@@ -4,7 +4,7 @@ from datetime import datetime
 db = SQLAlchemy()
 
 class Usuario(db.Model):
-    _tablename_ = 'Usuario'
+    __tablename__ = 'Usuario'
 
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
@@ -25,7 +25,7 @@ class Usuario(db.Model):
 
 
 class Proveedor(db.Model):
-    _tablename_ = 'Proveedor'
+    __tablename__ = 'Proveedor'
 
     ID_Proveedor = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreEmpresa = db.Column(db.String(100), nullable=False)
@@ -41,7 +41,7 @@ class Proveedor(db.Model):
 
 
 class Categorias(db.Model):
-    _tablename_ = 'Categorias'
+    __tablename__ = 'Categorias'
 
     ID_Categoria = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreCategoria = db.Column(db.String(100), nullable=False)
@@ -54,7 +54,7 @@ class Categorias(db.Model):
 
 
 class Calendario(db.Model):
-    _tablename_ = 'Calendario'
+    __tablename__ = 'Calendario'
 
     ID_Calendario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Fecha = db.Column(db.Date, default=datetime.utcnow, nullable=False)
@@ -69,7 +69,7 @@ class Calendario(db.Model):
 
 
 class Notificaciones(db.Model):
-    _tablename_ = 'Notificaciones'
+    __tablename__ = 'Notificaciones'
 
     ID_Notificacion = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Fecha = db.Column(db.Date, default=datetime.utcnow, nullable=False)
@@ -83,7 +83,7 @@ class Notificaciones(db.Model):
 
 
 class Producto(db.Model):
-    _tablename_ = 'Producto'
+    __tablename__ = 'Producto'
 
     ID_Producto = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreProducto = db.Column(db.String(100), nullable=False)
@@ -104,7 +104,7 @@ class Producto(db.Model):
 
 
 class Novedades(db.Model):
-    _tablename_ = 'Novedades'
+    __tablename__ = 'Novedades'
 
     ID_Novedad = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Tipo = db.Column(db.String(50), nullable=False)
@@ -121,7 +121,7 @@ class Novedades(db.Model):
 
 
 class Pedido(db.Model):
-    _tablename_ = 'Pedido'
+    __tablename__ = 'Pedido'
 
     ID_Pedido = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreComprador = db.Column(db.String(100), nullable=False)
@@ -141,7 +141,7 @@ class Pedido(db.Model):
 
 
 class Pagos(db.Model):
-    _tablename_ = 'Pagos'
+    __tablename__ = 'Pagos'
 
     ID_Pagos = db.Column(db.Integer, primary_key=True, autoincrement=True)
     MetodoPago = db.Column(db.String(50), nullable=False)
@@ -156,7 +156,7 @@ class Pagos(db.Model):
 
 
 class DetallePedido(db.Model):
-    _tablename_ = 'Detalle_Pedido'
+    __tablename__= 'Detalle_Pedido'
 
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), primary_key=True)
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), primary_key=True)
