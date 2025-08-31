@@ -20,7 +20,7 @@ class Usuario(db.Model):
     pedidos = db.relationship("Pedido", back_populates="usuario", lazy='dynamic', cascade="all, delete-orphan")
     novedades = db.relationship("Novedades", back_populates="usuario", lazy='dynamic', cascade="all, delete-orphan")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Usuario(id={self.ID_Usuario}, nombre='{self.Nombre}', correo='{self.Correo}')>"
 
 
@@ -36,7 +36,7 @@ class Proveedor(db.Model):
 
     productos = db.relationship("Producto", back_populates="proveedor", lazy='dynamic')
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Proveedor(id={self.ID_Proveedor}, empresa='{self.NombreEmpresa}')>"
 
 
@@ -49,7 +49,7 @@ class Categorias(db.Model):
 
     productos = db.relationship("Producto", back_populates="categoria", lazy='dynamic')
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Categoria(id={self.ID_Categoria}, nombre='{self.NombreCategoria}')>"
 
 
@@ -64,7 +64,7 @@ class Calendario(db.Model):
 
     usuario = db.relationship("Usuario", back_populates="calendarios")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Calendario(id={self.ID_Calendario}, fecha='{self.Fecha}')>"
 
 
@@ -78,7 +78,7 @@ class Notificaciones(db.Model):
 
     usuario = db.relationship("Usuario", back_populates="notificaciones")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Notificacion(id={self.ID_Notificacion})>"
 
 
@@ -99,7 +99,7 @@ class Producto(db.Model):
     novedades = db.relationship("Novedades", back_populates="producto", lazy='dynamic')
     detalles_pedido = db.relationship("DetallePedido", back_populates="producto", lazy='dynamic')
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Producto(id={self.ID_Producto}, nombre='{self.NombreProducto}')>"
 
 
@@ -116,7 +116,7 @@ class Novedades(db.Model):
     usuario = db.relationship("Usuario", back_populates="novedades")
     producto = db.relationship("Producto", back_populates="novedades")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Novedad(id={self.ID_Novedad}, tipo='{self.Tipo}')>"
 
 
@@ -136,7 +136,7 @@ class Pedido(db.Model):
     pagos = db.relationship("Pagos", back_populates="pedido", lazy='dynamic')
     detalles_pedido = db.relationship("DetallePedido", back_populates="pedido", lazy='dynamic', cascade="all, delete-orphan")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Pedido(id={self.ID_Pedido}, estado='{self.Estado}')>"
 
 
@@ -151,12 +151,12 @@ class Pagos(db.Model):
 
     pedido = db.relationship("Pedido", back_populates="pagos")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Pago(id={self.ID_Pagos}, monto='{self.Monto}')>"
 
 
 class DetallePedido(db.Model):
-    __tablename__= 'Detalle_Pedido'
+    __tablename__ = 'Detalle_Pedido'
 
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), primary_key=True)
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), primary_key=True)
@@ -166,5 +166,5 @@ class DetallePedido(db.Model):
     pedido = db.relationship("Pedido", back_populates="detalles_pedido")
     producto = db.relationship("Producto", back_populates="detalles_pedido")
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<DetallePedido(pedido_id={self.ID_Pedido}, producto_id={self.ID_Producto})>"
