@@ -1,6 +1,10 @@
-<form method="POST">
-  <input type="email" name="correo" placeholder="Correo" required><br>
-  <input type="password" name="contrasena" placeholder="Contraseña" required><br>
-  <button type="submit">Iniciar sesión</button>
+{% extends 'base.html' %}{% block title %}Iniciar sesión{% endblock %}
+{% block content %}
+<h2>Iniciar sesión</h2>
+<form method="post" class="form">
+  <label>Email <input type="email" name="email" required></label>
+  <label>Contraseña <input type="password" name="password" required></label>
+  <button class="btn" type="submit">Entrar</button>
 </form>
-<a href="{{ url_for('forgot_password') }}">¿Olvidaste tu contraseña?</a>
+<p><a href="olvidaste_contraseña.html">¿Olvidaste tu contraseña?</a></p>
+{% endblock %}

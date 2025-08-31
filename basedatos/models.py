@@ -5,11 +5,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Date, Float, Text, Time, ForeignKey
-from sqlalchemy.orm import relationship, declarative_base
-
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
-Base = declarative_base()
+
 class Usuario(db.Model):
     __tablename__ = 'Usuario'
 
