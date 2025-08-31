@@ -1,11 +1,5 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Date, Float, Text, Time, ForeignKey
-from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
@@ -13,13 +7,13 @@ class Usuario(db.Model):
     __tablename__ = 'Usuario'
 
     ID_Usuario = db.Column(db.Integer, primary_key=True)
-    Nombre = db.Column(db.String(100))
+    Nombre = db.Column(db.String(100), nullable=False)
     Telefono = db.Column(db.String(20))
-    Correo = db.Column(db.String(100))
+    Correo = db.Column(db.String(100), unique=True, nullable=False)
     Direccion = db.Column(db.String(200))
-    Contraseña = db.Column(db.String(100))
-    Rol = db.Column(db.String(50))
-    Activo = db.Column(db.Boolean)
+    Contrasena = db.Column(db.String(200), nullable=False)  # sin tilde
+    Rol = db.Column(db.String(50), default="cliente")
+    Activo = db.Column(db.Boolean, default=True)
 
     calendarios = db.relationship("Calendario", back_populates="usuario")
     notificaciones = db.relationship("Notificaciones", back_populates="usuario")
@@ -54,7 +48,7 @@ class Calendario(db.Model):
     __tablename__ = 'Calendario'
 
     ID_Calendario = db.Column(db.Integer, primary_key=True)
-    Fecha = db.Column(db.Date)
+    Fecha = db.Column(db.Date, default=datetime.utcnow)
     Hora = db.Column(db.Time)
     Ubicacion = db.Column(db.String(200))
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'))
@@ -66,7 +60,7 @@ class Notificaciones(db.Model):
     __tablename__ = 'Notificaciones'
 
     ID_Notificacion = db.Column(db.Integer, primary_key=True)
-    Fecha = db.Column(db.Date)
+    Fecha = db.Column(db.Date, default=datetime.utcnow)
     Mensaje = db.Column(db.Text)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'))
 
@@ -95,9 +89,9 @@ class Novedades(db.Model):
     __tablename__ = 'Novedades'
 
     ID_Novedad = db.Column(db.Integer, primary_key=True)
-    Tipo = db.Column(db.String(50))  # Garantía, devolución
+    Tipo = db.Column(db.String(50))
     EstadoNovedad = db.Column(db.String(50))
-    FechaReporte = db.Column(db.Date)
+    FechaReporte = db.Column(db.Date, default=datetime.utcnow)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'))
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'))
 
@@ -111,7 +105,7 @@ class Pedido(db.Model):
     ID_Pedido = db.Column(db.Integer, primary_key=True)
     NombreComprador = db.Column(db.String(100))
     Estado = db.Column(db.String(50))
-    FechaPedido = db.Column(db.Date)
+    FechaPedido = db.Column(db.Date, default=datetime.utcnow)
     FechaEntrega = db.Column(db.Date)
     Destino = db.Column(db.String(200))
     Descuento = db.Column(db.Float)
@@ -127,7 +121,7 @@ class Pagos(db.Model):
 
     ID_Pagos = db.Column(db.Integer, primary_key=True)
     MetodoPago = db.Column(db.String(50))
-    FechaPago = db.Column(db.Date)
+    FechaPago = db.Column(db.Date, default=datetime.utcnow)
     Monto = db.Column(db.Float)
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'))
 
