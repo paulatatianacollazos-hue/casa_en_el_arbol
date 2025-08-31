@@ -28,7 +28,7 @@ from basedatos.models import db, Usuario
 
 # Configuración de la aplicación
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@127.0.0.1:3306/casa_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_Casa_en_el_arbol'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'clave_secreta'
 
@@ -81,8 +81,8 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
@@ -91,14 +91,14 @@ def register():
 
         if not name or not email or not password:
             flash('Por favor, completa todos los campos requeridos.')
-            return render_template('register.html')
+            return render_template('registro.html')
 
         try:
             # CORREGIDO: Uso de `db.session.query` para consultar la base de datos
             existing_user = db.session.query(Usuario).filter_by(Correo=email).first()
             if existing_user:
                 flash('El correo electrónico ya está registrado. Por favor, usa otro.')
-                return render_template('register.html')
+                return render_template('registro.html')
 
             new_user = Usuario(Nombre=name, Correo=email, Telefono=phone, Contraseña=password)
 
@@ -111,9 +111,9 @@ def register():
         except SQLAlchemyError as e:
             db.session.rollback()
             flash(f'Ocurrió un error al intentar registrar el usuario: {str(e)}')
-            return render_template('register.html')
+            return render_template('registro.html')
 
-    return render_template('register.html')
+    return render_template('registro.html')
 
 @app.route('/dashboard')
 def dashboard():
