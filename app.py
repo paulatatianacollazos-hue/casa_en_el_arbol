@@ -44,16 +44,16 @@ def login():
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == "POST":
-        nombre = request.form["nombre"]
-        correo = request.form["correo"]
-        telefono = request.form["telefono"]
-        password = generate_password_hash(request.form["password"])
+        Nombre = request.form["nombre"]
+        Correo = request.form["correo"]
+        Telefono = request.form["telefono"]
+        Contrasena  = generate_password_hash(request.form["password"])
 
         nuevo_usuario = Usuario(
-            Nombre=nombre,
-            Correo=correo,
-            Telefono=telefono,
-            Contrasena=password,
+            Nombre=Nombre,
+            Correo= Correo,
+            Telefono= Telefono,
+            Contrasena= Contrasena,
             Activo=True,
             Rol="cliente"
         )
