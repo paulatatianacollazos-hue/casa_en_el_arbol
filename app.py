@@ -4,6 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from sqlalchemy import Column, Integer, String, Date, Float, Text, Time, ForeignKey
+from sqlalchemy.orm import relationship
+
 
 # Asumiendo que tus modelos están en 'models.py'
 # y que en ese archivo tienes algo como:
@@ -21,7 +24,7 @@ from datetime import datetime
 # from models import db, Usuario
 # Si está en una subcarpeta, por ejemplo 'database', usa:
 # from database.models import db, Usuario
-from database.models import db, Usuario
+from basedatos.models import db, Usuario
 
 # Configuración de la aplicación
 app = Flask(__name__)
