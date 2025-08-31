@@ -6,7 +6,8 @@ app = Flask(__name__)
 app.secret_key = "clave_secreta"
 
 # Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///basedatos.db'
+# Configuración de la base de datos MySQL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:TU_CONTRASEÑA@localhost/tienda_casa_en_el_arbol'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
