@@ -9,7 +9,7 @@ from sqlalchemy_utils import database_exists, create_database
 import pymysql
 
 # Importa el objeto 'db' y los modelos desde tu archivo de modelos
-from database.models import db, Usuario
+from basedatos.models import db, Usuario
 
 # Configuración de la aplicación
 app = Flask(__name__)
