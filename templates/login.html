@@ -1,10 +1,36 @@
-{% extends 'base.html' %}{% block title %}Iniciar sesión{% endblock %}
+{% extends 'base.html' %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
 {% block content %}
-<h2>Iniciar sesión</h2>
-<form method="post" class="form">
-  <label>Email <input type="email" name="email" required></label>
-  <label>Contraseña <input type="password" name="password" required></label>
-  <button class="btn" type="submit">Entrar</button>
-</form>
-<p><a href="">¿Olvidaste tu contraseña?</a></p>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<div class="login-container">
+    <h2>Iniciar sesión</h2>
+
+    <!-- Formulario de login -->
+    <form method="post" action="{{ url_for('login') }}" class="form">
+        <!-- Protección CSRF (si usas Flask-WTF) -->
+        {% if csrf_token %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" placeholder="ejemplo@correo.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input id="password" type="password" name="password" placeholder="********" required>
+        </div>
+
+        <button class="btn" type="submit">Entrar</button>
+    </form>
+
+    <p class="extra-links">
+        <a href="{{ url_for('reset_password') }}">¿Olvidaste tu contraseña?</a><br>
+        ¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate aquí</a>
+    </p>
+</div>
 {% endblock %}

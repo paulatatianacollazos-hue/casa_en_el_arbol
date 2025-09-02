@@ -120,3 +120,11 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+@app.template_filter('currency')
+def currency_format(value):
+    try:
+        return f"${value:,.0f}".replace(",", ".")  # separador de miles con punto
+    except:
+        return value
