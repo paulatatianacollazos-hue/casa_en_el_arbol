@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Catálogo{% endblock %}
+{% block content %}
+<h2>Catálogo</h2>
+<div class="grid">
+  {% for p in products %}
+  <article class="card">
+    <img src="{{ p.imagen or url_for('static', filename='images/placeholder.png') }}" alt="{{ p.nombre }}">
+    <div class="card-body">
+      <h3>{{ p.nombre }}</h3>
+      <p>{{ p.descripcion }}</p>
+      <strong>${{ '%.2f'|format(p.precio or 0) }}</strong>
+    </div>
+  </article>
+  {% else %}<p>No hay productos.</p>{% endfor %}
+</div>
+{% endblock %}
