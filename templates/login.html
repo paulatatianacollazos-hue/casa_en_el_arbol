@@ -2,91 +2,20 @@
 {% block title %}Iniciar sesión{% endblock %}
 
 {% block content %}
-<style>
-  /* Fondo completo borroso */
-  body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-  }
-
-  .overlay-blur {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5); /* oscurece */
-      backdrop-filter: blur(6px); /* borroso */
-      -webkit-backdrop-filter: blur(6px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-  }
-
-  /* Tarjeta */
-  .form-card {
-      background: #fff;
-      border-radius: 20px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  }
-
-  /* Inputs */
-  .form-control {
-      border-radius: 50px;
-      padding: 12px 15px;
-      border: 1px solid #e0e0e0;
-  }
-  .form-control:focus {
-      border-color: #4caf50;
-      box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-  }
-
-  /* Botón */
-  .btn-success {
-      border-radius: 50px;
-      padding: 12px;
-      font-weight: 600;
-  }
-</style>
-
-<div class="login-overlay">
-    <div class="card shadow rounded-4 p-4" style="max-width: 400px; width: 100%;">
-        
-        <!-- Título -->
+<div class="auth-overlay">
+    <div class="auth-card">
         <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
-        
-        <!-- Formulario -->
-        <form method="post" class="needs-validation" novalidate>
-            
-            <div class="mb-3">
-                <input type="email" 
-                       class="form-control rounded-pill" 
-                       id="email" 
-                       name="email" 
-                       placeholder="Correo electrónico" 
-                       required>
-                <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
-            </div>
 
+        <form method="post">
             <div class="mb-3">
-                <input type="password" 
-                       class="form-control rounded-pill" 
-                       id="password" 
-                       name="password" 
-                       placeholder="Contraseña" 
-                       required>
-                <div class="invalid-feedback">Por favor ingresa tu contraseña.</div>
+                <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
             </div>
-
-            <button type="submit" class="btn btn-success w-100 rounded-pill">Iniciar Sesión</button>
+            <div class="mb-3">
+                <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100 auth-btn">Iniciar Sesión</button>
         </form>
 
-        <!-- Links debajo -->
         <div class="text-center mt-3">
             <a href="#" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
         </div>
