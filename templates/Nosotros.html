@@ -12,46 +12,7 @@
  
 </head>
 <body>
-
-   
-      <nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container-fluid px-4">
-      <a class="navbar-brand" href="#">
-        Casa en el árbol
-      </a>
-      
-      <div class="search-container mx-auto d-none d-md-block">
-        <input class="form-control" type="search" placeholder="¿Qué estás buscando hoy?" aria-label="Buscar" id="searchInput">
-      </div>
-      
-      <div class="d-flex align-items-center gap-3">
-        <a href="#" class="nav-icon">
-          <i class="bi bi-heart fs-4"></i>
-        </a>
-        
-        <div class="dropdown">
-          <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown">
-            <i class="bi bi-person fs-4"></i>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{{ url_for('login') }}" onclick="mostrarSeccion('login')">
-              <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('register') }}" onclick="mostrarSeccion('registro')">
-              <i class="bi bi-person-plus me-2"></i>Registrarse
-            </a></li>
-            <li><hr class="dropdown-divider"></li>
-          </ul>
-        </div>
-   
-        
-        <a href="#" class="nav-icon position-relative" onclick="toggleCart()">
-          <i class="bi bi-cart fs-4"></i>
-          <span class="cart-badge" id="cartCount">3</span>
-        </a>
-      </div>
-    </div>
-  </nav>
+     
 <div class="seccion normal1">
   <div class="contenido">
     <div class="texto">
