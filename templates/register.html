@@ -2,47 +2,82 @@
 {% block title %}Crear cuenta{% endblock %}
 
 {% block content %}
-<div class="overlay show" id="registerModal">
-  <div class="modal-card">
-    <h2 class="modal-title">Crear cuenta</h2>
+<style>
+  /* Fondo completo borroso */
+  body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+  }
 
-    <form method="post" class="needs-validation" novalidate>
-      
-      <div class="mb-3">
-        <label for="name" class="form-label">Nombre completo</label>
-        <input type="text" class="form-control" id="name" name="name" placeholder="Tu nombre" required>
-        <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
-      </div>
+  .overlay-blur {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5); /* oscurece */
+      backdrop-filter: blur(6px); /* borroso */
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+  }
 
-      <div class="mb-3">
-        <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@email.com" required>
-        <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
-      </div>
+  /* Tarjeta */
+  .form-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
 
+  /* Inputs */
+  .form-control {
+      border-radius: 50px;
+      padding: 12px 15px;
+      border: 1px solid #e0e0e0;
+  }
+  .form-control:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+  }
 
-      <div class="mb-3">
-        <label for="phone" class="form-label">Teléfono</label>
-        <input type="tel" class="form-control" id="phone" name="phone" placeholder="300 123 4567">
-      </div>
+  /* Botón */
+  .btn-success {
+      border-radius: 50px;
+      padding: 12px;
+      font-weight: 600;
+  }
+</style>
 
-     
-      <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
-        <div class="invalid-feedback">Por favor ingresa una contraseña.</div>
-      </div>
+<div class="overlay-blur">
+    <div class="form-card">
+        <h3 class="text-center fw-bold text-success mb-4">Crear cuenta</h3>
+        
+        <form method="post">
+            <div class="mb-3">
+                <input type="text" class="form-control" name="fullname" placeholder="Nombre completo" required>
+            </div>
+            <div class="mb-3">
+                <input type="email" class="form-control" name="email" placeholder="Correo electrónico" required>
+            </div>
+            <div class="mb-3">
+                <input type="tel" class="form-control" name="phone" placeholder="Teléfono" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Registrarme</button>
+        </form>
 
-
-      <div class="d-grid">
-        <button type="submit" class="btn btn-success">Registrarme</button>
-      </div>
-    </form>
-
-    <!-- Enlace -->
-    <p class="mt-3 text-center">
-      ¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a>
-    </p>
-  </div>
+        <div class="text-center mt-3">
+            <span class="small">¿Ya tienes cuenta?</span>
+            <a href="{{ url_for('login') }}" class="small text-primary">Inicia sesión</a>
+        </div>
+    </div>
 </div>
 {% endblock %}
