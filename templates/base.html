@@ -12,6 +12,7 @@
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}">  
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -68,33 +69,47 @@
 
     <!-- Menu de secciones -->
     <div class="section-menu py-3" style="margin-top: 80px;">
-        <div class="container">
-            <ul class="nav justify-content-center flex-wrap">
-                <li class="nav-item"><a class="nav-link" href="#" onclick="filterProducts('all')">
-                    <i class="bi bi-grid me-1"></i>CATEGORÍAS
-                </a></li>
-                <a href="{{ url_for('nosotros') }}">
-                <i class="bi bi-info-circle me-1"></i>NOSOTROS
-                </a>
+  <div class="container">
+    <ul class="nav justify-content-center flex-wrap">
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="filterProducts('all')">
+          <i class="bi bi-grid me-1"></i>CATEGORÍAS
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('nosotros') }}">
+          <i class="bi bi-info-circle me-1"></i>NOSOTROS
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="scrollToCatalog()">
+          <i class="bi bi-collection me-1"></i>CATÁLOGO
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="filterProducts('ofertas')">
+          <i class="bi bi-tag me-1"></i>OFERTAS
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">
+          <i class="bi bi-shield-check me-1"></i>GARANTÍAS
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">
+          <i class="bi bi-tools me-1"></i>INSTALACIONES
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="toggleChat()">
+          <i class="bi bi-chat-dots me-1"></i>CHATBOT
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
 
-                <li class="nav-item"><a class="nav-link" href="#" onclick="scrollToCatalog()">
-                    <i class="bi bi-collection me-1"></i>CATÁLOGO
-                </a></li>
-                <li class="nav-item"><a class="nav-link" href="#" onclick="filterProducts('ofertas')">
-                    <i class="bi bi-tag me-1"></i>OFERTAS
-                </a></li>
-                <li class="nav-item"><a class="nav-link" href="#">
-                    <i class="bi bi-shield-check me-1"></i>GARANTÍAS
-                </a></li>
-                <li class="nav-item"><a class="nav-link" href="#">
-                    <i class="bi bi-tools me-1"></i>INSTALACIONES
-                </a></li>
-                <li class="nav-item"><a class="nav-link" href="#" onclick="toggleChat()">
-                    <i class="bi bi-chat-dots me-1"></i>CHATBOT
-                </a></li>
-            </ul>
-        </div>
-    </div>
 
     <!-- Contenido principal -->
     <main>
