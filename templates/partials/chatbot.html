@@ -1,0 +1,89 @@
+<div class="chat-widget">
+    <!-- Botón para abrir/cerrar el chat -->
+    <button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleChat()">
+        <i class="bi bi-chat-dots" id="chatIcon"></i>
+        <span class="chat-notification" id="chatNotification" style="display: none;">1</span>
+    </button>
+
+    <!-- Contenedor del chat -->
+    <div class="chat-container" id="chatContainer">
+        <!-- Header del chat -->
+        <div class="chat-header">
+            <div class="chat-status">
+                <div class="chat-avatar">
+                    <i class="bi bi-house-heart"></i>
+                </div>
+                <div class="chat-info">
+                    <h4>Asistente Casa en el Árbol</h4>
+                    <p><span class="status-indicator"></span>En línea - Respuesta inmediata</p>
+                </div>
+                <button class="close-btn" onclick="toggleChat()" style="position: relative; top: auto; right: auto; margin-left: auto;">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cuerpo del chat -->
+        <div class="chat-body" id="chatBody">
+            <div class="message message-bot">
+                <div class="message-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div>
+                    <div class="message-content">
+                        ¡Hola! 👋 Soy tu asistente virtual de Casa en el Árbol. Estoy aquí para ayudarte con información sobre nuestros productos, precios, instalaciones y más. ¿En qué puedo ayudarte hoy?
+                    </div>
+                    <div class="message-time" id="welcomeTime"></div>
+                </div>
+            </div>
+
+            <!-- Indicador de escritura -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div>
+                    <div class="message-content">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Respuestas rápidas -->
+        <div class="quick-replies" id="quickReplies">
+            <button class="quick-reply-btn" onclick="sendQuickReply('¿Cuáles son sus productos más populares?')">
+                🏆 Productos populares
+            </button>
+            <button class="quick-reply-btn" onclick="sendQuickReply('¿Hacen instalaciones?')">
+                🔧 Instalaciones
+            </button>
+            <button class="quick-reply-btn" onclick="sendQuickReply('¿Tienen garantía?')">
+                🛡️ Garantía
+            </button>
+            <button class="quick-reply-btn" onclick="sendQuickReply('¿Cuáles son los precios?')">
+                💰 Precios
+            </button>
+        </div>
+
+        <!-- Input del chat -->
+        <div class="chat-input-container">
+            <div class="chat-input-group">
+                <textarea 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="Escribe tu mensaje aquí..." 
+                    rows="1"
+                    onkeypress="handleChatKeyPress(event)"
+                ></textarea>
+                <button class="chat-send-btn" id="chatSendBtn" onclick="sendMessage()">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,108 @@
+<!-- Modal de Login -->
+<div id="login" class="overlay">
+    <div class="modal-card" style="max-width: 400px;">
+        <button class="close-btn" onclick="cerrarModal()">&times;</button>
+        <h3 class="modal-title">Bienvenido de vuelta</h3>
+        <form id="loginForm">
+            <div class="mb-3">
+                <input type="email" class="form-control" placeholder="Correo electrónico" required name="email">
+            </div>
+            <div class="mb-4">
+                <input type="password" class="form-control" placeholder="Contraseña" required name="password">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-3">Iniciar Sesión</button>
+            <div class="text-center">
+                <a href="#" class="text-muted" onclick="mostrarSeccion('recuperar-password')">¿Olvidaste tu contraseña?</a>
+            </div>
+            <hr>
+            <p class="text-center mb-0">¿No tienes cuenta? 
+                <a href="#" onclick="mostrarSeccion('registro')" class="text-decoration-none">Regístrate aquí</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Registro -->
+<div id="registro" class="overlay">
+    <div class="modal-card" style="max-width: 500px;">
+        <button class="close-btn" onclick="cerrarModal()">&times;</button>
+        <h3 class="modal-title">Únete a nuestra familia</h3>
+        <form id="registerForm">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input class="form-control" placeholder="Nombre completo" required name="name">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="email" class="form-control" placeholder="Correo electrónico" required name="email">
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input class="form-control" placeholder="Teléfono" required name="phone">
+                    <button class="btn btn-outline-primary" type="button">Verificar</button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <input class="form-control" placeholder="Dirección completa" required name="address">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input type="password" class="form-control" placeholder="Contraseña" required name="password">
+                </div>
+                <div class="col-md-6 mb-4">
+                    <input type="password" class="form-control" placeholder="Confirmar contraseña" required name="confirm_password">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success w-100 mb-3">Crear Cuenta</button>
+            <p class="text-center mb-0">¿Ya tienes cuenta? 
+                <a href="#" onclick="mostrarSeccion('login')" class="text-decoration-none">Inicia sesión</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Recuperar Contraseña -->
+<div id="recuperar-password" class="overlay">
+    <div class="modal-card" style="max-width: 450px;">
+        <button class="close-btn" onclick="cerrarModal()">&times;</button>
+        
+        <div class="recovery-icon">
+            <i class="bi bi-key-fill"></i>
+        </div>
+        
+        <h3 class="modal-title">Recuperar Contraseña</h3>
+        <p class="text-center text-muted mb-4">
+            Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+        </p>
+        
+        <div class="success-message" id="recoverySuccessMessage">
+            <i class="bi bi-check-circle me-2"></i>
+            ¡Enlace de recuperación enviado! Revisa tu correo electrónico.
+        </div>
+        
+        <form id="recoveryForm">
+            <div class="mb-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-envelope text-muted"></i>
+                    </span>
+                    <input type="email" class="form-control border-start-0" placeholder="tu-email@ejemplo.com" required name="email">
+                </div>
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Asegúrate de que el correo esté escrito correctamente
+                </small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 mb-3">
+                <i class="bi bi-send me-2"></i>Enviar Enlace de Recuperación
+            </button>
+            
+            <div class="text-center">
+                <a href="#" onclick="mostrarSeccion('login')" class="text-muted">
+                    <i class="bi bi-arrow-left me-1"></i>Volver al inicio de sesión
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
