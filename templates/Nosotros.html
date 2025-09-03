@@ -12,6 +12,8 @@
  
 </head>
 <body>
+
+   
       <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid px-4">
       <a class="navbar-brand" href="#">
@@ -32,15 +34,16 @@
             <i class="bi bi-person fs-4"></i>
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#" onclick="mostrarSeccion('login')">
+            <li><a class="dropdown-item" href="{{ url_for('login') }}" onclick="mostrarSeccion('login')">
               <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
             </a></li>
-            <li><a class="dropdown-item" href="#" onclick="mostrarSeccion('registro')">
+            <li><a class="dropdown-item" href="{{ url_for('register') }}" onclick="mostrarSeccion('registro')">
               <i class="bi bi-person-plus me-2"></i>Registrarse
             </a></li>
             <li><hr class="dropdown-divider"></li>
           </ul>
         </div>
+   
         
         <a href="#" class="nav-icon position-relative" onclick="toggleCart()">
           <i class="bi bi-cart fs-4"></i>
@@ -209,21 +212,7 @@
   </section>
 
     
-                <div class="dropdown">
-                    <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="bi bi-person fs-4"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('login') }}" onclick="mostrarSeccion('login')">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('register') }}" onclick="mostrarSeccion('registro')">
-                            <i class="bi bi-person-plus me-2"></i>Registrarse
-                        </a></li>
-                       
-                     
-                    </ul>
-                </div>
+               
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
