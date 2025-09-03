@@ -18,7 +18,7 @@
 
  
     .parallax {
-      background-image: url(img/imagenfondo.png); 
+      background-image: url(../img/imagenfondo.png);
       height: 100vh;
       background-attachment: fixed;
       background-position: center;
@@ -246,7 +246,7 @@
 }
 
   .footer-suscripcion {
-      background-image: url("img/carruselindex1.png");
+      background-image: url("../img/carruselindex1.png");
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;

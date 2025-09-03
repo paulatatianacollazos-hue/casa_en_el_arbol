@@ -57,7 +57,7 @@
       
     </div>
     <div class="imagen">
-      <img src="img/imagencarrusel6.png" alt="Personas felices en una reunión">
+     <img src="{{ url_for('static', filename='img/imagencarrusel6.png') }}" alt="Imagen de muebles">
     </div>
   </div>
 </div>
@@ -71,7 +71,8 @@
 
   <div class="fila fila1">
     <div class="col ilustracion">
-      <img src="img/silla.png" alt="Ilustración sillón">
+      <img src="{{ url_for('static', filename='img/Silla.png') }}" alt="silla">
+
     </div>
     <div class="col texto">
       <h2>
@@ -96,7 +97,7 @@
       
     </div>
     <div class="col imagen">
-      <img src="img/imagencarrusel3.png" alt="Silla y planta decorativa">
+      <img src="{{ url_for('static', filename='img/imagencarrusel3.png') }}" alt=" imagensillasdecorativas">
     </div>
   </div>
 </div>
@@ -114,19 +115,20 @@
           <div class="row">
             <div class="col-md-6 col-lg-4">
               <div class="card">
-                <img src="img/imagencarrusel1.png" class="card-img-top" alt="Desarrollo Web">
+                
+                <img src="{{ url_for('static', filename='img/imagencarrusel1.png') }}" class="card-img-top" alt="imagen1">
                
               </div>
             </div>
             <div class="col-md-6 col-lg-4 d-none d-md-block">
               <div class="card">
-                <img src="img/imagencarrusel2.png" class="card-img-top" alt="Bases de Datos">
+                <img src="{{ url_for('static', filename='img/imagencarrusel2.png') }}" class="card-img-top" alt="imagen2">
             
               </div>
             </div>
             <div class="col-lg-4 d-none d-lg-block">
               <div class="card">
-                <img src="img/imagenfondo1.png" class="card-img-top" alt="React y Hooks">
+                <img src="{{ url_for('static', filename='img/imagenfondo1.png') }}" class="card-img-top" alt="imagen3">
               
               </div>
             </div>
@@ -138,19 +140,19 @@
           <div class="row">
             <div class="col-md-6 col-lg-4">
               <div class="card">
-                <img src="img/imagenfondo2.png" class="card-img-top" alt="Cálculo Numérico">
+                <img src="{{ url_for('static', filename='img/imagenfondo2.png') }}" class="card-img-top" alt="Cálculo Numérico">
              
               </div>
             </div>
             <div class="col-md-6 col-lg-4 d-none d-md-block">
               <div class="card">
-                <img src="img/imagencarrusel5.png" class="card-img-top" alt="Machine Learning">
+                <img src="{{ url_for('static', filename='img/imagencarrusel5.png') }}" class="card-img-top" alt="Machine Learning">
               
               </div>
             </div>
             <div class="col-lg-4 d-none d-lg-block">
               <div class="card">
-                <img src="img/imagencarrusel6.png" class="card-img-top" alt="Ciberseguridad">
+                <img src="{{ url_for('static', filename='img/imagencarrusel6.png') }}" class="card-img-top" alt="Ciberseguridad">
           
               </div>
             </div>
