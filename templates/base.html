@@ -73,9 +73,10 @@
                 <li class="nav-item"><a class="nav-link" href="#" onclick="filterProducts('all')">
                     <i class="bi bi-grid me-1"></i>CATEGORÍAS
                 </a></li>
-                <li class="nav-item"><a class="nav-link" href="#">
-                    <i class="bi bi-info-circle me-1"></i>NOSOTROS
-                </a></li>
+                <a href="{{ url_for('nosotros') }}">
+                <i class="bi bi-info-circle me-1"></i>NOSOTROS
+                </a>
+
                 <li class="nav-item"><a class="nav-link" href="#" onclick="scrollToCatalog()">
                     <i class="bi bi-collection me-1"></i>CATÁLOGO
                 </a></li>
