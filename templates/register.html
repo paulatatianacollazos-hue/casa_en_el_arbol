@@ -7,35 +7,19 @@
 
         <form method="post">
             <div class="mb-3">
-                <input type="text" 
-                       class="form-control auth-input" 
-                       name="fullname" 
-                       placeholder="Nombre completo" 
-                       required>
+                <input type="text" class="form-control auth-input" name="name" placeholder="Nombre completo" required>
             </div>
-
             <div class="mb-3">
                 <input type="email" 
-                       class="form-control auth-input" 
-                       name="email" 
-                       placeholder="Correo electrónico" 
-                       required>
+                       class="form-control auth-input" name="email" placeholder="Correo electrónico"  required>
             </div>
 
             <div class="mb-3">
-                <input type="tel" 
-                       class="form-control auth-input" 
-                       name="phone" 
-                       placeholder="Teléfono" 
-                       required>
+                <input type="tel" class="form-control auth-input" name="phone" placeholder="Teléfono" required>
             </div>
 
             <div class="mb-3">
-                <input type="password" 
-                       class="form-control auth-input" 
-                       name="password" 
-                       placeholder="Contraseña" 
-                       required>
+                <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
             </div>
 
             <button type="submit" class="btn btn-success w-100 auth-btn">Registrarme</button>
@@ -48,29 +32,3 @@
     </div>
 </div>
 {% endblock %}
-{% extends 'base.html' %}{% block title %}Iniciar sesión{% endblock %}
-{% block content %}
-<div class="auth-overlay">
-    <div class="auth-card">
-        <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
-
-        <form method="post">
-            <div class="mb-3">
-                <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
-            </div>
-            <div class="mb-3">
-                <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
-            </div>
-            <button type="submit" class="btn btn-success w-100 auth-btn">Iniciar Sesión</button>
-        </form>
-
-        <div class="text-center mt-3">
-            <a href="#" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
-        </div>
-        <hr>
-        <div class="text-center">
-            <span class="small">¿No tienes cuenta?</span>
-            <a href="{{ url_for('register') }}" class="small text-primary">Regístrate aquí</a>
-        </div>
-    </div>
-</div>
