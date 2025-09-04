@@ -133,6 +133,7 @@ def nosotros():
 def chatbot():
     return render_template('base.html', content_template='partials/chatbot.html')
 
+
 @app.route('/api/chat/init', methods=['POST'])
 def init_chat():
     session_id = str(uuid.uuid4())
