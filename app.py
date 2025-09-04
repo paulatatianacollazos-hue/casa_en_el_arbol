@@ -133,7 +133,6 @@ def nosotros():
 def chatbot():
     return render_template('base.html', content_template='partials/chatbot.html')
 
-
 @app.route('/api/chat/init', methods=['POST'])
 def init_chat():
     session_id = str(uuid.uuid4())
@@ -227,3 +226,7 @@ if __name__ == '__main__':
     os.makedirs('chatbot', exist_ok=True)
 
     socketio.run(app, debug=True, use_reloader=False, host='0.0.0.0', port=5000)
+
+if __name__ == '__main__':
+    app.run(debug=True, use_reloader=False)
+
