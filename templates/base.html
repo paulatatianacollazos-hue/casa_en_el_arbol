@@ -10,54 +10,61 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Estilos propios -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}">  
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-<nav class="nav">
-  <a href="{{ url_for('index') }}">Inicio</a>
-  <a href="">Catálogo</a>
-  <a href="">Chat</a>
-  <a href="{{ url_for('login') }}">Iniciar sesión</a>
-  <a href="">Registrarse</a>
-  <a href="">Recuperar contraseña</a>
-</nav>
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <!-- NAVBAR PRINCIPAL -->
+    <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
         <div class="container-fluid px-4">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                Casa en el árbol
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                Casa en el Árbol
             </a>
             
+            <!-- Buscador -->
             <div class="search-container mx-auto d-none d-md-block">
                 <input class="form-control" type="search" placeholder="¿Qué estás buscando hoy?" aria-label="Buscar" id="searchInput">
             </div>
             
+            <!-- Iconos -->
             <div class="d-flex align-items-center gap-3">
-                <a href="#" class="nav-icon">
+                <!-- Favoritos -->
+                <a href="#" class="nav-icon" aria-label="Favoritos">
                     <i class="bi bi-heart fs-4"></i>
                 </a>
                 
+                <!-- Usuario -->
                 <div class="dropdown">
-                    <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                    <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-label="Cuenta de usuario">
                         <i class="bi bi-person fs-4"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('login') }}" onclick="mostrarSeccion('login')">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('register') }}" onclick="mostrarSeccion('registro')">
-                            <i class="bi bi-person-plus me-2"></i>Registrarse
-                        </a></li>
-                       
-                     
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('login') }}">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('register') }}">
+                                <i class="bi bi-person-plus me-2"></i>Registrarse
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-key me-2"></i>Recuperar contraseña
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 
-                <a href="#" class="nav-icon position-relative" onclick="toggleCart()">
+                <!-- Carrito -->
+                <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
                     <i class="bi bi-cart fs-4"></i>
                     <span class="cart-badge" id="cartCount">0</span>
                 </a>
@@ -65,60 +72,63 @@
         </div>
     </nav>
 
-    <div class="section-menu py-3" style="margin-top: 80px;">
-  <div class="container">
-    <ul class="nav justify-content-center flex-wrap">
-      <li class="nav-item">
-        <a class="nav-link" href="#" onclick="filterProducts('all')">
-          <i class="bi bi-grid me-1"></i>CATEGORÍAS
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('nosotros') }}">
-          <i class="bi bi-info-circle me-1"></i>NOSOTROS
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" onclick="scrollToCatalog()">
-          <i class="bi bi-collection me-1"></i>CATÁLOGO
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" onclick="filterProducts('ofertas')">
-          <i class="bi bi-tag me-1"></i>OFERTAS
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <i class="bi bi-shield-check me-1"></i>GARANTÍAS
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <i class="bi bi-tools me-1"></i>INSTALACIONES
-        </a>
-      </li>
-     <li><a class="nav-link" href="{{ url_for('chatbot') }}" >
-        <i class="bi bi-chat-dots me-1"></i>CHATBOT
-    </a></li> 
+    <!-- MENÚ SECUNDARIO -->
+    <div class="section-menu py-3 bg-white shadow-sm" style="margin-top: 80px;">
+        <div class="container">
+            <ul class="nav justify-content-center flex-wrap">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('all')">
+                        <i class="bi bi-grid me-1"></i>CATEGORÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}">
+                        <i class="bi bi-info-circle me-1"></i>NOSOTROS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="scrollToCatalog()">
+                        <i class="bi bi-collection me-1"></i>CATÁLOGO
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')">
+                        <i class="bi bi-tag me-1"></i>OFERTAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-shield-check me-1"></i>GARANTÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-tools me-1"></i>INSTALACIONES
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('chatbot') }}">
+                        <i class="bi bi-chat-dots me-1"></i>CHATBOT
+                    </a>
+                </li> 
+            </ul>
+        </div>
+    </div>
 
-    </ul>
-  </div>
-</div>
-
-
-    <!-- Contenido principal -->
+    <!-- CONTENIDO PRINCIPAL -->
     <main>
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Modales -->
+    <!-- MODALES -->
     {% include 'partials/modals.html' %}
     
-    <!-- Chatbot Widget -->
-    {% include 'partials/chatbot.html' %}
+    <!-- CHATBOT (opcional, solo si lo quieres en todas las vistas) -->
+    {% block chatbot %}
+        {% include 'partials/chatbot.html' %}
+    {% endblock %}
 
-
+    <!-- TOASTS -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="cartToast" class="toast" role="alert">
             <div class="toast-header">
@@ -137,13 +147,11 @@
                 <strong class="me-auto">Información</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
             </div>
-            <div class="toast-body" id="alertToastBody">
-                
-            </div>
+            <div class="toast-body" id="alertToastBody"></div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     
