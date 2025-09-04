@@ -147,7 +147,7 @@ class ResponseHandler:
                     text += f"\n~~${original_price:,}~~ (Descuento del {product['descuento']}%)"
                 
                 text += f"\n\n📋 {product['descripcion']}"
-                text += f"\n⏱️ Tiempo de entrega: {product.get('tiempo_entrega', '5-7 días hábiles')}"
+                text += f"\n⏱ Tiempo de entrega: {product.get('tiempo_entrega', '5-7 días hábiles')}"
                 text += "\n\n¿Necesitas más información sobre este producto?"
                 
                 return {
@@ -180,7 +180,7 @@ class ResponseHandler:
         text += "**El servicio incluye:**\n"
         for item in service['incluye']:
             text += f"• {item}\n"
-        text += f"\n⏱️ **Tiempo promedio:** {service['tiempo']}"
+        text += f"\n⏱ **Tiempo promedio:** {service['tiempo']}"
         text += f"\n💰 **Costo:** {service['costo']}"
         text += "\n\n¿Necesitas más detalles sobre la instalación?"
         
@@ -276,8 +276,8 @@ class ResponseHandler:
                     text += f" ~~${original_price:,}~~ (¡{product['descuento']}% de descuento!)"
                 
                 text += f"\n📋 **Descripción:** {product['descripcion']}"
-                text += f"\n🏷️ **Categoría:** {product['categoria']}"
-                text += f"\n⏱️ **Tiempo de entrega:** {product['tiempo_entrega']}"
+                text += f"\n **Categoría:** {product['categoria']}"
+                text += f"\n⏱ **Tiempo de entrega:** {product['tiempo_entrega']}"
                 
                 if 'caracteristicas' in product:
                     text += "\n\n✨ **Características destacadas:**\n"
@@ -285,9 +285,11 @@ class ResponseHandler:
                         text += f"• {caracteristica}\n"
                 
                 text += "\n¿Te gustaría saber más detalles o tienes alguna pregunta específica?"
-                
-                # Actualizar contexto
+            
+            
                 self.context_memory[session_id]['last_topic'] = f"product_{key}"
+
+
                 
                 return {
                     'text': text,
