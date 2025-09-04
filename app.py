@@ -129,6 +129,10 @@ def logout():
 def nosotros():
     return render_template('Nosotros.html')
 
+@app.route('/chatbot')
+def chatbot():
+    return render_template('base.html', content_template='partials/chatbot.html')
+
 @app.route('/api/chat/init', methods=['POST'])
 def init_chat():
     session_id = str(uuid.uuid4())
