@@ -39,12 +39,7 @@ with app.app_context():
         print("Base de datos 'tienda_db' creada exitosamente.")
     db.create_all()
     print("Tablas creadas exitosamente.")
-
-# Inicializar chatbot
-session_manager = SessionManager()
-knowledge = ChatbotKnowledge()
-response_handler = ResponseHandler(knowledge)
-
+    
 # --- RUTAS FLASK ---
 @app.route('/')
 def index():
@@ -128,105 +123,4 @@ def logout():
 @app.route('/nosotros')
 def nosotros():
     return render_template('Nosotros.html')
-
-@app.route('/chatbot')
-def chatbot():
-    return render_template('base.html', content_template='partials/chatbot.html')
-
-@app.route('/api/chat/init', methods=['POST'])
-def init_chat():
-    session_id = str(uuid.uuid4())
-    session_manager.create_session(session_id)
-
-    return jsonify({
-        'session_id': session_id,
-        'welcome_message': {
-            'text': '¡Hola! 👋 Soy tu asistente virtual de Casa en el Árbol. ¿En qué puedo ayudarte hoy?',
-            'timestamp': datetime.now().isoformat(),
-            'quick_replies': [
-                '¿Cuáles son sus productos más populares?',
-                '¿Hacen instalaciones?',
-                '¿Tienen garantía?',
-                '¿Cuáles son los precios?'
-            ]
-        }
-    })
-
-# --- SOCKET.IO HANDLERS ---
-@socketio.on('connect')
-def handle_connect():
-    session_id = request.sid
-    session_manager.create_session(session_id)
-    print(f'Cliente conectado: {session_id}')
-    emit('bot_message', {
-        'text': '¡Hola! 👋 Soy tu asistente virtual de Casa en el Árbol. ¿En qué puedo ayudarte hoy?',
-        'timestamp': datetime.now().strftime('%H:%M'),
-        'quick_replies': [
-            '🏆 Productos populares',
-            '🔧 Instalaciones', 
-            '🛡️ Garantía',
-            '💰 Precios'
-        ]
-    })
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    session_id = request.sid
-    session_manager.remove_session(session_id)
-    print(f'Cliente desconectado: {session_id}')
-
-@socketio.on('user_message')
-def handle_message(data):
-    session_id = request.sid
-    user_message = data['message']
-    session_manager.add_message(session_id, user_message, 'user')
-
-    emit('typing_start')
-    socketio.sleep(1)
-
-    bot_response = response_handler.generate_response(user_message, session_id)
-    session_manager.add_message(session_id, bot_response['text'], 'bot')
-
-    emit('typing_stop')
-    emit('bot_message', {
-        'text': bot_response['text'],
-        'timestamp': datetime.now().strftime('%H:%M'),
-        'suggestions': bot_response.get('suggestions', []),
-        'quick_replies': bot_response.get('quick_replies', [])
-    })
-
-@socketio.on('quick_reply')
-def handle_quick_reply(data):
-    handle_message({'message': data['reply']})
-
-# --- API DE HISTORIAL Y PRODUCTOS ---
-@app.route('/api/chat/history/<session_id>')
-def get_chat_history(session_id):
-    history = session_manager.get_session_history(session_id)
-    return jsonify(history)
-
-@app.route('/api/chat/clear/<session_id>', methods=['POST'])
-def clear_chat(session_id):
-    session_manager.clear_session_history(session_id)
-    return jsonify({'status': 'success'})
-
-@app.route('/api/products')
-def get_products():
-    return jsonify(knowledge.get_all_products())
-
-@app.route('/api/services')
-def get_services():
-    return jsonify(knowledge.get_all_services())
-
-# --- INICIO DEL SERVIDOR ---
-if __name__ == '__main__':
-    os.makedirs('templates', exist_ok=True)
-    os.makedirs('static/css', exist_ok=True)
-    os.makedirs('static/js', exist_ok=True)
-    os.makedirs('chatbot', exist_ok=True)
-
-    socketio.run(app, debug=True, use_reloader=False, host='0.0.0.0', port=5000)
-
-if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
 
