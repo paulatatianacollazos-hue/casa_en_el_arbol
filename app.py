@@ -10,28 +10,23 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Chatbot y modelos
-from basedatos.models import db, Usuario
-from chatbot.knowledge_base import ChatbotKnowledge
-from chatbot.response_handler import ResponseHandler
-from chatbot.session_manager import SessionManager
+from flask_socketio import SocketIO, emit
 
-from flask_socketio import SocketIO, emit  # Asegúrate de haber instalado flask-socketio
-
-# Inicializar app
+# --- Inicializar app ---
 app = Flask(__name__)
-socketio = SocketIO(app)
+app.config['SECRET_KEY'] = 'clave_super_secreta'
 
-# Configuración de base de datos
+# --- Configuración de base de datos ---
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'clave_super_secreta'
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
 
-# Inicializar base de datos
-db.init_app(app)
+# --- Inicializar base de datos ---
+db = SQLAlchemy(app)
+socketio = SocketIO(app)
 
+# Crear base de datos y tablas si no existen
 with app.app_context():
     engine = create_engine(DB_URL)
     if not database_exists(engine.url):
@@ -39,7 +34,7 @@ with app.app_context():
         print("Base de datos 'tienda_db' creada exitosamente.")
     db.create_all()
     print("Tablas creadas exitosamente.")
-    
+
 # --- RUTAS FLASK ---
 @app.route('/')
 def index():
@@ -124,3 +119,6 @@ def logout():
 def nosotros():
     return render_template('Nosotros.html')
 
+
+if __name__ == "__main__":
+    socketio.run(app, debug=True)
