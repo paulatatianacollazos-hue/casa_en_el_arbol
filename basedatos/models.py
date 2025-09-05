@@ -1,10 +1,10 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
 
-# Crear una instancia de SQLAlchemy
+
 db = SQLAlchemy()
 
-# Definir los modelos de la base de datos
+
 class Usuario(db.Model):
     __tablename__ = 'Usuario'
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -16,7 +16,7 @@ class Usuario(db.Model):
     Rol = db.Column(db.String(50), default='cliente')
     Activo = db.Column(db.Boolean, default=True)
 
-    # Relaciones
+
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
     notificaciones = db.relationship('Notificaciones', backref='usuario', lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
@@ -34,7 +34,7 @@ class Proveedor(db.Model):
     Pais = db.Column(db.String(50))
     CargoContacto = db.Column(db.String(50))
 
-    # Relaciones
+
     productos = db.relationship('Producto', backref='proveedor', lazy=True)
 
     def __repr__(self):
@@ -46,7 +46,7 @@ class Categorias(db.Model):
     NombreCategoria = db.Column(db.String(100), nullable=False)
     Descripcion = db.Column(db.Text)
 
-    # Relaciones
+
     productos = db.relationship('Producto', backref='categoria', lazy=True)
 
     def __repr__(self):
@@ -61,11 +61,11 @@ class Producto(db.Model):
     Color = db.Column(db.String(30))
     PrecioUnidad = db.Column(db.Float)
 
-    # Claves foráneas
+
     ID_Categoria = db.Column(db.Integer, db.ForeignKey('Categorias.ID_Categoria'), nullable=False)
     ID_Proveedor = db.Column(db.Integer, db.ForeignKey('Proveedor.ID_Proveedor'), nullable=False)
 
-    # Relaciones
+  
     detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
     novedades = db.relationship('Novedades', backref='producto', lazy=True)
 
@@ -79,7 +79,7 @@ class Calendario(db.Model):
     Hora = db.Column(db.Time)
     Ubicacion = db.Column(db.String(200))
 
-    # Clave foránea
+  
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
     def __repr__(self):
@@ -91,7 +91,7 @@ class Notificaciones(db.Model):
     Fecha = db.Column(db.Date)
     Mensaje = db.Column(db.Text)
 
-    # Clave foránea
+
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
     def __repr__(self):
@@ -104,7 +104,7 @@ class Novedades(db.Model):
     EstadoNovedad = db.Column(db.String(50))
     FechaReporte = db.Column(db.Date)
 
-    # Claves foráneas
+
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), nullable=False)
 
@@ -121,10 +121,10 @@ class Pedido(db.Model):
     Destino = db.Column(db.String(200))
     Descuento = db.Column(db.Float)
 
-    # Clave foránea
+
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
-    # Relaciones
+
     pagos = db.relationship('Pagos', backref='pedido', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='pedido', lazy=True)
 
@@ -138,7 +138,7 @@ class Pagos(db.Model):
     FechaPago = db.Column(db.Date)
     Monto = db.Column(db.Float)
 
-    # Clave foránea
+
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), nullable=False)
 
     def __repr__(self):
