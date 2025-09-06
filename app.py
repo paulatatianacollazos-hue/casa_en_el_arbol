@@ -16,7 +16,6 @@ app = Flask(__name__)
 
 # Configuración de la base de datos MySQL en Laragon
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/tienda_db'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'clave_super_secreta'
