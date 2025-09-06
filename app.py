@@ -118,6 +118,11 @@ def logout():
     flash('Has cerrado sesión.')
     return redirect(url_for('index'))
 
+@app.route('/nosotros')
+def nosotros():
+    return render_template('nosotros.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
