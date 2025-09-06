@@ -1,0 +1,153 @@
+/* Estilos generales */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.menu-toggle {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+/* Sección principal */
+.main-section {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    background: url('../img/imagenindex.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Superposición de color */
+.main-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* Color oscuro para el texto */
+    z-index: 1;
+}
+
+.content {
+    position: relative;
+    z-index: 2;
+    color: white;
+}
+
+.subtitle {
+    letter-spacing: 2px;
+}
+
+.title {
+    font-size: 3em;
+    margin-top: 10px;
+}
+
+/* Botones flotantes */
+.floating-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+ .footer-suscripcion {
+      background-image: url("../img/carruselindex1.png");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      color: white;
+      padding: 60px 20px;
+      position: relative;
+    }
+
+    .footer-suscripcion::before {
+      content: "";
+      background: rgba(0, 0, 0, 0.6); /* oscurece la imagen */
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .footer-suscripcion .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-columns {
+      margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .footer-col {
+      flex: 1;
+      min-width: 200px;
+      margin: 10px;
+    }
+
+    .footer-col h5 {
+      color: #7cb342;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 10px;
+    }
+
+    .footer-col a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .footer-col a:hover {
+      text-decoration: underline;
+    }
+
+    .social-icons a {
+      font-size: 20px;
+      color: white;
+      margin-right: 15px;
+    }
+/* Efecto zoom en todas las imágenes dentro de cards y columnas */
+img.img-fluid, .card-img-top {
+  transition: transform 0.3s ease; /* Animación suave */
+}
+
+img.img-fluid:hover, .card-img-top:hover {
+  transform: scale(1.05); /* Acerca la imagen un 5% */
+  cursor: pointer; /* Opcional: cambia el cursor al pasar */
+}
+
