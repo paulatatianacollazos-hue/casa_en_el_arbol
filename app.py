@@ -8,9 +8,11 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import pymysql
 
+# --- Recuperación de contraseña ---
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 from basedatos.models import db, Usuario
-
 
 app = Flask(__name__)
 
@@ -21,6 +23,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'clave_super_secreta'
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
 
+# --- Configuración del correo ---
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'tu_correo@gmail.com'   # <--- pon tu correo
+app.config['MAIL_PASSWORD'] = 'tu_contraseña_app'     # <--- usa contraseña de aplicación
+mail = Mail(app)
+
+# Serializador para tokens
+s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
 # Inicializa la instancia de SQLAlchemy con la aplicación
 db.init_app(app)
 
@@ -29,7 +42,7 @@ with app.app_context():
     engine = create_engine(DB_URL)
     if not database_exists(engine.url):
         create_database(engine.url)
-        print("Base de datos 'casaarbol' creada exitosamente.")
+        print("Base de datos 'Tienda_db' creada exitosamente.")
     db.create_all()
     print("Tablas de la base de datos creadas exitosamente.")
 
@@ -63,7 +76,7 @@ def register():
                 Nombre=name,
                 Correo=email,
                 Telefono=phone,
-                Contraseña=hashed_password,
+                Contrasena=hashed_password,  # ⚡ OJO: aquí va Contrasena sin ñ
                 Rol='cliente',
                 Activo=True
             )
@@ -94,7 +107,7 @@ def login():
 
         user = Usuario.query.filter_by(Correo=email).first()
 
-        if user and check_password_hash(user.Contraseña, password):
+        if user and check_password_hash(user.Contrasena, password):
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Has iniciado sesión con éxito!')
@@ -122,10 +135,47 @@ def logout():
 def nosotros():
     return render_template('nosotros.html')
 
+# --- Recuperación de contraseña ---
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = Usuario.query.filter_by(Correo=email).first()
+        if user:
+            token = s.dumps(email, salt='password-recovery')
+            link = url_for('reset_password', token=token, _external=True)
+
+            msg = Message("Recuperar contraseña",
+                          sender=app.config['MAIL_USERNAME'],
+                          recipients=[email])
+            msg.body = f"Para restablecer tu contraseña, haz clic en el siguiente enlace: {link}"
+            mail.send(msg)
+
+            flash('Se envió un enlace de recuperación a tu correo.')
+            return redirect(url_for('login'))
+        else:
+            flash('El correo no está registrado.')
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = s.loads(token, salt='password-recovery', max_age=3600)  # válido 1h
+    except (SignatureExpired, BadSignature):
+        flash('El enlace ha expirado o no es válido.')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        user = Usuario.query.filter_by(Correo=email).first()
+        if user:
+            user.Contrasena = generate_password_hash(new_password)
+            db.session.commit()
+            flash('Tu contraseña ha sido restablecida con éxito.')
+            return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
