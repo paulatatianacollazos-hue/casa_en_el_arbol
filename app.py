@@ -16,7 +16,7 @@ from basedatos.models import db, Usuario
 
 # --- Configuración básica ---
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'clave_super_secreta'
+app.config['SECRET_KEY'] = os.urandom(24)  # ✅ más seguro
 
 # Configuración de la base de datos MySQL en Laragon
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
@@ -29,8 +29,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'tu_correo@gmail.com'     # ⚡ pon tu correo
-app.config['MAIL_PASSWORD'] = 'tu_contraseña_app'       # ⚡ contraseña de aplicación Gmail
+app.config['MAIL_USERNAME'] = 'tu_correo@gmail.com'       # ⚡ pon tu correo
+app.config['MAIL_PASSWORD'] = 'tu_clave_app_google'       # ⚡ clave de aplicación Gmail
 app.config['MAIL_DEFAULT_SENDER'] = ('Soporte Tienda', app.config['MAIL_USERNAME'])
 
 mail = Mail(app)
@@ -46,9 +46,9 @@ with app.app_context():
     engine = create_engine(DB_URL)
     if not database_exists(engine.url):
         create_database(engine.url)
-        print("Base de datos 'Tienda_db' creada exitosamente.")
+        print("✅ Base de datos 'Tienda_db' creada exitosamente.")
     db.create_all()
-    print("Tablas de la base de datos creadas exitosamente.")
+    print("✅ Tablas de la base de datos creadas exitosamente.")
 
 # --- RUTAS DE LA APLICACIÓN ---
 
@@ -80,7 +80,7 @@ def register():
                 Nombre=name,
                 Correo=email,
                 Telefono=phone,
-                Contrasena=hashed_password,
+                Contrasena=hashed_password,  # ✅ corregido
                 Rol='cliente',
                 Activo=True
             )
@@ -111,7 +111,7 @@ def login():
 
         user = Usuario.query.filter_by(Correo=email).first()
 
-        if user and check_password_hash(user.Contrasena, password):
+        if user and check_password_hash(user.Contrasena, password):  # ✅ corregido
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Has iniciado sesión con éxito!')
@@ -151,10 +151,15 @@ def forgot_password():
             token = s.dumps(email, salt='password-recovery')
             link = url_for('reset_password', token=token, _external=True)
 
-            msg = Message("Recuperar contraseña",
-                          recipients=[email])
+            msg = Message("Recuperar contraseña", recipients=[email])
             msg.body = f"Para restablecer tu contraseña, haz clic en el siguiente enlace: {link}"
-            mail.send(msg)
+            try:
+                mail.send(msg)
+                print(f"📧 Correo enviado a {email} con link {link}")  # ✅ debug
+            except Exception as e:
+                print("❌ Error al enviar correo:", e)
+                flash('No se pudo enviar el correo de recuperación.')
+                return redirect(url_for('forgot_password'))
 
             flash('Se envió un enlace de recuperación a tu correo.')
             return redirect(url_for('login'))
@@ -165,7 +170,7 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        email = s.loads(token, salt='password-recovery', max_age=3600)
+        email = s.loads(token, salt='password-recovery', max_age=3600)  # ✅ 1 hora de validez
     except (SignatureExpired, BadSignature):
         flash('El enlace ha expirado o no es válido.')
         return redirect(url_for('forgot_password'))
@@ -174,7 +179,7 @@ def reset_password(token):
         new_password = request.form.get('password')
         user = Usuario.query.filter_by(Correo=email).first()
         if user:
-            user.Contrasena = generate_password_hash(new_password)
+            user.Contrasena = generate_password_hash(new_password)  # ✅ corregido
             db.session.commit()
             flash('Tu contraseña ha sido restablecida con éxito.')
             return redirect(url_for('login'))
