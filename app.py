@@ -189,7 +189,7 @@ def reset_password(token):
         user = Usuario.query.filter_by(Correo=email).first()
         if user:
             # ✅ Sobrescribir la contraseña antigua con la nueva (encriptada)
-            user.Contrasena = generate_password_hash(new_password)
+            user.Contraseña = generate_password_hash(new_password)
 
             # Guardar cambios en la base de datos
             db.session.commit()
