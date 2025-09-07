@@ -166,33 +166,52 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
+        # Validar token (1 hora de validez)
         email = s.loads(token, salt='password-recovery', max_age=3600)
-    except (SignatureExpired, BadSignature):
-        flash('El enlace ha expirado o no es válido.')
+    except SignatureExpired:
+        flash('El enlace ha expirado. Por favor, solicita uno nuevo.')
+        return redirect(url_for('forgot_password'))
+    except BadSignature:
+        flash('El enlace no es válido.')
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
         new_password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
+        if not new_password or not confirm_password:
+            flash('Por favor, completa ambos campos de contraseña.')
+            return render_template('reset_password.html')
+
         if new_password != confirm_password:
             flash('Las contraseñas no coinciden.')
             return render_template('reset_password.html')
 
+        # Buscar el usuario
         user = Usuario.query.filter_by(Correo=email).first()
-        if user:
-            # Sobrescribe la contraseña antigua
-            user.Contraseña = generate_password_hash(new_password)
-            db.session.commit()
+        if not user:
+            flash('Usuario no encontrado.')
+            return redirect(url_for('forgot_password'))
 
-            # Limpiar cualquier sesión antigua
-            session.pop('user_id', None)
-            session.pop('username', None)
+        # Depuración: imprimir hash antiguo
+        print(f"[DEBUG] Hash antiguo: {user.Contraseña}")
 
-            flash('Tu contraseña ha sido restablecida con éxito. Ahora solo puedes iniciar sesión con la nueva.')
-            return redirect(url_for('login'))
+        # Actualizar la contraseña
+        user.Contraseña = generate_password_hash(new_password)
+        db.session.commit()
+
+        # Depuración: imprimir hash nuevo
+        print(f"[DEBUG] Hash nuevo: {user.Contraseña}")
+
+        # Limpiar cualquier sesión activa
+        session.pop('user_id', None)
+        session.pop('username', None)
+
+        flash('✅ Tu contraseña ha sido restablecida correctamente. Ahora solo puedes iniciar sesión con la nueva.')
+        return redirect(url_for('login'))
 
     return render_template('reset_password.html')
+
 
 # --- Prueba de correo ---
 @app.route('/test_mail')
