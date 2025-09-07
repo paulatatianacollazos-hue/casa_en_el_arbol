@@ -80,7 +80,7 @@ def register():
                 Nombre=name,
                 Correo=email,
                 Telefono=phone,
-                Contrasena=hashed_password,  # ✅ corregido
+                Contraseña=hashed_password,  # ✅ corregido
                 Rol='cliente',
                 Activo=True
             )
