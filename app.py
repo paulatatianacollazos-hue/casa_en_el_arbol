@@ -16,7 +16,7 @@ from basedatos.models import db, Usuario
 
 # --- Configuración básica ---
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(24)  # ✅ más seguro
+app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"  # ✅ clave fija, no cambia en cada reinicio
 
 # Configuración de la base de datos MySQL en Laragon
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
@@ -29,13 +29,13 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'nataliamelendez2426@gmail.com'       # ⚡ pon tu correo
-app.config['MAIL_PASSWORD'] = 'tipz wgml ugeu dxnu'       # ⚡ clave de aplicación Gmail
+app.config['MAIL_USERNAME'] = 'nataliamelendez2426@gmail.com'       # ⚡ tu correo
+app.config['MAIL_PASSWORD'] = 'tipzwgmlugeudxnu'                   # ⚡ clave de aplicación (sin espacios)
 app.config['MAIL_DEFAULT_SENDER'] = ('Soporte Tienda', app.config['MAIL_USERNAME'])
 
 mail = Mail(app)
 
-# Serializador para tokens
+# Serializador para tokens seguros
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # Inicializa la instancia de SQLAlchemy con la aplicación
@@ -177,14 +177,32 @@ def reset_password(token):
 
     if request.method == 'POST':
         new_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if new_password != confirm_password:
+            flash('Las contraseñas no coinciden.')
+            return render_template('reset_password.html')
+
         user = Usuario.query.filter_by(Correo=email).first()
         if user:
-            user.Contrasena = generate_password_hash(new_password)  # ✅ corregido
+            user.Contrasena = generate_password_hash(new_password)  # ✅ se guarda encriptada
             db.session.commit()
             flash('Tu contraseña ha sido restablecida con éxito.')
             return redirect(url_for('login'))
 
     return render_template('reset_password.html')
+
+
+# --- Prueba de correo ---
+@app.route('/test_mail')
+def test_mail():
+    try:
+        msg = Message("Prueba Flask-Mail", recipients=[app.config['MAIL_USERNAME']])
+        msg.body = "✅ Si ves este mensaje, tu configuración de correo funciona."
+        mail.send(msg)
+        return "Correo de prueba enviado correctamente."
+    except Exception as e:
+        return f"❌ Error al enviar correo: {e}"
 
 # --- Iniciar app ---
 if __name__ == '__main__':
