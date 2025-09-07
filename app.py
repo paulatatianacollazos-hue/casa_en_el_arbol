@@ -111,7 +111,7 @@ def login():
 
         user = Usuario.query.filter_by(Correo=email).first()
 
-        if user and check_password_hash(user.Contrasena, password):  # ✅ corregido
+        if user and check_password_hash(user.Contraseña, password):  # ✅ corregido
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Has iniciado sesión con éxito!')
