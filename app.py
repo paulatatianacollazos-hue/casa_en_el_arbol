@@ -200,7 +200,6 @@ def reset_password(token):
     return render_template('reset_password.html')
 
 
-
 # --- Prueba de correo ---
 @app.route('/test_mail')
 def test_mail():
