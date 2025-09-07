@@ -1,30 +1,24 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
-import pymysql
-
-# --- Recuperación de contraseña ---
+from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
-# Importa tus modelos
 from basedatos.models import db, Usuario
 
-# --- Configuración básica ---
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-# Configuración de la base de datos MySQL
+# --- Configuración de la base de datos MySQL ---
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
 
-# --- Configuración del correo ---
+# --- Configuración de correo ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -44,17 +38,16 @@ with app.app_context():
     engine = create_engine(DB_URL)
     if not database_exists(engine.url):
         create_database(engine.url)
-        print("✅ Base de datos 'Tienda_db' creada exitosamente.")
+        print("✅ Base de datos creada")
     db.create_all()
-    print("✅ Tablas de la base de datos creadas exitosamente.")
+    print("✅ Tablas creadas")
 
-# --- RUTAS ---
-
+# --- Rutas ---
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# --- Registro ---
+# Registro
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -64,38 +57,30 @@ def register():
         password = request.form.get('password')
 
         if not name or not email or not password:
-            flash('Por favor, completa todos los campos requeridos.')
+            flash('Completa todos los campos')
             return render_template('register.html')
 
         try:
-            existing_user = Usuario.query.filter_by(Correo=email).first()
-            if existing_user:
-                flash('El correo electrónico ya está registrado.')
+            if Usuario.query.filter_by(Correo=email).first():
+                flash('Correo ya registrado')
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            new_user = Usuario(
-                Nombre=name,
-                Correo=email,
-                Telefono=phone,
-                Contraseña=hashed_password,
-                Rol='cliente',
-                Activo=True
-            )
-
-            db.session.add(new_user)
+            user = Usuario(Nombre=name, Correo=email, Telefono=phone, Contraseña=hashed_password, Rol='cliente', Activo=True)
+            db.session.add(user)
             db.session.commit()
-            flash('¡Cuenta creada exitosamente! Tu contraseña ha sido guardada.')
+
+            flash('Cuenta creada. ¡Ahora inicia sesión!')
             return redirect(url_for('login'))
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            flash(f'Ocurrió un error al registrar el usuario: {str(e)}')
+            flash(f'Error al registrar: {str(e)}')
             return render_template('register.html')
 
     return render_template('register.html')
 
-# --- Login ---
+# Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -103,41 +88,41 @@ def login():
         password = request.form.get('password')
 
         if not email or not password:
-            flash('Por favor, ingresa tu correo y contraseña.')
+            flash('Ingresa correo y contraseña')
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
         if user and check_password_hash(user.Contraseña, password):
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
-            flash('Has iniciado sesión con éxito!')
+            flash('Inicio de sesión exitoso')
             return redirect(url_for('dashboard'))
         else:
-            flash('Credenciales inválidas.')
-            return redirect(url_for('login'))
+            flash('Credenciales inválidas')
+            return render_template('login.html')
 
     return render_template('login.html')
 
-# --- Dashboard ---
+# Dashboard
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
-# --- Logout ---
+# Logout
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Has cerrado sesión.')
+    flash('Has cerrado sesión')
     return redirect(url_for('index'))
 
-# --- Nosotros ---
+# Nosotros (sin cambios)
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
 
-# --- Recuperación de contraseña ---
+# Recuperación de contraseña
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -146,21 +131,16 @@ def forgot_password():
         if user:
             token = s.dumps(email, salt='password-recovery')
             link = url_for('reset_password', token=token, _external=True)
-
             msg = Message("Recuperar contraseña", recipients=[email])
-            msg.body = f"Para restablecer tu contraseña, haz clic en el siguiente enlace: {link}"
+            msg.body = f"Para restablecer tu contraseña, haz clic: {link}"
             try:
                 mail.send(msg)
-                print(f"📧 Correo enviado a {email} con link {link}")
+                flash('Se envió el enlace a tu correo')
             except Exception as e:
-                print("❌ Error al enviar correo:", e)
-                flash('No se pudo enviar el correo de recuperación.')
-                return redirect(url_for('forgot_password'))
-
-            flash('Se envió un enlace de recuperación a tu correo.')
-            return redirect(url_for('login'))
+                flash('No se pudo enviar el correo')
+                print(e)
         else:
-            flash('El correo no está registrado.')
+            flash('Correo no registrado')
     return render_template('forgot_password.html')
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -168,7 +148,7 @@ def reset_password(token):
     try:
         email = s.loads(token, salt='password-recovery', max_age=3600)
     except (SignatureExpired, BadSignature):
-        flash('El enlace ha expirado o no es válido.')
+        flash('Enlace expirado o inválido')
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
@@ -176,48 +156,42 @@ def reset_password(token):
         confirm_password = request.form.get('confirm_password')
 
         if not new_password or not confirm_password:
-            flash('Completa ambos campos de contraseña.')
+            flash('Completa ambos campos')
             return render_template('reset_password.html')
         if new_password != confirm_password:
-            flash('Las contraseñas no coinciden.')
+            flash('Contraseñas no coinciden')
             return render_template('reset_password.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
-            flash('Usuario no encontrado.')
+            flash('Usuario no encontrado')
             return redirect(url_for('forgot_password'))
 
-        # Actualiza y fuerza que SQLAlchemy lo reconozca
-        db.session.add(user)
+        # Actualiza la contraseña
         user.Contraseña = generate_password_hash(new_password)
         db.session.commit()
-
-        # Verifica guardado
-        updated_user = Usuario.query.filter_by(Correo=email).first()
-        print("Nuevo hash guardado:", updated_user.Contraseña)
 
         # Limpiar sesión
         session.pop('user_id', None)
         session.pop('username', None)
 
-        flash('Contraseña restablecida correctamente. Ahora puedes iniciar sesión con la nueva.')
+        flash('Contraseña restablecida correctamente. Inicia sesión con la nueva')
         return redirect(url_for('login'))
 
     return render_template('reset_password.html')
 
 
-
-# --- Prueba de correo ---
+# Prueba de correo
 @app.route('/test_mail')
 def test_mail():
     try:
-        msg = Message("Prueba Flask-Mail", recipients=[app.config['MAIL_USERNAME']])
-        msg.body = "✅ Si ves este mensaje, tu configuración de correo funciona."
+        msg = Message("Prueba", recipients=[app.config['MAIL_USERNAME']])
+        msg.body = "✅ Configuración de correo funciona"
         mail.send(msg)
-        return "Correo de prueba enviado correctamente."
+        return "Correo enviado correctamente"
     except Exception as e:
-        return f"❌ Error al enviar correo: {e}"
+        return f"Error: {e}"
 
-# --- Iniciar app ---
+
 if __name__ == '__main__':
     app.run(debug=True)
