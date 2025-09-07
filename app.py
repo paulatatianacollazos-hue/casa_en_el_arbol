@@ -16,9 +16,9 @@ from basedatos.models import db, Usuario
 
 # --- Configuración básica ---
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"  # ✅ clave fija, no cambia en cada reinicio
+app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-# Configuración de la base de datos MySQL en Laragon
+# Configuración de la base de datos MySQL
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -29,16 +29,14 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'nataliamelendez2426@gmail.com'       # ⚡ tu correo
-app.config['MAIL_PASSWORD'] = 'tipzwgmlugeudxnu'                   # ⚡ clave de aplicación (sin espacios)
+app.config['MAIL_USERNAME'] = 'nataliamelendez2426@gmail.com'
+app.config['MAIL_PASSWORD'] = 'tipzwgmlugeudxnu'
 app.config['MAIL_DEFAULT_SENDER'] = ('Soporte Tienda', app.config['MAIL_USERNAME'])
 
 mail = Mail(app)
-
-# Serializador para tokens seguros
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-# Inicializa la instancia de SQLAlchemy con la aplicación
+# Inicializa SQLAlchemy
 db.init_app(app)
 
 # Crear base de datos si no existe
@@ -50,7 +48,7 @@ with app.app_context():
     db.create_all()
     print("✅ Tablas de la base de datos creadas exitosamente.")
 
-# --- RUTAS DE LA APLICACIÓN ---
+# --- RUTAS ---
 
 @app.route('/')
 def index():
@@ -80,14 +78,13 @@ def register():
                 Nombre=name,
                 Correo=email,
                 Telefono=phone,
-                Contraseña=hashed_password,  # ✅ corregido
+                Contraseña=hashed_password,
                 Rol='cliente',
                 Activo=True
             )
 
             db.session.add(new_user)
             db.session.commit()
-
             flash('¡Cuenta creada exitosamente! Tu contraseña ha sido guardada.')
             return redirect(url_for('login'))
 
@@ -110,8 +107,7 @@ def login():
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
-
-        if user and check_password_hash(user.Contraseña, password):  # ✅ corregido
+        if user and check_password_hash(user.Contraseña, password):
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Has iniciado sesión con éxito!')
@@ -155,7 +151,7 @@ def forgot_password():
             msg.body = f"Para restablecer tu contraseña, haz clic en el siguiente enlace: {link}"
             try:
                 mail.send(msg)
-                print(f"📧 Correo enviado a {email} con link {link}")  # ✅ debug
+                print(f"📧 Correo enviado a {email} con link {link}")
             except Exception as e:
                 print("❌ Error al enviar correo:", e)
                 flash('No se pudo enviar el correo de recuperación.')
@@ -170,8 +166,7 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        # Validar token
-        email = s.loads(token, salt='password-recovery', max_age=3600)  # 1 hora de validez
+        email = s.loads(token, salt='password-recovery', max_age=3600)
     except (SignatureExpired, BadSignature):
         flash('El enlace ha expirado o no es válido.')
         return redirect(url_for('forgot_password'))
@@ -180,25 +175,24 @@ def reset_password(token):
         new_password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
-        # Verificar coincidencia de contraseñas
         if new_password != confirm_password:
             flash('Las contraseñas no coinciden.')
             return render_template('reset_password.html')
 
-        # Buscar el usuario por correo
         user = Usuario.query.filter_by(Correo=email).first()
         if user:
-            # ✅ Sobrescribir la contraseña antigua con la nueva (encriptada)
+            # Sobrescribe la contraseña antigua
             user.Contraseña = generate_password_hash(new_password)
-
-            # Guardar cambios en la base de datos
             db.session.commit()
 
-            flash('Tu contraseña ha sido restablecida con éxito. La contraseña anterior ha sido reemplazada.')
+            # Limpiar cualquier sesión antigua
+            session.pop('user_id', None)
+            session.pop('username', None)
+
+            flash('Tu contraseña ha sido restablecida con éxito. Ahora solo puedes iniciar sesión con la nueva.')
             return redirect(url_for('login'))
 
     return render_template('reset_password.html')
-
 
 # --- Prueba de correo ---
 @app.route('/test_mail')
