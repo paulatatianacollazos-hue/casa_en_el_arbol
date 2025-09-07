@@ -88,7 +88,7 @@ def register():
             db.session.add(new_user)
             db.session.commit()
 
-            flash('Cuenta creada exitosamente! Inicia sesión.')
+            flash('¡Cuenta creada exitosamente! Tu contraseña ha sido guardada.')
             return redirect(url_for('login'))
 
         except SQLAlchemyError as e:
@@ -170,7 +170,8 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        email = s.loads(token, salt='password-recovery', max_age=3600)  # ✅ 1 hora de validez
+        # Validar token
+        email = s.loads(token, salt='password-recovery', max_age=3600)  # 1 hora de validez
     except (SignatureExpired, BadSignature):
         flash('El enlace ha expirado o no es válido.')
         return redirect(url_for('forgot_password'))
@@ -179,18 +180,25 @@ def reset_password(token):
         new_password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
+        # Verificar coincidencia de contraseñas
         if new_password != confirm_password:
             flash('Las contraseñas no coinciden.')
             return render_template('reset_password.html')
 
+        # Buscar el usuario por correo
         user = Usuario.query.filter_by(Correo=email).first()
         if user:
-            user.Contrasena = generate_password_hash(new_password)  # ✅ se guarda encriptada
+            # ✅ Sobrescribir la contraseña antigua con la nueva (encriptada)
+            user.Contrasena = generate_password_hash(new_password)
+
+            # Guardar cambios en la base de datos
             db.session.commit()
-            flash('Tu contraseña ha sido restablecida con éxito.')
+
+            flash('Tu contraseña ha sido restablecida con éxito. La contraseña anterior ha sido reemplazada.')
             return redirect(url_for('login'))
 
     return render_template('reset_password.html')
+
 
 
 # --- Prueba de correo ---
