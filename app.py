@@ -92,7 +92,7 @@ def login():
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
-        if user and check_password_hash(user.password, password):  # ✅ usamos .password
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Inicio de sesión exitoso')
@@ -170,7 +170,7 @@ def reset_password(token):
                 return redirect(url_for('forgot_password'))
 
             # 🔑 Guardar la nueva contraseña
-            user.password = generate_password_hash(new_password)  # ✅ usamos .password
+            user.password = generate_password_hash(new_password)
             db.session.commit()
 
             # 👉 Iniciar sesión automáticamente
