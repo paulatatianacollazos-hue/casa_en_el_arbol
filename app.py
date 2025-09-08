@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
-from basedatos.models import db, Usuario
+from basedatos.models import db, Usuario  # tu modelo corregido con password
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
@@ -66,7 +66,14 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            user = Usuario(Nombre=name, Correo=email, Telefono=phone, password=hashed_password, Rol='cliente', Activo=True)
+            user = Usuario(
+                Nombre=name,
+                Correo=email,
+                Telefono=phone,
+                password=hashed_password,   # 👈 se usa el alias password
+                Rol='cliente',
+                Activo=True
+            )
             db.session.add(user)
             db.session.commit()
 
@@ -169,13 +176,12 @@ def reset_password(token):
 
         # ✅ Guardar nueva contraseña en BD
         user.password = generate_password_hash(new_password)
-        db.session.commit()   # 👈 aquí sí se guarda
+        db.session.commit()
 
-        flash('✅ Contraseña restablecida')
+        flash('✅ Contraseña restablecida, ahora puedes iniciar sesión')
         return redirect(url_for('login'))
 
     return render_template('reset_password.html')
-
 
 # Prueba de correo
 @app.route('/test_mail')
