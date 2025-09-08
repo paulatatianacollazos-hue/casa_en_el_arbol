@@ -54,7 +54,7 @@ def register():
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
-        password = request.form.get('password')
+        password = request.form.get('password', '').strip()
 
         if not name or not email or not password:
             flash('Completa todos los campos')
@@ -86,7 +86,8 @@ def register():
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
-        password = request.form.get('password')
+        # Corrección: se utiliza .strip() para evitar problemas con espacios en blanco.
+        password = request.form.get('password', '').strip()
 
         if not email or not password:
             flash('Ingresa correo y contraseña')
@@ -154,8 +155,8 @@ def reset_password(token):
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
-        new_password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+        new_password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
 
         if not new_password or not confirm_password:
             flash('Completa ambos campos')
@@ -178,6 +179,12 @@ def reset_password(token):
         print(">>> Contraseña hasheada. Se ejecutará db.session.commit()...")
         db.session.commit()
         print(">>> Transacción completada. Contraseña actualizada en la base de datos.")
+
+        # Nuevo chequeo para confirmar que la contraseña funciona
+        if check_password_hash(user.Contraseña, new_password):
+            print(">>> Verificación de contraseña después de la actualización: SÍ funciona.")
+        else:
+            print(">>> Verificación de contraseña después de la actualización: NO funciona.")
 
         flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.')
         return redirect(url_for('login'))
