@@ -4,17 +4,17 @@ from flask_sqlalchemy import SQLAlchemy
 # Crear una instancia de SQLAlchemy
 db = SQLAlchemy()
 
-# Definir los modelos de la base de datos
+
 class Usuario(db.Model):
     __tablename__ = 'Usuario'
+
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
     Telefono = db.Column(db.String(20))
-    Correo = db.Column(db.String(100), unique=True, nullable=False)
-    Direccion = db.Column(db.String(200))
-    Contraseña = db.Column(db.String(200), nullable=False)
-    Rol = db.Column(db.String(50), default='cliente')
-    Activo = db.Column(db.Boolean, default=True)
+    Correo = db.Column(db.String(120), unique=True, nullable=False)  # ✅ emails únicos
+    Contraseña = db.Column(db.String(255), nullable=False)  # ✅ tamaño suficiente para hash
+    Rol = db.Column(db.String(50), default='cliente', nullable=False)
+    Activo = db.Column(db.Boolean, default=True, nullable=False)
 
     # Relaciones
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
