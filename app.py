@@ -147,6 +147,7 @@ def forgot_password():
 def reset_password(token):
     try:
         email = s.loads(token, salt='password-recovery', max_age=3600)
+        email = email.strip().lower()  # Normaliza el correo
     except (SignatureExpired, BadSignature):
         flash('Enlace expirado o inválido')
         return redirect(url_for('forgot_password'))
@@ -162,23 +163,31 @@ def reset_password(token):
             flash('Contraseñas no coinciden')
             return render_template('reset_password.html')
 
-        user = Usuario.query.filter_by(Correo=email).first()
-        if not user:
-            flash('Usuario no encontrado')
-            return redirect(url_for('forgot_password'))
+        try:
+            user = Usuario.query.filter_by(Correo=email).first()
+            if not user:
+                flash('Usuario no encontrado')
+                return redirect(url_for('forgot_password'))
 
-        # Actualiza la contraseña
-        user.Contraseña = generate_password_hash(new_password)
-        db.session.commit()
+            # 🔑 Guarda la nueva contraseña con hash
+            user.Contraseña = generate_password_hash(new_password)
 
-        # Limpiar sesión
-        session.pop('user_id', None)
-        session.pop('username', None)
+            db.session.commit()  # 🚀 Aplica cambios
+            flash('Contraseña restablecida correctamente. Inicia sesión con la nueva')
 
-        flash('Contraseña restablecida correctamente. Inicia sesión con la nueva')
-        return redirect(url_for('login'))
+            # Limpia la sesión
+            session.pop('user_id', None)
+            session.pop('username', None)
+
+            return redirect(url_for('login'))
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Error al actualizar la contraseña: {str(e)}')
+            return render_template('reset_password.html')
 
     return render_template('reset_password.html')
+
 
 
 # Prueba de correo
