@@ -66,7 +66,8 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            user = Usuario(Nombre=name, Correo=email, Telefono=phone, password=hashed_password, Rol='cliente', Activo=True)
+            # Corregido: Usar 'Contraseña' en lugar de 'password'
+            user = Usuario(Nombre=name, Correo=email, Telefono=phone, Contraseña=hashed_password, Rol='cliente', Activo=True)
             db.session.add(user)
             db.session.commit()
 
@@ -92,7 +93,8 @@ def login():
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
-        if user and check_password_hash(user.password, password):
+        # Corregido: Usar 'Contraseña' en lugar de 'password' para verificar
+        if user and check_password_hash(user.Contraseña, password):
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Inicio de sesión exitoso')
@@ -167,9 +169,9 @@ def reset_password(token):
             flash('Usuario no encontrado')
             return redirect(url_for('forgot_password'))
 
-        # ✅ Guardar nueva contraseña en BD
-        user.password = generate_password_hash(new_password)
-        db.session.commit()   # 👈 aquí sí se guarda
+        # Corregido: Usar 'Contraseña' en lugar de 'password' para guardar
+        user.Contraseña = generate_password_hash(new_password)
+        db.session.commit()
 
         flash('✅ Contraseña restablecida')
         return redirect(url_for('login'))
