@@ -147,7 +147,7 @@ def forgot_password():
 def reset_password(token):
     try:
         email = s.loads(token, salt='password-recovery', max_age=3600)
-        email = email.strip().lower()  # Normaliza el correo
+        email = email.strip().lower()
     except (SignatureExpired, BadSignature):
         flash('Enlace expirado o inválido')
         return redirect(url_for('forgot_password'))
@@ -169,17 +169,16 @@ def reset_password(token):
                 flash('Usuario no encontrado')
                 return redirect(url_for('forgot_password'))
 
-            # 🔑 Guarda la nueva contraseña con hash
+            # 🔑 Guardar la nueva contraseña
             user.Contraseña = generate_password_hash(new_password)
+            db.session.commit()
 
-            db.session.commit()  # 🚀 Aplica cambios
-            flash('Contraseña restablecida correctamente. Inicia sesión con la nueva')
+            # 👉 Iniciar sesión automáticamente
+            session['user_id'] = user.ID_Usuario
+            session['username'] = user.Nombre
 
-            # Limpia la sesión
-            session.pop('user_id', None)
-            session.pop('username', None)
-
-            return redirect(url_for('login'))
+            flash('✅ Contraseña restablecida y acceso concedido')
+            return redirect(url_for('dashboard'))
 
         except SQLAlchemyError as e:
             db.session.rollback()
