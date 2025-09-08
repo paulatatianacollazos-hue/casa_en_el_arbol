@@ -42,10 +42,12 @@ with app.app_context():
     db.create_all()
     print("✅ Tablas creadas")
 
+
 # --- Rutas ---
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 # Registro
 @app.route('/register', methods=['GET', 'POST'])
@@ -66,7 +68,14 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            user = Usuario(Nombre=name, Correo=email, Telefono=phone, Contraseña=hashed_password, Rol='cliente', Activo=True)
+            user = Usuario(
+                Nombre=name,
+                Correo=email,
+                Telefono=phone,
+                Contrasena=hashed_password,  # ✅ corregido
+                Rol='cliente',
+                Activo=True
+            )
             db.session.add(user)
             db.session.commit()
 
@@ -80,6 +89,7 @@ def register():
 
     return render_template('register.html')
 
+
 # Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -92,7 +102,7 @@ def login():
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
-        if user and check_password_hash(user.Contraseña, password):
+        if user and check_password_hash(user.Contrasena, password):  # ✅ corregido
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Inicio de sesión exitoso')
@@ -103,12 +113,14 @@ def login():
 
     return render_template('login.html')
 
+
 # Dashboard
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html')
+
 
 # Logout
 @app.route('/logout')
@@ -117,10 +129,12 @@ def logout():
     flash('Has cerrado sesión')
     return redirect(url_for('index'))
 
-# Nosotros (sin cambios)
+
+# Nosotros
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
+
 
 # Recuperación de contraseña
 @app.route('/forgot_password', methods=['GET', 'POST'])
@@ -142,6 +156,7 @@ def forgot_password():
         else:
             flash('Correo no registrado')
     return render_template('forgot_password.html')
+
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -170,7 +185,7 @@ def reset_password(token):
                 return redirect(url_for('forgot_password'))
 
             # 🔑 Guardar la nueva contraseña
-            user.Contraseña = generate_password_hash(new_password)
+            user.Contrasena = generate_password_hash(new_password)  # ✅ corregido
             db.session.commit()
 
             # 👉 Iniciar sesión automáticamente
@@ -186,7 +201,6 @@ def reset_password(token):
             return render_template('reset_password.html')
 
     return render_template('reset_password.html')
-
 
 
 # Prueba de correo
