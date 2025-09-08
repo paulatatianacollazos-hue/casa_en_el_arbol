@@ -43,6 +43,7 @@ with app.app_context():
     print("✅ Tablas creadas")
 
 # --- Rutas ---
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -66,8 +67,7 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            # Corregido: Usar 'Contraseña' en lugar de 'password'
-            user = Usuario(Nombre=name, Correo=email, Telefono=phone, Contraseña=hashed_password, Rol='cliente', Activo=True)
+            user = Usuario(Nombre=name, Correo=email, Telefono=phone, password=hashed_password, Rol='cliente', Activo=True)
             db.session.add(user)
             db.session.commit()
 
@@ -93,8 +93,7 @@ def login():
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
-        # Corregido: Usar 'Contraseña' en lugar de 'password' para verificar
-        if user and check_password_hash(user.Contraseña, password):
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Inicio de sesión exitoso')
@@ -148,7 +147,8 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
+        email = s.loads(token, salt='password-recovery', max_age=3600)
+        email = email.strip().lower()
     except (SignatureExpired, BadSignature):
         flash('Enlace expirado o inválido')
         return redirect(url_for('forgot_password'))
@@ -164,20 +164,29 @@ def reset_password(token):
             flash('Contraseñas no coinciden')
             return render_template('reset_password.html')
 
-        user = Usuario.query.filter_by(Correo=email).first()
-        if not user:
-            flash('Usuario no encontrado')
-            return redirect(url_for('forgot_password'))
+        try:
+            user = Usuario.query.filter_by(Correo=email).first()
+            if not user:
+                flash('Usuario no encontrado')
+                return redirect(url_for('forgot_password'))
 
-        # Corregido: Usar 'Contraseña' en lugar de 'password' para guardar
-        user.Contraseña = generate_password_hash(new_password)
-        db.session.commit()
+            # 🔑 Guardar la nueva contraseña
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
 
-        flash('✅ Contraseña restablecida')
-        return redirect(url_for('login'))
+            # 👉 Iniciar sesión automáticamente
+            session['user_id'] = user.ID_Usuario
+            session['username'] = user.Nombre
+
+            flash('✅ Contraseña restablecida y acceso concedido')
+            return redirect(url_for('dashboard'))
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Error al actualizar la contraseña: {str(e)}')
+            return render_template('reset_password.html')
 
     return render_template('reset_password.html')
-
 
 # Prueba de correo
 @app.route('/test_mail')
