@@ -159,20 +159,25 @@ def reset_password(token):
 
         if not new_password or not confirm_password:
             flash('Completa ambos campos')
-            return render_template('reset_password.html', token=token) # Agregado: pasa el token al template
+            return render_template('reset_password.html', token=token)
         if new_password != confirm_password:
             flash('Las contraseñas no coinciden')
-            return render_template('reset_password.html', token=token) # Agregado: pasa el token al template
+            return render_template('reset_password.html', token=token)
 
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
             flash('Usuario no encontrado')
             return redirect(url_for('forgot_password'))
 
-        # ✅ Esta línea genera un hash de la nueva contraseña
+        # Mensajes de depuración para la terminal
+        print(">>> Usuario encontrado. Procediendo a actualizar la contraseña.")
+        print(f">>> Contraseña nueva recibida: {new_password}")
+
         user.Contraseña = generate_password_hash(new_password)
-        # ✅ Esta línea guarda el cambio en la base de datos
+        
+        print(">>> Contraseña hasheada. Se ejecutará db.session.commit()...")
         db.session.commit()
+        print(">>> Transacción completada. Contraseña actualizada en la base de datos.")
 
         flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.')
         return redirect(url_for('login'))
