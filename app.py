@@ -66,7 +66,7 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            user = Usuario(Nombre=name, Correo=email, Telefono=phone, Contraseña=hashed_password, Rol='cliente', Activo=True)
+            user = Usuario(Nombre=name, Correo=email, Telefono=phone, password=hashed_password, Rol='cliente', Activo=True)
             db.session.add(user)
             db.session.commit()
 
@@ -92,7 +92,7 @@ def login():
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
-        if user and check_password_hash(user.Contraseña, password):
+        if user and check_password_hash(user.password, password):  # ✅ usamos .password
             session['user_id'] = user.ID_Usuario
             session['username'] = user.Nombre
             flash('Inicio de sesión exitoso')
@@ -117,7 +117,7 @@ def logout():
     flash('Has cerrado sesión')
     return redirect(url_for('index'))
 
-# Nosotros (sin cambios)
+# Nosotros
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
@@ -170,7 +170,7 @@ def reset_password(token):
                 return redirect(url_for('forgot_password'))
 
             # 🔑 Guardar la nueva contraseña
-            user.Contraseña = generate_password_hash(new_password)
+            user.password = generate_password_hash(new_password)  # ✅ usamos .password
             db.session.commit()
 
             # 👉 Iniciar sesión automáticamente
@@ -187,8 +187,6 @@ def reset_password(token):
 
     return render_template('reset_password.html')
 
-
-
 # Prueba de correo
 @app.route('/test_mail')
 def test_mail():
@@ -199,7 +197,6 @@ def test_mail():
         return "Correo enviado correctamente"
     except Exception as e:
         return f"Error: {e}"
-
 
 if __name__ == '__main__':
     app.run(debug=True)
