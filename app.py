@@ -147,6 +147,7 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
+        # Verifica el token y su validez de 1 hora (3600 segundos)
         email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
     except (SignatureExpired, BadSignature):
         flash('Enlace expirado o inválido')
@@ -158,24 +159,25 @@ def reset_password(token):
 
         if not new_password or not confirm_password:
             flash('Completa ambos campos')
-            return render_template('reset_password.html')
+            return render_template('reset_password.html', token=token) # Agregado: pasa el token al template
         if new_password != confirm_password:
-            flash('Contraseñas no coinciden')
-            return render_template('reset_password.html')
+            flash('Las contraseñas no coinciden')
+            return render_template('reset_password.html', token=token) # Agregado: pasa el token al template
 
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
             flash('Usuario no encontrado')
             return redirect(url_for('forgot_password'))
 
-        # ✅ Guardar nueva contraseña en BD
+        # ✅ Esta línea genera un hash de la nueva contraseña
         user.Contraseña = generate_password_hash(new_password)
+        # ✅ Esta línea guarda el cambio en la base de datos
         db.session.commit()
 
-        flash('✅ Contraseña restablecida')
+        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.')
         return redirect(url_for('login'))
 
-    return render_template('reset_password.html')
+    return render_template('reset_password.html', token=token)
 
 # Prueba de correo
 @app.route('/test_mail')
