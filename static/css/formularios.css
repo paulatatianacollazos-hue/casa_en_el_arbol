@@ -30,24 +30,3 @@
     font-weight: 600;
 }
 
-.auth-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6); /* fondo oscuro */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000; /* bien arriba */
-}
-
-.auth-card {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-}
