@@ -2,45 +2,60 @@
 {% block title %}Iniciar sesión{% endblock %}
 
 {% block content %}
-<div class="auth-overlay">
-  <div class="auth-card">
-    <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
 
-    <!-- Mensajes flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert {% if category == 'error' %}alert-danger{% elif category == 'success' %}alert-success{% endif %}">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<!-- Botón para abrir login -->
+<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#loginModal">
+    Iniciar sesión
+</button>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-success" id="loginModalLabel">Bienvenido de vuelta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert {% if category == 'error' %}alert-danger{% elif category == 'success' %}alert-success{% endif %}">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Formulario -->
+        <form method="post">
+          <div class="mb-3">
+            <input type="email" class="form-control" name="email" placeholder="Correo electrónico" required>
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+          <div class="mb-3">
+            <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Iniciar Sesión</button>
+        </form>
 
-    <!-- Formulario -->
-    <form method="post">
-      <div class="mb-3">
-        <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
-      </div>
-      <div class="mb-3">
-        <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
-      </div>
-      <button type="submit" class="btn btn-success w-100 auth-btn">Iniciar Sesión</button>
-    </form>
+        <div class="text-center mt-3">
+          <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
+        </div>
+        <hr>
+        <div class="text-center">
+          <span class="small">¿No tienes cuenta?</span>
+          <a href="{{ url_for('register') }}" class="small text-primary">Regístrate aquí</a>
+        </div>
 
-    <div class="text-center mt-3">
-      <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
-    </div>
-    <hr>
-    <div class="text-center">
-      <span class="small">¿No tienes cuenta?</span>
-      <a href="{{ url_for('register') }}" class="small text-primary">Regístrate aquí</a>
+      </div>
+
     </div>
   </div>
 </div>
-
-<!-- Scripts -->
-<script src="{{ url_for('static', filename='js/formularios.js') }}"></script>
 
 {% endblock %}
