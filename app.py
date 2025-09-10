@@ -33,12 +33,11 @@ s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 db.init_app(app)
 
-# --- Rutas ---
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Registro
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -72,12 +71,12 @@ def register():
 
     return render_template('register.html')
 
-# Login
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
-        # Corrección: se utiliza .strip() para evitar problemas con espacios en blanco.
+        
         password = request.form.get('password', '').strip()
 
         if not email or not password:
@@ -96,26 +95,26 @@ def login():
 
     return render_template('login.html')
 
-# Dashboard
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
-# Logout
+
 @app.route('/logout')
 def logout():
     session.clear()
     flash('Has cerrado sesión')
     return redirect(url_for('index'))
 
-# Nosotros
+
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
 
-# Recuperación de contraseña
+
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -139,7 +138,7 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        # Verifica el token y su validez de 1 hora (3600 segundos)
+        
         email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
     except (SignatureExpired, BadSignature):
         flash('❌ Enlace expirado o inválido', 'error')
@@ -157,13 +156,13 @@ def reset_password(token):
             flash('⚠️ Las contraseñas no coinciden', 'warning')
             return render_template('reset_password.html', token=token)
 
-        # Buscar usuario por correo
+       
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
             flash('❌ Usuario no encontrado', 'error')
             return redirect(url_for('forgot_password'))
 
-        # Actualizar la contraseña (hasheada)
+
         hashed_password = generate_password_hash(new_password)
         user.Contraseña = hashed_password  
 
@@ -180,7 +179,7 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 
-# Prueba de correo
+
 @app.route('/test_mail')
 def test_mail():
     try:
