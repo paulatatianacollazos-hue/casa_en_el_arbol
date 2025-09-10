@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}">  
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -46,17 +46,17 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item" href="#" onclick="openModal('loginModal')">
+                            <a class="dropdown-item" href="{{ url_for('login') }}">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="openModal('registerModal')">
+                            <a class="dropdown-item" href="{{ url_for('register') }}">
                                 <i class="bi bi-person-plus me-2"></i>Registrarse
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="openModal('forgotModal')">
+                            <a class="dropdown-item" href="#">
                                 <i class="bi bi-key me-2"></i>Recuperar contraseña
                             </a>
                         </li>
@@ -66,7 +66,7 @@
                 <!-- Carrito -->
                 <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
                     <i class="bi bi-cart fs-4"></i>
-                    <span class="cart-badge" id="cart-count">0</span>
+                    <span class="cart-badge" id="cart-count">0</span> <!-- CORREGIDO -->
                 </a>
             </div>
         </div>
@@ -123,13 +123,13 @@
     <!-- MODALES -->
     {% include 'partials/modals.html' %}
     
-    <!-- CHATBOT -->
+    <!-- CHATBOT (opcional, solo si lo quieres en todas las vistas) -->
     {% block chatbot %}
         {% include 'partials/chatbot.html' %}
     {% endblock %}
 
     <!-- TOASTS -->
-    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"> <!-- CORREGIDO -->
         <div id="cartToast" class="toast" role="alert">
             <div class="toast-header">
                 <i class="bi bi-cart-check text-success me-2"></i>

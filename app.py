@@ -68,6 +68,7 @@ def register():
             db.session.rollback()
             flash(f'Error al registrar: {str(e)}')
             return render_template('register.html')
+        
 
     return render_template('register.html')
 
