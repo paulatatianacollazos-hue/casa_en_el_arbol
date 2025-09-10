@@ -1,3 +1,4 @@
+/* Fondo del modal tipo overlay */
 .auth-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -10,40 +11,136 @@
     z-index: 1050;
 }
 
+/* Card de login/registro */
 .auth-card {
     background: #fff;
     border-radius: 20px;
     padding: 2rem;
     max-width: 400px;
     width: 100%;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.auth-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* Inputs redondeados y con padding */
 .auth-input {
     border-radius: 50px;
     padding: 12px 15px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s;
 }
 
+.auth-input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40,167,69,0.5);
+    outline: none;
+}
+
+/* Botones redondeados y con transición */
+.auth-btn {
+    border-radius: 50px;
+    padding: 12px;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Alertas */
+.alert-danger {
+    color: #842029;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.alert-success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+/* Enlaces dentro de modales */
+.auth-card a {
+    color: #28a745;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-card a:hover {
+    text-decoration: underline;
+}
+
+/* Títulos del modal */
+.auth-card h5 {
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+
+
+
+
+
+.auth-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+.auth-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.auth-input {
+    border-radius: 50px;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+}
+.auth-input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40,167,69,0.5);
+    outline: none;
+}
 .auth-btn {
     border-radius: 50px;
     padding: 12px;
     font-weight: 600;
 }
-
-.alert-danger {
-    color: red;
-    background-color: #f8d7da;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+.auth-card h5 {
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
 }
-
-.alert-success {
-    color: green;
-    background-color: #d4edda;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+.auth-card a {
+    color: #28a745;
+    text-decoration: none;
 }
-
+.auth-card a:hover {
+    text-decoration: underline;
+}
 
