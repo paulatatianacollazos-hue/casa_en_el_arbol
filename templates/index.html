@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block title %}Casa en el Árbol - Catálogo{% endblock %}
+
 {% block content %}
 
+<!-- Carrusel principal -->
 <div id="carouselEjemplo" class="carousel slide" data-bs-ride="carousel">
   <div class="carousel-indicators">
     <button type="button" data-bs-target="#carouselEjemplo" data-bs-slide-to="0" class="active"></button>
@@ -27,37 +29,35 @@
 </div>
 
 <!-- Sección Diseño con Identidad -->
-<div class="container-fluid">
-  <div class="row text-center my-4">
+<div class="container-fluid my-5">
+  <div class="row text-center mb-4">
     <div class="col-12">
       <h1>DISEÑO CON IDENTIDAD</h1>
     </div>
   </div>
 
-  <div class="row no-gutters">
+  <div class="row g-0">
     <div class="col-md-4">
       <img src="{{ url_for('static', filename='img/imagencarrusel1.png') }}" class="img-fluid" alt="Comedor con mesa de madera">
     </div>
     <div class="col-md-4">
       <img src="{{ url_for('static', filename='img/imagencarrusel3.png') }}" class="img-fluid" alt="Sillas de cuero en un comedor">
     </div>
-    <div class="col-md-4 position-relative">
+    <div class="col-md-4">
       <img src="{{ url_for('static', filename='img/imagencarrusel5.png') }}" class="img-fluid" alt="Mesa de mármol y sillas">
     </div>
   </div>
 </div>
 
-<!-- Otra sección -->
-<section class="main-section my-5">
-  <div class="content text-center">
-    <h5 class="subtitle">OTRO SERVICIO</h5>
-    <h1 class="title">Asesoría en Diseño</h1>
-  </div>
+<!-- Sección Asesoría -->
+<section class="main-section my-5 text-center">
+  <h5 class="subtitle">OTRO SERVICIO</h5>
+  <h1 class="title">Asesoría en Diseño</h1>
 </section>
 
 <!-- Carrusel de novedades -->
 <div class="container py-5">
-  <h1><b>NOVEDADES</b></h1>
+  <h1 class="mb-4"><b>NOVEDADES</b></h1>
   <div id="multiCardCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
       <div class="carousel-item active">
@@ -79,7 +79,6 @@
           </div>
         </div>
       </div>
-      <!-- Otra página del carrusel -->
       <div class="carousel-item">
         <div class="row">
           <div class="col-md-6 col-lg-4">
@@ -115,11 +114,9 @@
   <div class="container">
     <div class="row align-items-center">
       <!-- Imágenes -->
-      <div class="col-md-6 d-flex justify-content-center">
-        <div class="d-flex gap-3">
-          <img src="{{ url_for('static', filename='img/cocina.png') }}" class="img-fluid rounded shadow" alt="Mueble moderno" style="max-width: 45%;">
-          <img src="{{ url_for('static', filename='img/espejo.png') }}" class="img-fluid rounded shadow" alt="Diseño de sala" style="max-width: 45%;">
-        </div>
+      <div class="col-md-6 d-flex justify-content-center gap-3">
+        <img src="{{ url_for('static', filename='img/cocina.png') }}" class="img-fluid rounded shadow" alt="Mueble moderno" style="max-width: 45%;">
+        <img src="{{ url_for('static', filename='img/espejo.png') }}" class="img-fluid rounded shadow" alt="Diseño de sala" style="max-width: 45%;">
       </div>
 
       <!-- Texto -->
@@ -141,8 +138,8 @@
   </div>
 </section>
 
-<br><br>
-<section class="footer-suscripcion">
+<!-- Footer suscripción -->
+<section class="footer-suscripcion mt-5">
   <div class="container">
     <div class="footer-columns mt-4">
       <div class="footer-col">
@@ -160,7 +157,7 @@
       <div class="footer-col">
         <h5>Horario de Atención</h5>
         <p>Lunes a Viernes: 9:00 a.m. - 6:00 p.m.<br>
-          Sábados: 10:00 a.m. - 4:00 p.m.</p>
+        Sábados: 10:00 a.m. - 4:00 p.m.</p>
         <p><strong>Email:</strong> casaenelarbol@gmail.com</p>
       </div>
       <div class="footer-col">
