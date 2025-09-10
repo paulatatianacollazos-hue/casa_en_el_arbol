@@ -1,44 +1,11 @@
-{% extends 'base.html' %}
-{% block title %}Crear cuenta{% endblock %}
-
+{% extends 'base.html' %}{% block title %}Crear cuenta{% endblock %}
 {% block content %}
-<div class="auth-overlay">
-  <div class="auth-card">
-    <h3 class="text-center fw-bold text-success mb-4">Crear cuenta</h3>
-
-    <!-- Mensajes flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <!-- Formulario -->
-    <form method="post" action="{{ url_for('reset_password', token=token) }}">
-      <div class="mb-3">
-        <input type="text" class="form-control auth-input" name="name" placeholder="Nombre completo" required>
-      </div>
-      <div class="mb-3">
-        <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
-      </div>
-      <div class="mb-3">
-        <input type="tel" class="form-control auth-input" name="phone" placeholder="Teléfono" required>
-      </div>
-      <div class="mb-3">
-        <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
-      </div>
-      <button type="submit" class="btn btn-success w-100 auth-btn">Registrarme</button>
-    </form>
-
-    <div class="text-center mt-3">
-      <span class="small">¿Ya tienes cuenta?</span>
-      <a href="{{ url_for('login') }}" class="small text-primary">Inicia sesión</a>
-    </div>
-  </div>
-</div>
+<h2>Crear cuenta</h2>
+<form method="post" class="form">
+  <label>Nombre <input type="text" name="name" required></label>
+  <label>Email <input type="email" name="email" required></label>
+  <label>Teléfono <input type="tel" name="phone"></label>
+  <label>Contraseña <input type="password" name="password" required></label>
+  <button class="btn" type="submit">Registrarme</button>
+</form>
 {% endblock %}
