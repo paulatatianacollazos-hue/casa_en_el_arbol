@@ -151,45 +151,43 @@ def reset_password(token):
         # Verifica el token y su validez de 1 hora (3600 segundos)
         email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
     except (SignatureExpired, BadSignature):
-        flash('Enlace expirado o inválido')
+        flash('❌ Enlace expirado o inválido', 'error')
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
         new_password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
 
+        # Validaciones
         if not new_password or not confirm_password:
-            flash('Completa ambos campos')
+            flash('⚠️ Completa ambos campos', 'warning')
             return render_template('reset_password.html', token=token)
         if new_password != confirm_password:
-            flash('Las contraseñas no coinciden')
+            flash('⚠️ Las contraseñas no coinciden', 'warning')
             return render_template('reset_password.html', token=token)
 
+        # Buscar usuario por correo
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
-            flash('Usuario no encontrado')
+            flash('❌ Usuario no encontrado', 'error')
             return redirect(url_for('forgot_password'))
 
-        # Mensajes de depuración para la terminal
-        print(">>> Usuario encontrado. Procediendo a actualizar la contraseña.")
-        print(f">>> Contraseña nueva recibida: {new_password}")
+        # Actualizar la contraseña (hasheada)
+        hashed_password = generate_password_hash(new_password)
+        user.Contraseña = hashed_password  
 
-        user.Contraseña = generate_password_hash(new_password)
-        
-        print(">>> Contraseña hasheada. Se ejecutará db.session.commit()...")
-        db.session.commit()
-        print(">>> Transacción completada. Contraseña actualizada en la base de datos.")
-
-        # Nuevo chequeo para confirmar que la contraseña funciona
-        if check_password_hash(user.Contraseña, new_password):
-            print(">>> Verificación de contraseña después de la actualización: SÍ funciona.")
-        else:
-            print(">>> Verificación de contraseña después de la actualización: NO funciona.")
-
-        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.')
-        return redirect(url_for('login'))
+        try:
+            db.session.commit()
+            flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al actualizar contraseña: {e}")
+            flash('❌ Hubo un error al actualizar tu contraseña. Inténtalo de nuevo.', 'error')
+            return render_template('reset_password.html', token=token)
 
     return render_template('reset_password.html', token=token)
+
 
 # Prueba de correo
 @app.route('/test_mail')
