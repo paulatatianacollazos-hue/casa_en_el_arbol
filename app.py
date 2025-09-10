@@ -12,13 +12,13 @@ from basedatos.models import db, Usuario
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-# --- Configuración de la base de datos MySQL ---
+
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
 
-# --- Configuración de correo ---
+
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -30,17 +30,8 @@ app.config['MAIL_DEFAULT_SENDER'] = ('Soporte Tienda', app.config['MAIL_USERNAME
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-# Inicializa SQLAlchemy
-db.init_app(app)
 
-# Crear base de datos si no existe
-with app.app_context():
-    engine = create_engine(DB_URL)
-    if not database_exists(engine.url):
-        create_database(engine.url)
-        print("✅ Base de datos creada")
-    db.create_all()
-    print("✅ Tablas creadas")
+db.init_app(app)
 
 # --- Rutas ---
 @app.route('/')
