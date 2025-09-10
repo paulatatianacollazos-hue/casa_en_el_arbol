@@ -23,8 +23,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'nataliamelendez2426@gmail.com'
-app.config['MAIL_PASSWORD'] = 'tipzwgmlugeudxnu'
+app.config['MAIL_USERNAME'] = 'casaenelarbol236@gmail.com'
+app.config['MAIL_PASSWORD'] = 'usygdligtlewedju'
 app.config['MAIL_DEFAULT_SENDER'] = ('Soporte Tienda', app.config['MAIL_USERNAME'])
 
 mail = Mail(app)
