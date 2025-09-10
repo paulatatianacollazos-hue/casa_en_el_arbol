@@ -175,4 +175,19 @@
   </div>
 </section>
 
+<script>
+  // JS para abrir y cerrar el login
+const overlay = document.getElementById('login-overlay');
+const closeBtn = document.getElementById('close-btn');
+
+// Abrir el login (puedes llamarlo cuando quieras, por ejemplo al cargar la página)
+overlay.style.display = 'flex';
+
+// Cerrar al presionar el botón
+closeBtn.addEventListener('click', () => {
+  overlay.style.display = 'none';
+});
+
+</script>
+
 {% endblock %}
