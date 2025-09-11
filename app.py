@@ -106,9 +106,9 @@ def dashboard():
 
 @app.route('/logout')
 def logout():
-    session.clear()
-    flash('Has cerrado sesión')
+    session.pop('usuario', None)
     return redirect(url_for('index'))
+
 
 
 @app.route('/nosotros')
