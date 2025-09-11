@@ -131,8 +131,7 @@ def forgot_password():
         if user:
             try:
                 token = s.dumps(email, salt='password-recovery')
-                reset_code = token[:6].upper()  # Esto es opcional, puedes generar otro código si prefieres
-                send_reset_email(user_email=email, user_name=user.Nombre, reset_code=reset_code)
+                send_reset_email(user_email=email, user_name=user.Nombre, token=token)
                 flash('📩 Se envió el enlace a tu correo', 'success')
             except Exception as e:
                 print(f"Error al enviar correo: {e}")
@@ -141,14 +140,21 @@ def forgot_password():
             flash('⚠️ Correo no registrado', 'warning')
     return render_template('forgot_password.html')
 
-def send_reset_email(user_email, user_name, reset_code):
-    token = s.dumps(user_email, salt='password-recovery')
+
+def send_reset_email(user_email, user_name, token):
+    reset_link = url_for('reset_password', token=token, _external=True)
+    user_name_cap = user_name.strip().capitalize()
     msg = Message(
-        subject="Restablece tu contraseña - Casa en Arbol",
+        subject="Restablece tu contraseña - Casa en Árbol",
         recipients=[user_email],
-        html=render_template('email_reset.html', user_name=user_name, user_email=user_email, reset_code=reset_code)
+        html=render_template(
+            'email_reset.html',
+            user_name=user_name_cap,
+            reset_link=reset_link
+        )
     )
     mail.send(msg)
+
 
 
 
