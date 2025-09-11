@@ -129,19 +129,28 @@ def forgot_password():
         email = request.form.get('email')
         user = Usuario.query.filter_by(Correo=email).first()
         if user:
-            token = s.dumps(email, salt='password-recovery')
-            link = url_for('reset_password', token=token, _external=True)
-            msg = Message("Recuperar contraseña", recipients=[email])
-            msg.body = f"Para restablecer tu contraseña, haz clic: {link}"
             try:
-                mail.send(msg)
-                flash('Se envió el enlace a tu correo')
+                token = s.dumps(email, salt='password-recovery')
+                reset_code = token[:6].upper()  # Esto es opcional, puedes generar otro código si prefieres
+                send_reset_email(user_email=email, user_name=user.Nombre, reset_code=reset_code)
+                flash('📩 Se envió el enlace a tu correo', 'success')
             except Exception as e:
-                flash('No se pudo enviar el correo')
-                print(e)
+                print(f"Error al enviar correo: {e}")
+                flash('❌ No se pudo enviar el correo', 'error')
         else:
-            flash('Correo no registrado')
+            flash('⚠️ Correo no registrado', 'warning')
     return render_template('forgot_password.html')
+
+def send_reset_email(user_email, user_name, reset_code):
+    token = s.dumps(user_email, salt='password-recovery')
+    msg = Message(
+        subject="Restablece tu contraseña - Casa en Arbol",
+        recipients=[user_email],
+        html=render_template('email_reset.html', user_name=user_name, user_email=user_email, reset_code=reset_code)
+    )
+    mail.send(msg)
+
+
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -199,13 +208,11 @@ def test_mail():
     except Exception as e:
         return f"Error: {e}"
     
-def send_reset_email(user_email, token):
-    msg = Message(
-        subject="Restablece tu contraseña - Casa en Arbol",
-        recipients=[user_email],
-        html=render_template('email_reset.html', token=token)
-    )
-    mail.send(msg)
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
