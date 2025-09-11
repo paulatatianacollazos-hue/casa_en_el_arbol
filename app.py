@@ -122,7 +122,6 @@ def logout():
 def nosotros():
     return render_template('nosotros.html')
 
-
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
