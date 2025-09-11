@@ -1,0 +1,21 @@
+/* Estilo del modal personalizado */
+.custom-modal {
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+}
+
+/* Botón estilizado */
+.custom-btn {
+    background-color: #74b84f;
+    color: white;
+    font-weight: bold;
+    border-radius: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.custom-btn:hover {
+    background-color: #5a9e3d;
+    transform: scale(1.03);
+}

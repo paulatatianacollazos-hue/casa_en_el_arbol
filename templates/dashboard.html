@@ -102,6 +102,37 @@
         
     </nav>
 
+    {% if session.get('show_welcome_modal') %}
+<!-- Modal de bienvenida -->
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100" id="welcomeModalLabel">
+          ¡Bienvenido{{ ', ' + session['username'] if session['username'] else '' }}!
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p class="mb-4">Gracias por iniciar sesión en <strong>Casa en el Árbol</strong>.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Ir a la página principal</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script para mostrar el modal al cargar la página -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+    welcomeModal.show();
+  });
+</script>
+
+<!-- Eliminar la variable de sesión para que no vuelva a mostrarse -->
+{% set _ = session.pop('show_welcome_modal') %}
+{% endif %}
+
+
     <!-- Menú principal separado del navbar para evitar confusiones -->
     <div class="section-menu py-3 bg-white shadow-sm" style="margin-top: 80px;">
         <div class="container">

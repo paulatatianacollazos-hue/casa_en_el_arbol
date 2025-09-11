@@ -92,6 +92,8 @@ def login():
             session['username'] = nombre
             session['iniciales'] = iniciales
 
+            session['show_welcome_modal'] = True
+
             flash('Inicio de sesión exitoso')
             return redirect(url_for('dashboard'))
         else:
