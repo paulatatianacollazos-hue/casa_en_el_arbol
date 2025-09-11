@@ -142,18 +142,14 @@ def forgot_password():
 
 
 def send_reset_email(user_email, user_name, token):
-    reset_link = url_for('reset_password', token=token, _external=True)
-    user_name_cap = user_name.strip().capitalize()
+    reset_url = url_for('reset_password', token=token, _external=True)
     msg = Message(
-        subject="Restablece tu contraseña - Casa en Árbol",
+        subject="Restablece tu contraseña - Casa en Arbol",
         recipients=[user_email],
-        html=render_template(
-            'email_reset.html',
-            user_name=user_name_cap,
-            reset_link=reset_link
-        )
+        html=render_template('email_reset.html', user_name=user_name, reset_url=reset_url)
     )
     mail.send(msg)
+
 
 
 
