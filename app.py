@@ -154,6 +154,7 @@ def send_reset_email(user_email, user_name, token):
 
 
 
+
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
