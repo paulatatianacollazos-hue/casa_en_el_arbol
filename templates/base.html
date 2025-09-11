@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}" />
 
     
     {% block extra_css %}{% endblock %}
@@ -114,11 +115,6 @@
 
     <!-- MODALES -->
     {% include 'partials/modals.html' %}
-    
-    <!-- CHATBOT (opcional, solo si lo quieres en todas las vistas) -->
-    {% block chatbot %}
-        {% include 'partials/chatbot.html' %}
-    {% endblock %}
 
     <!-- TOASTS -->
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"> <!-- CORREGIDO -->

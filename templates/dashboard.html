@@ -21,7 +21,7 @@
     
 </head>
 <body>
-     {% block extra_css %}{% endblock %}
+    
     <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
@@ -105,6 +105,9 @@
         </div>
         
     </nav>
+     <main>
+        {% block content %}{% endblock %}
+    </main>
     
 
     {% if session.get('show_welcome_modal') %}
