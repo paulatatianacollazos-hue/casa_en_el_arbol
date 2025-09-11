@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Restablecer contraseña</title>
+  <style>
+    /* Reset y estilo base */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #28a745;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    a.button {
+      display: block;
+      width: fit-content;
+      background-color: #28a745;
+      color: white !important;
+      padding: 12px 25px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 0 auto 25px auto;
+      box-shadow: 0 3px 8px rgba(40, 167, 69, 0.6);
+      transition: background-color 0.3s ease;
+    }
+    a.button:hover {
+      background-color: #218838;
+    }
+    .footer {
+      font-size: 14px;
+      text-align: center;
+      color: #777;
+      margin-top: 30px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 15px;
+    }
+    /* Responsive */
+    @media screen and (max-width: 640px) {
+      .container {
+        margin: 15px;
+        padding: 20px;
+      }
+      p, h1 {
+        font-size: 14px;
+      }
+      a.button {
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Restablecer contraseña</h1>
+
+    <p>Hola,</p>
+    <p>Has solicitado restablecer tu contraseña para tu cuenta en <strong>Casa en Arbol</strong>.</p>
+    <p>Haz clic en el botón de abajo para crear una nueva contraseña:</p>
+
+    <a href="{{ url_for('reset_password', token=token, _external=True) }}" class="button">Restablecer contraseña</a>
+
+    <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+
+    <p>Gracias,<br>El equipo de Casa en Arbol</p>
+
+    <div class="footer">
+      &copy; {{ current_year }} Casa en Arbol. Todos los derechos reservados.
+    </div>
+  </div>
+</body>
+</html>

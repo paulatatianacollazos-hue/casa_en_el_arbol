@@ -198,6 +198,14 @@ def test_mail():
         return "Correo enviado correctamente"
     except Exception as e:
         return f"Error: {e}"
+    
+def send_reset_email(user_email, token):
+    msg = Message(
+        subject="Restablece tu contraseña - Casa en Arbol",
+        recipients=[user_email],
+        html=render_template('email_reset.html', token=token)
+    )
+    mail.send(msg)
 
 if __name__ == '__main__':
     app.run(debug=True)
