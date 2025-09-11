@@ -77,6 +77,7 @@ def register():
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
+        
         password = request.form.get('password', '').strip()
 
         if not email or not password:
@@ -85,13 +86,8 @@ def login():
 
         user = Usuario.query.filter_by(Correo=email).first()
         if user and check_password_hash(user.Contraseña, password):
-            nombre = user.Nombre.strip()
-            iniciales = ''.join([parte[0] for parte in nombre.split()][:2]).upper()
-
             session['user_id'] = user.ID_Usuario
-            session['username'] = nombre
-            session['iniciales'] = iniciales
-
+            session['username'] = user.Nombre
             flash('Inicio de sesión exitoso')
             return redirect(url_for('dashboard'))
         else:
@@ -99,7 +95,6 @@ def login():
             return render_template('login.html')
 
     return render_template('login.html')
-
 
 
 @app.route('/dashboard')
