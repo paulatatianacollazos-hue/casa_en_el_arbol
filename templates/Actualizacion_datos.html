@@ -1,0 +1,108 @@
+{% extends 'dashboard.html' %}
+{% block title %}Actualizacion de datos{% endblock %}
+  
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2 mb-4">
+      <div class="sidebar shadow-sm">
+        <h4>🌿 HOLA!</h4>
+        <a href="#" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
+        <a href="#"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
+        <a href="#"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a href="#"><i class="bi bi-heart me-2"></i>Favoritos</a>
+        <a href="#"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="col-md-9 col-lg-10">
+      <div class="card shadow-sm p-4">
+        <div class="profile-header mb-4">
+          <h5 class="mb-0">PERFIL</h5>
+          <a href="#"><i class="bi bi-pencil-square me-1"></i>Editar</a>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" placeholder="Nombre">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido</label>
+            <input type="text" class="form-control" placeholder="Apellido">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" value="correo@ejemplo.com">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Género</label>
+            <input type="text" class="form-control" placeholder="F/M/Otro">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input type="tel" class="form-control" placeholder="Número de teléfono">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br><br>
+
+<div class="carousel-container">
+  <div class="carousel-track">
+    <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
+    <div class="carousel-item"><i class="bi bi-cart"></i> Compra fácil y segura</div>
+    <div class="carousel-item"><i class="bi bi-award"></i> Excelente calidad</div>
+    <div class="carousel-item"><i class="bi bi-headset"></i> Productos personalizados</div>
+    <!-- Repite para que parezca infinito -->
+    <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
+    <div class="carousel-item"><i class="bi bi-cart"></i> Compra fácil y segura</div>
+    <div class="carousel-item"><i class="bi bi-award"></i> Excelente calidad</div>
+     <div class="carousel-item"><i class="bi bi-headset"></i> Productos personalizados</div>
+  </div>
+</div>
+
+<section class="footer-suscripcion">
+    <div class="container">
+
+      <div class="footer-columns mt-4">
+        <div class="footer-col">
+          <h3><strong>Casa en el Árbol</strong></h3>
+          <p>Diseñamos y fabricamos muebles únicos con alma natural.</p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Información</h5>
+          <ul>
+            <li><a href="#">Política de privacidad</a></li>
+            <li><a href="#">Términos y condiciones</a></li>
+            <li><a href="#">Envíos y devoluciones</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Horario de Atención</h5>
+          <p>Lunes a Viernes: 9:00 a.m. - 6:00 p.m.<br>
+             Sábados: 10:00 a.m. - 4:00 p.m.</p>
+          <p><strong>Email:</strong> casaenelarbol@gmail.com</p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Contáctanos</h5>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  
+{% block content %}
+{% endblock %}

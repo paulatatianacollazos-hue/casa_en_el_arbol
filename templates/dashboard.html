@@ -16,10 +16,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}" />
   
     
 </head>
 <body>
+     {% block extra_css %}{% endblock %}
     <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
@@ -67,7 +69,7 @@
                             <strong class="text-uppercase">{{ session['username'] }}</strong>
                         </div>
 
-                        <li><a class="dropdown-item" href="#">Perfil</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('actualizacion_datos') }}">Perfil</a></li>
                         <li><a class="dropdown-item" href="#">Historial</a></li>
                         <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
                         <li><a class="dropdown-item" href="#">Reseñas</a></li>
@@ -103,6 +105,7 @@
         </div>
         
     </nav>
+    
 
     {% if session.get('show_welcome_modal') %}
 <!-- Modal de bienvenida -->

@@ -3,12 +3,12 @@
 
 {% block content %}
 
-<!-- Login Overlay -->
+
 <div id="login-overlay" class="auth-overlay">
   <div class="auth-card">
     <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
 
-    <!-- Mensajes flash -->
+ 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}

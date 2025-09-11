@@ -210,9 +210,9 @@ def test_mail():
     except Exception as e:
         return f"Error: {e}"
     
-
-
-
+@app.route('/Actualizacion_datos')
+def actualizacion_datos():
+    return render_template('Actualizacion_datos.html')
 
 
 

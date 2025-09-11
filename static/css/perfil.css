@@ -1,0 +1,201 @@
+    :root {
+      --primary-green: #5f8f3f;
+      --secondary-green: #4e7b33;
+      --light-green: #6c9a50;
+      --accent-green: #7cb342;
+      --accent-green-light: #a8d374;
+      --bg-cream: #f8f6f0;
+      --text-dark: #2c3e50;
+      --shadow-light: rgba(0, 0, 0, 0.08);
+      --shadow-medium: rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+      background-color: var(--bg-cream);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--text-dark);
+    }
+
+    .sidebar {
+      background: #fff;
+      border-radius: 15px;
+      padding: 1.5rem 1rem;
+      min-height: 100vh;
+      box-shadow: 0 4px 8px var(--shadow-light);
+    }
+
+    .sidebar h4 {
+      color: var(--primary-green);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      color: var(--text-dark);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover {
+      background-color: var(--accent-green-light);
+      color: #fff;
+    }
+
+    .sidebar a.active {
+      background-color: var(--accent-green);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 6px var(--shadow-medium);
+    }
+
+    .card {
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 4px 10px var(--shadow-light);
+    }
+
+    .form-control {
+      border-radius: 50px;
+      border: 1px solid var(--light-green);
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green-light);
+    }
+
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .profile-header h5 {
+      color: var(--primary-green);
+      font-weight: 700;
+    }
+
+    .profile-header a {
+      font-weight: 600;
+      color: var(--secondary-green);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .profile-header a:hover {
+      color: var(--accent-green);
+    }
+
+    /* Botón personalizado */
+    .btn-green {
+      background: var(--accent-green);
+      color: #fff;
+      border-radius: 50px;
+      padding: 8px 20px;
+      font-weight: 600;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-green:hover {
+      background: var(--secondary-green);
+      color: #fff;
+    }
+    /* Sidebar */
+  .sidebar {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 1rem;
+    height: 100%; /* ocupará toda la altura del contenedor */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .sidebar a.active,
+  .sidebar a:hover {
+    background-color: var(--accent-green-light);
+    color: var(--primary-green);
+  }
+
+  /* Igual altura para contenido principal */
+  .row > .col-md-9, 
+  .row > .col-md-3 {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card {
+    flex: 1; /* ocupa todo el espacio disponible */
+  }
+
+  /* Opcional: ajustar inputs y labels a igual altura */
+  .form-label {
+    font-weight: 600;
+  }
+
+  .form-control {
+    height: 50px;
+    border-radius: 50px;
+  }
+
+   .carousel-container {
+    width: 100%;
+    overflow: hidden;
+    background-color: #c1f38b; /* color rosa similar a tu imagen */
+    padding: 10px 0;
+  }
+
+  .carousel-track {
+    display: flex;
+    width: max-content;
+    animation: scroll 15s linear infinite;
+  }
+
+  .carousel-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 20px;
+    white-space: nowrap;
+    font-weight: 500;
+    color: #4e7b33;
+  }
+
+  .carousel-item i {
+    font-size: 1.5rem;
+  }
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* ajusta según la cantidad de items */
+  }
+
+  /* Para que sea responsive */
+  @media (max-width: 768px) {
+    .carousel-item {
+      margin: 0 10px;
+      font-size: 0.9rem;
+    }
+    .carousel-item i {
+      font-size: 1.2rem;
+    }
+  }
+  
