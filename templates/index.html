@@ -177,23 +177,6 @@
     </div>
   </div>
 </section>
-{% block extra_js %}
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const carouselEjemplo = document.querySelector('#carouselEjemplo');
-    const bsCarouselEjemplo = new bootstrap.Carousel(carouselEjemplo, {
-      interval: 6000,
-      pause: 'hover'
-    });
-
-    const multiCardCarousel = document.querySelector('#multiCardCarousel');
-    const bsMultiCardCarousel = new bootstrap.Carousel(multiCardCarousel, {
-      interval: 7000,
-      pause: 'hover'
-    });
-  });
-</script>
-{% endblock %}
 
 
 {% endblock %}
