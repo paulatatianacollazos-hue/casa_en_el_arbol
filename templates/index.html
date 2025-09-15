@@ -59,45 +59,48 @@
 
 <!-- Carrusel de novedades -->
 <div class="container py-5">
-  <h1 class="mb-4"><b>NOVEDADES</b></h1>
+  <h1 class="mb-4 text-center"><b>NOVEDADES</b></h1>
+
   <div id="multiCardCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
 
+      <!-- Slide 1 -->
       <div class="carousel-item active">
-        <div class="row">
-          <div class="col-md-6 col-lg-4">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-4">
             <div class="card">
-              <img src="{{ url_for('static', filename='img/salacarrusel.png') }}" class="card-img-top d-block w-100" alt="Sala moderna">
+              <img src="{{ url_for('static', filename='img/salacarrusel.png') }}" class="card-img-top" alt="Sala moderna">
             </div>
           </div>
-          <div class="col-md-6 col-lg-4 d-none d-md-block">
+          <div class="col-12 col-md-4">
             <div class="card">
-              <img src="{{ url_for('static', filename='img/armariocarrusel.png') }}" class="card-img-top d-block w-100" alt="Armario moderno">
+              <img src="{{ url_for('static', filename='img/armariocarrusel.png') }}" class="card-img-top" alt="Armario moderno">
             </div>
           </div>
-          <div class="col-lg-4 d-none d-lg-block">
+          <div class="col-12 col-md-4">
             <div class="card">
-              <img src="{{ url_for('static', filename='img/bañocarrusel.png') }}" class="card-img-top d-block w-100" alt="Mueble para baño">
+              <img src="{{ url_for('static', filename='img/bañocarrusel.png') }}" class="card-img-top" alt="Baño moderno">
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Slide 2 -->
       <div class="carousel-item">
-        <div class="row">
-          <div class="col-md-6 col-lg-4">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-4">
             <div class="card">
-              <img src="{{ url_for('static', filename='img/cocinacarrusel.png') }}" class="card-img-top d-block w-100" alt="Cocina moderna">
+              <img src="{{ url_for('static', filename='img/cocinacarrusel.png') }}" class="card-img-top" alt="Cocina moderna">
             </div>
           </div>
-          <div class="col-md-6 col-lg-4 d-none d-md-block">
+          <div class="col-12 col-md-4">
             <div class="card">
-              <img src="{{ url_for('static', filename='img/espejocarrusel.png') }}" class="card-img-top d-block w-100" alt="Espejo decorativo">
+              <img src="{{ url_for('static', filename='img/espejocarrusel.png') }}" class="card-img-top" alt="Espejo decorativo">
             </div>
           </div>
-          <div class="col-lg-4 d-none d-lg-block">
+          <div class="col-12 col-md-4">
             <div class="card">
-              <img src="{{ url_for('static', filename='img/pinturacarrusel.png') }}" class="card-img-top d-block w-100" alt="Pintura decorativa">
+              <img src="{{ url_for('static', filename='img/pinturacarrusel.png') }}" class="card-img-top" alt="Pintura decorativa">
             </div>
           </div>
         </div>
@@ -105,14 +108,18 @@
 
     </div>
 
-    <button class="carousel-control-prev" type="button" data-bs-target="#multiCardCarousel" data-bs-slide="prev" aria-label="Anterior">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <!-- Controles -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#multiCardCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#multiCardCarousel" data-bs-slide="next" aria-label="Siguiente">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <button class="carousel-control-next" type="button" data-bs-target="#multiCardCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
     </button>
   </div>
 </div>
+
 
 <!-- Sección experiencia -->
 <section id="experiencia-muebles" class="py-5 bg-light">

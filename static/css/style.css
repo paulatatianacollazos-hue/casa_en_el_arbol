@@ -854,4 +854,29 @@
   font-size: 14px;
 }
 
+.novedades-img {
+  height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.card-img-top {
+  height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+}
+
+
+
 
