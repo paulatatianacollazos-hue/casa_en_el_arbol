@@ -1,10 +1,9 @@
-/* Estilo para el modal */
 .modal-content {
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Estilo bonito para el botón */
+
 .custom-btn {
   background-color: #74b84f;
   color: white;
