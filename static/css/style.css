@@ -195,6 +195,12 @@
       padding: 1.5rem;
     }
 
+  .img-carousel {
+  height: 300px; /* Ajusta a tu gusto */
+  object-fit: cover;
+  border-radius: 10px;
+}
+
     .product-title {
       font-weight: 600;
       color: var(--text-dark);
