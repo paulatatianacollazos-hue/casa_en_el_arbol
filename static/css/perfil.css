@@ -93,7 +93,7 @@
       color: var(--accent-green);
     }
 
-    /* Botón personalizado */
+    
     .btn-green {
       background: var(--accent-green);
       color: #fff;
@@ -108,12 +108,12 @@
       background: var(--secondary-green);
       color: #fff;
     }
-    /* Sidebar */
+   
   .sidebar {
     background-color: #fff;
     border-radius: 15px;
     padding: 1rem;
-    height: 100%; /* ocupará toda la altura del contenedor */
+    height: 100%; 
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -135,7 +135,6 @@
     color: var(--primary-green);
   }
 
-  /* Igual altura para contenido principal */
   .row > .col-md-9, 
   .row > .col-md-3 {
     display: flex;
@@ -143,10 +142,10 @@
   }
 
   .card {
-    flex: 1; /* ocupa todo el espacio disponible */
+    flex: 1; 
   }
 
-  /* Opcional: ajustar inputs y labels a igual altura */
+ 
   .form-label {
     font-weight: 600;
   }
@@ -159,7 +158,7 @@
    .carousel-container {
     width: 100%;
     overflow: hidden;
-    background-color: #c1f38b; /* color rosa similar a tu imagen */
+    background-color: #c1f38b; 
     padding: 10px 0;
   }
 
@@ -185,7 +184,7 @@
 
   @keyframes scroll {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); } /* ajusta según la cantidad de items */
+    100% { transform: translateX(-50%); } 
   }
 
   /* Para que sea responsive */
