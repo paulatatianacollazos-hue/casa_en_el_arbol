@@ -158,42 +158,6 @@ body {
   }
 }
 
-/* FOOTER DE PERFIL */
-.perfil-footer {
-  background-color: #fff;
-  padding: 2rem 0;
-  color: var(--text-dark);
-}
-
-.perfil-footer .footer-col h5,
-.perfil-footer .footer-col h3 {
-  color: var(--primary-green);
-  font-weight: 700;
-}
-
-.perfil-footer .footer-col ul {
-  padding-left: 0;
-  list-style: none;
-}
-
-.perfil-footer .footer-col ul li a {
-  text-decoration: none;
-  color: var(--text-dark);
-  transition: color 0.2s ease;
-}
-
-.perfil-footer .footer-col ul li a:hover {
-  color: var(--accent-green);
-}
-
-.perfil-footer .social-icons a {
-  color: var(--secondary-green);
-  transition: color 0.3s;
-}
-
-.perfil-footer .social-icons a:hover {
-  color: var(--accent-green);
-}
 
 /* RESPONSIVE PARA CARRUSEL */
 @media (max-width: 768px) {
