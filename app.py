@@ -245,20 +245,20 @@ def actualizacion_datos():
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario)
 
-        # Verificar si el correo ya existe en otro usuario
+
         usuario_existente = Usuario.query.filter(Usuario.Correo == correo, Usuario.ID_Usuario != user_id).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario)
 
-        # Actualizar campos
+
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
         usuario.Correo = correo
         usuario.Telefono = telefono
 
-        # Si cambian la contraseña, actualizarla (opcional)
+       
         if password:
             usuario.Contraseña = generate_password_hash(password)
 
