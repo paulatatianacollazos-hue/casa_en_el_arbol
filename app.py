@@ -233,13 +233,16 @@ def actualizacion_datos():
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        nombre = request.form.get('nombre')
-        correo = request.form.get('correo')
-        telefono = request.form.get('telefono')
+        nombre = request.form.get('nombre', '').strip()
+        apellido = request.form.get('apellido', '').strip()
+        genero = request.form.get('genero', '').strip()
+        correo = request.form.get('correo', '').strip()
+        telefono = request.form.get('telefono', '').strip()
         password = request.form.get('password', '').strip()
 
-        if not nombre or not correo:
-            flash('El nombre y correo son obligatorios.', 'warning')
+        # Validaciones básicas
+        if not nombre or not apellido or not correo:
+            flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario)
 
         # Verificar si el correo ya existe en otro usuario
@@ -250,6 +253,8 @@ def actualizacion_datos():
 
         # Actualizar campos
         usuario.Nombre = nombre
+        usuario.Apellido = apellido
+        usuario.Genero = genero
         usuario.Correo = correo
         usuario.Telefono = telefono
 

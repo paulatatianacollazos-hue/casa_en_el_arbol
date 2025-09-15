@@ -21,31 +21,31 @@
     <!-- Contenido principal -->
     <div class="col-md-9 col-lg-10">
       <div class="card shadow-sm p-4">
-        <div class="profile-header mb-4">
+        <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
           <h5 class="mb-0">PERFIL</h5>
           <a href="#"><i class="bi bi-pencil-square me-1"></i>Editar</a>
         </div>
         <form method="POST" action="{{ url_for('actualizacion_datos') }}">
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Nombre</label>
-              <input type="text" class="form-control" name="nombre" value="{{ usuario.Nombre }}">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input id="nombre" type="text" class="form-control" name="nombre" value="{{ usuario.Nombre }}">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Apellido</label>
-              <input type="text" class="form-control" placeholder="Apellido">
+              <label for="apellido" class="form-label">Apellido</label>
+              <input id="apellido" type="text" class="form-control" name="apellido" value="{{ usuario.Apellido }}">
             </div>
             <div class="col-md-12">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" name="correo" value="{{ usuario.Correo }}">
+              <label for="correo" class="form-label">Email</label>
+              <input id="correo" type="email" class="form-control" name="correo" value="{{ usuario.Correo }}">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Género</label>
-              <input type="text" class="form-control" placeholder="F/M/Otro">
+              <label for="genero" class="form-label">Género</label>
+              <input id="genero" type="text" class="form-control" name="genero" value="{{ usuario.Genero }}" placeholder="F/M/Otro">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Teléfono</label>
-              <input type="tel" class="form-control" name="telefono" value="{{ usuario.Telefono }}">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input id="telefono" type="tel" class="form-control" name="telefono" value="{{ usuario.Telefono }}">
             </div>
           </div>
           <button type="submit" class="btn btn-primary mt-3">Guardar cambios</button>
@@ -73,35 +73,35 @@
 
 <section class="footer-suscripcion">
   <div class="container">
-    <div class="footer-columns mt-4">
-      <div class="footer-col">
+    <div class="footer-columns mt-4 d-flex flex-wrap justify-content-between">
+      <div class="footer-col mb-3">
         <h3><strong>Casa en el Árbol</strong></h3>
         <p>Diseñamos y fabricamos muebles únicos con alma natural.</p>
       </div>
 
-      <div class="footer-col">
+      <div class="footer-col mb-3">
         <h5>Información</h5>
-        <ul>
+        <ul class="list-unstyled">
           <li><a href="#">Política de privacidad</a></li>
           <li><a href="#">Términos y condiciones</a></li>
           <li><a href="#">Envíos y devoluciones</a></li>
         </ul>
       </div>
 
-      <div class="footer-col">
+      <div class="footer-col mb-3">
         <h5>Horario de Atención</h5>
         <p>Lunes a Viernes: 9:00 a.m. - 6:00 p.m.<br>
            Sábados: 10:00 a.m. - 4:00 p.m.</p>
         <p><strong>Email:</strong> casaenelarbol@gmail.com</p>
       </div>
 
-      <div class="footer-col">
+      <div class="footer-col mb-3">
         <h5>Contáctanos</h5>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-whatsapp"></i></a>
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-youtube"></i></a>
+        <div class="social-icons d-flex gap-3 fs-4">
+          <a href="#"><i class="bi bi-whatsapp"></i></a>
+          <a href="#"><i class="bi bi-facebook"></i></a>
+          <a href="#"><i class="bi bi-instagram"></i></a>
+          <a href="#"><i class="bi bi-youtube"></i></a>
         </div>
       </div>
     </div>

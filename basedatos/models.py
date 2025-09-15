@@ -10,9 +10,11 @@ class Usuario(db.Model):
 
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
+    Apellido = db.Column(db.String(100), nullable=False)
+    Genero = db.Column(db.String(20))
     Telefono = db.Column(db.String(20))
-    Correo = db.Column(db.String(120), unique=True, nullable=False) 
-    Contraseña = db.Column(db.String(255), nullable=False)  
+    Correo = db.Column(db.String(120), unique=True, nullable=False)
+    Contraseña = db.Column(db.String(255), nullable=False)
     Rol = db.Column(db.String(50), default='cliente', nullable=False)
     Activo = db.Column(db.Boolean, default=True, nullable=False)
 
@@ -23,7 +25,7 @@ class Usuario(db.Model):
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
 
     def __repr__(self):
-        return f'<Usuario {self.Nombre}>'
+        return f'<Usuario {self.Nombre} {self.Apellido}>'
 
 class Proveedor(db.Model):
     __tablename__ = 'Proveedor'
