@@ -122,9 +122,9 @@ function addMessageToChat(sender, message) {
 
 function formatBotMessage(message) {
     return message
-        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // **texto**
-        .replace(/\*(.*?)\*/g, "<em>$1</em>")              // *texto*
-        .replace(/\n/g, "<br>");                           // saltos de línea
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")              
+        .replace(/\n/g, "<br>");                         
 }
 
 // Toggle Chatbot
@@ -138,3 +138,4 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCartCount();
     loadFavorites();
 });
+
