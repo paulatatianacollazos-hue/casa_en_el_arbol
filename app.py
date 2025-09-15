@@ -273,6 +273,12 @@ def actualizacion_datos():
 
     return render_template('Actualizacion_datos.html', usuario=usuario)
 
+@app.route('/direcciones/nueva', methods=['GET', 'POST'])
+def nueva_direccion():
+    if request.method == 'POST':
+        # Procesar datos y guardar la nueva dirección
+        pass
+    return render_template('nueva_direccion.html')
 
 
 
