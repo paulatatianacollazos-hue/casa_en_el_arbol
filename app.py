@@ -9,7 +9,8 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from flask import request, render_template, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash
 
-from basedatos.models import db, Usuario
+
+from basedatos.models import db, Usuario , Direccion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
@@ -273,13 +274,77 @@ def actualizacion_datos():
 
     return render_template('Actualizacion_datos.html', usuario=usuario)
 
+@app.route('/direcciones')
+def ver_direcciones():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    usuario = Usuario.query.get(user_id)
+    direcciones = usuario.direcciones if usuario else []
+    
+    return render_template('direcciones.html', direcciones=direcciones)
+
 @app.route('/direcciones/nueva', methods=['GET', 'POST'])
 def nueva_direccion():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
-        # Procesar datos y guardar la nueva dirección
-        pass
+        calle = request.form.get('calle')
+        ciudad = request.form.get('ciudad')
+        estado = request.form.get('estado')
+        codigo_postal = request.form.get('codigo_postal')
+        pais = request.form.get('pais')
+
+        nueva_dir = Direccion(
+            ID_Usuario=user_id,
+            Calle=calle,
+            Ciudad=ciudad,
+            Estado=estado,
+            Codigo_Postal=codigo_postal,
+            Pais=pais
+        )
+        db.session.add(nueva_dir)
+        db.session.commit()
+        flash('Dirección agregada correctamente', 'success')
+        return redirect(url_for('ver_direcciones'))
+
     return render_template('nueva_direccion.html')
 
+@app.route('/direcciones/editar/<int:id_direccion>', methods=['GET', 'POST'])
+def editar_direccion(id_direccion):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    direccion = Direccion.query.filter_by(ID_Direccion=id_direccion, ID_Usuario=user_id).first_or_404()
+
+    if request.method == 'POST':
+        direccion.Calle = request.form.get('calle')
+        direccion.Ciudad = request.form.get('ciudad')
+        direccion.Estado = request.form.get('estado')
+        direccion.Codigo_Postal = request.form.get('codigo_postal')
+        direccion.Pais = request.form.get('pais')
+
+        db.session.commit()
+        flash('Dirección actualizada correctamente', 'success')
+        return redirect(url_for('ver_direcciones'))
+
+    return render_template('editar_direccion.html', direccion=direccion)
+
+@app.route('/direcciones/eliminar/<int:id_direccion>', methods=['POST'])
+def eliminar_direccion(id_direccion):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    direccion = Direccion.query.filter_by(ID_Direccion=id_direccion, ID_Usuario=user_id).first_or_404()
+    db.session.delete(direccion)
+    db.session.commit()
+    flash('Dirección eliminada', 'success')
+    return redirect(url_for('ver_direcciones'))
 
 
 
