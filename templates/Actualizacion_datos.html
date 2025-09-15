@@ -4,28 +4,31 @@
 
 {% block content %}
 
-<div class="container-fluid mt-4">
+<!-- Perfil - Contenedor principal -->
+<div class="perfil-container container-fluid mt-4">
   <div class="row">
-    <!-- Sidebar -->
-    <div class="col-md-3 col-lg-2 mb-4">
-      <div class="sidebar shadow-sm">
-        <h4>🌿 HOLA!</h4>
-        <a href="#" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
-        <a href="#"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
-        <a href="#"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
-        <a href="#"><i class="bi bi-heart me-2"></i>Favoritos</a>
-        <a href="#"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
+    
+    <!-- Sidebar de perfil -->
+    <div class="perfil-sidebar col-md-3 col-lg-2 mb-4">
+      <div class="sidebar-menu shadow-sm p-3">
+        <h4 class="sidebar-title">🌿 HOLA!</h4>
+        <a href="#" class="sidebar-link active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-heart me-2"></i>Favoritos</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
     </div>
 
-    <!-- Contenido principal -->
-    <div class="col-md-9 col-lg-10">
-      <div class="card shadow-sm p-4">
-        <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">PERFIL</h5>
-          <a href="#"><i class="bi bi-pencil-square me-1"></i>Editar</a>
+    <!-- Contenido principal del perfil -->
+    <div class="perfil-main col-md-9 col-lg-10">
+      <div class="perfil-card card shadow-sm p-4">
+        <div class="perfil-header d-flex justify-content-between align-items-center mb-4">
+          <h5 class="perfil-title mb-0">PERFIL</h5>
+          <a href="#" class="perfil-edit-link"><i class="bi bi-pencil-square me-1"></i>Editar</a>
         </div>
-        <form method="POST" action="{{ url_for('actualizacion_datos') }}">
+
+        <form method="POST" action="{{ url_for('actualizacion_datos') }}" class="perfil-form">
           <div class="row g-3">
             <div class="col-md-6">
               <label for="nombre" class="form-label">Nombre</label>
@@ -55,15 +58,14 @@
   </div>
 </div>
 
-<br><br>
-
-<div class="carousel-container">
+<!-- Carrusel de beneficios -->
+<div class="perfil-carousel-container carousel-container mt-5">
   <div class="carousel-track">
     <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
     <div class="carousel-item"><i class="bi bi-cart"></i> Compra fácil y segura</div>
     <div class="carousel-item"><i class="bi bi-award"></i> Excelente calidad</div>
     <div class="carousel-item"><i class="bi bi-headset"></i> Productos personalizados</div>
-    <!-- Repite para que parezca infinito -->
+    <!-- Repetidos para efecto infinito -->
     <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
     <div class="carousel-item"><i class="bi bi-cart"></i> Compra fácil y segura</div>
     <div class="carousel-item"><i class="bi bi-award"></i> Excelente calidad</div>
@@ -71,9 +73,11 @@
   </div>
 </div>
 
-<section class="footer-suscripcion">
+<!-- Footer de perfil -->
+<section class="perfil-footer footer-suscripcion mt-5">
   <div class="container">
-    <div class="footer-columns mt-4 d-flex flex-wrap justify-content-between">
+    <div class="footer-columns d-flex flex-wrap justify-content-between">
+      
       <div class="footer-col mb-3">
         <h3><strong>Casa en el Árbol</strong></h3>
         <p>Diseñamos y fabricamos muebles únicos con alma natural.</p>
@@ -104,6 +108,7 @@
           <a href="#"><i class="bi bi-youtube"></i></a>
         </div>
       </div>
+
     </div>
   </div>
 </section>
