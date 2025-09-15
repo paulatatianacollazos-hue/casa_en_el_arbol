@@ -56,21 +56,27 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            user = Usuario(Nombre=name, Correo=email, Telefono=phone,
-                           Contraseña=hashed_password, Rol='cliente', Activo=True)
+            user = Usuario(
+                Nombre=name,
+                Correo=email,
+                Telefono=phone,
+                Contraseña=hashed_password,
+                Rol='cliente',
+                Activo=True
+            )
             db.session.add(user)
             db.session.commit()
 
             flash('Cuenta creada. ¡Ahora inicia sesión!')
             return redirect(url_for('login'))
 
-        except SQLAlchemyError as e:
+        except Exception as e:
             db.session.rollback()
             flash(f'Error al registrar: {str(e)}')
             return render_template('register.html')
-        
 
     return render_template('register.html')
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
