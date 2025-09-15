@@ -6,6 +6,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from flask import request, render_template, redirect, url_for, flash, session
+from werkzeug.security import generate_password_hash
 
 from basedatos.models import db, Usuario
 
@@ -216,9 +218,57 @@ def test_mail():
     except Exception as e:
         return f"Error: {e}"
     
-@app.route('/Actualizacion_datos')
+
+
+@app.route('/actualizacion_datos', methods=['GET', 'POST'])
 def actualizacion_datos():
-    return render_template('Actualizacion_datos.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Debes iniciar sesión para acceder a esta página.', 'warning')
+        return redirect(url_for('login'))
+
+    usuario = Usuario.query.get(user_id)
+    if not usuario:
+        flash('Usuario no encontrado.', 'danger')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        correo = request.form.get('correo')
+        telefono = request.form.get('telefono')
+        password = request.form.get('password', '').strip()
+
+        if not nombre or not correo:
+            flash('El nombre y correo son obligatorios.', 'warning')
+            return render_template('Actualizacion_datos.html', usuario=usuario)
+
+        # Verificar si el correo ya existe en otro usuario
+        usuario_existente = Usuario.query.filter(Usuario.Correo == correo, Usuario.ID_Usuario != user_id).first()
+        if usuario_existente:
+            flash('El correo ya está registrado por otro usuario.', 'danger')
+            return render_template('Actualizacion_datos.html', usuario=usuario)
+
+        # Actualizar campos
+        usuario.Nombre = nombre
+        usuario.Correo = correo
+        usuario.Telefono = telefono
+
+        # Si cambian la contraseña, actualizarla (opcional)
+        if password:
+            usuario.Contraseña = generate_password_hash(password)
+
+        try:
+            db.session.commit()
+            flash('Datos actualizados correctamente.', 'success')
+            return redirect(url_for('actualizacion_datos'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}', 'danger')
+            return render_template('Actualizacion_datos.html', usuario=usuario)
+
+    return render_template('Actualizacion_datos.html', usuario=usuario)
+
+
 
 
 
