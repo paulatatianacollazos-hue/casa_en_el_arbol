@@ -1,52 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Casa en el Árbol{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
     <!-- Estilos propios -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}">  
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}" />
 
-    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
     <!-- NAVBAR PRINCIPAL -->
-    <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
+    <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm" aria-label="Barra de navegación principal">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 Casa en el Árbol
             </a>
-            
+
             <!-- Buscador -->
-            <div class="search-container mx-auto d-none d-md-block">
-                <input class="form-control" type="search" placeholder="¿Qué estás buscando hoy?" aria-label="Buscar" id="searchInput">
+            <div class="search-container mx-auto d-none d-md-block" role="search">
+                <input class="form-control" type="search" placeholder="¿Qué estás buscando hoy?" aria-label="Buscar productos" id="searchInput" />
             </div>
-            
+
             <!-- Iconos -->
             <div class="d-flex align-items-center gap-3">
                 <!-- Favoritos -->
                 <a href="#" class="nav-icon" aria-label="Favoritos">
-                    <i class="bi bi-heart fs-4"></i>
+                    <i class="bi bi-heart fs-4" role="img" aria-hidden="true"></i>
                 </a>
-                
+
                 <!-- Usuario -->
                 <div class="dropdown">
-                    <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-label="Cuenta de usuario">
-                        <i class="bi bi-person fs-4"></i>
+                    <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Cuenta de usuario" role="button" id="dropdownUserMenu">
+                        <i class="bi bi-person fs-4" role="img" aria-hidden="true"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUserMenu">
                         <li>
                             <a class="dropdown-item" href="{{ url_for('login') }}">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
@@ -64,11 +63,11 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <!-- Carrito -->
                 <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
-                    <i class="bi bi-cart fs-4"></i>
-                    <span class="cart-badge" id="cart-count">0</span> <!-- CORREGIDO -->
+                    <i class="bi bi-cart fs-4" role="img" aria-hidden="true"></i>
+                    <span class="cart-badge visually-hidden" id="cart-count" aria-live="polite" aria-atomic="true">0</span> <!-- Para lectores de pantalla -->
                 </a>
             </div>
         </div>
@@ -77,38 +76,35 @@
     <!-- MENÚ SECUNDARIO -->
     <div class="section-menu py-3 bg-white shadow-sm" style="margin-top: 80px;">
         <div class="container">
-            <ul class="nav justify-content-center flex-wrap">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('all')">
-                        <i class="bi bi-grid me-1"></i>CATEGORÍAS
+            <ul class="nav justify-content-center flex-wrap" role="menubar" aria-label="Menú secundario de navegación">
+                <li class="nav-item" role="none">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('all')" role="menuitem" tabindex="0">
+                        <i class="bi bi-grid me-1" aria-hidden="true"></i>CATEGORÍAS
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}">
-                        <i class="bi bi-info-circle me-1"></i>NOSOTROS
+                <li class="nav-item" role="none">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}" role="menuitem" tabindex="0">
+                        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>NOSOTROS
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="#" onclick="scrollToCatalog()">
-                        <i class="bi bi-collection me-1"></i>CATÁLOGO
+                <li class="nav-item" role="none">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="scrollToCatalog()" role="menuitem" tabindex="0">
+                        <i class="bi bi-collection me-1" aria-hidden="true"></i>CATÁLOGO
                     </a>
                 </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')">
-                        <i class="bi bi-tag me-1"></i>OFERTAS
+                <li class="nav-item" role="none">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')" role="menuitem" tabindex="0">
+                        <i class="bi bi-tag me-1" aria-hidden="true"></i>OFERTAS
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="#">
-                        <i class="bi bi-chat-dots me-1"></i>CHATBOT
+                <li class="nav-item" role="none">
+                    <a class="nav-link fw-semibold text-dark" href="#" role="menuitem" tabindex="0">
+                        <i class="bi bi-chat-dots me-1" aria-hidden="true"></i>CHATBOT
                     </a>
-                </li> 
+                </li>
             </ul>
         </div>
     </div>
-
-
 
     <!-- CONTENIDO PRINCIPAL -->
     <main>
@@ -119,23 +115,23 @@
     {% include 'partials/modals.html' %}
 
     <!-- TOASTS -->
-    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"> <!-- CORREGIDO -->
-        <div id="cartToast" class="toast" role="alert">
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" aria-live="polite" aria-atomic="true">
+        <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
-                <i class="bi bi-cart-check text-success me-2"></i>
+                <i class="bi bi-cart-check text-success me-2" aria-hidden="true"></i>
                 <strong class="me-auto">¡Producto agregado!</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
             </div>
             <div class="toast-body">
                 El producto se ha agregado exitosamente al carrito.
             </div>
         </div>
-        
-        <div id="alertToast" class="toast" role="alert">
+
+        <div id="alertToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
-                <i class="bi bi-info-circle text-info me-2"></i>
+                <i class="bi bi-info-circle text-info me-2" aria-hidden="true"></i>
                 <strong class="me-auto">Información</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
             </div>
             <div class="toast-body" id="alertToastBody"></div>
         </div>
@@ -144,7 +140,7 @@
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
