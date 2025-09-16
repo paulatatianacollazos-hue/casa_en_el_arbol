@@ -76,7 +76,7 @@ def register():
         db.session.add(nuevo_usuario)
         db.session.commit()
 
-        # Notificación real al registrarse
+       
         crear_notificacion(
             user_id=nuevo_usuario.ID_Usuario,
             titulo="¡Bienvenido a Casa en el Árbol!",
