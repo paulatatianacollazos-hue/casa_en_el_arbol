@@ -310,7 +310,8 @@ def borrar_direccion(id_direccion):
     db.session.delete(direccion)
     db.session.commit()
     flash("Dirección eliminada correctamente 🗑️", "success")
-    return redirect(url_for('actualizacion_datos'))
+    return redirect(url_for('actualizacion_datos', direccion_eliminada=1))
+
 
 
 if __name__ == '__main__':
