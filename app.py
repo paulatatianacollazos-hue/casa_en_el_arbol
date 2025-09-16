@@ -212,6 +212,7 @@ def actualizacion_datos():
         return redirect(url_for('login'))
 
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
 
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
@@ -223,7 +224,7 @@ def actualizacion_datos():
 
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
-            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
+            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
@@ -231,7 +232,7 @@ def actualizacion_datos():
         ).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
-            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
+            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
         # Actualizar usuario
         usuario.Nombre = nombre
@@ -244,12 +245,22 @@ def actualizacion_datos():
 
         db.session.commit()
 
-        # Notificación visual tipo mensaje
+        # Crear notificación en la base de datos
+        crear_notificacion(
+            user_id=user_id,
+            titulo="Perfil actualizado ✏️",
+            mensaje="Tus datos personales se han actualizado correctamente."
+        )
+
         flash('✅ Perfil actualizado correctamente', 'success')
 
-    return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
+        # Volvemos a recargar las notificaciones
+        notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
 
-
+    return render_template('Actualizacion_datos.html',
+                           usuario=usuario,
+                           direcciones=direcciones,
+                           notificaciones=notificaciones)
 
 
 
