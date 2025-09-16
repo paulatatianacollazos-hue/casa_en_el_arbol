@@ -1,143 +1,53 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Notificaciones</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: #f8f6f0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      margin-top: 40px;
-    }
+{% extends "base.html" %}
 
-    .notificaciones-container {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      padding: 20px;
-      width: 600px;
-    }
+{% block title %}Notificaciones{% endblock %}
 
-    .notificaciones-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #e0e0e0;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="notificaciones-container" style="width: 600px;">
+        <div class="notificaciones-header d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h5 class="text-success fw-bold">NOTIFICACIONES</h5>
+            <div>
+                <button class="btn btn-link text-decoration-none fw-bold me-3" onclick="seleccionarTodos()">Seleccionar todos</button>
+                <button class="btn btn-danger fw-bold" onclick="eliminarSeleccionados()">Eliminar</button>
+            </div>
+        </div>
 
-    .notificaciones-header h5 {
-      margin: 0;
-      color: #4e7b33;
-      font-weight: 700;
-    }
-
-    .btn-eliminar {
-      background: #e63946;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 15px;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-
-    .btn-eliminar:hover {
-      background: #c92a34;
-    }
-
-    .notificacion {
-      display: flex;
-      align-items: center;
-      background: #f5f5f5;
-      border-radius: 10px;
-      padding: 12px 15px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      transition: 0.3s ease;
-    }
-
-    .notificacion input[type="checkbox"] {
-      margin-right: 12px;
-      transform: scale(1.2);
-    }
-
-    .notificacion p {
-      margin: 0;
-      font-size: 15px;
-      color: #333;
-      font-weight: 500;
-    }
-
-    .notificacion:hover {
-      background: #eaf4e1;
-      transform: scale(1.01);
-    }
-  </style>
-</head>
-<body>
-
-  <div class="notificaciones-container">
-    <div class="notificaciones-header">
-      <h5>NOTIFICACIONES</h5>
-      <div>
-        <button class="btn btn-link text-decoration-none fw-bold me-3" onclick="seleccionarTodos()">Seleccionar todos</button>
-        <button class="btn-eliminar" onclick="eliminarSeleccionados()">Eliminar</button>
-      </div>
+        {% if notificaciones %}
+        <form id="formNotificaciones" method="POST">
+            {% for noti in notificaciones %}
+            <div class="notificacion d-flex align-items-center bg-light rounded mb-2 p-2 border">
+                <input type="checkbox" class="check-noti me-2" name="ids" value="{{ noti.ID_Notificacion }}">
+                <p class="mb-0">{{ noti.Titulo }}: {{ noti.Mensaje }}</p>
+            </div>
+            {% endfor %}
+        </form>
+        {% else %}
+        <p class="text-center text-muted">No tienes notificaciones.</p>
+        {% endif %}
     </div>
+</div>
 
-    <form id="formNotificaciones">
-      {% for noti in notificaciones %}
-      <div class="notificacion">
-        <input type="checkbox" class="check-noti" value="{{ noti.ID_Notificacion }}">
-        <p><strong>{{ noti.Titulo }}</strong>: {{ noti.Mensaje }}</p>
-      </div>
-      {% else %}
-      <p>No tienes notificaciones 📭</p>
-      {% endfor %}
-    </form>
+<style>
+    .notificaciones-container { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);}
+    .notificacion:hover { background: #eaf4e1; transform: scale(1.01); transition: 0.3s;}
+    .check-noti { transform: scale(1.2);}
+</style>
 
-  </div>
+<script>
+function seleccionarTodos() {
+    document.querySelectorAll('.check-noti').forEach(chk => chk.checked = true);
+}
 
-  <script>
-    function seleccionarTodos() {
-      document.querySelectorAll('.check-noti').forEach(chk => chk.checked = true);
-    }
-
-    function eliminarSeleccionados() {
-      const seleccionadas = Array.from(document.querySelectorAll('.check-noti:checked')).map(chk => chk.value);
-
-      if (seleccionadas.length === 0) {
+function eliminarSeleccionados() {
+    const seleccionadas = document.querySelectorAll('.check-noti:checked');
+    if(seleccionadas.length === 0) {
         alert('No hay notificaciones seleccionadas.');
         return;
-      }
-
-      if (!confirm('¿Deseas eliminar las notificaciones seleccionadas?')) return;
-
-      fetch("{{ url_for('eliminar_notificaciones') }}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token() if csrf_token else '' }}"
-        },
-        body: JSON.stringify({ ids: seleccionadas })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "success") {
-          alert(data.message);
-          location.reload();
-        } else {
-          alert("Error: " + data.message);
-        }
-      })
-      .catch(err => console.error(err));
     }
-  </script>
-
-</body>
-</html>
+    if(confirm('¿Deseas eliminar las notificaciones seleccionadas?')) {
+        document.getElementById('formNotificaciones').submit();
+    }
+}
+</script>
+{% endblock %}
