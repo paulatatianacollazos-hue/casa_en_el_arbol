@@ -239,6 +239,7 @@ def actualizacion_datos():
         genero = request.form.get('genero', '').strip()
         correo = request.form.get('correo', '').strip()
         telefono = request.form.get('telefono', '').strip()
+        direccion = request.form.get('direccion', '').strip()  # <-- NUEVO CAMPO
         password = request.form.get('password', '').strip()
 
         # Validaciones básicas
@@ -246,20 +247,22 @@ def actualizacion_datos():
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario)
 
-
-        usuario_existente = Usuario.query.filter(Usuario.Correo == correo, Usuario.ID_Usuario != user_id).first()
+        usuario_existente = Usuario.query.filter(
+            Usuario.Correo == correo, 
+            Usuario.ID_Usuario != user_id
+        ).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario)
 
-
+     
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
         usuario.Correo = correo
         usuario.Telefono = telefono
+        usuario.Direccion = direccion  
 
-       
         if password:
             usuario.Contraseña = generate_password_hash(password)
 
