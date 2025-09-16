@@ -10,7 +10,7 @@ from flask import request, render_template, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash
 
 
-from basedatos.models import db, Usuario 
+from basedatos.models import db, Usuario , Direccion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
@@ -64,13 +64,13 @@ def register():
             return render_template('register.html')
 
         nuevo_usuario = Usuario(
-            Nombre=nombre,
-            Apellido=apellido,  # aunque quede vacío no romperá si tu DB lo permite
-            Telefono=telefono,
-            Correo=correo,
-            Direccion=None,  # queda vacío hasta que lo llene en actualización de datos
-            Contraseña=generate_password_hash(password)
-        )
+        Nombre=nombre,
+        Apellido=apellido,
+        Telefono=telefono,
+        Correo=correo,
+        Contraseña=generate_password_hash(password)
+    )
+
 
         db.session.add(nuevo_usuario)
         db.session.commit()
@@ -123,8 +123,10 @@ def dashboard():
 
 @app.route('/logout')
 def logout():
-    session.pop('usuario', None)
+    session.clear()
+    flash("Sesión cerrada correctamente", "info")
     return redirect(url_for('index'))
+
 
 
 
@@ -234,35 +236,34 @@ def actualizacion_datos():
         flash('Usuario no encontrado.', 'danger')
         return redirect(url_for('login'))
 
+    # 🔥 Agregamos esta línea para cargar direcciones
+    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         apellido = request.form.get('apellido', '').strip()
         genero = request.form.get('genero', '').strip()
         correo = request.form.get('correo', '').strip()
         telefono = request.form.get('telefono', '').strip()
-        direccion = request.form.get('direccion', '').strip() 
         password = request.form.get('password', '').strip()
 
-    
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
-            return render_template('Actualizacion_datos.html', usuario=usuario)
+            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
         usuario_existente = Usuario.query.filter(
-            Usuario.Correo == correo, 
+            Usuario.Correo == correo,
             Usuario.ID_Usuario != user_id
         ).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
-            return render_template('Actualizacion_datos.html', usuario=usuario)
+            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
-     
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
         usuario.Correo = correo
         usuario.Telefono = telefono
-        usuario.Direccion = direccion  
 
         if password:
             usuario.Contraseña = generate_password_hash(password)
@@ -274,11 +275,41 @@ def actualizacion_datos():
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar: {str(e)}', 'danger')
-            return render_template('Actualizacion_datos.html', usuario=usuario)
 
-    return render_template('Actualizacion_datos.html', usuario=usuario)
+   
+    return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
 
+@app.route('/agregar_direccion', methods=['POST'])
+def agregar_direccion():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Debes iniciar sesión para agregar direcciones.", "warning")
+        return redirect(url_for('login'))
+
+    nueva_direccion = Direccion(
+        ID_Usuario=user_id,
+        Pais=request.form.get('pais'),
+        Departamento=request.form.get('departamento'),
+        Ciudad=request.form.get('municipio'),
+        Direccion=request.form.get('direccion'),
+        InfoAdicional=request.form.get('infoAdicional'),
+        Barrio=request.form.get('barrio'),
+        Destinatario=request.form.get('destinatario')
+    )
+    db.session.add(nueva_direccion)
+    db.session.commit()
+
+    flash("Dirección agregada correctamente ✅", "success")
+    return redirect(url_for('actualizacion_datos'))
+
+@app.route('/borrar_direccion/<int:id_direccion>', methods=['POST'])
+def borrar_direccion(id_direccion):
+    direccion = Direccion.query.get_or_404(id_direccion)
+    db.session.delete(direccion)
+    db.session.commit()
+    flash("Dirección eliminada correctamente 🗑️", "success")
+    return redirect(url_for('actualizacion_datos'))
 
 
 if __name__ == '__main__':

@@ -41,11 +41,17 @@ class Direccion(db.Model):
 
     ID_Direccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
-    Direccion = db.Column(db.String(200), nullable=False)
+    Pais = db.Column(db.String(100), default="Colombia")
+    Departamento = db.Column(db.String(100))
     Ciudad = db.Column(db.String(100))
+    Direccion = db.Column(db.String(200), nullable=False)
+    InfoAdicional = db.Column(db.String(200))
+    Barrio = db.Column(db.String(100))
+    Destinatario = db.Column(db.String(100))
 
     def __repr__(self):
         return f'<Direccion {self.Direccion}, {self.Ciudad}>'
+
     
 class Proveedor(db.Model):
     __tablename__ = 'Proveedor'
