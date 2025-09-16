@@ -244,22 +244,27 @@ def actualizacion_datos():
 
         db.session.commit()
 
-        # Crear notificación
+        # Crear notificación (opcional)
         crear_notificacion(
             user_id=user_id,
             titulo="Perfil actualizado ✏️",
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        # Usar flash en vez de parámetros GET
-        flash('perfil_guardado', 'success')
+        # Guardar flag en session y redirigir
+        session['mostrar_modal'] = True
         return redirect(url_for('actualizacion_datos'))
+
+    # GET: mostrar modal solo si existe el flag
+    mostrar_modal = session.pop('mostrar_modal', False)
 
     return render_template(
         'Actualizacion_datos.html',
         usuario=usuario,
-        direcciones=direcciones
+        direcciones=direcciones,
+        mostrar_modal=mostrar_modal
     )
+
 
 # Direcciones
 @app.route('/agregar_direccion', methods=['POST'])
