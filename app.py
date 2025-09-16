@@ -358,7 +358,15 @@ def eliminar_notificaciones():
 
 @app.route('/gestion_roles', methods=['GET','POST'])
 def gestion_roles():
-    if 
+    if request.method == 'POST':
+        # Obtener el ID del usuario desde la sesión
+        user_id = session.get("user_id")
+        if not user_id:
+            flash("❌ No autorizado", "danger")
+            return redirect(url_for('gestion_roles'))
+
+        # Obtener el rol seleccionado del formulario
+        rol = request.form.get('rol')   
     return render_template("gestion_roles.html")
 
 if __name__ == '__main__':
