@@ -212,7 +212,7 @@ def actualizacion_datos():
         return redirect(url_for('login'))
 
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
-    mostrar_modal = False
+    mostrar_modal = False  # Por defecto no mostrar
 
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
@@ -224,7 +224,10 @@ def actualizacion_datos():
 
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
-            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, mostrar_modal=False)
+            return render_template('Actualizacion_datos.html',
+                                   usuario=usuario,
+                                   direcciones=direcciones,
+                                   mostrar_modal=False)
 
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
@@ -232,7 +235,10 @@ def actualizacion_datos():
         ).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
-            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, mostrar_modal=False)
+            return render_template('Actualizacion_datos.html',
+                                   usuario=usuario,
+                                   direcciones=direcciones,
+                                   mostrar_modal=False)
 
         # Actualizar usuario
         usuario.Nombre = nombre
@@ -245,16 +251,22 @@ def actualizacion_datos():
 
         db.session.commit()
 
+        # Crear notificación (opcional)
         crear_notificacion(
             user_id=user_id,
             titulo="Perfil actualizado ✏️",
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        mostrar_modal = True  # Solo después de guardar cambios
+        # **Después de guardar cambios, mostrar modal**
+        mostrar_modal = True
 
-    return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, mostrar_modal=mostrar_modal)
-
+    return render_template(
+        'Actualizacion_datos.html',
+        usuario=usuario,
+        direcciones=direcciones,
+        mostrar_modal=mostrar_modal
+    )
 
 
 
