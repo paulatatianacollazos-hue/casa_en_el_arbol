@@ -122,28 +122,27 @@
           </form>
         </div>
 
-       <!-- Modal Cambios Guardados -->
-<div class="modal fade" id="modalPerfilGuardado" tabindex="-1" aria-labelledby="modalPerfilGuardadoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-4 rounded-4 text-center">
-      <h5 class="modal-title mb-3 text-success fw-bold" id="modalPerfilGuardadoLabel">Cambios guardados</h5>
-      <p>Tu perfil se ha actualizado correctamente.</p>
-      <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cerrar</button>
-    </div>
-  </div>
-</div>
+        <!-- MODAL CAMBIOS GUARDADOS -->
+        <div class="modal fade" id="modalPerfilGuardado" tabindex="-1" aria-labelledby="modalPerfilGuardadoLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4 rounded-4 text-center">
+              <h5 class="modal-title mb-3 text-success fw-bold" id="modalPerfilGuardadoLabel">Cambios guardados</h5>
+              <p>Tu perfil se ha actualizado correctamente.</p>
+              <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
 
-{% set mostrar_modal = session.pop('mostrar_modal', False) %}
-{% if mostrar_modal %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var modalEl = document.getElementById('modalPerfilGuardado');
-    var modal = new bootstrap.Modal(modalEl);
-    modal.show();
-});
-</script>
-{% endif %}
-
+        {% set mostrar_modal = session.pop('mostrar_modal', False) %}
+        {% if mostrar_modal %}
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            var modalEl = document.getElementById('modalPerfilGuardado');
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+          });
+        </script>
+        {% endif %}
 
         <!-- SECCIÓN DIRECCIONES -->
         <div id="seccion-direcciones" class="card shadow-sm p-4" style="display:none;">

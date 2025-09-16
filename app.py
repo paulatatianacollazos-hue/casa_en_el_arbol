@@ -223,7 +223,10 @@ def actualizacion_datos():
 
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
-            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
+            return render_template('Actualizacion_datos.html',
+                                   usuario=usuario,
+                                   direcciones=direcciones,
+                                   mostrar_modal=False)
 
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
@@ -231,14 +234,17 @@ def actualizacion_datos():
         ).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
-            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
+            return render_template('Actualizacion_datos.html',
+                                   usuario=usuario,
+                                   direcciones=direcciones,
+                                   mostrar_modal=False)
 
+        # Actualizar usuario
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
         usuario.Correo = correo
         usuario.Telefono = telefono
-
         if password:
             usuario.Contraseña = generate_password_hash(password)
 
@@ -251,7 +257,7 @@ def actualizacion_datos():
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        # Guardar flag en session y redirigir
+        # Flag para mostrar modal solo después de guardar cambios
         session['mostrar_modal'] = True
         return redirect(url_for('actualizacion_datos'))
 
@@ -264,6 +270,10 @@ def actualizacion_datos():
         direcciones=direcciones,
         mostrar_modal=mostrar_modal
     )
+
+
+
+
 
 
 # Direcciones
