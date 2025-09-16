@@ -1,14 +1,14 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-# Crear una instancia de SQLAlchemy
+
 db = SQLAlchemy()
 
 
 import os
 from flask_sqlalchemy import SQLAlchemy
 
-# Crear una instancia de SQLAlchemy
+
 db = SQLAlchemy()
 
 
