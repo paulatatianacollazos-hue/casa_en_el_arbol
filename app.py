@@ -70,10 +70,18 @@ def register():
         Correo=correo,
         Contraseña=generate_password_hash(password)
     )
+        
+
 
 
         db.session.add(nuevo_usuario)
         db.session.commit()
+
+        crear_notificacion(
+                user_id=nuevo_usuario.ID_Usuario,
+                titulo="¡Bienvenido a Casa en el Árbol!",
+                mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
+            )
 
         flash('Cuenta creada correctamente, ahora puedes completar tu información en el perfil.', 'success')
         return redirect(url_for('login'))
@@ -236,7 +244,6 @@ def actualizacion_datos():
         flash('Usuario no encontrado.', 'danger')
         return redirect(url_for('login'))
 
-    # 🔥 Cargar direcciones del usuario
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
 
     if request.method == 'POST':
@@ -277,7 +284,7 @@ def actualizacion_datos():
             db.session.rollback()
             flash(f'Error al actualizar: {str(e)}', 'danger')
 
-    # ✅ Lee el parámetro de la URL para saber si debe mostrar el modal
+  
     perfil_guardado = request.args.get('perfil_guardado', 0, type=int)
 
     return render_template(
@@ -367,6 +374,17 @@ def eliminar_notificaciones():
     except Exception as e:
         db.session.rollback()
         return {"status": "error", "message": f"Error al eliminar: {str(e)}"}, 500
+
+# En tu app.py
+def crear_notificacion(user_id, titulo, mensaje):
+    """Crea y guarda una notificación real para un usuario"""
+    noti = Notificaciones(
+        ID_Usuario=user_id,
+        Titulo=titulo,
+        Mensaje=mensaje
+    )
+    db.session.add(noti)
+    db.session.commit()
 
 
 
