@@ -41,7 +41,7 @@ def crear_notificacion(user_id, titulo, mensaje):
     db.session.add(noti)
     db.session.commit()
 
-# Rutas básicas
+
 @app.route('/')
 def index():
     return render_template('index.html')
