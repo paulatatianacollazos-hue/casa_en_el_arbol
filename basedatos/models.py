@@ -11,11 +11,10 @@ class Usuario(db.Model):
 
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
-    Apellido = db.Column(db.String(100))  # ✅ Ahora sí existe
-    Genero = db.Column(db.String(10))     # ✅ Ahora sí existe
+    Apellido = db.Column(db.String(100))  
+    Genero = db.Column(db.String(10))     
     Telefono = db.Column(db.String(20))
     Correo = db.Column(db.String(100), nullable=False, unique=True)
-    Direccion = db.Column(db.String(200))
     Contraseña = db.Column(db.String(200), nullable=False)
     Rol = db.Column(db.String(50), default='cliente')
     Activo = db.Column(db.Boolean, default=True)
