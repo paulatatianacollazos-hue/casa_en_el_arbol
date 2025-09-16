@@ -123,7 +123,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <!-- 🔥 Aquí se conecta al endpoint de Flask -->
+       
         <form method="POST" action="{{ url_for('agregar_direccion') }}">
           <div class="mb-3">
             <label for="pais" class="form-label">País</label>
@@ -136,17 +136,16 @@
             <div class="col-md-6">
               <label for="departamento" class="form-label">Departamento</label>
               <select name="departamento" id="departamento" class="form-select rounded-pill">
-                <option selected disabled>Departamento</option>
-                <option>Cundinamarca</option>
-                <option>Antioquia</option>
-                <option>Valle del Cauca</option>
-              </select>
+          <option selected>Bogotá, D.C.</option>
+        </select>
+
             </div>
             <div class="col-md-6">
               <label for="municipio" class="form-label">Municipio</label>
               <select name="municipio" id="municipio" class="form-select rounded-pill">
-                <option selected disabled>Municipio</option>
-              </select>
+              <option selected>Bogotá, D.C.</option>
+            </select>
+
             </div>
           </div>
 
