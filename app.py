@@ -289,9 +289,9 @@ def agregar_direccion():
 
     nueva_direccion = Direccion(
         ID_Usuario=user_id,
-        Pais=request.form.get('pais'),
-        Departamento=request.form.get('departamento'),
-        Ciudad=request.form.get('municipio'),
+        Pais="Colombia",
+        Departamento="Bogotá, D.C.",
+        Ciudad="Bogotá",
         Direccion=request.form.get('direccion'),
         InfoAdicional=request.form.get('infoAdicional'),
         Barrio=request.form.get('barrio'),
@@ -300,8 +300,9 @@ def agregar_direccion():
     db.session.add(nueva_direccion)
     db.session.commit()
 
-    flash("Dirección agregada correctamente ✅", "success")
-    return redirect(url_for('actualizacion_datos'))
+    # ✅ Redirige con query param para mostrar modal
+    return redirect(url_for('actualizacion_datos', direccion_guardada="1"))
+
 
 @app.route('/borrar_direccion/<int:id_direccion>', methods=['POST'])
 def borrar_direccion(id_direccion):
