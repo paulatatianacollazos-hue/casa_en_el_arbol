@@ -212,6 +212,7 @@ def actualizacion_datos():
         return redirect(url_for('login'))
 
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    mostrar_modal = False
 
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
@@ -223,10 +224,7 @@ def actualizacion_datos():
 
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
-            return render_template('Actualizacion_datos.html',
-                                   usuario=usuario,
-                                   direcciones=direcciones,
-                                   mostrar_modal=False)
+            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, mostrar_modal=False)
 
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
@@ -234,10 +232,7 @@ def actualizacion_datos():
         ).first()
         if usuario_existente:
             flash('El correo ya está registrado por otro usuario.', 'danger')
-            return render_template('Actualizacion_datos.html',
-                                   usuario=usuario,
-                                   direcciones=direcciones,
-                                   mostrar_modal=False)
+            return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, mostrar_modal=False)
 
         # Actualizar usuario
         usuario.Nombre = nombre
@@ -250,26 +245,18 @@ def actualizacion_datos():
 
         db.session.commit()
 
-        # Crear notificación (opcional)
         crear_notificacion(
             user_id=user_id,
             titulo="Perfil actualizado ✏️",
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        # Flag para mostrar modal solo después de guardar cambios
-        session['mostrar_modal'] = True
-        return redirect(url_for('actualizacion_datos'))
+        mostrar_modal = True  # Solo después de guardar cambios
 
-    # GET: mostrar modal solo si existe el flag
-    mostrar_modal = session.pop('mostrar_modal', False)
+    return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, mostrar_modal=mostrar_modal)
 
-    return render_template(
-        'Actualizacion_datos.html',
-        usuario=usuario,
-        direcciones=direcciones,
-        mostrar_modal=mostrar_modal
-    )
+
+
 
 
 
