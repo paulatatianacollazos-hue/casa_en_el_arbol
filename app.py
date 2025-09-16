@@ -41,11 +41,10 @@ def crear_notificacion(user_id, titulo, mensaje):
     db.session.add(noti)
     db.session.commit()
 
-
+# Rutas básicas
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -77,6 +76,7 @@ def register():
         db.session.add(nuevo_usuario)
         db.session.commit()
 
+        # Notificación real al registrarse
         crear_notificacion(
             user_id=nuevo_usuario.ID_Usuario,
             titulo="¡Bienvenido a Casa en el Árbol!",
@@ -87,7 +87,6 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -107,7 +106,6 @@ def login():
             session['user_id'] = user.ID_Usuario
             session['username'] = nombre
             session['iniciales'] = iniciales
-
             session['show_welcome_modal'] = True
 
             flash('Inicio de sesión exitoso')
@@ -118,13 +116,11 @@ def login():
 
     return render_template('login.html')
 
-
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html')
-
 
 @app.route('/logout')
 def logout():
@@ -132,12 +128,11 @@ def logout():
     flash("Sesión cerrada correctamente", "info")
     return redirect(url_for('index'))
 
-
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
 
-
+# Olvido y restablecimiento de contraseña
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -155,7 +150,6 @@ def forgot_password():
             flash('⚠️ Correo no registrado', 'warning')
     return render_template('forgot_password.html')
 
-
 def send_reset_email(user_email, user_name, token):
     reset_url = url_for('reset_password', token=token, _external=True)
     msg = Message(
@@ -164,7 +158,6 @@ def send_reset_email(user_email, user_name, token):
         html=render_template('email_reset.html', user_name=user_name, reset_url=reset_url)
     )
     mail.send(msg)
-
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -191,31 +184,21 @@ def reset_password(token):
             return redirect(url_for('forgot_password'))
 
         user.Contraseña = generate_password_hash(new_password)
+        db.session.commit()
 
-        try:
-            db.session.commit()
-            flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.', 'success')
-            return redirect(url_for('login'))
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error al actualizar contraseña: {e}")
-            flash('❌ Hubo un error al actualizar tu contraseña. Inténtalo de nuevo.', 'error')
-            return render_template('reset_password.html', token=token)
+        # Notificación real por cambio de contraseña
+        crear_notificacion(
+            user_id=user.ID_Usuario,
+            titulo="Contraseña actualizada 🔑",
+            mensaje="Tu contraseña ha sido cambiada exitosamente."
+        )
+
+        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión con tu nueva contraseña.', 'success')
+        return redirect(url_for('login'))
 
     return render_template('reset_password.html', token=token)
 
-
-@app.route('/test_mail')
-def test_mail():
-    try:
-        msg = Message("Prueba", recipients=[app.config['MAIL_USERNAME']])
-        msg.body = "✅ Configuración de correo funciona"
-        mail.send(msg)
-        return "Correo enviado correctamente"
-    except Exception as e:
-        return f"Error: {e}"
-
-
+# Actualización de datos
 @app.route('/actualizacion_datos', methods=['GET', 'POST'])
 def actualizacion_datos():
     user_id = session.get('user_id')
@@ -259,15 +242,18 @@ def actualizacion_datos():
         if password:
             usuario.Contraseña = generate_password_hash(password)
 
-        try:
-            db.session.commit()
-            return redirect(url_for('actualizacion_datos', perfil_guardado=1))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al actualizar: {str(e)}', 'danger')
+        db.session.commit()
+
+        # Notificación real por actualización de perfil
+        crear_notificacion(
+            user_id=user_id,
+            titulo="Perfil actualizado ✏️",
+            mensaje="Tus datos personales se han actualizado correctamente."
+        )
+
+        return redirect(url_for('actualizacion_datos', perfil_guardado=1))
 
     perfil_guardado = request.args.get('perfil_guardado', 0, type=int)
-
     return render_template(
         'Actualizacion_datos.html',
         usuario=usuario,
@@ -275,7 +261,7 @@ def actualizacion_datos():
         perfil_guardado=perfil_guardado
     )
 
-
+# Direcciones
 @app.route('/agregar_direccion', methods=['POST'])
 def agregar_direccion():
     user_id = session.get('user_id')
@@ -296,18 +282,32 @@ def agregar_direccion():
     db.session.add(nueva_direccion)
     db.session.commit()
 
-    return redirect(url_for('actualizacion_datos', direccion_guardada="1"))
+    # Notificación real por agregar dirección
+    crear_notificacion(
+        user_id=user_id,
+        titulo="Dirección agregada 🏠",
+        mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
+    )
 
+    return redirect(url_for('actualizacion_datos', direccion_guardada="1"))
 
 @app.route('/borrar_direccion/<int:id_direccion>', methods=['POST'])
 def borrar_direccion(id_direccion):
     direccion = Direccion.query.get_or_404(id_direccion)
     db.session.delete(direccion)
     db.session.commit()
+
+    # Notificación real por borrar dirección
+    crear_notificacion(
+        user_id=session['user_id'],
+        titulo="Dirección eliminada 🗑️",
+        mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
+    )
+
     flash("Dirección eliminada correctamente 🗑️", "success")
     return redirect(url_for('actualizacion_datos', direccion_eliminada=1))
 
-
+# Notificaciones
 @app.route('/notificaciones', methods=['GET', 'POST'])
 def ver_notificaciones():
     user_id = session.get("user_id")
@@ -327,7 +327,6 @@ def ver_notificaciones():
 
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
-
 
 @app.route('/eliminar_notificaciones', methods=['POST'])
 def eliminar_notificaciones():
@@ -350,7 +349,7 @@ def eliminar_notificaciones():
         db.session.rollback()
         return {"status": "error", "message": f"Error al eliminar: {str(e)}"}, 500
 
-
+# Ruta para pruebas de notificaciones (opcional)
 @app.route('/test_notificaciones')
 def test_notificaciones():
     user_id = session.get("user_id")
@@ -358,6 +357,7 @@ def test_notificaciones():
         flash("Debes iniciar sesión para probar las notificaciones.", "warning")
         return redirect(url_for('login'))
 
+    # Crear notificaciones de prueba reales
     crear_notificacion(user_id, "¡Bienvenido de nuevo!", "Esta es una notificación de prueba 1")
     crear_notificacion(user_id, "Promoción especial", "Esta es una notificación de prueba 2")
     crear_notificacion(user_id, "Recordatorio", "Esta es una notificación de prueba 3")
@@ -365,6 +365,6 @@ def test_notificaciones():
     flash("Se han agregado notificaciones de prueba ✅", "success")
     return redirect(url_for('ver_notificaciones'))
 
-
 if __name__ == '__main__':
     app.run(debug=True)
+
