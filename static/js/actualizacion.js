@@ -65,9 +65,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-// Botón "Ver direcciones" del modal de guardado
-function verDirecciones() {
-  document.getElementById("menu-direcciones").click();
-  const modal = bootstrap.Modal.getInstance(document.getElementById('modalGuardado'));
-  modal.hide();
-}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = new bootstrap.Modal(document.getElementById('modalPerfilGuardado'));
+  modal.show();
+});
+

@@ -236,7 +236,7 @@ def actualizacion_datos():
         flash('Usuario no encontrado.', 'danger')
         return redirect(url_for('login'))
 
-    # 🔥 Agregamos esta línea para cargar direcciones
+    # 🔥 Cargar direcciones del usuario
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
 
     if request.method == 'POST':
@@ -259,6 +259,7 @@ def actualizacion_datos():
             flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
+        # Actualiza datos
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
@@ -270,14 +271,22 @@ def actualizacion_datos():
 
         try:
             db.session.commit()
-            flash('Datos actualizados correctamente.', 'success')
-            return redirect(url_for('actualizacion_datos'))
+            # ✅ Redirige con parámetro para mostrar modal de confirmación
+            return redirect(url_for('actualizacion_datos', perfil_guardado=1))
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar: {str(e)}', 'danger')
 
-   
-    return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
+    # ✅ Lee el parámetro de la URL para saber si debe mostrar el modal
+    perfil_guardado = request.args.get('perfil_guardado', 0, type=int)
+
+    return render_template(
+        'Actualizacion_datos.html',
+        usuario=usuario,
+        direcciones=direcciones,
+        perfil_guardado=perfil_guardado
+    )
+
 
 
 @app.route('/agregar_direccion', methods=['POST'])
