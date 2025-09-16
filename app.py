@@ -8,9 +8,9 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from flask import request, render_template, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash
+from flask import jsonify
 
-
-from basedatos.models import db, Usuario , Direccion
+from basedatos.models import db, Usuario , Direccion ,Notificaciones
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
@@ -320,6 +320,26 @@ def borrar_direccion(id_direccion):
     db.session.commit()
     flash("Dirección eliminada correctamente 🗑️", "success")
     return redirect(url_for('actualizacion_datos', direccion_eliminada=1))
+
+
+
+
+@app.route('/notificaciones')
+def notificaciones():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "No autenticado"}), 401
+
+    notis = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
+    return jsonify([
+        {
+            "id": n.ID_Notificacion,
+            "titulo": n.Titulo,
+            "mensaje": n.Mensaje,
+            "fecha": n.Fecha.strftime("%d/%m/%Y %H:%M"),
+            "leida": n.Leida
+        } for n in notis
+    ])
 
 
 
