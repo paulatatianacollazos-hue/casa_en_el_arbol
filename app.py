@@ -103,18 +103,17 @@ def login():
             nombre = user.Nombre.strip()
             iniciales = ''.join([parte[0] for parte in nombre.split()][:2]).upper()
 
-            # Guardar en sesión
+          
             session['user_id'] = user.ID_Usuario
             session['username'] = nombre
             session['iniciales'] = iniciales
-            session['rol'] = user.Rol  # <-- aquí guardamos el rol
+            session['rol'] = user.Rol  
             session['show_welcome_modal'] = True
 
             flash('Inicio de sesión exitoso', 'success')
 
             if user.Rol == 'admin':
-                return redirect(url_for('admin_dashboard'))  # Redirigir admin a su dashboard
-            else:
+                return redirect(url_for('admin_dashboard')) 
                 return redirect(url_for('dashboard'))
 
         else:
