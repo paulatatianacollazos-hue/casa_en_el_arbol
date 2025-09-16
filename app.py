@@ -327,43 +327,34 @@ def ver_notificaciones():
 
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
-
 @app.route('/eliminar_notificaciones', methods=['POST'])
 def eliminar_notificaciones():
     user_id = session.get("user_id")
     if not user_id:
-        return {"status": "error", "message": "No autorizado"}, 401
+        flash("❌ No autorizado", "danger")
+        return redirect(url_for('ver_notificaciones'))
 
-    ids = request.json.get("ids", [])
+    # request.form.getlist() obtiene todos los checkboxes seleccionados
+    ids = request.form.getlist("ids")
     if not ids:
-        return {"status": "error", "message": "No seleccionaste ninguna notificación"}, 400
+        flash("❌ No seleccionaste ninguna notificación", "warning")
+        return redirect(url_for('ver_notificaciones'))
 
     try:
         Notificaciones.query.filter(
-            Notificaciones.ID_Notificacion.in_(ids),
-            Notificaciones.ID_Usuario == user_id
+            Notificaciones.ID_Usuario == user_id,
+            Notificaciones.ID_Notificacion.in_(ids)
         ).delete(synchronize_session=False)
         db.session.commit()
-        return {"status": "success", "message": "Notificaciones eliminadas correctamente"}
+        flash("✅ Notificaciones eliminadas correctamente", "success")
     except Exception as e:
         db.session.rollback()
-        return {"status": "error", "message": f"Error al eliminar: {str(e)}"}, 500
+        flash(f"❌ Error al eliminar: {str(e)}", "danger")
 
-# Ruta para pruebas de notificaciones (opcional)
-@app.route('/test_notificaciones')
-def test_notificaciones():
-    user_id = session.get("user_id")
-    if not user_id:
-        flash("Debes iniciar sesión para probar las notificaciones.", "warning")
-        return redirect(url_for('login'))
-
-    # Crear notificaciones de prueba reales
-    crear_notificacion(user_id, "¡Bienvenido de nuevo!", "Esta es una notificación de prueba 1")
-    crear_notificacion(user_id, "Promoción especial", "Esta es una notificación de prueba 2")
-    crear_notificacion(user_id, "Recordatorio", "Esta es una notificación de prueba 3")
-
-    flash("Se han agregado notificaciones de prueba ✅", "success")
     return redirect(url_for('ver_notificaciones'))
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
