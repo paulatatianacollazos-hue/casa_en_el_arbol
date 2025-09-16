@@ -95,7 +95,7 @@ def login():
         password = request.form.get('password', '').strip()
 
         if not email or not password:
-            flash('Ingresa correo y contraseña')
+            flash('Ingresa correo y contraseña', 'warning')
             return render_template('login.html')
 
         user = Usuario.query.filter_by(Correo=email).first()
@@ -103,18 +103,38 @@ def login():
             nombre = user.Nombre.strip()
             iniciales = ''.join([parte[0] for parte in nombre.split()][:2]).upper()
 
+            # Guardar en sesión
             session['user_id'] = user.ID_Usuario
             session['username'] = nombre
             session['iniciales'] = iniciales
+            session['rol'] = user.Rol  # <-- aquí guardamos el rol
             session['show_welcome_modal'] = True
 
-            flash('Inicio de sesión exitoso')
-            return redirect(url_for('dashboard'))
+            flash('Inicio de sesión exitoso', 'success')
+
+            if user.Rol == 'admin':
+                return redirect(url_for('admin_dashboard'))  # Redirigir admin a su dashboard
+            else:
+                return redirect(url_for('dashboard'))
+
         else:
-            flash('Credenciales inválidas')
+            flash('Credenciales inválidas', 'danger')
             return render_template('login.html')
 
     return render_template('login.html')
+
+@app.route('/admin')
+def admin_dashboard():
+    if 'user_id' not in session:
+        flash('Debes iniciar sesión', 'warning')
+        return redirect(url_for('login'))
+
+    if session.get('rol') != 'admin':
+        flash('❌ No tienes permisos para acceder a esta sección', 'danger')
+        return redirect(url_for('dashboard'))
+
+    return render_template('admin_dashboard.html')
+
 
 @app.route('/dashboard')
 def dashboard():
