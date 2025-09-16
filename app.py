@@ -356,18 +356,40 @@ def eliminar_notificaciones():
     return redirect(url_for('ver_notificaciones'))
 
 
-@app.route('/gestion_roles', methods=['GET','POST'])
+@app.route('/gestion_roles', methods=['GET', 'POST'])
 def gestion_roles():
+
+    if 'user_id' not in session or session.get('rol') != 'admin':
+        flash("❌ No tienes permisos para acceder a esta página.", "danger")
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
-        # Obtener el ID del usuario desde la sesión
-        user_id = session.get("user_id")
-        if not user_id:
-            flash("❌ No autorizado", "danger")
+        user_id = request.form.get('user_id')  
+        nuevo_rol = request.form.get('rol')    
+
+        if not user_id or not nuevo_rol:
+            flash("⚠️ Selecciona un usuario y un rol válido", "warning")
             return redirect(url_for('gestion_roles'))
 
-        # Obtener el rol seleccionado del formulario
-        rol = request.form.get('rol')   
-    return render_template("gestion_roles.html")
+        
+        usuario = Usuario.query.get(user_id)
+        if not usuario:
+            flash("❌ Usuario no encontrado", "danger")
+            return redirect(url_for('gestion_roles'))
+
+       
+        usuario.Rol = nuevo_rol
+        db.session.commit()
+
+        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}", "success")
+        return redirect(url_for('gestion_roles'))
+
+    
+    usuarios = Usuario.query.all()
+    roles_disponibles = ["Admin", "Cliente", "Instalador", "Transportista"]
+
+    return render_template("gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
