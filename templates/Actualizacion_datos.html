@@ -233,13 +233,18 @@
   </div>
 </div>
 
-{% if perfil_guardado %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    new bootstrap.Modal(document.getElementById('modalPerfilGuardado')).show();
-});
-</script>
-{% endif %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    {% if message == 'perfil_guardado' %}
+      <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          new bootstrap.Modal(document.getElementById('modalPerfilGuardado')).show();
+      });
+      </script>
+    {% endif %}
+  {% endfor %}
+{% endwith %}
+
 
   
       

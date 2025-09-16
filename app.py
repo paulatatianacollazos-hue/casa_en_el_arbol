@@ -244,21 +244,21 @@ def actualizacion_datos():
 
         db.session.commit()
 
-        #
+        # Crear notificación
         crear_notificacion(
             user_id=user_id,
             titulo="Perfil actualizado ✏️",
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        return redirect(url_for('actualizacion_datos', perfil_guardado=1))
+        # Usar flash en vez de parámetros GET
+        flash('perfil_guardado', 'success')
+        return redirect(url_for('actualizacion_datos'))
 
-    perfil_guardado = request.args.get('perfil_guardado', 0, type=int)
     return render_template(
         'Actualizacion_datos.html',
         usuario=usuario,
-        direcciones=direcciones,
-        perfil_guardado=perfil_guardado
+        direcciones=direcciones
     )
 
 # Direcciones
