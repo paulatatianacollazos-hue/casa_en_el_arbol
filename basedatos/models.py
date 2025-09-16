@@ -5,33 +5,48 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
+import os
+from flask_sqlalchemy import SQLAlchemy
+
+# Crear una instancia de SQLAlchemy
+db = SQLAlchemy()
+
+
 class Usuario(db.Model):
     __tablename__ = 'Usuario'
 
-
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
-    Apellido = db.Column(db.String(100))  
-    Genero = db.Column(db.String(10))     
+    Apellido = db.Column(db.String(100))
+    Genero = db.Column(db.String(10))
     Telefono = db.Column(db.String(20))
     Correo = db.Column(db.String(100), nullable=False, unique=True)
     Contraseña = db.Column(db.String(200), nullable=False)
     Rol = db.Column(db.String(50), default='cliente')
     Activo = db.Column(db.Boolean, default=True)
 
-    def __repr__(self):
-        return f"<Usuario {self.ID_Usuario} - {self.Nombre}>"
-
-
     # Relaciones
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
     notificaciones = db.relationship('Notificaciones', backref='usuario', lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
+    direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")  # ✅ relación 1:N
 
     def __repr__(self):
-        return f'<Usuario {self.Nombre} {self.Apellido}>'
+        return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
 
+
+class Direccion(db.Model):
+    __tablename__ = 'Direccion'
+
+    ID_Direccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
+    Direccion = db.Column(db.String(200), nullable=False)
+    Ciudad = db.Column(db.String(100))
+
+    def __repr__(self):
+        return f'<Direccion {self.Direccion}, {self.Ciudad}>'
+    
 class Proveedor(db.Model):
     __tablename__ = 'Proveedor'
     ID_Proveedor = db.Column(db.Integer, primary_key=True, autoincrement=True)
