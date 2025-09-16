@@ -244,7 +244,7 @@ def actualizacion_datos():
 
         db.session.commit()
 
-        # Notificación real por actualización de perfil
+        #
         crear_notificacion(
             user_id=user_id,
             titulo="Perfil actualizado ✏️",
