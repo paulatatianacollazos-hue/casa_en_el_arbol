@@ -41,7 +41,7 @@ def crear_notificacion(user_id, titulo, mensaje):
     db.session.add(noti)
     db.session.commit()
 
-
+# Rutas básicas
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -103,17 +103,18 @@ def login():
             nombre = user.Nombre.strip()
             iniciales = ''.join([parte[0] for parte in nombre.split()][:2]).upper()
 
-          
+            # Guardar en sesión
             session['user_id'] = user.ID_Usuario
             session['username'] = nombre
             session['iniciales'] = iniciales
-            session['rol'] = user.Rol  
+            session['rol'] = user.Rol  # <-- aquí guardamos el rol
             session['show_welcome_modal'] = True
 
             flash('Inicio de sesión exitoso', 'success')
 
             if user.Rol == 'admin':
-                return redirect(url_for('admin_dashboard')) 
+                return redirect(url_for('admin_dashboard'))  # Redirigir admin a su dashboard
+            else:
                 return redirect(url_for('dashboard'))
 
         else:
@@ -122,13 +123,17 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/admin_dashboard')
+@app.route('/admin')
 def admin_dashboard():
-    if 'user_id' not in session or session.get('rol') != 'admin':
-        flash("No tienes permisos para acceder a esta página.", "danger")
+    if 'user_id' not in session:
+        flash('Debes iniciar sesión', 'warning')
         return redirect(url_for('login'))
-    return render_template('admin_dashboard.html')
 
+    if session.get('rol') != 'admin':
+        flash('❌ No tienes permisos para acceder a esta sección', 'danger')
+        return redirect(url_for('dashboard'))
+
+    return render_template('admin_dashboard.html')
 
 
 @app.route('/dashboard')
