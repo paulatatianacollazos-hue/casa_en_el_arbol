@@ -123,17 +123,13 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/admin')
+@app.route('/admin_dashboard')
 def admin_dashboard():
-    if 'user_id' not in session:
-        flash('Debes iniciar sesión', 'warning')
+    if 'user_id' not in session or session.get('rol') != 'admin':
+        flash("No tienes permisos para acceder a esta página.", "danger")
         return redirect(url_for('login'))
-
-    if session.get('rol') != 'admin':
-        flash('❌ No tienes permisos para acceder a esta sección', 'danger')
-        return redirect(url_for('dashboard'))
-
     return render_template('admin_dashboard.html')
+
 
 
 @app.route('/dashboard')
