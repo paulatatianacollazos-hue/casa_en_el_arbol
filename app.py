@@ -239,10 +239,10 @@ def actualizacion_datos():
         genero = request.form.get('genero', '').strip()
         correo = request.form.get('correo', '').strip()
         telefono = request.form.get('telefono', '').strip()
-        direccion = request.form.get('direccion', '').strip()  # <-- NUEVO CAMPO
+        direccion = request.form.get('direccion', '').strip() 
         password = request.form.get('password', '').strip()
 
-        # Validaciones básicas
+    
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario)
