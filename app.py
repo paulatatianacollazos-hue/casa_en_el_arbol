@@ -263,11 +263,6 @@ def actualizacion_datos():
                            notificaciones=notificaciones)
 
 
-
-
-
-
-# Direcciones
 @app.route('/agregar_direccion', methods=['POST'])
 def agregar_direccion():
     user_id = session.get('user_id')
@@ -333,6 +328,7 @@ def ver_notificaciones():
 
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
+
 @app.route('/eliminar_notificaciones', methods=['POST'])
 def eliminar_notificaciones():
     user_id = session.get("user_id")
@@ -360,7 +356,10 @@ def eliminar_notificaciones():
     return redirect(url_for('ver_notificaciones'))
 
 
-
+@app.route('/gestion_roles', methods=['GET','POST'])
+def gestion_roles():
+    if 
+    return render_template("gestion_roles.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
