@@ -206,11 +206,13 @@ def actualizacion_datos():
         flash('Debes iniciar sesión para acceder a esta página.', 'warning')
         return redirect(url_for('login'))
 
+    # Siempre obtenemos el usuario desde la sesión
     usuario = Usuario.query.get(user_id)
     if not usuario:
         flash('Usuario no encontrado.', 'danger')
         return redirect(url_for('login'))
 
+    # Obtenemos direcciones del usuario
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
 
     if request.method == 'POST':
@@ -221,10 +223,12 @@ def actualizacion_datos():
         telefono = request.form.get('telefono', '').strip()
         password = request.form.get('password', '').strip()
 
+        # Validaciones básicas
         if not nombre or not apellido or not correo:
             flash('Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
+        # Verificar si el correo ya existe en otro usuario
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
             Usuario.ID_Usuario != user_id
@@ -233,33 +237,43 @@ def actualizacion_datos():
             flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
+        # Actualizamos datos
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
         usuario.Correo = correo
         usuario.Telefono = telefono
-
         if password:
             usuario.Contraseña = generate_password_hash(password)
 
-        db.session.commit()
+        try:
+            db.session.commit()
+            # Crear notificación real
+            crear_notificacion(
+                user_id=user_id,
+                titulo="Perfil actualizado ✏️",
+                mensaje="Tus datos personales se han actualizado correctamente."
+            )
+            # Redirigimos con query param para mostrar modal/alerta
+            return redirect(url_for('actualizacion_datos', perfil_guardado=1))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}', 'danger')
 
-        # Notificación real por actualización de perfil
-        crear_notificacion(
-            user_id=user_id,
-            titulo="Perfil actualizado ✏️",
-            mensaje="Tus datos personales se han actualizado correctamente."
-        )
-
-        return redirect(url_for('actualizacion_datos', perfil_guardado=1))
-
+    # Flags para mostrar alertas/modales
     perfil_guardado = request.args.get('perfil_guardado', 0, type=int)
+    direccion_guardada = request.args.get('direccion_guardada', 0, type=int)
+    direccion_eliminada = request.args.get('direccion_eliminada', 0, type=int)
+
     return render_template(
         'Actualizacion_datos.html',
         usuario=usuario,
         direcciones=direcciones,
-        perfil_guardado=perfil_guardado
+        perfil_guardado=perfil_guardado,
+        direccion_guardada=direccion_guardada,
+        direccion_eliminada=direccion_eliminada
     )
+
 
 # Direcciones
 @app.route('/agregar_direccion', methods=['POST'])

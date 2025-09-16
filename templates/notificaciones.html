@@ -1,8 +1,211 @@
-{% extends "base.html" %}
+<nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                Casa en el Árbol
+            </a>
 
-{% block title %}Notificaciones{% endblock %}
+            <div class="search-container mx-auto d-none d-md-block">
+                <input
+                    class="form-control"
+                    type="search"
+                    placeholder="¿Qué estás buscando hoy?"
+                    aria-label="Buscar"
+                    id="searchInput"
+                />
+            </div>
 
-{% block content %}
+            <div class="d-flex align-items-center gap-3">
+                <a href="#" class="nav-icon" aria-label="Favoritos">
+                    <i class="bi bi-heart fs-4"></i>
+                </a>
+
+                <!-- Dropdown único para el usuario -->
+                <div class="dropdown">
+                    <a
+                        class="nav-icon dropdown-toggle"
+                        href="#"
+                        data-bs-toggle="dropdown"
+                        aria-label="Cuenta de usuario"
+                        role="button"
+                        data-bs-auto-close="outside"
+                    >
+                        <i class="bi bi-person fs-4"></i>
+                    </a>
+
+                    {% if session.get('user_id') %}
+                    <!-- MENÚ PARA USUARIO LOGUEADO -->
+                    <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div
+                                class="rounded-circle bg-light border text-dark fw-bold d-flex align-items-center justify-content-center me-2"
+                                style="width: 45px; height: 45px; font-size: 16px;"
+                            >
+                                {{ session['iniciales'] }}
+                            </div>
+                            <strong class="text-uppercase">{{ session['username'] }}</strong>
+                        </div>
+
+                        <li><a class="dropdown-item" href="{{ url_for('actualizacion_datos') }}">Perfil</a></li>
+                        <li><a class="dropdown-item" href="#">Historial</a></li>
+                        <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
+                        <li><a class="dropdown-item" href="#">Reseñas</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('ver_notificaciones') }}">Notificaciones</a></li>
+                       
+
+                        <div class="mt-3">
+                            <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
+                        </div>
+                    </ul>
+                    {% else %}
+                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('login') }}"
+                                ><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a
+                            >
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('register') }}"
+                                ><i class="bi bi-person-plus me-2"></i>Registrarse</a
+                            >
+                        </li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
+                    </ul>
+
+                    {% endif %}
+                </div>
+            </div>
+             <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
+                    <i class="bi bi-cart fs-4"></i>
+                    <span class="cart-badge" id="cart-count">0</span> 
+                </a>
+        </div>
+        
+    </nav>
+
+    {% if session.get('show_welcome_modal') %}
+<!-- Modal de bienvenida -->
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100" id="welcomeModalLabel">
+          ¡Bienvenid@{{ ', ' + session['username'] if session['username'] else '' }}!
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p class="mb-4">Gracias por iniciar sesión en <strong>Casa en el Árbol</strong>.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn custom-btn px-4 py-2">Ir a la página principal</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script para mostrar el modal al cargar la página -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+    welcomeModal.show();
+  });
+</script>
+
+<!-- Eliminar la variable de sesión para que no vuelva a mostrarse -->
+{% set _ = session.pop('show_welcome_modal') %}
+{% endif %}
+
+
+    <!-- Menú principal separado del navbar para evitar confusiones -->
+    <div class="section-menu py-3 bg-white shadow-sm" style="margin-top: 80px;">
+        <div class="container">
+            <ul class="nav justify-content-center flex-wrap">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('all')">
+                        <i class="bi bi-grid me-1"></i>CATEGORÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}">
+                        <i class="bi bi-info-circle me-1"></i>NOSOTROS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="scrollToCatalog()">
+                        <i class="bi bi-collection me-1"></i>CATÁLOGO
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')">
+                        <i class="bi bi-tag me-1"></i>OFERTAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-shield-check me-1"></i>GARANTÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-tools me-1"></i>INSTALACIONES
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-chat-dots me-1"></i>CHATBOT
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+<div class="container-fluid mt-4">
+  <div class="row">
+ 
+    <div class="col-md-3 col-lg-2 mb-4">
+      <div class="sidebar shadow-sm">
+        <h4>🌿 HOLA!</h4>
+        <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
+        <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
+        <a><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a><i class="bi bi-heart me-2"></i>Favoritos</a>
+        <a href="{{ url_for('dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
+      </div>
+    </div>
+
+  
+    <div class="col-md-9 col-lg-10">
+ 
+      <div id="seccion-perfil" class="card shadow-sm p-4">
+        <div class="profile-header mb-4">
+          <h5 class="mb-0">PERFIL</h5>
+        </div>
+        <form method="POST" action="{{ url_for('actualizacion_datos') }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre</label>
+              <input type="text" name="nombre" class="form-control" value="{{ usuario.Nombre }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Apellido</label>
+              <input type="text" name="apellido" class="form-control" value="{{ usuario.Apellido or '' }}" />
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">Email</label>
+              <input type="email" name="correo" class="form-control" value="{{ usuario.Correo }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Género</label>
+              <input type="text" name="genero" class="form-control" value="{{ usuario.Genero or '' }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Teléfono</label>
+              <input type="tel" name="telefono" class="form-control" value="{{ usuario.Telefono or '' }}" />
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-green mt-3">Guardar cambios</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
 <div class="container mt-5 d-flex justify-content-center">
     <div class="notificaciones-container" style="width: 600px;">
         <div class="notificaciones-header d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
@@ -50,4 +253,3 @@ function eliminarSeleccionados() {
     }
 }
 </script>
-{% endblock %}
