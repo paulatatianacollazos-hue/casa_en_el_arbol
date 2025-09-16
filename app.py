@@ -1,26 +1,21 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from flask import request, render_template, redirect, url_for, flash, session
-from werkzeug.security import generate_password_hash
-from flask import jsonify
 
-from basedatos.models import db, Usuario , Direccion ,Notificaciones
+from basedatos.models import db, Usuario, Direccion, Notificaciones
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
-
 
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
-
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -33,9 +28,7 @@ app.config['MAIL_DEFAULT_SENDER'] = ('Casa en arbol', app.config['MAIL_USERNAME'
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-
 db.init_app(app)
-
 
 # Función para crear notificaciones
 def crear_notificacion(user_id, titulo, mensaje):
@@ -66,42 +59,34 @@ def register():
             flash('Nombre, correo y contraseña son obligatorios.', 'warning')
             return render_template('register.html')
 
-        # Divide nombre en nombre/apellido si quieres guardar algo por defecto
         partes = nombre_completo.split(" ", 1)
         nombre = partes[0]
-        apellido = partes[1] if len(partes) > 1 else ""  # vacío si no puso segundo nombre
+        apellido = partes[1] if len(partes) > 1 else ""
 
-        usuario_existente = Usuario.query.filter_by(Correo=correo).first()
-        if usuario_existente:
+        if Usuario.query.filter_by(Correo=correo).first():
             flash('Ya existe una cuenta con ese correo.', 'danger')
             return render_template('register.html')
 
         nuevo_usuario = Usuario(
-        Nombre=nombre,
-        Apellido=apellido,
-        Telefono=telefono,
-        Correo=correo,
-        Contraseña=generate_password_hash(password)
-    )
-        
-
-
-
+            Nombre=nombre,
+            Apellido=apellido,
+            Telefono=telefono,
+            Correo=correo,
+            Contraseña=generate_password_hash(password)
+        )
         db.session.add(nuevo_usuario)
         db.session.commit()
 
         crear_notificacion(
-                user_id=nuevo_usuario.ID_Usuario,
-                titulo="¡Bienvenido a Casa en el Árbol!",
-                mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
-            )
+            user_id=nuevo_usuario.ID_Usuario,
+            titulo="¡Bienvenido a Casa en el Árbol!",
+            mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
+        )
 
         flash('Cuenta creada correctamente, ahora puedes completar tu información en el perfil.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register.html')
-
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -134,7 +119,6 @@ def login():
     return render_template('login.html')
 
 
-
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
@@ -149,11 +133,10 @@ def logout():
     return redirect(url_for('index'))
 
 
-
-
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
+
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -183,14 +166,9 @@ def send_reset_email(user_email, user_name, token):
     mail.send(msg)
 
 
-
-
-
-
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        
         email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
     except (SignatureExpired, BadSignature):
         flash('❌ Enlace expirado o inválido', 'error')
@@ -200,7 +178,6 @@ def reset_password(token):
         new_password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
 
-        # Validaciones
         if not new_password or not confirm_password:
             flash('⚠️ Completa ambos campos', 'warning')
             return render_template('reset_password.html', token=token)
@@ -208,15 +185,12 @@ def reset_password(token):
             flash('⚠️ Las contraseñas no coinciden', 'warning')
             return render_template('reset_password.html', token=token)
 
-       
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
             flash('❌ Usuario no encontrado', 'error')
             return redirect(url_for('forgot_password'))
 
-
-        hashed_password = generate_password_hash(new_password)
-        user.Contraseña = hashed_password  
+        user.Contraseña = generate_password_hash(new_password)
 
         try:
             db.session.commit()
@@ -231,8 +205,6 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 
-
-
 @app.route('/test_mail')
 def test_mail():
     try:
@@ -242,7 +214,6 @@ def test_mail():
         return "Correo enviado correctamente"
     except Exception as e:
         return f"Error: {e}"
-    
 
 
 @app.route('/actualizacion_datos', methods=['GET', 'POST'])
@@ -279,7 +250,6 @@ def actualizacion_datos():
             flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones)
 
-        # Actualiza datos
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
@@ -291,13 +261,11 @@ def actualizacion_datos():
 
         try:
             db.session.commit()
-            # ✅ Redirige con parámetro para mostrar modal de confirmación
             return redirect(url_for('actualizacion_datos', perfil_guardado=1))
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar: {str(e)}', 'danger')
 
-  
     perfil_guardado = request.args.get('perfil_guardado', 0, type=int)
 
     return render_template(
@@ -306,7 +274,6 @@ def actualizacion_datos():
         direcciones=direcciones,
         perfil_guardado=perfil_guardado
     )
-
 
 
 @app.route('/agregar_direccion', methods=['POST'])
@@ -329,7 +296,6 @@ def agregar_direccion():
     db.session.add(nueva_direccion)
     db.session.commit()
 
-    # ✅ Redirige con query param para mostrar modal
     return redirect(url_for('actualizacion_datos', direccion_guardada="1"))
 
 
@@ -340,8 +306,6 @@ def borrar_direccion(id_direccion):
     db.session.commit()
     flash("Dirección eliminada correctamente 🗑️", "success")
     return redirect(url_for('actualizacion_datos', direccion_eliminada=1))
-
-
 
 
 @app.route('/notificaciones', methods=['GET', 'POST'])
@@ -359,9 +323,8 @@ def ver_notificaciones():
             ).delete(synchronize_session=False)
             db.session.commit()
             flash("✅ Notificaciones eliminadas", "success")
-        return redirect(url_for('ver_notificaciones'))  # ✅ sin argumentos posicionales
+        return redirect(url_for('ver_notificaciones'))
 
-    # GET: obtener notificaciones
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
 
@@ -387,6 +350,7 @@ def eliminar_notificaciones():
         db.session.rollback()
         return {"status": "error", "message": f"Error al eliminar: {str(e)}"}, 500
 
+
 @app.route('/test_notificaciones')
 def test_notificaciones():
     user_id = session.get("user_id")
@@ -394,14 +358,12 @@ def test_notificaciones():
         flash("Debes iniciar sesión para probar las notificaciones.", "warning")
         return redirect(url_for('login'))
 
-    # Crear 3 notificaciones de prueba
     crear_notificacion(user_id, "¡Bienvenido de nuevo!", "Esta es una notificación de prueba 1")
     crear_notificacion(user_id, "Promoción especial", "Esta es una notificación de prueba 2")
     crear_notificacion(user_id, "Recordatorio", "Esta es una notificación de prueba 3")
 
     flash("Se han agregado notificaciones de prueba ✅", "success")
     return redirect(url_for('ver_notificaciones'))
-
 
 
 if __name__ == '__main__':
