@@ -36,6 +36,19 @@ s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 db.init_app(app)
 
+
+# Función para crear notificaciones
+def crear_notificacion(user_id, titulo, mensaje):
+    """Crea y guarda una notificación real para un usuario"""
+    noti = Notificaciones(
+        ID_Usuario=user_id,
+        Titulo=titulo,
+        Mensaje=mensaje
+    )
+    db.session.add(noti)
+    db.session.commit()
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -346,12 +359,11 @@ def ver_notificaciones():
             ).delete(synchronize_session=False)
             db.session.commit()
             flash("✅ Notificaciones eliminadas", "success")
-        return redirect(url_for('ver_notificaciones'))
+        return redirect(url_for('ver_notificaciones'))  # ✅ sin argumentos posicionales
 
+    # GET: obtener notificaciones
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
-
-
 
 
 @app.route('/eliminar_notificaciones', methods=['POST'])
@@ -375,16 +387,20 @@ def eliminar_notificaciones():
         db.session.rollback()
         return {"status": "error", "message": f"Error al eliminar: {str(e)}"}, 500
 
-# En tu app.py
-def crear_notificacion(user_id, titulo, mensaje):
-    """Crea y guarda una notificación real para un usuario"""
-    noti = Notificaciones(
-        ID_Usuario=user_id,
-        Titulo=titulo,
-        Mensaje=mensaje
-    )
-    db.session.add(noti)
-    db.session.commit()
+@app.route('/test_notificaciones')
+def test_notificaciones():
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Debes iniciar sesión para probar las notificaciones.", "warning")
+        return redirect(url_for('login'))
+
+    # Crear 3 notificaciones de prueba
+    crear_notificacion(user_id, "¡Bienvenido de nuevo!", "Esta es una notificación de prueba 1")
+    crear_notificacion(user_id, "Promoción especial", "Esta es una notificación de prueba 2")
+    crear_notificacion(user_id, "Recordatorio", "Esta es una notificación de prueba 3")
+
+    flash("Se han agregado notificaciones de prueba ✅", "success")
+    return redirect(url_for('ver_notificaciones'))
 
 
 
