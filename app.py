@@ -324,22 +324,49 @@ def borrar_direccion(id_direccion):
 
 
 
-@app.route('/notificaciones')
-def notificaciones():
-    user_id = session.get('user_id')
+@app.route('/notificaciones', methods=['GET', 'POST'])
+def ver_notificaciones():
+    user_id = session.get("user_id")
     if not user_id:
-        return jsonify({"error": "No autenticado"}), 401
+        return redirect(url_for('login'))
 
-    notis = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
-    return jsonify([
-        {
-            "id": n.ID_Notificacion,
-            "titulo": n.Titulo,
-            "mensaje": n.Mensaje,
-            "fecha": n.Fecha.strftime("%d/%m/%Y %H:%M"),
-            "leida": n.Leida
-        } for n in notis
-    ])
+    if request.method == 'POST':
+        ids = request.form.getlist('ids')
+        if ids:
+            Notificaciones.query.filter(
+                Notificaciones.ID_Usuario == user_id,
+                Notificaciones.ID_Notificacion.in_(ids)
+            ).delete(synchronize_session=False)
+            db.session.commit()
+            flash("✅ Notificaciones eliminadas", "success")
+        return redirect(url_for('ver_notificaciones'))
+
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
+    return render_template("notificaciones.html", notificaciones=notificaciones)
+
+
+
+
+@app.route('/eliminar_notificaciones', methods=['POST'])
+def eliminar_notificaciones():
+    user_id = session.get("user_id")
+    if not user_id:
+        return {"status": "error", "message": "No autorizado"}, 401
+
+    ids = request.json.get("ids", [])
+    if not ids:
+        return {"status": "error", "message": "No seleccionaste ninguna notificación"}, 400
+
+    try:
+        Notificaciones.query.filter(
+            Notificaciones.ID_Notificacion.in_(ids),
+            Notificaciones.ID_Usuario == user_id
+        ).delete(synchronize_session=False)
+        db.session.commit()
+        return {"status": "success", "message": "Notificaciones eliminadas correctamente"}
+    except Exception as e:
+        db.session.rollback()
+        return {"status": "error", "message": f"Error al eliminar: {str(e)}"}, 500
 
 
 
