@@ -104,7 +104,7 @@
     </div>
 
     <!-- Contenido principal del perfil -->
-    <div class="perfil-main col-md-9 col-lg-10">
+       <div class="perfil-main col-md-9 col-lg-10">
       <div class="perfil-card card shadow-sm p-4">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -141,6 +141,12 @@
               <label for="telefono" class="form-label">Teléfono</label>
               <input id="telefono" type="tel" class="form-control" name="telefono" value="{{ usuario.Telefono }}">
             </div>
+            <!-- NUEVO CAMPO DIRECCIÓN -->
+            <div class="col-md-12">
+              <label for="direccion" class="form-label">Dirección</label>
+              <input id="direccion" type="text" class="form-control" name="direccion" value="{{ usuario.Direccion }}" placeholder="Ej: CL 80 SUR 78 G 85">
+            </div>
+          </div>
          
           <button type="submit" class="btn btn-primary mt-3">Guardar cambios</button>
         </form>
