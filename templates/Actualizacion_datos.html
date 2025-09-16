@@ -216,22 +216,30 @@
         </form>
       </div>
 
- 
-      <div class="modal fade" id="modalPerfilGuardado" tabindex="-1" aria-labelledby="modalPerfilGuardadoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content p-4 rounded-4 text-center">
-            <h5 class="modal-title mb-3 text-success fw-bold" id="modalPerfilGuardadoLabel">
-             Cambios guardados
-            </h5>
-            <p>Tus datos se han actualizado correctamente.</p>
-            <div class="d-flex justify-content-center mt-3">
-              <button type="button" class="btn btn-success px-4 rounded-pill" data-bs-dismiss="modal">
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+ <!-- Modal de perfil actualizado -->
+<div class="modal fade" id="modalPerfilGuardado" tabindex="-1" aria-labelledby="modalPerfilGuardadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 rounded-4 text-center">
+      <h5 class="modal-title mb-3 text-success fw-bold" id="modalPerfilGuardadoLabel">
+        Cambios guardados
+      </h5>
+      <p>Tus datos se han actualizado correctamente.</p>
+      <div class="d-flex justify-content-center mt-3">
+        <button type="button" class="btn btn-success px-4 rounded-pill" data-bs-dismiss="modal">
+          Cerrar
+        </button>
       </div>
+    </div>
+  </div>
+</div>
+
+{% if perfil_guardado %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new bootstrap.Modal(document.getElementById('modalPerfilGuardado')).show();
+});
+</script>
+{% endif %}
 
   
       
