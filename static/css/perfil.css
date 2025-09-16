@@ -102,3 +102,46 @@
       background: var(--secondary-green);
        color: #fff; 
       }
+
+        .carousel-container {
+    width: 100%;
+    overflow: hidden;
+    background-color: #c1f38b; /* color rosa similar a tu imagen */
+    padding: 10px 0;
+  }
+
+  .carousel-track {
+    display: flex;
+    width: max-content;
+    animation: scroll 15s linear infinite;
+  }
+
+  .carousel-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 20px;
+    white-space: nowrap;
+    font-weight: 500;
+    color: #4e7b33;
+  }
+
+  .carousel-item i {
+    font-size: 1.5rem;
+  }
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* ajusta según la cantidad de items */
+  }
+
+  /* Para que sea responsive */
+  @media (max-width: 768px) {
+    .carousel-item {
+      margin: 0 10px;
+      font-size: 0.9rem;
+    }
+    .carousel-item i {
+      font-size: 1.2rem;
+    }
+  }
