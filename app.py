@@ -44,41 +44,42 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
+        nombre_completo = request.form.get('name', '').strip()
+        correo = request.form.get('email', '').strip()
+        telefono = request.form.get('phone', '').strip()
         password = request.form.get('password', '').strip()
 
-        if not name or not email or not password:
-            flash('Completa todos los campos')
+        if not nombre_completo or not correo or not password:
+            flash('Nombre, correo y contraseña son obligatorios.', 'warning')
             return render_template('register.html')
 
-        try:
-            if Usuario.query.filter_by(Correo=email).first():
-                flash('Correo ya registrado')
-                return render_template('register.html')
+        # Divide nombre en nombre/apellido si quieres guardar algo por defecto
+        partes = nombre_completo.split(" ", 1)
+        nombre = partes[0]
+        apellido = partes[1] if len(partes) > 1 else ""  # vacío si no puso segundo nombre
 
-            hashed_password = generate_password_hash(password)
-            user = Usuario(
-                Nombre=name,
-                Correo=email,
-                Telefono=phone,
-                Contraseña=hashed_password,
-                Rol='cliente',
-                Activo=True
-            )
-            db.session.add(user)
-            db.session.commit()
-
-            flash('Cuenta creada. ¡Ahora inicia sesión!')
-            return redirect(url_for('login'))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al registrar: {str(e)}')
+        usuario_existente = Usuario.query.filter_by(Correo=correo).first()
+        if usuario_existente:
+            flash('Ya existe una cuenta con ese correo.', 'danger')
             return render_template('register.html')
+
+        nuevo_usuario = Usuario(
+            Nombre=nombre,
+            Apellido=apellido,  # aunque quede vacío no romperá si tu DB lo permite
+            Telefono=telefono,
+            Correo=correo,
+            Direccion=None,  # queda vacío hasta que lo llene en actualización de datos
+            Contraseña=generate_password_hash(password)
+        )
+
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+
+        flash('Cuenta creada correctamente, ahora puedes completar tu información en el perfil.', 'success')
+        return redirect(url_for('login'))
 
     return render_template('register.html')
+
 
 
 
