@@ -25,12 +25,12 @@ class Usuario(db.Model):
     Rol = db.Column(db.String(50), default='cliente')
     Activo = db.Column(db.Boolean, default=True)
 
-    # Relaciones
+    
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
     notificaciones = db.relationship('Notificaciones', backref='usuario', lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
-    direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")  # ✅ relación 1:N
+    direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")  
 
     def __repr__(self):
         return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
