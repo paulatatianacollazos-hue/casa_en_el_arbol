@@ -509,12 +509,10 @@ def catalogo():
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
     data = request.get_json()
-    product_id = data.get("id")
+    product_id = data.get("id")   # 👈 aquí debe ser "id"
 
-    if not product_id or not str(product_id).isdigit():
-        return jsonify({"success": False, "error": "ID inválido"}), 400
-
-    product_id = int(product_id)
+    if not product_id:
+        return jsonify({"success": False, "message": "ID de producto inválido"}), 400
 
     if "cart" not in session:
         session["cart"] = []
@@ -530,17 +528,22 @@ def add_to_cart():
     })
 
 
-
 @app.route("/carrito")
 def carrito():
     ids = session.get("cart", [])
-    # convertir todos a int por seguridad
+
+    # Convertir todos los IDs de la sesión a enteros
     try:
         ids_int = [int(i) for i in ids]
     except Exception:
         ids_int = []
-    productos = Producto.query.filter(Producto.ID_Producto.in_(ids_int)).all() if ids_int else []
+
+    productos = Producto.query.filter(
+        Producto.ID_Producto.in_(ids_int)
+    ).all() if ids_int else []
+
     return render_template("carrito.html", productos=productos)
+
 
 
 @app.route("/remove_from_cart/<int:product_id>", methods=["POST"])
