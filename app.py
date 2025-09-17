@@ -7,6 +7,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
+from flask_login import login_required, current_user
+from functools import wraps
+from flask import redirect, url_for, flash, session
+
+from basedatos.decoradores import role_required
 from basedatos.models import db, Usuario, Direccion, Notificaciones
 
 app = Flask(__name__)
@@ -117,6 +122,7 @@ def login():
     return render_template('login.html')
 
 @app.route('/dashboard')
+@role_required( 'cliente','user')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -389,6 +395,33 @@ def gestion_roles():
     roles_disponibles = ["Admin", "Cliente", "Instalador", "Transportista"]
 
     return render_template("gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
+
+@app.route('/admin_dashboard')
+@login_required
+@role_required('admin')
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+
+@app.route('/dashboard')
+@login_required
+@role_required('cliente')
+def dashboard():
+    return render_template('dashboard.html')
+
+
+@app.route('/instalador_dashboard')
+@login_required
+@role_required('instalador')
+def instalador_dashboard():
+    return render_template('instalador_dashboard.html')
+
+
+@app.route('/transportista_dashboard')
+@login_required
+@role_required('transportista')
+def transportista_dashboard():
+    return render_template('transportista_dashboard.html')
 
 
 if __name__ == '__main__':

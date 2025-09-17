@@ -20,6 +20,9 @@
       {% endif %}
     {% endwith %}
 
+    <!-- Formulario -->
+    <form method="post">
+      
       <div class="mb-3">
         <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
       </div>
@@ -38,7 +41,7 @@
       <a href="{{ url_for('register') }}" class="small text-primary">Regístrate aquí</a>
     </div>
 
-    
+    <!-- Botón cerrar -->
 
      <div class="close-login-btn">
      <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mt-3 w-100">Cerrar </a>
@@ -46,7 +49,7 @@
   </div>
 </div>
 
-
+<!-- Scripts -->
 <script src="{{ url_for('static', filename='js/formularios.js') }}"></script>
 
 {% endblock %}
