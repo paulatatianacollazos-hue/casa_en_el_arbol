@@ -638,7 +638,7 @@ def escribir():
         return redirect(url_for('index'))
     return render_template("escribir.html")
 
-@app.route('/admin_reseñas')
+@app.route('/admin')
 def admin():
     return render_template("administrador/admin_reseñas.html", reviews=reviews)
 # ------------------ MAIN ------------------ #
