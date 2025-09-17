@@ -509,7 +509,7 @@ def catalogo():
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
     data = request.get_json()
-    product_id = data.get("id")   # 👈 aquí debe ser "id"
+    product_id = data.get("id")
 
     if not product_id:
         return jsonify({"success": False, "message": "ID de producto inválido"}), 400
@@ -528,19 +528,16 @@ def add_to_cart():
     })
 
 
+
 @app.route("/carrito")
 def carrito():
     ids = session.get("cart", [])
-
-    # Convertir todos los IDs de la sesión a enteros
     try:
-        ids_int = [int(i) for i in ids]
+        ids_int = [int(i) for i in ids]   # convertir a enteros
     except Exception:
         ids_int = []
 
-    productos = Producto.query.filter(
-        Producto.ID_Producto.in_(ids_int)
-    ).all() if ids_int else []
+    productos = Producto.query.filter(Producto.ID_Producto.in_(ids_int)).all() if ids_int else []
 
     return render_template("carrito.html", productos=productos)
 
