@@ -197,24 +197,31 @@
       </thead>
       <tbody>
         {% for user in usuarios %}
-        <tr>
-          <td data-label="Usuario">{{ user.Nombre }}</td>
-          <td data-label="Correo">{{ user.Correo }}</td>
-          <td data-label="Rol">{{ user.Rol }}</td>
-          <td data-label="Acción">
-            <div class="dropdown">
-              <button class="dropdown-button">Cambiar Rol ▼</button>
-              <div class="dropdown-content">
-                <form action="{{ url_for('cambiar_rol', user_id=user.ID_Usuario) }}" method="POST">
-                  <button type="submit" name="rol" value="admin">Admin</button>
-                  <button type="submit" name="rol" value="cliente">Cliente</button>
-                  <button type="submit" name="rol" value="instalador">Instalador</button>
-                  <button type="submit" name="rol" value="transportista">Transportista</button>
-                </form>
-              </div>
-            </div>
-          </td>
-        </tr>
+       <tr>
+  <td data-label="Usuario">{{ user.Nombre }}</td>
+  <td data-label="Correo">{{ user.Correo }}</td>
+  <td data-label="Rol">{{ user.Rol }}</td>
+  <td data-label="Acción">
+    <div class="dropdown">
+      <button class="dropdown-button">Cambiar Rol ▼</button>
+      <div class="dropdown-content">
+        <form action="{{ url_for('cambiar_rol', user_id=user.ID_Usuario) }}" method="POST">
+          <button type="submit" name="rol" value="admin">Admin</button>
+        </form>
+        <form action="{{ url_for('cambiar_rol', user_id=user.ID_Usuario) }}" method="POST">
+          <button type="submit" name="rol" value="cliente">Cliente</button>
+        </form>
+        <form action="{{ url_for('cambiar_rol', user_id=user.ID_Usuario) }}" method="POST">
+          <button type="submit" name="rol" value="instalador">Instalador</button>
+        </form>
+        <form action="{{ url_for('cambiar_rol', user_id=user.ID_Usuario) }}" method="POST">
+          <button type="submit" name="rol" value="transportista">Transportista</button>
+        </form>
+      </div>
+    </div>
+  </td>
+</tr>
+
         {% endfor %}
       </tbody>
     </table>
