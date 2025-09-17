@@ -1,33 +1,26 @@
-<section style="padding:60px 0; background:#f8f9fa;">
+
+<section style="padding:80px 0; background:#f5f6f8;">
   <div class="container">
-    <h2 class="text-center mb-5 fw-bold text-primary">✨ Catálogo de Productos ✨</h2>
-    <div class="row justify-content-center">
+    <h2 class="text-center mb-5 fw-bold" style="font-size:2.5rem; color:#222;">
+      Catálogo de productos
+    </h2>
+    <div class="row g-4">
       {% for p in productos %}
-      <div class="col-md-3 mb-4 d-flex">
-        <div class="card shadow-lg h-100 border-0 rounded-4 overflow-hidden" 
-             style="transition: transform 0.3s, box-shadow 0.3s;">
-          
-          <!-- Imagen con hover -->
-          <div class="overflow-hidden">
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card catalog-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="catalog-img-wrapper">
             {% if p.imagenes %}
-              <img src="{{ p.imagenes[0].ruta }}" 
-                   class="card-img-top" 
-                   alt="{{ p.NombreProducto }}"
-                   style="object-fit:cover; height:220px; transition: transform 0.4s;">
+              <img src="{{ p.imagenes[0].ruta }}" class="card-img-top catalog-img" alt="{{ p.NombreProducto }}">
             {% else %}
-              <img src="/static/img/placeholder.jpg" 
-                   class="card-img-top" 
-                   alt="Sin imagen"
-                   style="object-fit:cover; height:220px; transition: transform 0.4s;">
+              <img src="/static/img/placeholder.jpg" class="card-img-top catalog-img" alt="Sin imagen">
             {% endif %}
           </div>
-
-          <!-- Cuerpo de la tarjeta -->
-          <div class="card-body text-center">
-            <h5 class="card-title fw-bold text-dark">{{ p.NombreProducto }}</h5>
-            <p class="card-text text-muted mb-1">Material: {{ p.Material }}</p>
-            <p class="card-text text-muted mb-1">Color: {{ p.Color }}</p>
-            <p class="fw-bold fs-5 text-success mt-2">${{ "%.2f"|format(p.PrecioUnidad) }}</p>
+          <div class="card-body d-flex flex-column justify-content-between">
+            <h5 class="card-title product-name">{{ p.NombreProducto }}</h5>
+            <p class="text-muted small mb-1">Material: {{ p.Material }}</p>
+            <p class="text-muted small mb-2">Color: {{ p.Color }}</p>
+            <p class="fw-bold fs-5 text-success mb-3">${{ "%.2f"|format(p.PrecioUnidad) }}</p>
+            <a href="#" class="btn btn-primary w-100 rounded-3 fw-semibold">Ver detalle</a>
           </div>
         </div>
       </div>
@@ -36,16 +29,40 @@
   </div>
 </section>
 
-<!-- Estilos extras -->
 <style>
-  /* Animación al pasar por encima de la card */
-  .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+  .catalog-card {
+    transition: all 0.3s ease-in-out;
+    background: #fff;
   }
-
-  /* Zoom en la imagen */
-  .card:hover img {
+  .catalog-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  }
+  .catalog-img-wrapper {
+    height: 250px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+  }
+  .catalog-img {
+    height: 100%;
+    width: auto;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .catalog-card:hover .catalog-img {
     transform: scale(1.08);
+  }
+  .product-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #222;
+    min-height: 48px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
   }
 </style>
