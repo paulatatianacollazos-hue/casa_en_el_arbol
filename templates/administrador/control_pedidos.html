@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+
   
   <style>
     body {
@@ -21,17 +22,19 @@
       color: #2c3e50;
     }
 
-    .opciones {
-      border: 1px solid #e6e6e6;
-      background-color: #fff;
-      border-radius: 12px;
-      position: fixed;
-      top: 120px;
-      left: 20px;
-      padding: 20px 10px;
-      width: 200px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
+   .opciones {
+  border: 1px solid #e6e6e6;
+  background-color: #fff;
+  border-radius: 12px;
+  position: fixed;  /* lo mantiene fijo */
+  top: 300px;       /* distancia desde arriba (ajústalo según el navbar) */
+  left: 20px;
+  padding: 20px 15px;
+  width: 200px;
+  height: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 
     .opciones .menu-link {
       display: block;
