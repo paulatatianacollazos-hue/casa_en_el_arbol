@@ -505,43 +505,111 @@ def catalogo():
     return render_template("catalogo.html", productos=productos)
 
 
+# ---------------- CARRITO ----------------
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
-    product_id = request.json.get("id")
+    data = request.get_json()
+    product_id = data.get("id")
+
+    if not product_id or not str(product_id).isdigit():
+        return jsonify({"success": False, "error": "ID inválido"}), 400
+
+    product_id = int(product_id)
+
     if "cart" not in session:
         session["cart"] = []
+
     if product_id not in session["cart"]:
         session["cart"].append(product_id)
+
     session.modified = True
-    return jsonify({"cart_count": len(session["cart"])})
+
+    return jsonify({
+        "success": True,
+        "cart_count": len(session["cart"])
+    })
+
+
 
 @app.route("/carrito")
 def carrito():
     ids = session.get("cart", [])
-    productos = Producto.query.filter(Producto.id.in_(ids)).all() if ids else []
+    # convertir todos a int por seguridad
+    try:
+        ids_int = [int(i) for i in ids]
+    except Exception:
+        ids_int = []
+    productos = Producto.query.filter(Producto.ID_Producto.in_(ids_int)).all() if ids_int else []
     return render_template("carrito.html", productos=productos)
+
+
+@app.route("/remove_from_cart/<int:product_id>", methods=["POST"])
+def remove_from_cart(product_id):
+    cart = session.get("cart", [])
+    try:
+        cart = [int(i) for i in cart]
+    except:
+        pass
+    if product_id in cart:
+        cart.remove(product_id)
+        session["cart"] = cart
+        session.modified = True
+        flash("Producto eliminado del carrito", "success")
+    return redirect(url_for("carrito"))
+
 
 # ---------------- FAVORITOS ----------------
 @app.route("/add_to_favorites", methods=["POST"])
 def add_to_favorites():
-    product_id = request.json.get("id")
+    data = request.get_json() or {}
+    try:
+        product_id = int(data.get("id"))
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "ID inválido"}), 400
+
     if "favorites" not in session:
         session["favorites"] = []
-    if product_id not in session["favorites"]:
-        session["favorites"].append(product_id)
+
+    favs = list(map(int, session.get("favorites", [])))
+    if product_id not in favs:
+        favs.append(product_id)
+
+    session["favorites"] = favs
     session.modified = True
-    return jsonify({"fav_count": len(session["favorites"])})
+
+    return jsonify({"success": True, "fav_count": len(session["favorites"])})
+
 
 @app.route("/favoritos")
 def favoritos():
     ids = session.get("favorites", [])
-    productos = Producto.query.filter(Producto.id.in_(ids)).all() if ids else []
+    try:
+        ids_int = [int(i) for i in ids]
+    except Exception:
+        ids_int = []
+    productos = Producto.query.filter(Producto.ID_Producto.in_(ids_int)).all() if ids_int else []
     return render_template("favoritos.html", productos=productos)
 
-# ------------------ Pagos------------------ #
+
+@app.route("/remove_from_favorites/<int:product_id>", methods=["POST"])
+def remove_from_favorites(product_id):
+    favs = session.get("favorites", [])
+    try:
+        favs = [int(i) for i in favs]
+    except:
+        pass
+    if product_id in favs:
+        favs.remove(product_id)
+        session["favorites"] = favs
+        session.modified = True
+        flash("Producto eliminado de favoritos", "success")
+    return redirect(url_for("favoritos"))
+
 @app.route("/pagos")
 def pagos():
     return render_template("pagos.html")
+
+
 
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':

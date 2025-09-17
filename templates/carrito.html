@@ -5,38 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carrito de compras</title>
 
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
 
- 
-  <script defer src="{{ url_for('static', filename='js/storage.js') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
   <style>
-    body {
-  background-color: #f8f9fa;
-}
-
-.table th, .table td {
-  vertical-align: middle;
-}
-
-.table img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.btn-outline-danger {
-  transition: all 0.2s;
-}
-
-.btn-outline-danger:hover {
-  transform: scale(1.05);
-}
-
+    body { background-color: #f8f9fa; }
+    .table th, .table td { vertical-align: middle; }
+    .table img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .btn-outline-danger { transition: all 0.2s; }
+    .btn-outline-danger:hover { transform: scale(1.05); }
   </style>
 </head>
 <body class="container py-4">
@@ -52,7 +34,7 @@
   </nav>
 
   <!-- TÍTULO -->
-  <h3 class="mb-3">Carrito de compras (<span id="cantItems">0</span>)</h3>
+  <h3 class="mb-3">Carrito de compras (<span id="cantItems">{{ productos|length }}</span>)</h3>
 
   <!-- TABLA -->
   <div class="table-responsive">
@@ -66,7 +48,28 @@
           <th></th>
         </tr>
       </thead>
-      <tbody id="tbodyCarrito"></tbody>
+      <tbody id="tbodyCarrito">
+        {% if productos %}
+          {% for p in productos %}
+          <tr data-id="{{ p.ID_Producto }}">
+            <td>
+              <img src="{{ p.imagenes[0].ruta if p.imagenes else '/static/img/placeholder.jpg' }}" alt="{{ p.NombreProducto }}">
+              {{ p.NombreProducto }}
+            </td>
+            <td>${{ "%.0f"|format(p.PrecioUnidad) }}</td>
+            <td>1</td>
+            <td>${{ "%.0f"|format(p.PrecioUnidad) }}</td>
+            <td>
+              <button class="btn btn-outline-danger btn-remove-cart" data-id="{{ p.ID_Producto }}">❌ Eliminar</button>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="text-center">Tu carrito está vacío 🛒</td>
+          </tr>
+        {% endif %}
+      </tbody>
     </table>
   </div>
 
@@ -74,8 +77,10 @@
   <div class="d-flex justify-content-between align-items-center mt-3">
     <button class="btn btn-outline-danger" id="btnVaciar">🗑 Eliminar todo</button>
     <div class="fs-5">
-      Total (<span id="cantArt">0</span> artículo/s): 
-      <strong id="total" class="text-success">$0</strong>
+      Total (<span id="cantArt">{{ productos|length }}</span> artículo/s): 
+      <strong id="total" class="text-success">
+        ${{ "%.0f"|format(productos|sum(attribute='PrecioUnidad')) if productos else 0 }}
+      </strong>
     </div>
   </div>
 
@@ -84,108 +89,50 @@
     <a class="btn btn-primary btn-lg" href="{{ url_for('pagos') }}">Continuar</a>
   </div>
 
-  <!-- MODAL CONFIRMACIÓN -->
-  <div class="modal fade" id="modalVaciar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-4">
-        <div class="modal-header">
-          <h5 class="modal-title">Confirmación</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          ¿Deseas eliminar todos los productos del carrito?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-          <button type="button" class="btn btn-danger" id="confirmVaciar">Sí</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const tbody = document.getElementById("tbodyCarrito");
-  const cantItems = document.getElementById("cantItems");
-  const cantArt = document.getElementById("cantArt");
-  const totalSpan = document.getElementById("total");
+  document.addEventListener("DOMContentLoaded", () => {
+    // Botón eliminar individual
+    document.querySelectorAll(".btn-remove-cart").forEach(button => {
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        const productId = button.dataset.id;
 
-  // Recuperar carrito del localStorage
-  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-  console.log("Carrito desde localStorage:", carrito);
+        fetch("/remove_from_cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: productId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("cart-count").innerText = data.cart_count;
+            // eliminar fila
+            button.closest("tr").remove();
 
-  function renderCarrito() {
-    tbody.innerHTML = "";
-    let total = 0;
-
-    carrito.forEach((p, index) => {
-      const subtotal = p.precio * p.cantidad;
-      total += subtotal;
-
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>
-          <img src="${p.imagen || '/static/img/placeholder.jpg'}" 
-               alt="${p.nombre}" class="me-2">
-          ${p.nombre}
-        </td>
-        <td>$${p.precio.toFixed(2)}</td>
-        <td>
-          <input type="number" min="1" value="${p.cantidad}" 
-            class="form-control text-center" 
-            data-index="${index}">
-        </td>
-        <td>$${subtotal.toFixed(2)}</td>
-        <td>
-          <button class="btn btn-sm btn-danger" data-remove="${index}">🗑</button>
-        </td>
-      `;
-      tbody.appendChild(fila);
+            if (data.cart_count === 0) {
+              document.getElementById("tbodyCarrito").innerHTML =
+                "<tr><td colspan='5' class='text-center'>Tu carrito está vacío 🛒</td></tr>";
+            }
+          }
+        });
+      });
     });
 
-    // Actualizar contadores
-    cantItems.textContent = carrito.length;
-    cantArt.textContent = carrito.reduce((acc, p) => acc + p.cantidad, 0);
-    totalSpan.textContent = `$${total.toFixed(2)}`;
-
-    // Guardar cambios
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-  }
-
-  // Eliminar un producto
-  tbody.addEventListener("click", e => {
-    if (e.target.dataset.remove) {
-      carrito.splice(e.target.dataset.remove, 1);
-      renderCarrito();
-    }
+    // Botón eliminar todo
+    document.getElementById("btnVaciar").addEventListener("click", () => {
+      fetch("/clear_cart", { method: "POST" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("cart-count").innerText = 0;
+          document.getElementById("tbodyCarrito").innerHTML =
+            "<tr><td colspan='5' class='text-center'>Tu carrito está vacío 🛒</td></tr>";
+        }
+      });
+    });
   });
-
-  // Cambiar cantidad
-  tbody.addEventListener("input", e => {
-    if (e.target.type === "number") {
-      const index = e.target.dataset.index;
-      carrito[index].cantidad = parseInt(e.target.value) || 1;
-      renderCarrito();
-    }
-  });
-
-  // Vaciar carrito
-  document.getElementById("btnVaciar").addEventListener("click", () => {
-    const modal = new bootstrap.Modal(document.getElementById("modalVaciar"));
-    modal.show();
-  });
-
-  document.getElementById("confirmVaciar").addEventListener("click", () => {
-    carrito = [];
-    renderCarrito();
-    bootstrap.Modal.getInstance(document.getElementById("modalVaciar")).hide();
-  });
-
-  renderCarrito();
-});
-</script>
-
+  </script>
 </body>
 </html>
