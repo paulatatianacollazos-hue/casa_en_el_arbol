@@ -1,6 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -25,18 +24,15 @@ class Usuario(UserMixin, db.Model):
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
     direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")
 
-    # ✅ Esto ya está bien
     def get_id(self):
         return str(self.ID_Usuario)
 
-    # ✅ Agrega esto para compatibilidad con current_user.id
     @property
     def id(self):
         return self.ID_Usuario
 
     def __repr__(self):
         return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
-
 
 
 class Direccion(db.Model):
@@ -66,8 +62,8 @@ class Proveedor(db.Model):
     Pais = db.Column(db.String(50))
     CargoContacto = db.Column(db.String(50))
 
-    # Relaciones
-    productos = db.relationship('Producto', backref='proveedor', lazy=True)
+    # Relación con productos
+    productos = db.relationship('Producto', back_populates='proveedor', lazy=True)
 
     def __repr__(self):
         return f'<Proveedor {self.NombreEmpresa}>'
@@ -80,33 +76,47 @@ class Categorias(db.Model):
     NombreCategoria = db.Column(db.String(100), nullable=False)
     Descripcion = db.Column(db.Text)
 
-    # Relaciones
-    productos = db.relationship('Producto', backref='categoria', lazy=True)
+    # Relación con productos
+    productos = db.relationship('Producto', back_populates='categoria', lazy=True)
 
     def __repr__(self):
         return f'<Categoria {self.NombreCategoria}>'
 
 
 class Producto(db.Model):
-    __tablename__ = 'producto'
-    ID_Producto = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    NombreProducto = db.Column(db.String(100))
-    Stock = db.Column(db.Integer)
-    Material = db.Column(db.String(50))
-    PrecioUnidad = db.Column(db.Float)
-    Color = db.Column(db.String(50))
-    ID_Proveedor = db.Column(db.Integer)
-    ID_Categoria = db.Column(db.Integer)
+    __tablename__ = 'Producto'
 
-    imagenes = db.relationship("ImagenProducto", backref="producto", lazy=True)
+    ID_Producto = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    NombreProducto = db.Column(db.String(100), nullable=False)
+    Stock = db.Column(db.Integer, nullable=False)
+    Material = db.Column(db.String(50))
+    PrecioUnidad = db.Column(db.Float, nullable=False)
+    Color = db.Column(db.String(30))
+
+    # Claves foráneas
+    ID_Proveedor = db.Column(db.Integer, db.ForeignKey('Proveedor.ID_Proveedor'), nullable=False)
+    ID_Categoria = db.Column(db.Integer, db.ForeignKey('Categorias.ID_Categoria'), nullable=True)
+
+    # Relaciones
+    proveedor = db.relationship('Proveedor', back_populates='productos')
+    categoria = db.relationship('Categorias', back_populates='productos')
+    imagenes = db.relationship('ImagenProducto', backref='producto', lazy=True)
+    novedades = db.relationship('Novedades', backref='producto', lazy=True)
+    detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
+
+    def __repr__(self):
+        return f"<Producto {self.NombreProducto}>"
 
 
 class ImagenProducto(db.Model):
-    __tablename__ = 'imagenproducto'
+    __tablename__ = 'ImagenProducto'
+
     ID_Imagen = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ruta = db.Column(db.String(200), nullable=False)
-    ID_Producto = db.Column(db.Integer, db.ForeignKey('producto.ID_Producto'), nullable=False)
+    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), nullable=False)
 
+    def __repr__(self):
+        return f"<ImagenProducto {self.ruta}>"
 
 
 class Calendario(db.Model):
@@ -116,14 +126,12 @@ class Calendario(db.Model):
     Fecha = db.Column(db.Date)
     Hora = db.Column(db.Time)
     Ubicacion = db.Column(db.String(200))
-    Tipo = db.Column(db.String(50), default="Instalación")  
+    Tipo = db.Column(db.String(50), default="Instalación")
 
-    # Clave foránea
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
     def __repr__(self):
         return f'<Calendario {self.ID_Calendario}>'
-
 
 
 class Notificaciones(db.Model):
@@ -135,7 +143,6 @@ class Notificaciones(db.Model):
     Fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
     Leida = db.Column(db.Boolean, default=False)
 
-    # Clave foránea
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
     def __repr__(self):
@@ -150,7 +157,6 @@ class Novedades(db.Model):
     EstadoNovedad = db.Column(db.String(50))
     FechaReporte = db.Column(db.Date)
 
-    # Claves foráneas
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), nullable=False)
 
@@ -169,10 +175,8 @@ class Pedido(db.Model):
     Destino = db.Column(db.String(200))
     Descuento = db.Column(db.Float)
 
-    # Clave foránea
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
-    # Relaciones
     pagos = db.relationship('Pagos', backref='pedido', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='pedido', lazy=True)
 
@@ -188,7 +192,6 @@ class Pagos(db.Model):
     FechaPago = db.Column(db.Date)
     Monto = db.Column(db.Float)
 
-    # Clave foránea
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), nullable=False)
 
     def __repr__(self):

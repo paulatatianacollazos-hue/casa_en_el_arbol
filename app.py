@@ -14,7 +14,7 @@ from flask_login import (
 
 from functools import wraps
 
-from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario
+from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,Producto
 
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
@@ -495,6 +495,15 @@ def confirmacion():
 def lista():
     citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
     return render_template("lista.html", citas=citas)
+
+# ------------------Catalogo ------------------ #
+
+@app.route('/catalogo')
+@login_required
+def catalogo():
+    productos = Producto.query.all() 
+    return render_template("catalogo.html", productos=productos)
+
 
 
 # ------------------ MAIN ------------------ #
