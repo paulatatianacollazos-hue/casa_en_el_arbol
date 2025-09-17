@@ -144,6 +144,102 @@ def obtener_todos_los_pedidos():
     return list(pedidos_dict.values())
 
 
+def todos_los_pedidos():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="tu_password",
+        database="tienda_db"
+    )
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            p.ID_Pedido,
+            p.FechaPedido,
+            p.FechaEntrega,
+            p.Estado,
+            u.Nombre AS Cliente,
+            u.Apellido AS ApellidoCliente
+        FROM Pedido p
+        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+        ORDER BY p.FechaPedido DESC
+    """)
+
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return resultados
+
+def detalle():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="tu_password",
+        database="tienda_db"
+    )
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            p.ID_Pedido,
+            u.Nombre AS Nombre_Cliente,
+            u.Apellido AS Apellido_Cliente,
+            u.Telefono,
+            u.Direccion,
+            pr.NombreProducto AS Producto,
+            dp.Cantidad
+        FROM Pedido p
+        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+        JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
+        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        ORDER BY p.FechaPedido DESC
+    """)
+
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    agrupado = {}
+    for row in resultados:
+        pid = row['ID_Pedido']
+        if pid not in agrupado:
+            agrupado[pid] = {
+                'Nombre_Cliente': f"{row['Nombre_Cliente']} {row['Apellido_Cliente']}",
+                'Telefono': row['Telefono'],
+                'Direccion': row['Direccion'],
+                'Productos': []
+            }
+        agrupado[pid]['Productos'].append({
+            'Producto': row['Producto'],
+            'Cantidad': row['Cantidad']
+        })
+
+    return agrupado
+
+def obtener_empleados():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="tu_password",
+        database="tienda_db"
+    )
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT 
+            e.ID_Empleado, 
+            u.Nombre, 
+            u.Apellido, 
+            u.Telefono
+        FROM Empleado e
+        JOIN Usuario u ON e.ID_Usuario = u.ID_Usuario
+    """)
+
+    empleados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return empleados
 
 # ------------------ FUNCIONES ------------------ #
 def crear_notificacion(user_id, titulo, mensaje):
@@ -722,6 +818,16 @@ def escribir():
 @app.route('/admin')
 def admin():
     return render_template("administrador/admin_reseñas.html", reviews=reviews)
+
+# ------------------ Asignacion de transportista------------------ #
+
+@app.route('/envios')
+def envios():
+    pedidos = obtener_todos_los_pedidos()
+    detalles = detalle()
+    empleados = obtener_empleados()
+    return render_template('envios.html', pedidos=pedidos, detalles=detalles,
+                           empleados=empleados)
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
     app.run(debug=True)
