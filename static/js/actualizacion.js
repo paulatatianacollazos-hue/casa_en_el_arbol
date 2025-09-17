@@ -1,71 +1,83 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const menuPerfil = document.getElementById('menu-perfil');
-  const menuDirecciones = document.getElementById('menu-direcciones');
-  const seccionPerfil = document.getElementById('seccion-perfil');
-  const seccionDirecciones = document.getElementById('seccion-direcciones');
+document.addEventListener("DOMContentLoaded", function () {
+  // --- Menús ---
+  const menuPerfil = document.getElementById("menu-perfil");
+  const menuDirecciones = document.getElementById("menu-direcciones");
+  const menuFavoritos = document.getElementById("menu-favoritos");
+  const iconoFavoritos = document.getElementById("icono-favoritos");
+
+  // --- Secciones ---
+  const seccionPerfil = document.getElementById("seccion-perfil");
+  const seccionDirecciones = document.getElementById("seccion-direcciones");
+  const seccionFavoritos = document.getElementById("seccion-favoritos");
+
+  // --- Variables para confirmación de borrado ---
   let formPendienteBorrar = null;
   let itemPendienteBorrar = null;
 
-  function activarMenu(seccion) {
-    if (seccion === 'perfil') {
-      seccionPerfil.style.display = 'block';
-      seccionDirecciones.style.display = 'none';
-      menuPerfil.classList.add('active');
-      menuDirecciones.classList.remove('active');
-    } else {
-      seccionPerfil.style.display = 'none';
-      seccionDirecciones.style.display = 'block';
-      menuPerfil.classList.remove('active');
-      menuDirecciones.classList.add('active');
-    }
+  // --- Mostrar secciones ---
+  function mostrarSeccion(seccion) {
+    // Ocultar todas
+    seccionPerfil.style.display = "none";
+    seccionDirecciones.style.display = "none";
+    seccionFavoritos.style.display = "none";
+
+    // Mostrar la seleccionada
+    seccion.style.display = "block";
+
+    // Quitar "active" de todos los menús
+    [menuPerfil, menuDirecciones, menuFavoritos].forEach(m => m.classList.remove("active"));
+
+    // Agregar "active" al que corresponda
+    if (seccion === seccionPerfil) menuPerfil.classList.add("active");
+    if (seccion === seccionDirecciones) menuDirecciones.classList.add("active");
+    if (seccion === seccionFavoritos) menuFavoritos.classList.add("active");
   }
 
   // --- Eventos de menú ---
-  menuPerfil.addEventListener('click', e => { e.preventDefault(); activarMenu('perfil'); });
-  menuDirecciones.addEventListener('click', e => { e.preventDefault(); activarMenu('direcciones'); });
+  menuPerfil?.addEventListener("click", e => { e.preventDefault(); mostrarSeccion(seccionPerfil); });
+  menuDirecciones?.addEventListener("click", e => { e.preventDefault(); mostrarSeccion(seccionDirecciones); });
+  menuFavoritos?.addEventListener("click", e => { e.preventDefault(); mostrarSeccion(seccionFavoritos); });
+  iconoFavoritos?.addEventListener("click", e => { e.preventDefault(); mostrarSeccion(seccionFavoritos); });
 
   // --- Analizar parámetros de la URL ---
   const params = new URLSearchParams(window.location.search);
 
-  // Si se guardó dirección -> mostrar modal y abrir direcciones
   if (params.get("direccion_guardada") === "1") {
-    const modal = new bootstrap.Modal(document.getElementById('modalGuardado'));
+    const modal = new bootstrap.Modal(document.getElementById("modalGuardado"));
     modal.show();
-    activarMenu('direcciones');
+    mostrarSeccion(seccionDirecciones);
   }
 
-  // Si se eliminó dirección -> mostrar modal y abrir direcciones
   if (params.get("direccion_eliminada") === "1") {
-    const modalEliminado = new bootstrap.Modal(document.getElementById('modalEliminado'));
+    const modalEliminado = new bootstrap.Modal(document.getElementById("modalEliminado"));
     modalEliminado.show();
-    activarMenu('direcciones');
+    mostrarSeccion(seccionDirecciones);
   }
 
-  // Si se guardó perfil -> mostrar modal y abrir perfil
   if (params.get("perfil_guardado") === "1") {
-    const modal = new bootstrap.Modal(document.getElementById('modalPerfilGuardado'));
+    const modal = new bootstrap.Modal(document.getElementById("modalPerfilGuardado"));
     modal.show();
-    activarMenu('perfil');
+    mostrarSeccion(seccionPerfil);
   }
 
   // --- Interceptar formularios de borrar dirección ---
   const deleteForms = document.querySelectorAll('form[action*="borrar_direccion"]');
   deleteForms.forEach(form => {
-    form.addEventListener('submit', function (e) {
+    form.addEventListener("submit", function (e) {
       e.preventDefault();
       formPendienteBorrar = this;
-      itemPendienteBorrar = this.closest('.list-group-item');
+      itemPendienteBorrar = this.closest(".list-group-item");
 
-      const modalConfirm = new bootstrap.Modal(document.getElementById('modalConfirmarBorrar'));
+      const modalConfirm = new bootstrap.Modal(document.getElementById("modalConfirmarBorrar"));
       modalConfirm.show();
     });
   });
 
   // --- Confirmar eliminación ---
-  document.getElementById('btnConfirmarBorrar').addEventListener('click', function () {
+  document.getElementById("btnConfirmarBorrar")?.addEventListener("click", function () {
     if (formPendienteBorrar) {
       // Animación visual antes de enviar
-      itemPendienteBorrar.classList.add('fade');
+      itemPendienteBorrar.classList.add("fade");
       itemPendienteBorrar.style.opacity = 0;
 
       setTimeout(() => {

@@ -505,6 +505,23 @@ def catalogo():
     return render_template("catalogo.html", productos=productos)
 
 
+# ------------------Favoritos------------------ #
+@app.route("/favoritos")
+def favoritos():
+    return render_template("favoritos.html")
+
+
+# ------------------Carrito ------------------ #
+@app.route("/carrito")
+def carrito():
+    return render_template("carrito.html")
+
+
+# ------------------Pagos ------------------ #
+@app.route("/pagos")
+def pagos():
+    return render_template("pagos.html")
+
 
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
