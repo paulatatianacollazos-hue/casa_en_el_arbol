@@ -345,17 +345,6 @@ def ver_notificaciones_cliente():
     return render_template("notificaciones_cliente.html", notificaciones=notificaciones)
 
 
-@app.route('/eliminar_notificaciones_cliente', methods=['POST'])
-@login_required
-def eliminar_notificaciones_cliente():
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
-    
-    for n in notificaciones:
-        db.session.delete(n)
-    db.session.commit()
-    
-    flash("✅ Todas las notificaciones de cliente fueron eliminadas", "success")
-    return redirect(url_for('ver_notificaciones_cliente'))
 
 
 # ---------------------------
