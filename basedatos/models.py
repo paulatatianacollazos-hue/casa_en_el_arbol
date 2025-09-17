@@ -1,18 +1,11 @@
-import os
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 from flask_login import UserMixin
-db = SQLAlchemy()
-
-
-import os
-from flask_sqlalchemy import SQLAlchemy
-
+from datetime import datetime
 
 db = SQLAlchemy()
 
 
-class Usuario(db.Model):
+class Usuario(UserMixin, db.Model):
     __tablename__ = 'Usuario'
 
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -25,15 +18,15 @@ class Usuario(db.Model):
     Rol = db.Column(db.String(50), default='cliente')
     Activo = db.Column(db.Boolean, default=True)
 
-    
+    # Relaciones
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
     notificaciones = db.relationship('Notificaciones', backref='usuario', lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
-    direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")  
+    direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")
 
     def get_id(self):
-        return str(self.ID_Usuario)  # Flask-Login necesita este método
+        return str(self.ID_Usuario)
 
     def __repr__(self):
         return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
@@ -55,9 +48,10 @@ class Direccion(db.Model):
     def __repr__(self):
         return f'<Direccion {self.Direccion}, {self.Ciudad}>'
 
-    
+
 class Proveedor(db.Model):
     __tablename__ = 'Proveedor'
+
     ID_Proveedor = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreEmpresa = db.Column(db.String(100), nullable=False)
     NombreContacto = db.Column(db.String(100))
@@ -71,8 +65,10 @@ class Proveedor(db.Model):
     def __repr__(self):
         return f'<Proveedor {self.NombreEmpresa}>'
 
+
 class Categorias(db.Model):
     __tablename__ = 'Categorias'
+
     ID_Categoria = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreCategoria = db.Column(db.String(100), nullable=False)
     Descripcion = db.Column(db.Text)
@@ -83,8 +79,10 @@ class Categorias(db.Model):
     def __repr__(self):
         return f'<Categoria {self.NombreCategoria}>'
 
+
 class Producto(db.Model):
     __tablename__ = 'Producto'
+
     ID_Producto = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreProducto = db.Column(db.String(100), nullable=False)
     Stock = db.Column(db.Integer)
@@ -103,8 +101,10 @@ class Producto(db.Model):
     def __repr__(self):
         return f'<Producto {self.NombreProducto}>'
 
+
 class Calendario(db.Model):
     __tablename__ = 'Calendario'
+
     ID_Calendario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Fecha = db.Column(db.Date)
     Hora = db.Column(db.Time)
@@ -116,6 +116,7 @@ class Calendario(db.Model):
     def __repr__(self):
         return f'<Calendario {self.ID_Calendario}>'
 
+
 class Notificaciones(db.Model):
     __tablename__ = 'Notificaciones'
 
@@ -124,6 +125,8 @@ class Notificaciones(db.Model):
     Mensaje = db.Column(db.Text, nullable=False)
     Fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
     Leida = db.Column(db.Boolean, default=False)
+
+    # Clave foránea
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
     def __repr__(self):
@@ -132,6 +135,7 @@ class Notificaciones(db.Model):
 
 class Novedades(db.Model):
     __tablename__ = 'Novedades'
+
     ID_Novedad = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Tipo = db.Column(db.String(50))
     EstadoNovedad = db.Column(db.String(50))
@@ -144,8 +148,10 @@ class Novedades(db.Model):
     def __repr__(self):
         return f'<Novedad {self.ID_Novedad}>'
 
+
 class Pedido(db.Model):
     __tablename__ = 'Pedido'
+
     ID_Pedido = db.Column(db.Integer, primary_key=True, autoincrement=True)
     NombreComprador = db.Column(db.String(100))
     Estado = db.Column(db.String(50))
@@ -164,8 +170,10 @@ class Pedido(db.Model):
     def __repr__(self):
         return f'<Pedido {self.ID_Pedido}>'
 
+
 class Pagos(db.Model):
     __tablename__ = 'Pagos'
+
     ID_Pagos = db.Column(db.Integer, primary_key=True, autoincrement=True)
     MetodoPago = db.Column(db.String(50))
     FechaPago = db.Column(db.Date)
@@ -177,8 +185,10 @@ class Pagos(db.Model):
     def __repr__(self):
         return f'<Pago {self.ID_Pagos}>'
 
+
 class Detalle_Pedido(db.Model):
     __tablename__ = 'Detalle_Pedido'
+
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), primary_key=True)
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), primary_key=True)
     Cantidad = db.Column(db.Integer)
