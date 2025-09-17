@@ -360,7 +360,7 @@ def gestion_roles():
 
     usuarios = Usuario.query.all()
     roles_disponibles = ["admin", "cliente", "instalador", "transportista"]
-    return render_template("gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
+    return render_template("administrador/gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
 
 # ---------- Dashboards ----------
 @app.route('/admin_dashboard')
