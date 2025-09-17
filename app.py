@@ -129,7 +129,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        correo = request.form.get('correo')
+        correo = request.form.get('correo') or request.form.get('email')  # soporta ambos nombres
         password = request.form.get('password')
 
         usuario = Usuario.query.filter_by(Correo=correo).first()
@@ -137,29 +137,26 @@ def login():
             login_user(usuario)
             flash("✅ Inicio de sesión exitoso", "success")
 
-            if usuario.Rol == 'admin':
+            # redirigir segun rol
+            rol = (usuario.Rol or "").lower()
+            if rol == 'admin':
                 return redirect(url_for('admin_dashboard'))
-            elif usuario.Rol == 'cliente':
-                return redirect(url_for('dashboard'))
-            elif usuario.Rol == 'instalador':
+            if rol == 'instalador':
                 return redirect(url_for('instalador_dashboard'))
-            elif usuario.Rol == 'transportista':
+            if rol == 'transportista':
                 return redirect(url_for('transportista_dashboard'))
-            else:
-                flash("⚠️ Rol desconocido, contacta al administrador.", "warning")
-                return redirect(url_for('login'))
+            # por defecto cliente
+            return redirect(url_for('dashboard'))
         else:
             flash("❌ Correo o contraseña incorrectos", "danger")
             return render_template('login.html')
 
     return render_template('login.html')
 
-
 # ---------- Página Nosotros ----------
 @app.route('/nosotros')
 def nosotros():
     return render_template('nosotros.html')
-
 
 # ---------- Logout ----------
 @app.route('/logout')
@@ -226,8 +223,7 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 
-
-# ---------- Actualización de datos ----------
+# ---------- Actualización de datos (perfil) ----------
 @app.route('/actualizacion_datos', methods=['GET', 'POST'])
 @login_required
 @role_required('cliente', 'instalador', 'transportista', 'admin')
@@ -272,12 +268,20 @@ def actualizacion_datos():
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
+        # indicar que muestre modal de éxito en la siguiente carga
+        session['show_update_success'] = True
         flash('✅ Perfil actualizado correctamente', 'success')
 
+        return redirect(url_for('actualizacion_datos'))
+
+    # limpiar flag si viene por GET
+    show_update = session.pop('show_update_success', False)
     return render_template('Actualizacion_datos.html',
                            usuario=usuario,
                            direcciones=direcciones,
-                           notificaciones=notificaciones)
+                           notificaciones=notificaciones,
+                           show_update_success=show_update)
+
 
 # ---------- Direcciones ----------
 @app.route('/agregar_direccion', methods=['POST'])
@@ -285,9 +289,9 @@ def actualizacion_datos():
 def agregar_direccion():
     nueva_direccion = Direccion(
         ID_Usuario=current_user.ID_Usuario,
-        Pais="Colombia",
-        Departamento="Bogotá, D.C.",
-        Ciudad="Bogotá",
+        Pais=request.form.get('pais', 'Colombia'),
+        Departamento=request.form.get('departamento', 'Bogotá, D.C.'),
+        Ciudad=request.form.get('ciudad', 'Bogotá'),
         Direccion=request.form.get('direccion'),
         InfoAdicional=request.form.get('infoAdicional'),
         Barrio=request.form.get('barrio'),
@@ -302,12 +306,20 @@ def agregar_direccion():
         mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
     )
 
+    # flag para modal de éxito
+    session['show_address_saved'] = True
     return redirect(url_for('actualizacion_datos'))
+
 
 @app.route('/borrar_direccion/<int:id_direccion>', methods=['POST'])
 @login_required
 def borrar_direccion(id_direccion):
     direccion = Direccion.query.get_or_404(id_direccion)
+    # comprobar que la direccion pertenece al usuario (o si admin, permitir)
+    if direccion.ID_Usuario != current_user.ID_Usuario and current_user.Rol.lower() != 'admin':
+        flash("❌ No autorizado para eliminar esta dirección.", "danger")
+        return redirect(url_for('actualizacion_datos'))
+
     db.session.delete(direccion)
     db.session.commit()
 
@@ -317,13 +329,12 @@ def borrar_direccion(id_direccion):
         mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
     )
 
-    flash("Dirección eliminada correctamente 🗑️", "success")
+    # flag para modal de eliminado
+    session['show_address_deleted'] = True
     return redirect(url_for('actualizacion_datos'))
 
+
 # ---------- Notificaciones ----------
-# ---------------------------
-# 📌 NOTIFICACIONES CLIENTE
-# ---------------------------
 @app.route('/notificaciones', methods=['GET', 'POST'])
 @login_required
 def ver_notificaciones_cliente():
@@ -341,7 +352,7 @@ def ver_notificaciones_cliente():
     notificaciones = Notificaciones.query.filter_by(
         ID_Usuario=current_user.ID_Usuario
     ).order_by(Notificaciones.Fecha.desc()).all()
-    
+
     return render_template("notificaciones_cliente.html", notificaciones=notificaciones)
 
 
@@ -349,50 +360,12 @@ def ver_notificaciones_cliente():
 @login_required
 def eliminar_notificaciones_cliente():
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
-    
     for n in notificaciones:
         db.session.delete(n)
     db.session.commit()
-    
     flash("✅ Todas las notificaciones de cliente fueron eliminadas", "success")
     return redirect(url_for('ver_notificaciones_cliente'))
 
-
-# ---------------------------
-# 📌 NOTIFICACIONES ADMIN
-# ---------------------------
-@app.route('/notificaciones_admin', methods=['GET', 'POST'])
-@login_required
-def ver_notificaciones_admin():
-    if request.method == 'POST':
-        ids = request.form.getlist('ids')
-        if ids:
-            Notificaciones.query.filter(
-                Notificaciones.ID_Usuario == current_user.ID_Usuario,
-                Notificaciones.ID_Notificacion.in_(ids)
-            ).delete(synchronize_session=False)
-            db.session.commit()
-            flash("✅ Notificaciones de admin eliminadas", "success")
-        return redirect(url_for('ver_notificaciones_admin'))
-
-    notificaciones = Notificaciones.query.filter_by(
-        ID_Usuario=current_user.ID_Usuario
-    ).order_by(Notificaciones.Fecha.desc()).all()
-    
-    return render_template("notificaciones_admin.html", notificaciones=notificaciones)
-
-
-@app.route('/eliminar_notificaciones_admin', methods=['POST'])
-@login_required
-def eliminar_notificaciones_admin():
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
-    
-    for n in notificaciones:
-        db.session.delete(n)
-    db.session.commit()
-    
-    flash("✅ Todas las notificaciones de admin fueron eliminadas", "success")
-    return redirect(url_for('ver_notificaciones_admin'))
 
 # ---------- Gestión de roles ----------
 @app.route('/gestion_roles', methods=['GET', 'POST'])
@@ -417,6 +390,7 @@ def gestion_roles():
     usuarios = Usuario.query.all()
     roles_disponibles = ["admin", "cliente", "instalador", "transportista"]
     return render_template("administrador/gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
+
 
 # ---------- Dashboards ----------
 @app.route('/admin_dashboard')
@@ -443,21 +417,22 @@ def instalador_dashboard():
 def transportista_dashboard():
     return render_template('transportista_dashboard.html')
 
-# ---------- Cambiar rol ----------
 
+# ---------- Cambiar rol (POST desde boton) ----------
 @app.route('/cambiar_rol/<int:user_id>', methods=['POST'])
 @login_required
+@role_required('admin')
 def cambiar_rol(user_id):
     nuevo_rol = request.form['rol']
     usuario = Usuario.query.get(user_id)  # Busca el usuario en la tabla
-    
+
     if usuario:
         usuario.Rol = nuevo_rol  # Cambia el rol
         db.session.commit()      # Guarda cambios en la BD
         flash(f"✅ Rol de {usuario.Nombre} cambiado a {nuevo_rol}", "success")
     else:
         flash("❌ Usuario no encontrado", "danger")
-    
+
     return redirect(url_for('gestion_roles'))
 
 
