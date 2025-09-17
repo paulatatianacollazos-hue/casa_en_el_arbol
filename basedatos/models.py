@@ -88,25 +88,25 @@ class Categorias(db.Model):
 
 
 class Producto(db.Model):
-    __tablename__ = 'Producto'
-
+    __tablename__ = 'producto'
     ID_Producto = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    NombreProducto = db.Column(db.String(100), nullable=False)
+    NombreProducto = db.Column(db.String(100))
     Stock = db.Column(db.Integer)
     Material = db.Column(db.String(50))
-    Color = db.Column(db.String(30))
     PrecioUnidad = db.Column(db.Float)
+    Color = db.Column(db.String(50))
+    ID_Proveedor = db.Column(db.Integer)
+    ID_Categoria = db.Column(db.Integer)
 
-    # Claves foráneas
-    ID_Categoria = db.Column(db.Integer, db.ForeignKey('Categorias.ID_Categoria'), nullable=False)
-    ID_Proveedor = db.Column(db.Integer, db.ForeignKey('Proveedor.ID_Proveedor'), nullable=False)
+    imagenes = db.relationship("ImagenProducto", backref="producto", lazy=True)
 
-    # Relaciones
-    detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
-    novedades = db.relationship('Novedades', backref='producto', lazy=True)
 
-    def __repr__(self):
-        return f'<Producto {self.NombreProducto}>'
+class ImagenProducto(db.Model):
+    __tablename__ = 'imagenproducto'
+    ID_Imagen = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ruta = db.Column(db.String(200), nullable=False)
+    ID_Producto = db.Column(db.Integer, db.ForeignKey('producto.ID_Producto'), nullable=False)
+
 
 
 class Calendario(db.Model):
