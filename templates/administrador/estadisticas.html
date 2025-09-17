@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Estadísticas</title>
+  
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- CSS propio -->
+  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- JS propio -->
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body class="container py-4">
+  
+  <h3>Estadísticas de satisfacción</h3>
+  
+  <!-- Filtros -->
+  <form id="filtros" class="row g-3 mb-3">
+    <div class="col-md-3">
+      <label>Desde</label>
+      <input type="date" class="form-control" name="desde">
+    </div>
+    <div class="col-md-3">
+      <label>Hasta</label>
+      <input type="date" class="form-control" name="hasta">
+    </div>
+    <div class="col-md-2">
+      <label>Canal</label>
+      <select class="form-select" name="canal">
+        <option>Todos</option>
+        <option>web</option>
+        <option>app</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label>Tipo.P</label>
+      <select class="form-select" name="segmento">
+        <option>Todos</option>
+        <option>retail</option>
+        <option>Stock.Com</option>
+      </select>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="button" id="btnGen" class="btn btn-primary">Generar estadísticas</button>
+    </div>
+  </form>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>% Positivas</h6>
+        <canvas id="pie"></canvas>
+        <div id="txtTotal" class="text-muted mt-2"></div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card p-3">
+        <h6>Compras por mes</h6>
+        <canvas id="bars"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card mt-3 p-3">
+    <h6>Comentarios negativos por producto</h6>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Negativos</th>
+        </tr>
+      </thead>
+      <tbody id="negTable"></tbody>
+    </table>
+  </div>
+
+</body>
+</html>

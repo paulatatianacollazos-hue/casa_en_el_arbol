@@ -505,76 +505,117 @@ def catalogo():
     return render_template("catalogo.html", productos=productos)
 
 
-# --- AGREGAR AL CARRITO ---
+# ---------------- CARRITO ----------------
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
+    data = request.get_json()
+
+    try:
+        product_id = int(data.get("id"))  # 🔹 convertir a int aquí
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "ID inválido"}), 400
+
+    if "cart" not in session:
+        session["cart"] = []
+
+    if product_id not in session["cart"]:
+        session["cart"].append(product_id)
+
+    session.modified = True
+
+    return jsonify({
+        "success": True,
+        "cart_count": len(session["cart"])
+    })
+
+
+
+@app.route("/carrito")
+def carrito():
+    ids = session.get("cart", [])
+
+    try:
+        ids = [int(i) for i in ids]
+    except:
+        ids = []
+
+    productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
+
+    print("🛒 Productos encontrados:", [p.NombreProducto for p in productos])
+
+    return render_template("carrito.html", productos=productos)
+
+
+
+@app.route("/remove_from_cart/<int:product_id>", methods=["POST"])
+def remove_from_cart(product_id):
+    cart = session.get("cart", [])
+    try:
+        cart = [int(i) for i in cart]
+    except:
+        pass
+    if product_id in cart:
+        cart.remove(product_id)
+        session["cart"] = cart
+        session.modified = True
+        flash("Producto eliminado del carrito", "success")
+    return redirect(url_for("carrito"))
+
+
+# ---------------- FAVORITOS ----------------
+@app.route("/add_to_favorites", methods=["POST"])
+def add_to_favorites():
     data = request.get_json() or {}
     try:
         product_id = int(data.get("id"))
     except (TypeError, ValueError):
         return jsonify({"success": False, "message": "ID inválido"}), 400
 
-    cart = list(map(int, session.get("cart", [])))
-    if product_id not in cart:
-        cart.append(product_id)
+    if "favorites" not in session:
+        session["favorites"] = []
 
-    session["cart"] = cart
+    favs = list(map(int, session.get("favorites", [])))
+    if product_id not in favs:
+        favs.append(product_id)
+
+    session["favorites"] = favs
     session.modified = True
 
-    return jsonify({
-        "success": True,
-        "cart_count": len(cart)
-    })
+    return jsonify({"success": True, "fav_count": len(session["favorites"])})
 
 
-# --- MOSTRAR EL CARRITO ---
-@app.route("/carrito")
-def carrito():
-    ids = session.get("cart", [])
+@app.route("/favoritos")
+def favoritos():
+    ids = session.get("favorites", [])
     try:
         ids_int = [int(i) for i in ids]
     except Exception:
         ids_int = []
-
-    print("IDs en carrito:", ids_int)  # 👈 Depuración
-
-    productos = Producto.query.filter(Producto.id.in_(ids_int)).all() if ids_int else []
-    return render_template("carrito.html", productos=productos)
+    productos = Producto.query.filter(Producto.ID_Producto.in_(ids_int)).all() if ids_int else []
+    return render_template("favoritos.html", productos=productos)
 
 
-# --- ELIMINAR UN PRODUCTO DEL CARRITO ---
-@app.route("/remove_from_cart", methods=["POST"])
-def remove_from_cart():
-    data = request.get_json() or {}
+@app.route("/remove_from_favorites/<int:product_id>", methods=["POST"])
+def remove_from_favorites(product_id):
+    favs = session.get("favorites", [])
     try:
-        product_id = int(data.get("id"))
-    except (TypeError, ValueError):
-        return jsonify({"success": False, "message": "ID inválido"}), 400
+        favs = [int(i) for i in favs]
+    except:
+        pass
+    if product_id in favs:
+        favs.remove(product_id)
+        session["favorites"] = favs
+        session.modified = True
+        flash("Producto eliminado de favoritos", "success")
+    return redirect(url_for("favoritos"))
 
-    cart = list(map(int, session.get("cart", [])))
-    if product_id in cart:
-        cart.remove(product_id)
+@app.route("/pagos")
+def pagos():
+    return render_template("pagos.html")
 
-    session["cart"] = cart
-    session.modified = True
-
-    # recalcular total
-    productos = Producto.query.filter(Producto.id.in_(cart)).all() if cart else []
-    total = sum([p.PrecioUnidad for p in productos])
-
-    return jsonify({
-        "success": True,
-        "cart_count": len(cart),
-        "total": f"{total:.0f}"
-    })
-
-
-# --- VACIAR EL CARRITO ---
-@app.route("/clear_cart", methods=["POST"])
-def clear_cart():
-    session["cart"] = []
-    session.modified = True
-    return jsonify({"success": True})
+@app.route("/estadisticas")
+def estadisticas():
+    return render_template("administrador/estadisticas.html")
 
 
 
