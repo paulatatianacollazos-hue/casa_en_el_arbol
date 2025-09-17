@@ -64,6 +64,162 @@ def role_required(*roles):
         return wrapped
     return decorator
 
+def get_connection():
+    return mysql.connector.connect(
+        user='root',
+        password='paula123',
+        host='localhost',
+        database='Casa_En_El_Arbol',
+        port='3306'
+    )
+
+
+def obtener_todos_los_pedidos():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT
+            pe.ID_Pedido,
+            u.nombre AS nombre_usuario,
+            u.telefono,
+            u.direccion,
+            p.ID_Producto,
+            p.NombreProducto,
+            dp.Cantidad,
+            pe.FechaPedido,
+            ip.ruta AS ImagenURL,
+            p.PrecioUnidad
+            FROM Usuario u
+        JOIN Cliente c ON u.ID_Usuario = c.ID_Usuario
+        JOIN Pedido pe ON c.ID_Cliente = pe.ID_Cliente
+        JOIN Detalles_De_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+        JOIN Producto p ON dp.ID_Producto = p.ID_Producto
+        LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
+        ORDER BY pe.FechaPedido DESC
+    """
+
+    cursor.execute(query)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    pedidos_dict = {}
+
+    for row in resultados:
+        id_pedido = row[0]
+        id_producto = row[4]
+
+        producto = {
+            'id': id_producto,
+            'nombre': row[5],
+            'cantidad': row[6],
+            'imagen': row[8] or '',
+            'precio': float(row[9])  # Asegura que el precio esté como número
+        }
+
+        fecha = row[7].strftime('%Y-%m-%d')
+
+        if id_pedido not in pedidos_dict:
+            pedidos_dict[id_pedido] = {
+                'id': id_pedido,
+                'usuario': row[1],
+                'telefono': row[2],
+                'direccion': row[3],
+                'fecha': fecha,
+                'productos': {}
+            }
+
+        productos = pedidos_dict[id_pedido]['productos']
+
+        if id_producto in productos:
+            productos[id_producto]['cantidad'] += producto['cantidad']
+        else:
+            productos[id_producto] = producto
+
+    for pedido in pedidos_dict.values():
+        pedido['productos'] = list(pedido['productos'].values())
+        total = sum(prod['cantidad'] * prod['precio']
+                    for prod in pedido['productos'])
+        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
+    return list(pedidos_dict.values())
+
+
+def todos_los_pedidos():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT
+            p.ID_Pedido,
+            p.FechaPedido,
+            p.FechaEntrega,
+            p.FechaEnvio,
+            p.Estado,
+            uc.Nombre AS Cliente,
+            ue.Nombre AS Empleado
+        FROM pedido p
+        JOIN cliente c ON p.ID_Cliente = c.ID_Cliente
+        JOIN usuario uc ON c.ID_Usuario = uc.ID_Usuario
+        LEFT JOIN empleado e ON p.ID_Empleado = e.ID_Empleado
+        LEFT JOIN usuario ue ON e.ID_Usuario = ue.ID_Usuario
+    """)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return resultados
+
+
+def detalle():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT
+            p.ID_Pedido,
+            u.Nombre AS Nombre_Cliente,
+            u.Telefono,
+            u.Direccion,
+            pr.NombreProducto AS Producto,
+            dp.Cantidad
+        FROM Pedido p
+        JOIN Cliente c ON p.ID_Cliente = c.ID_Cliente
+        JOIN Usuario u ON c.ID_Usuario = u.ID_Usuario
+        JOIN Detalles_De_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
+        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+    """)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    agrupado = {}
+    for row in resultados:
+        pid = row['ID_Pedido']
+        if pid not in agrupado:
+            agrupado[pid] = {
+                'Nombre_Cliente': row['Nombre_Cliente'],
+                'Telefono': row['Telefono'],
+                'Direccion': row['Direccion'],
+                'Productos': []
+            }
+        agrupado[pid]['Productos'].append({
+            'Producto': row['Producto'],
+            'Cantidad': row['Cantidad']
+        })
+
+    return agrupado  
+
+def obtener_empleados():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT e.ID_Empleado, u.Nombre
+        FROM Empleado e
+        JOIN Usuario u ON e.ID_Usuario = u.ID_Usuario
+    """)
+    empleados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return empleados
+
 # ------------------ FUNCIONES ------------------ #
 def crear_notificacion(user_id, titulo, mensaje):
     noti = Notificaciones(
