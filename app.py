@@ -310,7 +310,7 @@ def obtener_productos_filtrados(correo, categoria):
 @app.route("/control_pedidos")
 def control_pedidos():
     pedidos = todos_los_pedidos()
-    return render_template("control_pedidos.html", pedidos=pedidos)
+    return render_template("administrador/control_pedidos.html", pedidos=pedidos)
 
 
 @app.route('/asignar_empleado', methods=["POST"])

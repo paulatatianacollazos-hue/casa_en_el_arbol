@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Pedidos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+  
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #f8f6f0;
+      color: #2c3e50;
+    }
+
+    .opciones {
+      border: 1px solid #e6e6e6;
+      background-color: #fff;
+      border-radius: 12px;
+      position: fixed;
+      top: 120px;
+      left: 20px;
+      padding: 20px 10px;
+      width: 200px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .opciones .menu-link {
+      display: block;
+      text-decoration: none;
+      color: #2c3e50;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .opciones .menu-link:hover {
+      background-color: #7cb342;
+      color: #fff;
+    }
+
+    .volver {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .volver a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: #7cb342;
+      color: #fff;
+      transition: 0.3s;
+    }
+
+    .volver a:hover {
+      background: #5f8f3f;
+    }
+
+    .contenedor-pedidos {
+      margin-left: 250px;
+      padding: 40px 20px;
+    }
+
+    .contenedor-pedidos h2 {
+      color: #628d46;
+      font-weight: 600;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .pedido-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s;
+    }
+
+    .pedido-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .pedido-card p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .pedido-card strong {
+      color: #4e7b33;
+    }
+  </style>
+</head>
+<body>
+     <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                Casa en el Árbol
+            </a>
+
+            <div class="search-container mx-auto d-none d-md-block">
+                <input
+                    class="form-control"
+                    type="search"
+                    placeholder="¿Qué estás buscando hoy?"
+                    aria-label="Buscar"
+                    id="searchInput"
+                />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="#" class="nav-icon" aria-label="Favoritos">
+                    <i class="bi bi-heart fs-4"></i>
+                </a>
+
+                <!-- Dropdown único para el usuario -->
+                <div class="dropdown">
+                    <a
+                        class="nav-icon dropdown-toggle"
+                        href="#"
+                        data-bs-toggle="dropdown"
+                        aria-label="Cuenta de usuario"
+                        role="button"
+                        data-bs-auto-close="outside"
+                    >
+                        <i class="bi bi-person fs-4"></i>
+                    </a>
+
+                    {% if session.get('user_id') %}
+                    <!-- MENÚ PARA USUARIO LOGUEADO -->
+                    <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div
+                                class="rounded-circle bg-light border text-dark fw-bold d-flex align-items-center justify-content-center me-2"
+                                style="width: 45px; height: 45px; font-size: 16px;"
+                            >
+                                {{ session['iniciales'] }}
+                            </div>
+                            <strong class="text-uppercase">{{ session['username'] }}</strong>
+                        </div>
+
+                        <li><a class="dropdown-item" href="{{ url_for('actualizacion_datos') }}">Perfil</a></li>
+                        <li><a class="dropdown-item" href="#">Historial</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('gestion_roles') }}">Gestión de roles</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('estadisticas') }}">Estadísticas</a></li></a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin') }}">Reseñas</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('ver_notificaciones_admin') }}">Notificaciones</a></li>
+
+                        <div class="mt-3">
+                            <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
+                        </div>
+                    </ul>
+                    {% else %}
+                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('login') }}"
+                                ><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a
+                            >
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('register') }}"
+                                ><i class="bi bi-person-plus me-2"></i>Registrarse</a
+                            >
+                        </li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
+                    </ul>
+
+                    {% endif %}
+                </div>
+            </div>
+             <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
+                    <i class="bi bi-cart fs-4"></i>
+                    <span class="cart-badge" id="cart-count">0</span> 
+                </a>
+        </div>
+        
+    </nav>
+
+    {% if session.get('show_welcome_modal') %}
+<!-- Modal de bienvenida -->
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100" id="welcomeModalLabel">
+          ¡Bienvenid@{{ ', ' + session['username'] if session['username'] else '' }}!
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p class="mb-4">Gracias por iniciar sesión en <strong>Casa en el Árbol</strong>.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn custom-btn px-4 py-2">Ir a la página principal</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script para mostrar el modal al cargar la página -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+    welcomeModal.show();
+  });
+</script>
+
+<!-- Eliminar la variable de sesión para que no vuelva a mostrarse -->
+{% set _ = session.pop('show_welcome_modal') %}
+{% endif %}
+
+
+    <!-- Menú principal separado del navbar para evitar confusiones -->
+    <div class="section-menu py-3 bg-white shadow-sm" style="margin-top: 80px;">
+        <div class="container">
+            <ul class="nav justify-content-center flex-wrap">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('all')">
+                        <i class="bi bi-grid me-1"></i>CATEGORÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}">
+                        <i class="bi bi-info-circle me-1"></i>NOSOTROS
+                    </a>
+                </li>
+                <li class="nav-item">
+                   <a class="nav-link fw-semibold text-dark" href="{{ url_for('catalogo') }}">
+                <i class="bi bi-collection me-1"></i>CATÁLOGO
+                </a>
+
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')">
+                        <i class="bi bi-tag me-1"></i>OFERTAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-shield-check me-1"></i>GARANTÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('instalaciones') }}">
+                        <i class="bi bi-tools me-1"></i>INSTALACIONES
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-chat-dots me-1"></i>CHATBOT
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+  <div class="opciones">
+    <a href="/estado" class="menu-link"><i class="bi bi-hourglass-split me-2"></i> Estado</a>
+    <a href="/control_pedidos" class="menu-link"><i class="bi bi-box-seam me-2"></i> Pedidos</a>
+    <a href="/comentarios" class="menu-link"><i class="bi bi-chat-left-text me-2"></i> Comentarios</a>
+    <div class="volver">
+      <a href="/envios"><i class="bi bi-arrow-left me-2"></i> Volver</a>
+    </div>
+  </div>
+
+  <div class="contenedor-pedidos">
+    <h2>📦 Pedidos Registrados</h2>
+    {% for p in pedidos %}
+    <div class="pedido-card">
+      <p><strong>ID Pedido:</strong> {{ p.ID_Pedido }}</p>
+      <p><strong>Cliente:</strong> {{ p.Cliente }}</p>
+      <p><strong>Empleado:</strong> {{ p.Empleado or 'Sin asignar' }}</p>
+      <p><strong>Fecha Pedido:</strong> {{ p.FechaPedido }}</p>
+      <p><strong>Fecha Entrega:</strong> {{ p.FechaEntrega }}</p>
+      <p><strong>Fecha Envío:</strong> {{ p.FechaEnvio }}</p>
+      <p><strong>Estado:</strong> {{ p.Estado }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</body>
+</html>
