@@ -85,42 +85,39 @@ def get_connection():
 def obtener_todos_los_pedidos():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     cursor.execute("""
         SELECT
             p.ID_Pedido,
             p.FechaPedido,
             p.FechaEntrega,
             p.Estado,
-            u.Nombre AS Cliente
-        FROM Pedido p
-        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
-        ORDER BY p.FechaPedido DESC
+            u.Nombre AS Cliente,
+            u.Apellido AS ApellidoCliente
+        FROM pedido p
+        JOIN usuario u ON p.ID_Usuario = u.ID_Usuario
     """)
-
-    pedidos = cursor.fetchall()
+    resultados = cursor.fetchall()
     cursor.close()
     conn.close()
-    return pedidos
+    return resultados
 
 
 def detalle():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     cursor.execute("""
         SELECT
             p.ID_Pedido,
             u.Nombre AS Nombre_Cliente,
+            u.Apellido AS Apellido_Cliente,
             u.Telefono,
             pr.NombreProducto AS Producto,
             dp.Cantidad
-        FROM Pedido p
-        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
-        JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
-        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        FROM pedido p
+        JOIN usuario u ON p.ID_Usuario = u.ID_Usuario
+        JOIN detalle_pedido dp ON p.ID_Pedido = dp.ID_Pedido
+        JOIN producto pr ON dp.ID_Producto = pr.ID_Producto
     """)
-
     resultados = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -131,6 +128,7 @@ def detalle():
         if pid not in agrupado:
             agrupado[pid] = {
                 'Nombre_Cliente': row['Nombre_Cliente'],
+                'Apellido_Cliente': row['Apellido_Cliente'],
                 'Telefono': row['Telefono'],
                 'Direccion': row['Direccion'],
                 'Productos': []
@@ -142,22 +140,8 @@ def detalle():
 
     return agrupado
 
-
 def obtener_empleados():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT e.ID_Empleado, u.Nombre, u.Apellido, u.Telefono
-        FROM Empleado e
-        JOIN Usuario u ON e.ID_Usuario = u.ID_Usuario
-    """)
-
-    empleados = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return empleados
-
+    return []  # ya que no tienes tabla Empleado
 
 
 
@@ -746,13 +730,9 @@ def admin():
 def envios():
     pedidos = obtener_todos_los_pedidos()
     detalles = detalle()
-    empleados = obtener_empleados()
-    return render_template(
-        'envios.html',
-        pedidos=pedidos,
-        detalles=detalles,
-        empleados=empleados
-    )
+    empleados = []  # no hay empleados en esta BD
+    return render_template('envios.html', pedidos=pedidos, detalles=detalles, empleados=empleados)
+
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
     app.run(debug=True)
