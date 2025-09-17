@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial de Transacciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --primary-green: #5f8f3f;
+      --secondary-green: #4e7b33;
+      --light-green: #6c9a50;
+      --accent-green: #7cb342;
+      --bg-cream: #f8f6f0;
+      --text-dark: #2c3e50;
+      --shadow-light: rgba(0, 0, 0, 0.08);
+      --shadow-medium: rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--bg-cream) 0%, #f0f4ec 100%);
+      color: var(--text-dark);
+      line-height: 1.6;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      color: var(--primary-green);
+      font-weight: 700;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-green), var(--primary-green));
+      border-radius: 2px;
+    }
+
+    .tabla-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px var(--shadow-light);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 16px;
+      font-size: 15px;
+    }
+
+    th {
+      color: var(--primary-green);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent-green);
+    }
+
+    tr:not(:last-child) {
+      border-bottom: 1px solid #eee;
+    }
+
+    td:last-child {
+      text-align: center;
+    }
+
+    .btn-detalles {
+      background: linear-gradient(45deg, var(--primary-green), var(--accent-green));
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 3px 8px rgba(95, 143, 63, 0.3);
+    }
+
+    .btn-detalles:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(95, 143, 63, 0.4);
+    }
+
+    /* ==== Modal ==== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      width: 500px;
+      max-width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      position: relative;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal h3 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: var(--primary-green);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .modal p {
+      margin: 10px 0;
+      font-size: 0.95rem;
+    }
+
+    .modal p strong {
+      color: var(--text-dark);
+    }
+
+    .modal-buttons {
+      margin-top: 25px;
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .btn-modal {
+      flex: 1;
+      background: linear-gradient(45deg, var(--primary-green), var(--accent-green));
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(95, 143, 63, 0.3);
+    }
+
+    .btn-modal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(95, 143, 63, 0.4);
+    }
+
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #aaa;
+      background: none;
+      border: none;
+    }
+
+    .close:hover {
+      color: var(--primary-green);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Historial de Transacciones</h2>
+
+  <div class="tabla-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Total Pagado</th>
+          <th>Productos</th>
+          <th>Instalación</th>
+          <th>Estado de Pago</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>16/09/25</td>
+          <td>700.000 COP</td>
+          <td>Armario rosa con luces</td>
+          <td>Agendada</td>
+          <td>Pagado</td>
+          <td><button class="btn-detalles" onclick="abrirModal()">Ver detalles</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div id="miModal" class="modal">
+    <div class="modal-content">
+      <button class="close" onclick="cerrarModal()">&times;</button>
+      <h3>Detalles de la Transacción</h3>
+      <p><strong>PRODUCTOS:</strong> Armario rosa con luces</p>
+      <p><strong>FECHA DE COMPRA:</strong> 16/09/25</p>
+      <p><strong>INSTALACIÓN:</strong> Agendada para el 20/09/25 a las 9:00 AM</p>
+      <p><strong>DIRECCIÓN:</strong> Calle 80 sur #75g...</p>
+      <p><strong>COMENTARIOS:</strong> Ninguno</p>
+      <div class="modal-buttons">
+        <button class="btn-modal">Descargar recibo</button>
+        <button class="btn-modal">Reprogramar instalación</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function abrirModal() {
+      document.getElementById("miModal").style.display = "flex";
+    }
+    function cerrarModal() {
+      document.getElementById("miModal").style.display = "none";
+    }
+    window.onclick = function(event) {
+      let modal = document.getElementById("miModal");
+      if (event.target === modal) {
+        cerrarModal();
+      }
+    }
+  </script>
+
+</body>
+</html>
