@@ -118,31 +118,38 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password', '').strip()
+        # Usamos .get() para evitar KeyError si el input no existe
+        correo = request.form.get('correo')  
+        password = request.form.get('password')
 
-        if not email or not password:
-            flash('Ingresa correo y contraseña')
-            return render_template('login.html')
+        if not correo or not password:
+            flash("⚠️ Debes completar todos los campos", "warning")
+            return redirect(url_for('login'))
 
-        user = Usuario.query.filter_by(Correo=email).first()
-        if user and check_password_hash(user.Contraseña, password):
-            login_user(user)  # ✅ iniciar sesión con Flask-Login
+        usuario = Usuario.query.filter_by(Correo=correo).first()
 
-            nombre = user.Nombre.strip()
-            iniciales = ''.join([parte[0] for parte in nombre.split()][:2]).upper()
+        if usuario and check_password_hash(usuario.Contraseña, password):
+            login_user(usuario)
+            flash("✅ Inicio de sesión exitoso", "success")
 
-            session['username'] = nombre
-            session['iniciales'] = iniciales
-            session['show_welcome_modal'] = True
-
-            flash('Inicio de sesión exitoso')
-            return redirect(url_for('dashboard'))
+            # Redirigir según el rol
+            if usuario.Rol == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            elif usuario.Rol == 'cliente':
+                return redirect(url_for('dashboard'))
+            elif usuario.Rol == 'instalador':
+                return redirect(url_for('instalador_dashboard'))
+            elif usuario.Rol == 'transportista':
+                return redirect(url_for('transportista_dashboard'))
+            else:
+                flash("⚠️ Rol desconocido, contacta al administrador.", "warning")
+                return redirect(url_for('login'))
         else:
-            flash('Credenciales inválidas')
-            return render_template('login.html')
+            flash("❌ Correo o contraseña incorrectos", "danger")
+            return redirect(url_for('login'))
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():

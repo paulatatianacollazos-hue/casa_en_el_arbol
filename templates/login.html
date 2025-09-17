@@ -3,16 +3,18 @@
 
 {% block content %}
 
-
 <div id="login-overlay" class="auth-overlay">
   <div class="auth-card">
     <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
 
- 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert {% if category == 'error' %}alert-danger{% elif category == 'success' %}alert-success{% endif %}">
+          <div class="alert 
+              {% if category == 'error' %}alert-danger
+              {% elif category == 'success' %}alert-success
+              {% elif category == 'warning' %}alert-warning
+              {% endif %}">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           </div>
@@ -21,10 +23,9 @@
     {% endwith %}
 
     <!-- Formulario -->
-    <form method="post">
-      
+    <form method="POST" action="{{ url_for('login') }}">
       <div class="mb-3">
-        <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
+        <input type="email" class="form-control auth-input" name="correo" placeholder="Correo electrónico" required>
       </div>
       <div class="mb-3">
         <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
@@ -42,10 +43,9 @@
     </div>
 
     <!-- Botón cerrar -->
-
-     <div class="close-login-btn">
-     <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mt-3 w-100">Cerrar </a>
-      </div>
+    <div class="close-login-btn">
+      <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mt-3 w-100">Cerrar</a>
+    </div>
   </div>
 </div>
 
