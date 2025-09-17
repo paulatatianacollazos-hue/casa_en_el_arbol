@@ -6,6 +6,8 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
 
+
+
 from flask_login import (
     LoginManager, login_required, current_user,
     login_user, logout_user
@@ -64,14 +66,6 @@ def role_required(*roles):
         return wrapped
     return decorator
 
-def get_connection():
-    return mysql.connector.connect(
-        user='root',
-        password='paula123',
-        host='localhost',
-        database='Casa_En_El_Arbol',
-        port='3306'
-    )
 
 
 def obtener_todos_los_pedidos():
@@ -205,7 +199,8 @@ def detalle():
             'Cantidad': row['Cantidad']
         })
 
-    return agrupado  
+    return agrupado  # Retorna un dict con ID_Pedido como clave
+
 
 def obtener_empleados():
     conn = get_connection()
