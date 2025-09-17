@@ -116,12 +116,14 @@ class Calendario(db.Model):
     Fecha = db.Column(db.Date)
     Hora = db.Column(db.Time)
     Ubicacion = db.Column(db.String(200))
+    Tipo = db.Column(db.String(50), default="Instalación")  
 
     # Clave foránea
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
 
     def __repr__(self):
         return f'<Calendario {self.ID_Calendario}>'
+
 
 
 class Notificaciones(db.Model):

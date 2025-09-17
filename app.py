@@ -466,11 +466,13 @@ def instalaciones():
         fecha = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
         hora = datetime.strptime(request.form['hora'], "%H:%M").time()
         ubicacion = request.form['ubicacion']
+        tipo = request.form.get('tipo', 'Instalación')  
 
-        nueva_cita = Calendario(   # ✅ usar el modelo, no la función
+        nueva_cita = Calendario(
             Fecha=fecha,
             Hora=hora,
             Ubicacion=ubicacion,
+            Tipo=tipo,
             ID_Usuario=current_user.ID_Usuario
         )
 
@@ -478,16 +480,21 @@ def instalaciones():
         db.session.commit()
 
         flash("✅ Instalación agendada con éxito", "success")
-        return redirect(url_for('instalaciones'))
+        return redirect(url_for('confirmacion'))
 
-    # Mostrar citas del usuario
-    citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()  # ✅ usar el modelo
+    citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
     return render_template("instalaciones.html", citas=citas)
 
+@app.route('/confirmacion')
+@login_required
+def confirmacion():
+    return render_template("confirmacion.html")
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/lista')
+@login_required
+def lista():
+    citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    return render_template("lista.html", citas=citas)
 
 
 # ------------------ MAIN ------------------ #

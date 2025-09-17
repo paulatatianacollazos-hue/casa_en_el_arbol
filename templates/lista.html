@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Instalaciones</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Casa en el árbol</a>
+    <div class="section-menu">
+      <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+      <a class="nav-link" href="{{ url_for('instalaciones') }}">Instalaciones</a>
+      <a class="nav-link" href="{{ url_for('lista') }}">Ver Instalaciones</a>
+    </div>
+  </nav>
+
+  <div style="max-width:800px; margin:20px auto; background:white; padding:20px; border-radius:10px;">
+    <h2>Tus instalaciones agendadas</h2>
+    <table border="1" width="100%" cellpadding="10">
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Ubicación</th>
+        <th>Tipo</th>
+      </tr>
+      {% for i in citas %}
+      <tr>
+        <td>{{ i.Fecha }}</td>
+        <td>{{ i.Hora }}</td>
+        <td>{{ i.Ubicacion }}</td>
+        <td>{{ i.Tipo if i.Tipo else 'Instalación' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</body>
+</html>
