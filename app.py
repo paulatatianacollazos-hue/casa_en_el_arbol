@@ -68,6 +68,7 @@ def role_required(*roles):
 
 
 
+
 # ------------------ FUNCIONES ------------------ #
 def crear_notificacion(user_id, titulo, mensaje):
     noti = Notificaciones(
@@ -86,6 +87,509 @@ def send_reset_email(user_email, user_name, token):
         html=render_template('email_reset.html', user_name=user_name, reset_url=reset_url)
     )
     mail.send(msg)
+
+    def get_connection():
+    return mysql.connector.connect(
+        user='root',
+        password='paula123',
+        host='localhost',
+        database='tienda_db',
+        port='3306'
+    )
+
+
+def obtener_todos_los_pedidos():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT
+            pe.ID_Pedido,
+            u.Nombre AS nombre_usuario,
+            u.Telefono,
+            u.Direccion,
+            p.ID_Producto,
+            p.NombreProducto,
+            dp.Cantidad,
+            pe.FechaPedido,
+            ip.ruta AS ImagenURL,
+            p.PrecioUnidad
+        FROM Pedido pe
+        JOIN Usuario u ON pe.ID_Usuario = u.ID_Usuario
+        JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+        JOIN Producto p ON dp.ID_Producto = p.ID_Producto
+        LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
+        ORDER BY pe.FechaPedido DESC
+    """
+
+    cursor.execute(query)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    pedidos_dict = {}
+
+    for row in resultados:
+        id_pedido = row[0]
+        id_producto = row[4]
+
+        producto = {
+            'id': id_producto,
+            'nombre': row[5],
+            'cantidad': row[6],
+            'imagen': row[8] or '',
+            'precio': float(row[9])  # Asegura que el precio esté como número
+        }
+
+        fecha = row[7].strftime('%Y-%m-%d')
+
+        if id_pedido not in pedidos_dict:
+            pedidos_dict[id_pedido] = {
+                'id': id_pedido,
+                'usuario': row[1],
+                'telefono': row[2],
+                'direccion': row[3],
+                'fecha': fecha,
+                'productos': {}
+            }
+
+        productos = pedidos_dict[id_pedido]['productos']
+
+        if id_producto in productos:
+            productos[id_producto]['cantidad'] += producto['cantidad']
+        else:
+            productos[id_producto] = producto
+
+    for pedido in pedidos_dict.values():
+        pedido['productos'] = list(pedido['productos'].values())
+        total = sum(prod['cantidad'] * prod['precio']
+                    for prod in pedido['productos'])
+        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
+    return list(pedidos_dict.values())
+
+
+def todos_los_pedidos():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT
+            p.ID_Pedido,
+            p.FechaPedido,
+            p.FechaEntrega,
+            p.Estado,
+            u.Nombre AS Cliente
+        FROM Pedido p
+        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+    """)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return resultados
+
+
+def detalle():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT
+            p.ID_Pedido,
+            u.Nombre AS Nombre_Cliente,
+            u.Telefono,
+            u.Direccion,
+            pr.NombreProducto AS Producto,
+            dp.Cantidad
+        FROM Pedido p
+        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+        JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
+        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+    """)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    agrupado = {}
+    for row in resultados:
+        pid = row['ID_Pedido']
+        if pid not in agrupado:
+            agrupado[pid] = {
+                'Nombre_Cliente': row['Nombre_Cliente'],
+                'Telefono': row['Telefono'],
+                'Direccion': row['Direccion'],
+                'Productos': []
+            }
+        agrupado[pid]['Productos'].append({
+            'Producto': row['Producto'],
+            'Cantidad': row['Cantidad']
+        })
+
+    return agrupado  # Retorna un dict con ID_Pedido como clave
+
+
+def obtener_empleados():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT ID_Usuario AS ID_Empleado, Nombre
+        FROM Usuario
+        WHERE Rol = 'Empleado'
+    """)
+    empleados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return empleados
+
+
+@app.route('/envios')
+def envios():
+    pedidos = obtener_todos_los_pedidos()
+    detalles = detalle()
+    empleados = obtener_empleados()
+    return render_template('envios.html', pedidos=pedidos, detalles=detalles,
+                           empleados=empleados)
+
+
+def obtener_productos_filtrados(correo, categoria):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+    SELECT
+        u.nombre AS nombre_cliente,
+        p.NombreProducto,
+        p.PrecioUnidad,
+        ip.ruta AS ImagenURL,
+        c.NombreCategoria
+    FROM Usuario u
+    JOIN Cliente cl ON u.ID_Usuario = cl.ID_Usuario
+    JOIN Pedido pe ON cl.ID_Cliente = pe.ID_Cliente
+    JOIN Detalles_De_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+    JOIN Producto p ON dp.ID_Producto = p.ID_Producto
+    JOIN Categorias c ON p.ID_Categoria = c.ID_Categoria
+    LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
+    WHERE u.correo = %s
+
+    UNION
+
+    SELECT
+        '' AS nombre_cliente,
+        p2.NombreProducto,
+        p2.PrecioUnidad,
+        ip2.ruta AS ImagenURL,
+        c2.NombreCategoria
+    FROM Producto p2
+    JOIN Categorias c2 ON p2.ID_Categoria = c2.ID_Categoria
+    LEFT JOIN ImagenProducto ip2 ON p2.ID_Producto = ip2.ID_Producto
+    WHERE c2.NombreCategoria = %s
+    """
+
+    cursor.execute(query, (correo, categoria))
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not resultados:
+        return "", []
+
+    nombre_cliente = ""
+    for fila in resultados:
+        if fila[0]:
+            nombre_cliente = fila[0]
+            break
+
+    productos = []
+    for row in resultados:
+        productos.append({
+            'producto': row[1],
+            'precio': float(row[2]),
+            'imagen': row[3] or '',
+            'categoria': row[4]
+        })
+
+    return nombre_cliente, productos
+
+
+@app.route("/control_pedidos")
+def control_pedidos():
+    pedidos = todos_los_pedidos()
+    return render_template("control_pedidos.html", pedidos=pedidos)
+
+
+@app.route('/asignar_empleado', methods=["POST"])
+def asignar_empleado():
+    pedidos_ids = request.form.get("pedidos")
+    id_empleado = request.form.get("empleado")
+
+    if not pedidos_ids or not id_empleado:
+        return "Faltan datos", 400
+
+    ids = pedidos_ids.split(',')
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Guardamos el usuario que es empleado
+    query = "UPDATE Pedido SET ID_UsuarioEmpleado = %s WHERE ID_Pedido = %s"
+    for pid in ids:
+        cursor.execute(query, (id_empleado, pid))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for("envios"))
+
+
+@app.route('/actualizar_pedido', methods=['POST'])
+def actualizar_pedido():
+    pedido_id = request.form['pedido_id']
+    nuevo_estado = request.form['estado']
+    comentario = request.form['comentario']
+
+    conn = get_connection()  # ← esta es la forma correcta
+    cursor = conn.cursor()
+
+    try:
+        # Actualizar estado del pedido
+        cursor.execute("""
+            UPDATE Pedido
+            SET Estado = %s
+            WHERE ID_Pedido = %s
+        """, (nuevo_estado, pedido_id))
+
+        # Insertar comentario (si se escribió algo)
+        if comentario.strip():
+            cursor.execute("""
+                INSERT INTO comentarios (pedido_id, texto)
+                VALUES (%s, %s)
+            """, (pedido_id, comentario))
+
+        conn.commit()
+        flash("Pedido actualizado correctamente", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error al actualizar el pedido: {str(e)}", "danger")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for('control_pedidos'))  # O la vista que desees
+
+
+@app.route('/estado', methods=['GET', 'POST'])
+def buscar_pedido():
+    if request.method == 'POST':
+        pedido_id = request.form['pedido_id']
+        return redirect(url_for('editar_estado', pedido_id=pedido_id))
+    return render_template('estado.html')
+
+
+def obtener_comentarios_agrupados():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT pedido_id, texto, fecha
+        FROM comentarios
+        ORDER BY pedido_id, fecha
+    """
+
+    cursor.execute(query)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    comentarios_por_pedido = {}
+
+    for comentario in resultados:
+        pid = comentario["pedido_id"]
+        if pid not in comentarios_por_pedido:
+            comentarios_por_pedido[pid] = []
+        comentarios_por_pedido[pid].append(comentario)
+
+    return comentarios_por_pedido
+
+
+@app.route('/comentarios')
+def mostrar_comentarios():
+    comentarios = obtener_comentarios_agrupados()
+    return render_template('comentarios.html', comentarios=comentarios)
+
+
+def obtener_productos():
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        SELECT
+            p.ID_Producto,
+            p.NombreProducto,
+            p.Stock,
+            p.Material,
+            p.Color,
+            p.PrecioUnidad,
+            c.NombreCategoria,
+            pr.NombreEmpresa,
+            ip.ruta
+        FROM Producto p
+        LEFT JOIN Categorias c ON p.ID_Categoria = c.ID_Categoria
+        LEFT JOIN Proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
+        LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
+    """
+    cursor.execute(query)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    productos = []
+    for row in resultados:
+        productos.append({
+            "id": row[0],
+            "nombre": row[1],
+            "stock": row[2],
+            "material": row[3],
+            "color": row[4],
+            "precio": float(row[5]),
+            "categoria": row[6],
+            "proveedor": row[7],
+            "imagen": row[8] or ""
+        })
+    return productos
+
+
+def obtener_producto_por_id(producto_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        SELECT
+            p.ID_Producto,
+            p.NombreProducto,
+            p.Stock,
+            p.Material,
+            p.Color,
+            p.PrecioUnidad,
+            c.NombreCategoria,
+            pr.NombreEmpresa,
+            ip.ruta
+        FROM Producto p
+        LEFT JOIN Categorias c ON p.ID_Categoria = c.ID_Categoria
+        LEFT JOIN Proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
+        LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
+        WHERE p.ID_Producto = %s
+    """
+    cursor.execute(query, (producto_id,))
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not resultados:
+        return None
+
+    producto = {
+        "id": resultados[0][0],
+        "nombre": resultados[0][1],
+        "stock": resultados[0][2],
+        "material": resultados[0][3],
+        "color": resultados[0][4],
+        "precio": float(resultados[0][5]),
+        "categoria": resultados[0][6],
+        "proveedor": resultados[0][7],
+        "imagenes": [row[8] for row in resultados if row[8]]
+    }
+    return producto
+
+
+@app.route('/productos')
+def listar_productos():
+    productos = obtener_productos()
+    return render_template('productos.html', productos=productos)
+
+
+@app.route('/producto/<int:producto_id>')
+def ver_producto(producto_id):
+    producto = obtener_producto_por_id(producto_id)
+    if not producto:
+        return "Producto no encontrado", 404
+    return render_template('detalles.html', producto=producto)
+
+
+@app.route('/firmar', methods=['GET', 'POST'])
+def firmar_pedido():
+    mensaje = None
+
+    if request.method == 'POST':
+        pedido_id = request.form['pedido_id']
+        nombre = request.form['nombre_cliente']
+        archivo = request.files.get('firma')  # 👈 cambio importante
+
+        if archivo and archivo.filename != "":
+            filename = secure_filename(archivo.filename)
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            archivo.save(filepath)
+
+            ruta_db = f"firmas/{filename}"
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO firmas (pedido_id, nombre_cliente, firma)
+                VALUES (%s, %s, %s)
+            """, (pedido_id, nombre, ruta_db))
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+            mensaje = "Firma registrada correctamente "
+        else:
+            mensaje = "No se subió ningún archivo "
+
+    return render_template('confirmacion_firma.html', mensaje=mensaje)
+
+
+@app.route('/reporte', methods=['GET', 'POST'])
+def buscar_pedidos():
+    resultados = []
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha_pedido')
+        id_pedido = request.form.get('id_pedido')
+        nombre_cliente = request.form.get('nombre_cliente')
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+        SELECT
+            p.FechaPedido,
+            u.Nombre AS cliente,
+            u.Direccion,
+            pr.NombreProducto AS producto,
+            p.Estado
+        FROM Pedido p
+        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+        JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
+        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        WHERE p.Estado = 'entregado'
+        """
+
+        params = []
+
+        if fecha:
+            query += " AND p.FechaPedido = %s"
+            params.append(fecha)
+
+        if id_pedido:
+            query += " AND p.ID_Pedido = %s"
+            params.append(id_pedido)
+
+        if nombre_cliente:
+            query += " AND u.Nombre LIKE %s"
+            params.append(f"%{nombre_cliente}%")
+
+        cursor.execute(query, tuple(params))
+        resultados = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+    return render_template('reportes_entrega.html', resultados=resultados)
 
 # ------------------ RUTAS ------------------ #
 @app.route('/')
