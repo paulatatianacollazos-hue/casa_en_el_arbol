@@ -338,19 +338,17 @@ def ver_notificaciones():
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
 
-
 @app.route('/eliminar_notificaciones', methods=['POST'])
 @login_required
 def eliminar_notificaciones():
-    # Ejemplo: eliminar todas las notificaciones del usuario actual
-    notificaciones = Notificaciones.query.filter_by(usuario_id=current_user.id).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.id).all()
+    
     for n in notificaciones:
         db.session.delete(n)
     db.session.commit()
     
     flash("✅ Todas las notificaciones fueron eliminadas", "success")
     return redirect(url_for('ver_notificaciones'))
-
 
 # ---------- Gestión de roles ----------
 @app.route('/gestion_roles', methods=['GET', 'POST'])

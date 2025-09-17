@@ -25,11 +25,18 @@ class Usuario(UserMixin, db.Model):
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
     direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")
 
+    # ✅ Esto ya está bien
     def get_id(self):
         return str(self.ID_Usuario)
 
+    # ✅ Agrega esto para compatibilidad con current_user.id
+    @property
+    def id(self):
+        return self.ID_Usuario
+
     def __repr__(self):
         return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
+
 
 
 class Direccion(db.Model):
