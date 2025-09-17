@@ -1,4 +1,5 @@
 import os
+import mysql.connector
 from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -65,6 +66,82 @@ def role_required(*roles):
         return wrapped
     return decorator
 
+
+def obtener_todos_los_pedidos():
+  
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",          
+        password="tu_password",
+        database="tienda_db"
+    )
+    cursor = conn.cursor()
+
+    query = """
+        SELECT
+            pe.ID_Pedido,
+            u.Nombre AS nombre_usuario,
+            u.Telefono,
+            u.Direccion,
+            p.ID_Producto,
+            p.NombreProducto,
+            dp.Cantidad,
+            pe.FechaPedido,
+            ip.ruta AS ImagenURL,
+            p.PrecioUnidad
+        FROM Usuario u
+        JOIN Pedido pe ON u.ID_Usuario = pe.ID_Usuario
+        JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+        JOIN Producto p ON dp.ID_Producto = p.ID_Producto
+        LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
+        ORDER BY pe.FechaPedido DESC
+    """
+
+    cursor.execute(query)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    pedidos_dict = {}
+
+    for row in resultados:
+        id_pedido = row[0]
+        id_producto = row[4]
+
+        producto = {
+            'id': id_producto,
+            'nombre': row[5],
+            'cantidad': row[6],
+            'imagen': row[8] or '',
+            'precio': float(row[9]) if row[9] else 0.0
+        }
+
+        fecha = row[7].strftime('%Y-%m-%d') if row[7] else None
+
+        if id_pedido not in pedidos_dict:
+            pedidos_dict[id_pedido] = {
+                'id': id_pedido,
+                'usuario': row[1],
+                'telefono': row[2],
+                'direccion': row[3],
+                'fecha': fecha,
+                'productos': {}
+            }
+
+        productos = pedidos_dict[id_pedido]['productos']
+
+        if id_producto in productos:
+            productos[id_producto]['cantidad'] += producto['cantidad']
+        else:
+            productos[id_producto] = producto
+
+    for pedido in pedidos_dict.values():
+        pedido['productos'] = list(pedido['productos'].values())
+        total = sum(prod['cantidad'] * prod['precio']
+                    for prod in pedido['productos'])
+        pedido['total'] = round(total, 2)
+
+    return list(pedidos_dict.values())
 
 
 
