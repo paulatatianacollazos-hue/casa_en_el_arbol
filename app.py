@@ -4,14 +4,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from datetime import datetime
 
 from flask_login import (
     LoginManager, login_required, current_user,
     login_user, logout_user
 )
+
+
 from functools import wraps
 
-from basedatos.models import db, Usuario, Direccion, Notificaciones
+from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario
 
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
@@ -454,28 +457,34 @@ def cambiar_rol(user_id):
     return redirect(url_for('gestion_roles'))
 
 # ------------------ Instalaciones ------------------ #
+
+
 @app.route('/instalaciones', methods=['GET', 'POST'])
-def agendar():
+@login_required
+def instalaciones():
     if request.method == 'POST':
-        instalacion = {
-            "pedido": request.form['pedido'],
-            "producto": request.form['producto'],
-            "direccion": request.form['direccion'],
-            "fecha": request.form['fecha'],
-            "hora": request.form['hora'],
-            "comentarios": request.form['comentarios']
-        }
-        instalaciones.append(instalacion)
-        return redirect(url_for('confirmacion'))
-    return render_template('instalaciones.html')
+        fecha = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
+        hora = datetime.strptime(request.form['hora'], "%H:%M").time()
+        ubicacion = request.form['ubicacion']
 
-@app.route('/confirmacion')
-def confirmacion():
-    return render_template('confirmacion.html')
+        nueva_cita = Calendario(   # ✅ usar el modelo, no la función
+            Fecha=fecha,
+            Hora=hora,
+            Ubicacion=ubicacion,
+            ID_Usuario=current_user.ID_Usuario
+        )
 
-@app.route('/lista')
-def lista():
-    return render_template('lista.html', instalaciones=instalaciones)
+        db.session.add(nueva_cita)
+        db.session.commit()
+
+        flash("✅ Instalación agendada con éxito", "success")
+        return redirect(url_for('instalaciones'))
+
+    # Mostrar citas del usuario
+    citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()  # ✅ usar el modelo
+    return render_template("instalaciones.html", citas=citas)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

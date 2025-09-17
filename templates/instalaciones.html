@@ -10,38 +10,35 @@
     <a class="navbar-brand" href="{{ url_for('index') }}">Casa en el árbol</a>
     <div class="section-menu">
       <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
-      <a class="nav-link" href="{{ url_for('agendar') }}">Instalaciones</a>
-      <a class="nav-link" href="{{ url_for('lista') }}">Ver Instalaciones</a>
+      <a class="nav-link" href="{{ url_for('instalaciones') }}">Instalaciones</a>
     </div>
   </nav>
 
   <div style="max-width:600px; margin:20px auto; background:white; padding:20px; border-radius:10px;">
     <h2>Agendar instalación</h2>
     <form method="POST">
-      <label>Número de pedido:</label>
-      <input type="text" name="pedido" required><br><br>
-
-      <label>Nombre del producto:</label>
-      <input type="text" name="producto" required><br><br>
-
-      <label>Dirección:</label>
-      <input type="text" name="direccion" required><br><br>
+      <label>Dirección de instalación:</label>
+      <input type="text" name="ubicacion" required><br><br>
 
       <label>Fecha de instalación:</label>
       <input type="date" name="fecha" required><br><br>
 
       <label>Hora:</label>
-      <select name="hora" required>
-        <option>9:00AM - 12:00PM</option>
-        <option>1:00PM - 4:00PM</option>
-        <option>4:00PM - 7:00PM</option>
-      </select><br><br>
-
-      <label>Comentarios:</label>
-      <textarea name="comentarios"></textarea><br><br>
+      <input type="time" name="hora" required><br><br>
 
       <button type="submit">Confirmar instalación</button>
     </form>
   </div>
+
+  {% if citas %}
+  <div style="max-width:600px; margin:20px auto; background:white; padding:20px; border-radius:10px;">
+    <h3>Mis instalaciones</h3>
+    <ul>
+      {% for c in citas %}
+        <li>{{ c.Fecha }} - {{ c.Hora }} en {{ c.Ubicacion }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 </body>
 </html>
