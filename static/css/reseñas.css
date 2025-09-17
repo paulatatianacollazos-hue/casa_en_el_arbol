@@ -1,0 +1,47 @@
+/* Header general */
+.custom-header {
+  background: linear-gradient(to bottom, #ffffff 50%, #6da544 50%);
+  border-bottom: 1px solid #ddd;
+}
+
+/* Logo */
+.logo {
+  width: 35px;
+  height: 35px;
+}
+
+/* Buscador */
+.search-bar input {
+  border: 1px solid #6da544;
+  padding: 8px 15px;
+  outline: none;
+}
+
+/* Iconos */
+.icons a {
+  font-size: 1.2rem;
+  color: #2f4f2f;
+  position: relative;
+}
+.icons a:hover {
+  color: #6da544;
+}
+.icons .badge {
+  font-size: 0.7rem;
+  position: relative;
+  top: -10px;
+  right: 10px;
+}
+
+/* Menú */
+.menu-bar {
+  background-color: #6da544;
+}
+.menu-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+.menu-link:hover {
+  text-decoration: underline;
+}

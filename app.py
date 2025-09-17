@@ -19,6 +19,7 @@ from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
 instalaciones = []
+reviews=[]
 
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
@@ -618,7 +619,28 @@ def estadisticas():
     return render_template("administrador/estadisticas.html")
 
 
+@app.route('/reseñas')
+def reseñas():
+    if reviews:
+        avg = round(sum([int(r['estrellas']) for r in reviews]) / len(reviews), 2)
+    else:
+        avg = "N/A"
+    return render_template("reseñas.html", reviews=reviews, avg=avg)
 
+@app.route('/escribir', methods=['GET', 'POST'])
+def escribir():
+    if request.method == 'POST':
+        pedido = request.form['pedido']
+        cliente = request.form['cliente']
+        estrellas = request.form['estrellas']
+        comentario = request.form['comentario']
+        reviews.append({"pedido": pedido, "cliente": cliente, "estrellas": estrellas, "comentario": comentario})
+        return redirect(url_for('index'))
+    return render_template("escribir.html")
+
+@app.route('/admin_reseñas')
+def admin():
+    return render_template("administrador/admin_reseñas.html", reviews=reviews)
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
     app.run(debug=True)
