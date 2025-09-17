@@ -51,7 +51,7 @@
       <tbody id="tbodyCarrito">
         {% if productos %}
           {% for p in productos %}
-          <tr data-id="{{ p.ID_Producto }}">
+          <tr data-id="{{ p.id }}">
             <td>
               <img src="{{ p.imagenes[0].ruta if p.imagenes else '/static/img/placeholder.jpg' }}" alt="{{ p.NombreProducto }}">
               {{ p.NombreProducto }}
@@ -60,7 +60,7 @@
             <td>1</td>
             <td>${{ "%.0f"|format(p.PrecioUnidad) }}</td>
             <td>
-              <button class="btn btn-outline-danger btn-remove-cart" data-id="{{ p.ID_Producto }}">❌ Eliminar</button>
+              <button class="btn btn-outline-danger btn-remove-cart" data-id="{{ p.id }}">❌ Eliminar</button>
             </td>
           </tr>
           {% endfor %}
@@ -111,9 +111,14 @@
             // eliminar fila
             button.closest("tr").remove();
 
+            // actualizar contador de items
+            document.getElementById("cantItems").innerText = data.cart_count;
+            document.getElementById("cantArt").innerText = data.cart_count;
+
             if (data.cart_count === 0) {
               document.getElementById("tbodyCarrito").innerHTML =
                 "<tr><td colspan='5' class='text-center'>Tu carrito está vacío 🛒</td></tr>";
+              document.getElementById("total").innerText = "$0";
             }
           }
         });
@@ -127,6 +132,9 @@
       .then(data => {
         if (data.success) {
           document.getElementById("cart-count").innerText = 0;
+          document.getElementById("cantItems").innerText = 0;
+          document.getElementById("cantArt").innerText = 0;
+          document.getElementById("total").innerText = "$0";
           document.getElementById("tbodyCarrito").innerHTML =
             "<tr><td colspan='5' class='text-center'>Tu carrito está vacío 🛒</td></tr>";
         }
