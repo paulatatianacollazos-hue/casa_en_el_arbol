@@ -323,13 +323,8 @@ def borrar_direccion(id_direccion):
     db.session.delete(direccion)
     db.session.commit()
 
-    crear_notificacion(
-        user_id=current_user.ID_Usuario,
-        titulo="Dirección eliminada 🗑️",
-        mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
-    )
-
     return jsonify({"success": True, "message": "Dirección eliminada"})
+
 
 
 

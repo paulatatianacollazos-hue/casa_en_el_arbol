@@ -20,34 +20,51 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Eventos de menú
+  // --- Eventos de menú ---
   menuPerfil.addEventListener('click', e => { e.preventDefault(); activarMenu('perfil'); });
   menuDirecciones.addEventListener('click', e => { e.preventDefault(); activarMenu('direcciones'); });
 
-  // Mostrar modal de "dirección guardada"
+  // --- Analizar parámetros de la URL ---
   const params = new URLSearchParams(window.location.search);
+
+  // Si se guardó dirección -> mostrar modal y abrir direcciones
   if (params.get("direccion_guardada") === "1") {
     const modal = new bootstrap.Modal(document.getElementById('modalGuardado'));
     modal.show();
     activarMenu('direcciones');
   }
 
-  // Interceptar formularios de borrar
+  // Si se eliminó dirección -> mostrar modal y abrir direcciones
+  if (params.get("direccion_eliminada") === "1") {
+    const modalEliminado = new bootstrap.Modal(document.getElementById('modalEliminado'));
+    modalEliminado.show();
+    activarMenu('direcciones');
+  }
+
+  // Si se guardó perfil -> mostrar modal y abrir perfil
+  if (params.get("perfil_guardado") === "1") {
+    const modal = new bootstrap.Modal(document.getElementById('modalPerfilGuardado'));
+    modal.show();
+    activarMenu('perfil');
+  }
+
+  // --- Interceptar formularios de borrar dirección ---
   const deleteForms = document.querySelectorAll('form[action*="borrar_direccion"]');
   deleteForms.forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       formPendienteBorrar = this;
-      itemPendienteBorrar = this.closest('.list-group-item'); // Guardamos el item visual
+      itemPendienteBorrar = this.closest('.list-group-item');
+
       const modalConfirm = new bootstrap.Modal(document.getElementById('modalConfirmarBorrar'));
       modalConfirm.show();
     });
   });
 
-  // Confirmar eliminación
+  // --- Confirmar eliminación ---
   document.getElementById('btnConfirmarBorrar').addEventListener('click', function () {
     if (formPendienteBorrar) {
-      // Animación de desaparición antes de enviar
+      // Animación visual antes de enviar
       itemPendienteBorrar.classList.add('fade');
       itemPendienteBorrar.style.opacity = 0;
 
@@ -56,18 +73,4 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 300);
     }
   });
-
-  // Mostrar modal de eliminación exitosa si viene de backend
-  if (params.get("direccion_eliminada") === "1") {
-    activarMenu('direcciones');
-    const modalEliminado = new bootstrap.Modal(document.getElementById('modalEliminado'));
-    modalEliminado.show();
-  }
 });
-
-
-document.addEventListener("DOMContentLoaded", function () {
-  const modal = new bootstrap.Modal(document.getElementById('modalPerfilGuardado'));
-  modal.show();
-});
-
