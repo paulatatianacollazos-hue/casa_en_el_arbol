@@ -83,6 +83,8 @@ class Categorias(db.Model):
         return f'<Categoria {self.NombreCategoria}>'
 
 
+from sqlalchemy.orm import column_property
+
 class Producto(db.Model):
     __tablename__ = 'Producto'
 
@@ -104,8 +106,12 @@ class Producto(db.Model):
     novedades = db.relationship('Novedades', backref='producto', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
 
+    # Alias real para que funcione en consultas
+    id = column_property(ID_Producto)
+
     def __repr__(self):
         return f"<Producto {self.NombreProducto}>"
+
 
 
 class ImagenProducto(db.Model):

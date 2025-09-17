@@ -1,0 +1,24 @@
+<section class="catalog-section">
+  <div class="container">
+    <h2 class="section-title text-center">❤️ Mis Favoritos</h2>
+
+    {% if productos %}
+    <div class="row g-4 product-grid">
+      {% for p in productos %}
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card product-card h-100">
+          <img src="{{ p.imagenes[0].ruta if p.imagenes else '/static/img/placeholder.jpg' }}" class="product-image" alt="{{ p.NombreProducto }}">
+          <div class="card-body text-center">
+            <h5 class="product-name">{{ p.NombreProducto }}</h5>
+            <p class="price-final">${{ "%.0f"|format(p.PrecioUnidad) }}</p>
+            <button class="btn btn-primary w-100 mt-2">Mover al carrito</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="text-center">No tienes productos en favoritos ❤️</p>
+    {% endif %}
+  </div>
+</section>

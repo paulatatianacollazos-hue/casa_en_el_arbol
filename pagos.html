@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagos - Casa en el Árbol</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+
+<script defer src="{{ url_for('static', filename='js/pagos.js') }}"></script>
+</head>
+<body class="container py-4">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary rounded shadow-sm mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="{{ url_for('favoritos') }}">Casa en el Árbol</a>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('carrito') }}">🛒 Carrito</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Título -->
+  <h3 class="mb-3">💳 Pagos</h3>
+
+  <!-- Resumen de productos -->
+  <div class="table-responsive">
+    <table class="table align-middle table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Producto</th>
+          <th>Precio Unitario</th>
+          <th>Cantidad</th>
+          <th>Total Artículo</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyPago"></tbody>
+    </table>
+  </div>
+
+  <!-- Método de pago + Total -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Método de pago</label>
+      <select id="metodoPago" class="form-select">
+        <option value="">Selecciona…</option>
+        <option>Tarjeta</option>
+        <option>Nequi</option>
+        <option>PSE</option>
+        <option>Efectivo</option>
+      </select>
+    </div>
+    <div class="col-md-6 d-flex align-items-end justify-content-end">
+      <div class="fs-5">
+        Total a pagar: <strong id="pagoTotal">$0</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de pago -->
+  <div class="text-end mt-3">
+    <button id="btnPagar" class="btn btn-success btn-lg">✅ Realizar Pedido</button>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <div class="modal-header">
+          <h5 class="modal-title">¡Pedido Confirmado!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="mb-3">Tu compra ha sido procesada con éxito 🎉</p>
+          <p>Gracias por elegir <strong>Casa en el Árbol</strong>.</p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <a href="{{ url_for('catalogo') }}" class="btn btn-primary">Seguir comprando</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

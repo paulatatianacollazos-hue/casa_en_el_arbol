@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
@@ -505,23 +505,43 @@ def catalogo():
     return render_template("catalogo.html", productos=productos)
 
 
-# ------------------Favoritos------------------ #
-@app.route("/favoritos")
-def favoritos():
-    return render_template("favoritos.html")
+@app.route("/add_to_cart", methods=["POST"])
+def add_to_cart():
+    product_id = request.json.get("id")
+    if "cart" not in session:
+        session["cart"] = []
+    if product_id not in session["cart"]:
+        session["cart"].append(product_id)
+    session.modified = True
+    return jsonify({"cart_count": len(session["cart"])})
 
-
-# ------------------Carrito ------------------ #
 @app.route("/carrito")
 def carrito():
-    return render_template("carrito.html")
+    ids = session.get("cart", [])
+    productos = Producto.query.filter(Producto.id.in_(ids)).all() if ids else []
+    return render_template("carrito.html", productos=productos)
 
+# ---------------- FAVORITOS ----------------
+@app.route("/add_to_favorites", methods=["POST"])
+def add_to_favorites():
+    product_id = request.json.get("id")
+    if "favorites" not in session:
+        session["favorites"] = []
+    if product_id not in session["favorites"]:
+        session["favorites"].append(product_id)
+    session.modified = True
+    return jsonify({"fav_count": len(session["favorites"])})
 
-# ------------------Pagos ------------------ #
+@app.route("/favoritos")
+def favoritos():
+    ids = session.get("favorites", [])
+    productos = Producto.query.filter(Producto.id.in_(ids)).all() if ids else []
+    return render_template("favoritos.html", productos=productos)
+
+# ------------------ Pagos------------------ #
 @app.route("/pagos")
 def pagos():
     return render_template("pagos.html")
-
 
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
