@@ -6,16 +6,17 @@ db = SQLAlchemy()
 
 class Usuario(UserMixin, db.Model):
     __tablename__ = 'Usuario'
+
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
-    Apellido = db.Column(db.String(100), nullable=False)
-    Genero = db.Column(db.String(20))
+    Apellido = db.Column(db.String(100))
+    Genero = db.Column(db.String(10))
     Telefono = db.Column(db.String(20))
     Correo = db.Column(db.String(100), nullable=False, unique=True)
-    Direccion = db.Column(db.String(200))
     Contraseña = db.Column(db.String(200), nullable=False)
     Rol = db.Column(db.String(50), default='cliente')
     Activo = db.Column(db.Boolean, default=True)
+
 
     # Relaciones
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
@@ -31,6 +32,8 @@ class Usuario(UserMixin, db.Model):
     def id(self):
         return self.ID_Usuario
 
+    def __repr__(self):
+        return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
 
 class Direccion(db.Model):
     __tablename__ = 'Direccion'
