@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session,  jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+
 
 from flask_login import (
     LoginManager, login_required, current_user,
@@ -315,10 +316,9 @@ def agregar_direccion():
 @login_required
 def borrar_direccion(id_direccion):
     direccion = Direccion.query.get_or_404(id_direccion)
-    # comprobar que la direccion pertenece al usuario (o si admin, permitir)
+
     if direccion.ID_Usuario != current_user.ID_Usuario and current_user.Rol.lower() != 'admin':
-        flash("❌ No autorizado para eliminar esta dirección.", "danger")
-        return redirect(url_for('actualizacion_datos'))
+        return jsonify({"success": False, "message": "No autorizado"}), 403
 
     db.session.delete(direccion)
     db.session.commit()
@@ -329,9 +329,8 @@ def borrar_direccion(id_direccion):
         mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
     )
 
-    # flag para modal de eliminado
-    session['show_address_deleted'] = True
-    return redirect(url_for('actualizacion_datos'))
+    return jsonify({"success": True, "message": "Dirección eliminada"})
+
 
 
 # ---------- Notificaciones ----------
