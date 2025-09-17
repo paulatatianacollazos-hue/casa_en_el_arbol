@@ -15,6 +15,8 @@ from basedatos.models import db, Usuario, Direccion, Notificaciones
 
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
+instalaciones = []
+
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
 DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
@@ -450,6 +452,33 @@ def cambiar_rol(user_id):
         flash("❌ Usuario no encontrado", "danger")
     
     return redirect(url_for('gestion_roles'))
+
+# ------------------ Instalaciones ------------------ #
+@app.route('/instalaciones', methods=['GET', 'POST'])
+def agendar():
+    if request.method == 'POST':
+        instalacion = {
+            "pedido": request.form['pedido'],
+            "producto": request.form['producto'],
+            "direccion": request.form['direccion'],
+            "fecha": request.form['fecha'],
+            "hora": request.form['hora'],
+            "comentarios": request.form['comentarios']
+        }
+        instalaciones.append(instalacion)
+        return redirect(url_for('confirmacion'))
+    return render_template('instalaciones.html')
+
+@app.route('/confirmacion')
+def confirmacion():
+    return render_template('confirmacion.html')
+
+@app.route('/lista')
+def lista():
+    return render_template('lista.html', instalaciones=instalaciones)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 # ------------------ MAIN ------------------ #
