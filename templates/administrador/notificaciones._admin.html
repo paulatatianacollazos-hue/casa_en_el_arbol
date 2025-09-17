@@ -289,7 +289,8 @@
         </button>
       </div>
 
-      <form method="POST" action="{{ url_for('eliminar_notificaciones') }}">
+      <form method="POST" action="{{ url_for('ver_notificaciones_admin') }}">
+
         {% if notificaciones %}
           <div class="noti-list">
             {% for noti in notificaciones %}
