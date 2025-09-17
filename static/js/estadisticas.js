@@ -33,28 +33,35 @@ function genStats(){
   const total = subset.length;
   const positives = subset.filter(x=>x.rating>=4).length;
   const negatives = subset.filter(x=>x.rating<=2).length;
-  const rate = total ? Math.round((positives*100/total)*10)/10 : 0;
+  const neutrals  = subset.filter(x=>x.rating===3).length;
 
   document.getElementById('txtTotal').textContent = `Total respuestas: ${total}`;
 
-  // Pie chart (respuestas reales, no porcentaje)
-  const pieCtx = document.getElementById('pie');
+  // Pie chart en tonos verdes
+  const pieCtx = document.getElementById('pie').getContext('2d');
   if(window._pie) window._pie.destroy();
   window._pie = new Chart(pieCtx, {
     type:'pie',
     data:{
       labels:['Positivas','Neutrales','Negativas'],
       datasets:[{
-        data:[
-          positives,
-          subset.filter(x=>x.rating===3).length,
-          negatives
-        ]
+        data:[positives, neutrals, negatives],
+        backgroundColor: [
+          'rgba(0,128,0,0.8)',    // verde fuerte
+          'rgba(60,179,113,0.8)', // verde medio
+          'rgba(144,238,144,0.8)' // verde claro
+        ],
+        borderColor: [
+          'rgba(0,100,0,1)',
+          'rgba(46,139,87,1)',
+          'rgba(34,139,34,1)'
+        ],
+        borderWidth: 1
       }]
     }
   });
 
-  // Barras por mes
+  // Barras por mes en verde
   const months = {};
   subset.forEach(r => {
     const ym = r.date.slice(0,7); // YYYY-MM
@@ -62,13 +69,24 @@ function genStats(){
   });
   const labels = Object.keys(months).sort();
   const vals = labels.map(l=>months[l]);
-  const barsCtx = document.getElementById('bars');
+  const barsCtx = document.getElementById('bars').getContext('2d');
   if(window._bars) window._bars.destroy();
   window._bars = new Chart(barsCtx, {
     type:'bar',
     data:{
       labels,
-      datasets:[{label:'Respuestas', data:vals}]
+      datasets:[{
+        label:'Respuestas',
+        data:vals,
+        backgroundColor:'rgba(0,128,0,0.7)',
+        borderColor:'rgba(0,100,0,1)',
+        borderWidth:1
+      }]
+    },
+    options:{
+      scales:{
+        y:{ beginAtZero:true }
+      }
     }
   });
 
@@ -85,4 +103,3 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnGen').addEventListener('click', genStats);
   genStats();
 });
-
