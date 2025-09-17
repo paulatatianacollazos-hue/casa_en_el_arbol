@@ -338,6 +338,20 @@ def ver_notificaciones():
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("notificaciones.html", notificaciones=notificaciones)
 
+
+@app.route('/eliminar_notificaciones', methods=['POST'])
+@login_required
+def eliminar_notificaciones():
+    # Ejemplo: eliminar todas las notificaciones del usuario actual
+    notificaciones = Notificaciones.query.filter_by(usuario_id=current_user.id).all()
+    for n in notificaciones:
+        db.session.delete(n)
+    db.session.commit()
+    
+    flash("✅ Todas las notificaciones fueron eliminadas", "success")
+    return redirect(url_for('ver_notificaciones'))
+
+
 # ---------- Gestión de roles ----------
 @app.route('/gestion_roles', methods=['GET', 'POST'])
 @login_required
@@ -386,6 +400,24 @@ def instalador_dashboard():
 @role_required('transportista')
 def transportista_dashboard():
     return render_template('transportista_dashboard.html')
+
+# ---------- Cambiar rol ----------
+
+@app.route('/cambiar_rol/<int:user_id>', methods=['POST'])
+@login_required
+def cambiar_rol(user_id):
+    nuevo_rol = request.form['rol']
+    usuario = Usuario.query.get(user_id)  # Busca el usuario en la tabla
+    
+    if usuario:
+        usuario.Rol = nuevo_rol  # Cambia el rol
+        db.session.commit()      # Guarda cambios en la BD
+        flash(f"✅ Rol de {usuario.Nombre} cambiado a {nuevo_rol}", "success")
+    else:
+        flash("❌ Usuario no encontrado", "danger")
+    
+    return redirect(url_for('gestion_roles'))
+
 
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
