@@ -1,5 +1,4 @@
 import os
-import mysql.connector
 from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,7 +16,7 @@ from flask_login import (
 
 from functools import wraps
 
-from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,Producto
+from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,Producto,Pedido, Detalle_Pedido
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
 instalaciones = []
@@ -65,83 +64,6 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return wrapped
     return decorator
-
-
-from flask import Flask, render_template
-import mysql.connector
-
-app = Flask(__name__)
-
-
-def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",  # SIN contraseña
-        database="tienda_db"
-    )
-
-
-def obtener_todos_los_pedidos():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT
-            p.ID_Pedido,
-            p.FechaPedido,
-            p.FechaEntrega,
-            p.Estado,
-            u.Nombre AS Cliente,
-            u.Apellido AS ApellidoCliente
-        FROM pedido p
-        JOIN usuario u ON p.ID_Usuario = u.ID_Usuario
-    """)
-    resultados = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return resultados
-
-
-def detalle():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT
-            p.ID_Pedido,
-            u.Nombre AS Nombre_Cliente,
-            u.Apellido AS Apellido_Cliente,
-            u.Telefono,
-            pr.NombreProducto AS Producto,
-            dp.Cantidad
-        FROM pedido p
-        JOIN usuario u ON p.ID_Usuario = u.ID_Usuario
-        JOIN detalle_pedido dp ON p.ID_Pedido = dp.ID_Pedido
-        JOIN producto pr ON dp.ID_Producto = pr.ID_Producto
-    """)
-    resultados = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    agrupado = {}
-    for row in resultados:
-        pid = row['ID_Pedido']
-        if pid not in agrupado:
-            agrupado[pid] = {
-                'Nombre_Cliente': row['Nombre_Cliente'],
-                'Apellido_Cliente': row['Apellido_Cliente'],
-                'Telefono': row['Telefono'],
-                'Direccion': row['Direccion'],
-                'Productos': []
-            }
-        agrupado[pid]['Productos'].append({
-            'Producto': row['Producto'],
-            'Cantidad': row['Cantidad']
-        })
-
-    return agrupado
-
-def obtener_empleados():
-    return []  # ya que no tienes tabla Empleado
 
 
 
@@ -470,7 +392,7 @@ def ver_notificaciones_admin():
     notificaciones = Notificaciones.query.filter_by(
         ID_Usuario=current_user.ID_Usuario
     ).order_by(Notificaciones.Fecha.desc()).all()
-    return render_template("notificaciones_admin.html", notificaciones=notificaciones)
+    return render_template("administrador/notificaciones_admin.html", notificaciones=notificaciones)
 
 
 # ---------- Gestión de roles ----------
@@ -723,16 +645,6 @@ def escribir():
 @app.route('/admin')
 def admin():
     return render_template("administrador/admin_reseñas.html", reviews=reviews)
-
-# ------------------ Asignacion de transportista------------------ #
-
-@app.route('/envios')
-def envios():
-    pedidos = obtener_todos_los_pedidos()
-    detalles = detalle()
-    empleados = []  # no hay empleados en esta BD
-    return render_template('envios.html', pedidos=pedidos, detalles=detalles, empleados=empleados)
-
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
     app.run(debug=True)
