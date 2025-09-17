@@ -76,8 +76,8 @@ app = Flask(__name__)
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
-        user="root",          
-        password="tu_password", 
+        user="root",
+        password="",  # SIN contraseña
         database="tienda_db"
     )
 
@@ -113,7 +113,6 @@ def detalle():
             p.ID_Pedido,
             u.Nombre AS Nombre_Cliente,
             u.Telefono,
-            u.Direccion,
             pr.NombreProducto AS Producto,
             dp.Cantidad
         FROM Pedido p
