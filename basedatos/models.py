@@ -32,6 +32,9 @@ class Usuario(db.Model):
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True)
     direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")  
 
+    def get_id(self):
+        return str(self.ID_Usuario)  # Flask-Login necesita este método
+
     def __repr__(self):
         return f'<Usuario {self.Nombre} {self.Apellido or ""}>'
 
