@@ -1,4 +1,5 @@
 import os
+import mysql.connector
 from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -88,13 +89,13 @@ def send_reset_email(user_email, user_name, token):
     )
     mail.send(msg)
 
-    def get_connection():
+def get_connection():
     return mysql.connector.connect(
         user='root',
-        password='paula123',
+        password='',
         host='localhost',
         database='tienda_db',
-        port='3306'
+       
     )
 
 
@@ -107,7 +108,6 @@ def obtener_todos_los_pedidos():
             pe.ID_Pedido,
             u.Nombre AS nombre_usuario,
             u.Telefono,
-            u.Direccion,
             p.ID_Producto,
             p.NombreProducto,
             dp.Cantidad,
@@ -195,7 +195,6 @@ def detalle():
             p.ID_Pedido,
             u.Nombre AS Nombre_Cliente,
             u.Telefono,
-            u.Direccion,
             pr.NombreProducto AS Producto,
             dp.Cantidad
         FROM Pedido p
