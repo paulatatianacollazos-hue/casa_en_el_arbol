@@ -363,29 +363,37 @@ def eliminar_notificaciones_cliente():
 # ---------------------------
 @app.route('/notificaciones_admin', methods=['GET', 'POST'])
 @login_required
+@role_required('admin')  # obligatorio si solo admins deben ver esto
 def ver_notificaciones_admin():
     if request.method == 'POST':
-        ids = request.form.getlist('ids')  # ✅ checkboxes seleccionadas
-        if ids:
+        ids = request.form.getlist('ids')
+        if not ids:
+            flash("❌ No seleccionaste ninguna notificación", "warning")
+            return redirect(url_for('ver_notificaciones_admin'))
+
+        try:
+            ids_int = [int(i) for i in ids if str(i).isdigit()]
+        except ValueError:
+            flash("❌ IDs inválidos", "danger")
+            return redirect(url_for('ver_notificaciones_admin'))
+
+        try:
             Notificaciones.query.filter(
                 Notificaciones.ID_Usuario == current_user.ID_Usuario,
-                Notificaciones.ID_Notificacion.in_(ids)
+                Notificaciones.ID_Notificacion.in_(ids_int)
             ).delete(synchronize_session=False)
             db.session.commit()
-            flash("✅ Notificaciones seleccionadas eliminadas", "success")
-        else:
-            flash("⚠️ No seleccionaste ninguna notificación.", "warning")
+            flash("✅ Notificaciones eliminadas", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"❌ Error al eliminar: {e}", "danger")
 
         return redirect(url_for('ver_notificaciones_admin'))
 
-    # Si es GET → mostrar lista de notificaciones
     notificaciones = Notificaciones.query.filter_by(
         ID_Usuario=current_user.ID_Usuario
     ).order_by(Notificaciones.Fecha.desc()).all()
-    
     return render_template("notificaciones_admin.html", notificaciones=notificaciones)
-
-
 
 
 # ---------- Gestión de roles ----------
