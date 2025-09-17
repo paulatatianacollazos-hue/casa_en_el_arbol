@@ -379,7 +379,7 @@ def buscar_pedido():
     if request.method == 'POST':
         pedido_id = request.form['pedido_id']
         return redirect(url_for('editar_estado', pedido_id=pedido_id))
-    return render_template('estado.html')
+    return render_template('administrador/estado.html')
 
 
 def obtener_comentarios_agrupados():
@@ -411,7 +411,7 @@ def obtener_comentarios_agrupados():
 @app.route('/comentarios')
 def mostrar_comentarios():
     comentarios = obtener_comentarios_agrupados()
-    return render_template('comentarios.html', comentarios=comentarios)
+    return render_template('administrador/comentarios.html', comentarios=comentarios)
 
 
 def obtener_productos():
