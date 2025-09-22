@@ -6,7 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
-import re
+from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
 
 
 
@@ -48,11 +49,9 @@ login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
-
 
 # ------------------ DECORADOR DE ROLES ------------------ #
 def role_required(*roles):
@@ -74,34 +73,6 @@ def role_required(*roles):
 
 
 # ------------------ FUNCIONES ------------------ #
-
-
-
-def validar_password(password: str) -> list:
-    """
-    Valida la contraseña y devuelve una lista con los errores encontrados.
-    Si la lista está vacía, la contraseña es válida.
-    """
-    errores = []
-
-    if len(password) < 8:
-        errores.append("Debe tener al menos 8 caracteres.")
-
-    if not re.search(r"[A-Z]", password):
-        errores.append("Debe contener al menos una letra mayúscula.")
-
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=]", password):
-        errores.append("Debe contener al menos un carácter especial.")
-
-    for i in range(len(password) - 2):
-        if password[i].isdigit() and password[i+1].isdigit() and password[i+2].isdigit():
-            if int(password[i+1]) == int(password[i]) + 1 and int(password[i+2]) == int(password[i]) + 2:
-                errores.append("No debe contener números consecutivos .")
-                break  # con uno basta
-
-    return errores
-
-
 def crear_notificacion(user_id, titulo, mensaje):
     noti = Notificaciones(
         ID_Usuario=user_id,
@@ -110,7 +81,6 @@ def crear_notificacion(user_id, titulo, mensaje):
     )
     db.session.add(noti)
     db.session.commit()
-
 
 def send_reset_email(user_email, user_name, token):
     reset_url = url_for('reset_password', token=token, _external=True)
@@ -121,14 +91,13 @@ def send_reset_email(user_email, user_name, token):
     )
     mail.send(msg)
 
-
 def get_connection():
     return mysql.connector.connect(
         user='root',
         password='',
         host='localhost',
         database='tienda_db',
- 
+       
     )
 
 
@@ -146,7 +115,8 @@ def obtener_todos_los_pedidos():
             dp.Cantidad,
             pe.FechaPedido,
             ip.ruta AS ImagenURL,
-            p.PrecioUnidad
+            p.PrecioUnidad,
+            pe.ID_Empleado
         FROM Pedido pe
         JOIN Usuario u ON pe.ID_Usuario = u.ID_Usuario
         JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
@@ -171,7 +141,7 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio': float(row[9])  
+            'precio': float(row[9])  # Asegura que el precio esté como número
         }
 
         fecha = row[7].strftime('%Y-%m-%d')
@@ -183,7 +153,8 @@ def obtener_todos_los_pedidos():
                 'telefono': row[2],
                 'direccion': row[3],
                 'fecha': fecha,
-                'productos': {}
+                'productos': {},
+                'id_empleado': row[10]   # 👈 nuevo campo
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -197,7 +168,7 @@ def obtener_todos_los_pedidos():
         pedido['productos'] = list(pedido['productos'].values())
         total = sum(prod['cantidad'] * prod['precio']
                     for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)  
+        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
     return list(pedidos_dict.values())
 
 
@@ -205,14 +176,24 @@ def todos_los_pedidos():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT
-            p.ID_Pedido,
-            p.FechaPedido,
-            p.FechaEntrega,
-            p.Estado,
-            u.Nombre AS Cliente
-        FROM Pedido p
-        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+       SELECT
+            pe.ID_Pedido,
+            MAX(pe.FechaPedido) AS FechaPedido,
+            MAX(pe.FechaEntrega) AS FechaEntrega,
+            MAX(u.Nombre) AS cliente,
+            MAX(u.Direccion) AS direccion,
+            GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
+            SEPARATOR '<br>') AS productos,
+            MAX(pe.Estado) AS Estado,
+            MAX(emp.Nombre) AS empleado
+        FROM Pedido pe
+        JOIN Usuario u ON pe.ID_Usuario = u.ID_Usuario
+        LEFT JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+        LEFT JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        LEFT JOIN Usuario emp ON pe.ID_Empleado = emp.ID_Usuario
+        GROUP BY pe.ID_Pedido
+        ORDER BY pe.ID_Pedido DESC;
+
     """)
     resultados = cursor.fetchall()
     cursor.close()
@@ -254,16 +235,16 @@ def detalle():
             'Cantidad': row['Cantidad']
         })
 
-    return agrupado  
+    return agrupado  # Retorna un dict con ID_Pedido como clave
 
 
 def obtener_empleados():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT ID_Usuario AS ID_Empleado, Nombre
-        FROM Usuario
-        WHERE Rol = 'Empleado'
+    SELECT ID_Usuario AS ID_Empleado, Nombre
+    FROM Usuario
+    WHERE Rol = 'Empleado'
     """)
     empleados = cursor.fetchall()
     cursor.close()
@@ -272,11 +253,13 @@ def obtener_empleados():
 
 
 @app.route('/envios')
+@login_required
+@role_required('admin')
 def envios():
     pedidos = obtener_todos_los_pedidos()
     detalles = detalle()
     empleados = obtener_empleados()
-    return render_template('envios.html', pedidos=pedidos, detalles=detalles,
+    return render_template('administrador/envios.html', pedidos=pedidos, detalles=detalles,
                            empleados=empleados)
 
 
@@ -341,34 +324,65 @@ def obtener_productos_filtrados(correo, categoria):
 
 
 @app.route("/control_pedidos")
+@login_required
+@role_required('admin')
 def control_pedidos():
     pedidos = todos_los_pedidos()
-    return render_template("administrador/control_pedidos.html", pedidos=pedidos)
+    return render_template('administrador/control_pedidos.html', pedidos=pedidos)
 
 
-@app.route('/asignar_empleado', methods=["POST"])
+@app.route('/asignar_empleado', methods=['POST'])
 def asignar_empleado():
-    pedidos_ids = request.form.get("pedidos")
-    id_empleado = request.form.get("empleado")
-
-    if not pedidos_ids or not id_empleado:
-        return "Faltan datos", 400
-
-    ids = pedidos_ids.split(',')
+    pedido_ids = request.form['pedido_id'].split(",")
+    empleado_id = request.form['empleado_id']
 
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
-    # Guardamos el usuario que es empleado
-    query = "UPDATE Pedido SET ID_UsuarioEmpleado = %s WHERE ID_Pedido = %s"
-    for pid in ids:
-        cursor.execute(query, (id_empleado, pid))
+    mensajes = []
+    for pid in pedido_ids:
+        # 1️⃣ obtener hora del pedido que quiero asignar
+        cursor.execute("""
+            SELECT HoraEntrega
+            FROM Pedido
+            WHERE ID_Pedido = %s
+        """, (pid,))
+        pedido = cursor.fetchone()
+
+        if not pedido or not pedido['HoraEntrega']:
+            mensajes.append(f"❌ Pedido {pid} no tiene hora definida")
+            continue
+
+        hora_pedido = pedido['HoraEntrega']
+
+# 2️⃣ verificar si el empleado ya tiene un pedido en el mismo rango de 30 min
+        cursor.execute("""
+            SELECT ID_Pedido, HoraEntrega
+            FROM Pedido
+            WHERE ID_Empleado = %s
+            AND ABS(TIMESTAMPDIFF(MINUTE, HoraEntrega, %s)) < 30
+        """, (empleado_id, hora_pedido))
+        conflicto = cursor.fetchone()
+
+        if conflicto:
+            mensajes.append(f"""❌ Pedido {pid} no se asignó.
+                            Conflicto con pedido {conflicto['ID_Pedido']}
+                            en el calendario.""")
+            continue
+
+        # 3️⃣ asignar si no hay conflicto
+        cursor.execute("""
+            UPDATE Pedido
+            SET ID_Empleado = %s
+            WHERE ID_Pedido = %s
+        """, (empleado_id, pid))
+        mensajes.append(f"✅ Pedido {pid} asignado correctamente")
 
     conn.commit()
     cursor.close()
     conn.close()
 
-    return redirect(url_for("envios"))
+    return jsonify({"success": True, "message": "<br>".join(mensajes)})
 
 
 @app.route('/actualizar_pedido', methods=['POST'])
@@ -377,18 +391,18 @@ def actualizar_pedido():
     nuevo_estado = request.form['estado']
     comentario = request.form['comentario']
 
-    conn = get_connection() 
+    conn = get_connection()  # ← esta es la forma correcta
     cursor = conn.cursor()
 
     try:
-        
+        # Actualizar estado del pedido
         cursor.execute("""
             UPDATE Pedido
             SET Estado = %s
             WHERE ID_Pedido = %s
         """, (nuevo_estado, pedido_id))
 
-        
+        # Insertar comentario (si se escribió algo)
         if comentario.strip():
             cursor.execute("""
                 INSERT INTO comentarios (pedido_id, texto)
@@ -404,14 +418,16 @@ def actualizar_pedido():
         cursor.close()
         conn.close()
 
-    return redirect(url_for('control_pedidos'))  
+    return redirect(url_for('control_pedidos'))  # O la vista que desees
 
 
 @app.route('/estado', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
 def buscar_pedido():
     if request.method == 'POST':
         pedido_id = request.form['pedido_id']
-        return redirect(url_for('editar_estado', pedido_id=pedido_id))
+        return redirect(url_for('administrador/control_pedidos.html', pedido_id=pedido_id))
     return render_template('administrador/estado.html')
 
 
@@ -442,6 +458,8 @@ def obtener_comentarios_agrupados():
 
 
 @app.route('/comentarios')
+@login_required
+@role_required('admin')
 def mostrar_comentarios():
     comentarios = obtener_comentarios_agrupados()
     return render_template('administrador/comentarios.html', comentarios=comentarios)
@@ -544,13 +562,15 @@ def ver_producto(producto_id):
 
 
 @app.route('/firmar', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
 def firmar_pedido():
     mensaje = None
 
     if request.method == 'POST':
         pedido_id = request.form['pedido_id']
         nombre = request.form['nombre_cliente']
-        archivo = request.files.get('firma')  
+        archivo = request.files.get('firma')  # 👈 cambio importante
 
         if archivo and archivo.filename != "":
             filename = secure_filename(archivo.filename)
@@ -573,10 +593,12 @@ def firmar_pedido():
         else:
             mensaje = "No se subió ningún archivo "
 
-    return render_template('confirmacion_firma.html', mensaje=mensaje)
+    return render_template('administrador/confirmacion_firma.html', mensaje=mensaje)
 
 
 @app.route('/reporte', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
 def buscar_pedidos():
     resultados = []
 
@@ -584,24 +606,28 @@ def buscar_pedidos():
         fecha = request.form.get('fecha_pedido')
         id_pedido = request.form.get('id_pedido')
         nombre_cliente = request.form.get('nombre_cliente')
+        nombre_empleado = request.form.get('nombre_empleado')
 
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
         query = """
         SELECT
-            p.FechaPedido,
-            u.Nombre AS cliente,
-            u.Direccion,
-            pr.NombreProducto AS producto,
-            p.Estado
-        FROM Pedido p
-        JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
-        JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
-        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
-        WHERE p.Estado = 'entregado'
+                p.ID_Pedido AS id_pedido,
+                p.FechaPedido AS fecha,
+                c.Nombre AS cliente,
+                c.Direccion AS direccion,
+                GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
+                SEPARATOR '<br>') AS productos,
+                p.Estado AS estado,
+                COALESCE(e.Nombre, 'Sin asignar') AS empleado
+            FROM Pedido p
+            JOIN Usuario c ON p.ID_Usuario = c.ID_Usuario
+            JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
+            JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+            LEFT JOIN Usuario e ON p.ID_Empleado = e.ID_Usuario
+            WHERE p.Estado = 'entregado'
         """
-
         params = []
 
         if fecha:
@@ -613,15 +639,104 @@ def buscar_pedidos():
             params.append(id_pedido)
 
         if nombre_cliente:
-            query += " AND u.Nombre LIKE %s"
+            query += " AND c.Nombre LIKE %s"
             params.append(f"%{nombre_cliente}%")
+
+        if nombre_empleado:
+            query += " AND e.Nombre LIKE %s"
+            params.append(f"%{nombre_empleado}%")
+
+        # 👇 agrupar y ordenar SOLO al final
+        query += """
+            GROUP BY p.ID_Pedido, p.FechaPedido, c.Nombre, c.Direccion,
+            p.Estado, e.Nombre
+            ORDER BY p.FechaPedido DESC
+        """
 
         cursor.execute(query, tuple(params))
         resultados = cursor.fetchall()
         cursor.close()
         conn.close()
 
-    return render_template('reportes_entrega.html', resultados=resultados)
+    return render_template('administrador/reportes_entrega.html', resultados=resultados)
+
+
+@app.route("/asignar_calendario", methods=["POST"])
+def asignar_calendario():
+    print("📩 Datos recibidos:", request.form.to_dict())
+    pedidos_ids = request.form.get("pedidosSeleccionados").split(",")
+    empleado_id = request.form["empleado_id"]
+    fecha = request.form["fecha"]
+    hora_inicio = request.form["hora"]
+
+    # Convertir fecha y hora a datetime inicial
+    start_datetime = datetime.strptime(f"{fecha} {hora_inicio}",
+                                       "%Y-%m-%d %H:%M")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        for pedido_id in pedidos_ids:
+            # Ver si el pedido es instalación
+            cursor.execute("SELECT Instalacion FROM Pedido WHERE ID_Pedido = %s", (pedido_id,))
+            instalacion = cursor.fetchone()[0]
+
+            intervalo = timedelta(minutes=60) if instalacion == "si" else timedelta(minutes=30)
+
+            # 🔹 Validar si ya existe una cita en ese día, hora y empleado
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM Calendario
+                WHERE Fecha = %s AND Hora = %s AND ID_Usuario = %s
+            """, (fecha, start_datetime.strftime("%H:%M:%S"), empleado_id))
+
+            existe = cursor.fetchone()[0]
+
+            if existe > 0:
+                conn.rollback()
+                cursor.close()
+                conn.close()
+                return jsonify({
+                    "success": False,
+                    "message": f"⚠️ El empleado ya tiene una cita el {fecha} a las {start_datetime.strftime('%H:%M')}."
+                })
+
+            # 🟢 Guardamos en la tabla Pedido
+            cursor.execute("""
+                UPDATE Pedido
+                SET ID_Empleado = %s,
+                    FechaEntrega = %s,
+                    HoraEntrega = %s
+                WHERE ID_Pedido = %s
+            """, (empleado_id, fecha, start_datetime.strftime("%H:%M:%S"), pedido_id))
+
+            # 🟢 Insertar también en la tabla Calendario
+            cursor.execute("""
+                INSERT INTO Calendario (Fecha, Hora, Ubicacion, ID_Usuario, ID_Pedido, Tipo)
+                SELECT %s, %s, u.Direccion, %s, p.ID_Pedido, p.Instalacion
+                FROM Pedido p
+                JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
+                WHERE p.ID_Pedido = %s
+            """, (fecha, start_datetime.strftime("%H:%M:%S"), empleado_id, pedido_id))
+
+            # Avanzar a la siguiente hora según instalación o normal
+            start_datetime += intervalo
+
+        conn.commit()
+        return jsonify({
+            "success": True,
+            "message": "✅ Pedidos asignados y calendario actualizado"
+        })
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": f"❌ Error: {str(e)}"})
+
+    finally:
+        cursor.close()
+        conn.close()
+
 
 # ------------------ RUTAS ------------------ #
 @app.route('/')
@@ -639,21 +754,7 @@ def register():
 
         if not nombre_completo or not correo or not password:
             flash('Nombre, correo y contraseña son obligatorios.', 'warning')
-            return render_template('register.html',
-                                   name=nombre_completo,
-                                   email=correo,
-                                   phone=telefono)
-
-        errores_password = validar_password(password)
-        if errores_password:
-            for e in errores_password:
-                flash(e, 'danger')
-           
-            return render_template('register.html',
-                                   name=nombre_completo,
-                                   email=correo,
-                                   phone=telefono,
-                                   password="")
+            return render_template('register.html')
 
         partes = nombre_completo.split(" ", 1)
         nombre = partes[0]
@@ -661,10 +762,7 @@ def register():
 
         if Usuario.query.filter_by(Correo=correo).first():
             flash('Ya existe una cuenta con ese correo.', 'danger')
-            return render_template('register.html',
-                                   name=nombre_completo,
-                                   email=correo,
-                                   phone=telefono)
+            return render_template('register.html')
 
         nuevo_usuario = Usuario(
             Nombre=nombre,
@@ -683,13 +781,10 @@ def register():
             mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
         )
 
-    flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'register_success')
-    return redirect(url_for('login'))
+        flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'success')
+        return redirect(url_for('login'))
 
     return render_template('register.html')
-
-
-
 
 # ---------- Login ----------
 @app.route('/login', methods=['GET', 'POST'])
@@ -701,24 +796,8 @@ def login():
         usuario = Usuario.query.filter_by(Correo=correo).first()
         if usuario and check_password_hash(usuario.Contraseña, password):
             login_user(usuario)
-            flash("✅ Inicio de sesión exitoso", 'login_success')
+            flash("✅ Inicio de sesión exitoso", "success")
 
-            # --- Iniciales seguras ---
-            nombre = usuario.Nombre.strip() if usuario.Nombre else ""
-            apellido = usuario.Apellido.strip() if usuario.Apellido else ""
-            
-            if nombre and apellido:
-                iniciales = (nombre[0] + apellido[0]).upper()
-            elif nombre:  
-                iniciales = nombre[:2].upper()  
-            else:
-                iniciales = "??"
-
-            session['username'] = nombre
-            session['iniciales'] = iniciales
-            session['show_welcome_modal'] = True  
-
-            # Redirecciones por rol
             if usuario.Rol == 'admin':
                 return redirect(url_for('admin_dashboard'))
             elif usuario.Rol == 'cliente':
@@ -728,15 +807,13 @@ def login():
             elif usuario.Rol == 'transportista':
                 return redirect(url_for('transportista_dashboard'))
             else:
-                flash("⚠️ Rol desconocido, contacta al administrador.", 'login_warning')
+                flash("⚠️ Rol desconocido, contacta al administrador.", "warning")
                 return redirect(url_for('login'))
         else:
-            flash("❌ Correo o contraseña incorrectos", 'login_danger')
+            flash("❌ Correo o contraseña incorrectos", "danger")
             return render_template('login.html')
 
     return render_template('login.html')
-
-
 
 
 # ---------- Página Nosotros ----------
@@ -763,12 +840,12 @@ def forgot_password():
             try:
                 token = s.dumps(email, salt='password-recovery')
                 send_reset_email(user_email=email, user_name=user.Nombre, token=token)
-                flash('📩 Se envió el enlace a tu correo', 'forgot_password_success')
+                flash('📩 Se envió el enlace a tu correo', 'success')
             except Exception as e:
                 print(f"Error al enviar correo: {e}")
-                flash('❌ No se pudo enviar el correo', 'forgot_password_danger')
+                flash('❌ No se pudo enviar el correo', 'danger')
         else:
-            flash('⚠️ Correo no registrado', 'forgot_password_warning')
+            flash('⚠️ Correo no registrado', 'warning')
     return render_template("forgot_password.html")
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -776,7 +853,7 @@ def reset_password(token):
     try:
         email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
     except (SignatureExpired, BadSignature):
-        flash('❌ Enlace expirado o inválido', 'reset_password_danger')
+        flash('❌ Enlace expirado o inválido', 'danger')
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
@@ -784,15 +861,15 @@ def reset_password(token):
         confirm_password = request.form.get('confirm_password')
 
         if not new_password or not confirm_password:
-            flash('⚠️ Completa ambos campos', 'reset_password_warning')
+            flash('⚠️ Completa ambos campos', 'warning')
             return render_template('reset_password.html', token=token)
         if new_password != confirm_password:
-            flash('⚠️ Las contraseñas no coinciden', 'reset_password_warning')
+            flash('⚠️ Las contraseñas no coinciden', 'warning')
             return render_template('reset_password.html', token=token)
 
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
-            flash('❌ Usuario no encontrado', 'reset_password_danger')
+            flash('❌ Usuario no encontrado', 'danger')
             return redirect(url_for('forgot_password'))
 
         user.Contraseña = generate_password_hash(new_password)
@@ -804,7 +881,7 @@ def reset_password(token):
             mensaje="Tu contraseña ha sido cambiada exitosamente."
         )
 
-        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión.', 'reset_password_success')
+        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión.', 'success')
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', token=token)
@@ -829,19 +906,17 @@ def actualizacion_datos():
         password = request.form.get('password', '').strip()
 
         if not nombre or not apellido or not correo:
-            flash('⚠️ Los campos Nombre, Apellido y Correo son obligatorios.', 'actualizacion_datos_warning')
+            flash('⚠️ Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
-        # Verificar que el correo no esté usado por otro usuario
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
             Usuario.ID_Usuario != usuario.ID_Usuario
         ).first()
         if usuario_existente:
-            flash('El correo ya está registrado por otro usuario.', 'actualizacion_datos_danger')
+            flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
-        # Guardar cambios
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
@@ -852,31 +927,18 @@ def actualizacion_datos():
 
         db.session.commit()
 
-        # --- Actualizar sesión con nuevos datos ---
-        if nombre and apellido:
-            iniciales = (nombre[0] + apellido[0]).upper()
-        elif nombre:
-            iniciales = nombre[:2].upper()
-        else:
-            iniciales = "??"
-
-        session['username'] = nombre
-        session['iniciales'] = iniciales
-
-        # Crear notificación
         crear_notificacion(
             user_id=usuario.ID_Usuario,
             titulo="Perfil actualizado ✏️",
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        flash('✅ Perfil actualizado correctamente', 'actualizacion_datos_success')
+        flash('✅ Perfil actualizado correctamente', 'success')
 
     return render_template('Actualizacion_datos.html',
                            usuario=usuario,
                            direcciones=direcciones,
                            notificaciones=notificaciones)
-
 
 # ---------- Direcciones ----------
 @app.route('/agregar_direccion', methods=['POST'])
@@ -916,7 +978,7 @@ def borrar_direccion(id_direccion):
         mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
     )
 
-    flash("Dirección eliminada correctamente 🗑️", 'borrar_direccion_success')
+    flash("Dirección eliminada correctamente 🗑️", "success")
     return redirect(url_for('actualizacion_datos'))
 
 # ---------- Notificaciones ----------
@@ -934,7 +996,7 @@ def ver_notificaciones_cliente():
                 Notificaciones.ID_Notificacion.in_(ids)
             ).delete(synchronize_session=False)
             db.session.commit()
-            flash("✅ Notificaciones eliminadas", 'notificaciones_success')
+            flash("✅ Notificaciones eliminadas", "success")
         return redirect(url_for('ver_notificaciones_cliente'))
 
     notificaciones = Notificaciones.query.filter_by(
@@ -956,7 +1018,7 @@ def ver_notificaciones_admin():
     if request.method == 'POST':
         ids = request.form.getlist('ids')
         if not ids:
-            flash("❌ No seleccionaste ninguna notificación", 'notificaciones_admin_warning')
+            flash("❌ No seleccionaste ninguna notificación", "warning")
             return redirect(url_for('ver_notificaciones_admin'))
 
         try:
@@ -971,10 +1033,10 @@ def ver_notificaciones_admin():
                 Notificaciones.ID_Notificacion.in_(ids_int)
             ).delete(synchronize_session=False)
             db.session.commit()
-            flash("✅ Notificaciones eliminadas", 'notificaciones_admin_success')
+            flash("✅ Notificaciones eliminadas", "success")
         except Exception as e:
             db.session.rollback()
-            flash(f"❌ Error al eliminar: {e}", 'notificaciones_admin_danger')
+            flash(f"❌ Error al eliminar: {e}", "danger")
 
         return redirect(url_for('ver_notificaciones_admin'))
 
@@ -995,13 +1057,13 @@ def gestion_roles():
 
         usuario = Usuario.query.get(user_id)
         if not usuario:
-            flash("❌ Usuario no encontrado", 'gestion_roles_danger')
+            flash("❌ Usuario no encontrado", "danger")
             return redirect(url_for('gestion_roles'))
 
         usuario.Rol = nuevo_rol
         db.session.commit()
 
-        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}", 'gestion_roles_success')
+        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}", "success")
         return redirect(url_for('gestion_roles'))
 
     usuarios = Usuario.query.all()
@@ -1044,7 +1106,7 @@ def cambiar_rol(user_id):
     if usuario:
         usuario.Rol = nuevo_rol  # Cambia el rol
         db.session.commit()      # Guarda cambios en la BD
-        flash(f"✅ Rol de {usuario.Nombre} cambiado a {nuevo_rol}", 'cambiar_rol_success')
+        flash(f"✅ Rol de {usuario.Nombre} cambiado a {nuevo_rol}", "success")
     else:
         flash("❌ Usuario no encontrado", "danger")
     
@@ -1073,7 +1135,7 @@ def instalaciones():
         db.session.add(nueva_cita)
         db.session.commit()
 
-        flash("✅ Instalación agendada con éxito", 'instalaciones_success')
+        flash("✅ Instalación agendada con éxito", "success")
         return redirect(url_for('confirmacion'))
 
     citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
@@ -1105,15 +1167,13 @@ def add_to_cart():
     data = request.get_json()
 
     try:
-        product_id = int(data.get("id"))
+        product_id = int(data.get("id"))  # 🔹 convertir a int aquí
     except (TypeError, ValueError):
         return jsonify({"success": False, "message": "ID inválido"}), 400
 
-    # Inicializar carrito si no existe
     if "cart" not in session:
         session["cart"] = []
 
-    # Agregar solo si no está ya en el carrito
     if product_id not in session["cart"]:
         session["cart"].append(product_id)
 
@@ -1125,49 +1185,38 @@ def add_to_cart():
     })
 
 
+
 @app.route("/carrito")
 def carrito():
     ids = session.get("cart", [])
 
     try:
         ids = [int(i) for i in ids]
-    except Exception:
+    except:
         ids = []
 
     productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
 
-    # Calcular total
-    total = sum(float(p.PrecioUnidad) for p in productos) if productos else 0
-
     print("🛒 Productos encontrados:", [p.NombreProducto for p in productos])
 
-    return render_template("carrito.html", productos=productos, total=total)
+    return render_template("carrito.html", productos=productos)
+
 
 
 @app.route("/remove_from_cart/<int:product_id>", methods=["POST"])
 def remove_from_cart(product_id):
     cart = session.get("cart", [])
-
     try:
         cart = [int(i) for i in cart]
-    except Exception:
+    except:
         pass
-
     if product_id in cart:
         cart.remove(product_id)
         session["cart"] = cart
         session.modified = True
         flash("Producto eliminado del carrito", "success")
+    return redirect(url_for("carrito"))
 
-    return jsonify({"success": True, "cart_count": len(cart)})
-
-
-@app.route("/clear_cart", methods=["POST"])
-def clear_cart():
-    session["cart"] = []
-    session.modified = True
-    flash("Carrito vaciado", "info")
-    return jsonify({"success": True, "cart_count": 0})
 
 # ---------------- FAVORITOS ----------------
 @app.route("/add_to_favorites", methods=["POST"])
