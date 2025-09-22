@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 
 
+
 from flask_login import (
     LoginManager, login_required, current_user,
     login_user, logout_user
@@ -26,7 +27,7 @@ reviews=[]
 
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-DB_URL = 'mysql+pymysql://root:2426@127.0.0.1:3306/Tienda_db'
+DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
@@ -109,7 +110,6 @@ def obtener_todos_los_pedidos():
             pe.ID_Pedido,
             u.Nombre AS nombre_usuario,
             u.Telefono,
-            u.Direccion,
             p.ID_Producto,
             p.NombreProducto,
             dp.Cantidad,
@@ -208,7 +208,6 @@ def detalle():
             p.ID_Pedido,
             u.Nombre AS Nombre_Cliente,
             u.Telefono,
-            u.Direccion,
             pr.NombreProducto AS Producto,
             dp.Cantidad
         FROM Pedido p
@@ -236,20 +235,6 @@ def detalle():
         })
 
     return agrupado  # Retorna un dict con ID_Pedido como clave
-
-
-def obtener_empleados():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-    SELECT ID_Usuario AS ID_Empleado, Nombre
-    FROM Usuario
-    WHERE Rol = 'Empleado'
-    """)
-    empleados = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return empleados
 
 
 def obtener_empleados():
