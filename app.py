@@ -10,7 +10,6 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 
 
-
 from flask_login import (
     LoginManager, login_required, current_user,
     login_user, logout_user
