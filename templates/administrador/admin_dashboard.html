@@ -80,22 +80,7 @@
                             <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
                         </div>
                     </ul>
-                    {% else %}
-                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('login') }}"
-                                ><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a
-                            >
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('register') }}"
-                                ><i class="bi bi-person-plus me-2"></i>Registrarse</a
-                            >
-                        </li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
-                    </ul>
-
+               
                     {% endif %}
                 </div>
             </div>
