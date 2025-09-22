@@ -140,11 +140,10 @@ def obtener_todos_los_pedidos():
             'id': id_producto,
             'nombre': row[5],
             'cantidad': row[6],
-            'imagen': row[8] or '',
-            'precio': float(row[9])  # Asegura que el precio esté como número
+            'imagen': row[8] or ''
         }
 
-        fecha = row[7].strftime('%Y-%m-%d')
+        fecha = row[7] 
 
         if id_pedido not in pedidos_dict:
             pedidos_dict[id_pedido] = {
@@ -154,7 +153,7 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-                'id_empleado': row[10]   # 👈 nuevo campo
+                'id_empleado': row[10]   
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -314,7 +313,6 @@ def obtener_productos_filtrados(correo, categoria):
     for row in resultados:
         productos.append({
             'producto': row[1],
-            'precio': float(row[2]),
             'imagen': row[3] or '',
             'categoria': row[4]
         })
@@ -496,7 +494,6 @@ def obtener_productos():
             "stock": row[2],
             "material": row[3],
             "color": row[4],
-            "precio": float(row[5]),
             "categoria": row[6],
             "proveedor": row[7],
             "imagen": row[8] or ""
@@ -538,7 +535,6 @@ def obtener_producto_por_id(producto_id):
         "stock": resultados[0][2],
         "material": resultados[0][3],
         "color": resultados[0][4],
-        "precio": float(resultados[0][5]),
         "categoria": resultados[0][6],
         "proveedor": resultados[0][7],
         "imagenes": [row[8] for row in resultados if row[8]]
