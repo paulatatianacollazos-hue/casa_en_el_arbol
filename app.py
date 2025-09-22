@@ -679,8 +679,8 @@ def register():
             mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
         )
 
-        flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'success')
-        return redirect(url_for('login'))
+    flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'register_success')
+    return redirect(url_for('login'))
 
     return render_template('register.html')
 
@@ -697,7 +697,7 @@ def login():
         usuario = Usuario.query.filter_by(Correo=correo).first()
         if usuario and check_password_hash(usuario.Contraseña, password):
             login_user(usuario)
-            flash("✅ Inicio de sesión exitoso", "success")
+            flash("✅ Inicio de sesión exitoso", 'login_success')
 
             # --- Iniciales seguras ---
             nombre = usuario.Nombre.strip() if usuario.Nombre else ""
@@ -724,10 +724,10 @@ def login():
             elif usuario.Rol == 'transportista':
                 return redirect(url_for('transportista_dashboard'))
             else:
-                flash("⚠️ Rol desconocido, contacta al administrador.", "warning")
+                flash("⚠️ Rol desconocido, contacta al administrador.", 'login_warning')
                 return redirect(url_for('login'))
         else:
-            flash("❌ Correo o contraseña incorrectos", "danger")
+            flash("❌ Correo o contraseña incorrectos", 'login_danger')
             return render_template('login.html')
 
     return render_template('login.html')
@@ -759,12 +759,12 @@ def forgot_password():
             try:
                 token = s.dumps(email, salt='password-recovery')
                 send_reset_email(user_email=email, user_name=user.Nombre, token=token)
-                flash('📩 Se envió el enlace a tu correo', 'success')
+                flash('📩 Se envió el enlace a tu correo', 'forgot_password_success')
             except Exception as e:
                 print(f"Error al enviar correo: {e}")
-                flash('❌ No se pudo enviar el correo', 'danger')
+                flash('❌ No se pudo enviar el correo', 'forgot_password_danger')
         else:
-            flash('⚠️ Correo no registrado', 'warning')
+            flash('⚠️ Correo no registrado', 'forgot_password_warning')
     return render_template("forgot_password.html")
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -772,7 +772,7 @@ def reset_password(token):
     try:
         email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
     except (SignatureExpired, BadSignature):
-        flash('❌ Enlace expirado o inválido', 'danger')
+        flash('❌ Enlace expirado o inválido', 'reset_password_danger')
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
@@ -780,15 +780,15 @@ def reset_password(token):
         confirm_password = request.form.get('confirm_password')
 
         if not new_password or not confirm_password:
-            flash('⚠️ Completa ambos campos', 'warning')
+            flash('⚠️ Completa ambos campos', 'reset_password_warning')
             return render_template('reset_password.html', token=token)
         if new_password != confirm_password:
-            flash('⚠️ Las contraseñas no coinciden', 'warning')
+            flash('⚠️ Las contraseñas no coinciden', 'reset_password_warning')
             return render_template('reset_password.html', token=token)
 
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
-            flash('❌ Usuario no encontrado', 'danger')
+            flash('❌ Usuario no encontrado', 'reset_password_danger')
             return redirect(url_for('forgot_password'))
 
         user.Contraseña = generate_password_hash(new_password)
@@ -800,7 +800,7 @@ def reset_password(token):
             mensaje="Tu contraseña ha sido cambiada exitosamente."
         )
 
-        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión.', 'success')
+        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión.', 'reset_password_success')
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', token=token)
@@ -825,7 +825,7 @@ def actualizacion_datos():
         password = request.form.get('password', '').strip()
 
         if not nombre or not apellido or not correo:
-            flash('⚠️ Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
+            flash('⚠️ Los campos Nombre, Apellido y Correo son obligatorios.', 'actualizacion_datos_warning')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
         # Verificar que el correo no esté usado por otro usuario
@@ -834,7 +834,7 @@ def actualizacion_datos():
             Usuario.ID_Usuario != usuario.ID_Usuario
         ).first()
         if usuario_existente:
-            flash('El correo ya está registrado por otro usuario.', 'danger')
+            flash('El correo ya está registrado por otro usuario.', 'actualizacion_datos_danger')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
         # Guardar cambios
@@ -866,7 +866,7 @@ def actualizacion_datos():
             mensaje="Tus datos personales se han actualizado correctamente."
         )
 
-        flash('✅ Perfil actualizado correctamente', 'success')
+        flash('✅ Perfil actualizado correctamente', 'actualizacion_datos_success')
 
     return render_template('Actualizacion_datos.html',
                            usuario=usuario,
@@ -912,7 +912,7 @@ def borrar_direccion(id_direccion):
         mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
     )
 
-    flash("Dirección eliminada correctamente 🗑️", "success")
+    flash("Dirección eliminada correctamente 🗑️", 'borrar_direccion_success')
     return redirect(url_for('actualizacion_datos'))
 
 # ---------- Notificaciones ----------
@@ -930,7 +930,7 @@ def ver_notificaciones_cliente():
                 Notificaciones.ID_Notificacion.in_(ids)
             ).delete(synchronize_session=False)
             db.session.commit()
-            flash("✅ Notificaciones eliminadas", "success")
+            flash("✅ Notificaciones eliminadas", 'notificaciones_success')
         return redirect(url_for('ver_notificaciones_cliente'))
 
     notificaciones = Notificaciones.query.filter_by(
@@ -952,7 +952,7 @@ def ver_notificaciones_admin():
     if request.method == 'POST':
         ids = request.form.getlist('ids')
         if not ids:
-            flash("❌ No seleccionaste ninguna notificación", "warning")
+            flash("❌ No seleccionaste ninguna notificación", 'notificaciones_admin_warning')
             return redirect(url_for('ver_notificaciones_admin'))
 
         try:
@@ -967,10 +967,10 @@ def ver_notificaciones_admin():
                 Notificaciones.ID_Notificacion.in_(ids_int)
             ).delete(synchronize_session=False)
             db.session.commit()
-            flash("✅ Notificaciones eliminadas", "success")
+            flash("✅ Notificaciones eliminadas", 'notificaciones_admin_success')
         except Exception as e:
             db.session.rollback()
-            flash(f"❌ Error al eliminar: {e}", "danger")
+            flash(f"❌ Error al eliminar: {e}", 'notificaciones_admin_danger')
 
         return redirect(url_for('ver_notificaciones_admin'))
 
@@ -991,13 +991,13 @@ def gestion_roles():
 
         usuario = Usuario.query.get(user_id)
         if not usuario:
-            flash("❌ Usuario no encontrado", "danger")
+            flash("❌ Usuario no encontrado", 'gestion_roles_danger')
             return redirect(url_for('gestion_roles'))
 
         usuario.Rol = nuevo_rol
         db.session.commit()
 
-        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}", "success")
+        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}", 'gestion_roles_success')
         return redirect(url_for('gestion_roles'))
 
     usuarios = Usuario.query.all()
@@ -1040,7 +1040,7 @@ def cambiar_rol(user_id):
     if usuario:
         usuario.Rol = nuevo_rol  # Cambia el rol
         db.session.commit()      # Guarda cambios en la BD
-        flash(f"✅ Rol de {usuario.Nombre} cambiado a {nuevo_rol}", "success")
+        flash(f"✅ Rol de {usuario.Nombre} cambiado a {nuevo_rol}", 'cambiar_rol_success')
     else:
         flash("❌ Usuario no encontrado", "danger")
     

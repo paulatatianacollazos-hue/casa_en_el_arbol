@@ -89,17 +89,25 @@
     </div>
   </div>
 </nav>
-<!-- Bloque de mensajes flash -->
+
+<!-- Bloque de mensajes flash específicos de actualización de datos -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="container mt-3">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+    {% for category, message in messages %}
+      {% if category.startswith('actualizacion_datos') or category.startswith('borrar_direccion') %}
+        <div 
+          class="alert 
+                 {% if 'success' in category %}alert-success
+                 {% elif 'warning' in category %}alert-warning
+                 {% elif 'danger' in category %}alert-danger
+                 {% else %}alert-info{% endif %} 
+                 alert-dismissible fade show mt-3"
+          role="alert">
           {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-      {% endfor %}
-    </div>
+      {% endif %}
+    {% endfor %}
   {% endif %}
 {% endwith %}
 
