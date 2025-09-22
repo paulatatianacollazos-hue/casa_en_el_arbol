@@ -27,7 +27,7 @@ reviews=[]
 
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-DB_URL = 'mysql+pymysql://root:paula123@127.0.0.1:3306/Tienda_db'
+DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
@@ -94,7 +94,7 @@ def send_reset_email(user_email, user_name, token):
 def get_connection():
     return mysql.connector.connect(
         user='root',
-        password='paula123',
+        password='',
         host='localhost',
         database='tienda_db',
        
@@ -110,7 +110,6 @@ def obtener_todos_los_pedidos():
             pe.ID_Pedido,
             u.Nombre AS nombre_usuario,
             u.Telefono,
-            u.Direccion,
             p.ID_Producto,
             p.NombreProducto,
             dp.Cantidad,
@@ -142,7 +141,7 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio': float(row[9])  # Asegura que el precio esté como número
+            'precio': float(row[9])  
         }
 
         fecha = row[7].strftime('%Y-%m-%d')
@@ -155,7 +154,7 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-                'id_empleado': row[10]   # 👈 nuevo campo
+                'id_empleado': row[10]   
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -169,7 +168,7 @@ def obtener_todos_los_pedidos():
         pedido['productos'] = list(pedido['productos'].values())
         total = sum(prod['cantidad'] * prod['precio']
                     for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
+        pedido['total'] = round(total, 2)  
     return list(pedidos_dict.values())
 
 
@@ -182,7 +181,6 @@ def todos_los_pedidos():
             MAX(pe.FechaPedido) AS FechaPedido,
             MAX(pe.FechaEntrega) AS FechaEntrega,
             MAX(u.Nombre) AS cliente,
-            MAX(u.Direccion) AS direccion,
             GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
             SEPARATOR '<br>') AS productos,
             MAX(pe.Estado) AS Estado,
