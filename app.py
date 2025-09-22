@@ -26,7 +26,7 @@ reviews=[]
 
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
+DB_URL = 'mysql+pymysql://root:2426@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
