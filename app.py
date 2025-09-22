@@ -827,6 +827,7 @@ def actualizacion_datos():
             flash('⚠️ Los campos Nombre, Apellido y Correo son obligatorios.', 'warning')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
+        # Verificar que el correo no esté usado por otro usuario
         usuario_existente = Usuario.query.filter(
             Usuario.Correo == correo,
             Usuario.ID_Usuario != usuario.ID_Usuario
@@ -835,6 +836,7 @@ def actualizacion_datos():
             flash('El correo ya está registrado por otro usuario.', 'danger')
             return render_template('Actualizacion_datos.html', usuario=usuario, direcciones=direcciones, notificaciones=notificaciones)
 
+        # Guardar cambios
         usuario.Nombre = nombre
         usuario.Apellido = apellido
         usuario.Genero = genero
@@ -845,6 +847,18 @@ def actualizacion_datos():
 
         db.session.commit()
 
+        # --- Actualizar sesión con nuevos datos ---
+        if nombre and apellido:
+            iniciales = (nombre[0] + apellido[0]).upper()
+        elif nombre:
+            iniciales = nombre[:2].upper()
+        else:
+            iniciales = "??"
+
+        session['username'] = nombre
+        session['iniciales'] = iniciales
+
+        # Crear notificación
         crear_notificacion(
             user_id=usuario.ID_Usuario,
             titulo="Perfil actualizado ✏️",
@@ -857,6 +871,7 @@ def actualizacion_datos():
                            usuario=usuario,
                            direcciones=direcciones,
                            notificaciones=notificaciones)
+
 
 # ---------- Direcciones ----------
 @app.route('/agregar_direccion', methods=['POST'])
