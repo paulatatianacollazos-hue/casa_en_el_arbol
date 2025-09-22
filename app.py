@@ -699,12 +699,22 @@ def login():
             login_user(usuario)
             flash("✅ Inicio de sesión exitoso", "success")
 
+            # --- Iniciales seguras ---
+            nombre = usuario.Nombre.strip() if usuario.Nombre else ""
+            apellido = usuario.Apellido.strip() if usuario.Apellido else ""
             
-            session['username'] = usuario.Nombre  # o el campo que uses
-            session['iniciales'] = (usuario.Nombre[0] + usuario.Apellido[0]).upper()
+            if nombre and apellido:
+                iniciales = (nombre[0] + apellido[0]).upper()
+            elif nombre:  
+                iniciales = nombre[:2].upper()  
+            else:
+                iniciales = "??"
+
+            session['username'] = nombre
+            session['iniciales'] = iniciales
             session['show_welcome_modal'] = True  
 
-            # 
+            # Redirecciones por rol
             if usuario.Rol == 'admin':
                 return redirect(url_for('admin_dashboard'))
             elif usuario.Rol == 'cliente':
@@ -721,6 +731,7 @@ def login():
             return render_template('login.html')
 
     return render_template('login.html')
+
 
 
 # ---------- Página Nosotros ----------
