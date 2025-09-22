@@ -138,7 +138,7 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio': float(row[9])  # Asegura que el precio esté como número
+            'precio': float(row[9])  
         }
 
         fecha = row[7].strftime('%Y-%m-%d')
@@ -164,7 +164,7 @@ def obtener_todos_los_pedidos():
         pedido['productos'] = list(pedido['productos'].values())
         total = sum(prod['cantidad'] * prod['precio']
                     for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
+        pedido['total'] = round(total, 2)  
     return list(pedidos_dict.values())
 
 
@@ -221,7 +221,7 @@ def detalle():
             'Cantidad': row['Cantidad']
         })
 
-    return agrupado  # Retorna un dict con ID_Pedido como clave
+    return agrupado  
 
 
 def obtener_empleados():
@@ -344,18 +344,18 @@ def actualizar_pedido():
     nuevo_estado = request.form['estado']
     comentario = request.form['comentario']
 
-    conn = get_connection()  # ← esta es la forma correcta
+    conn = get_connection() 
     cursor = conn.cursor()
 
     try:
-        # Actualizar estado del pedido
+        
         cursor.execute("""
             UPDATE Pedido
             SET Estado = %s
             WHERE ID_Pedido = %s
         """, (nuevo_estado, pedido_id))
 
-        # Insertar comentario (si se escribió algo)
+        
         if comentario.strip():
             cursor.execute("""
                 INSERT INTO comentarios (pedido_id, texto)
@@ -371,7 +371,7 @@ def actualizar_pedido():
         cursor.close()
         conn.close()
 
-    return redirect(url_for('control_pedidos'))  # O la vista que desees
+    return redirect(url_for('control_pedidos'))  
 
 
 @app.route('/estado', methods=['GET', 'POST'])
@@ -517,7 +517,7 @@ def firmar_pedido():
     if request.method == 'POST':
         pedido_id = request.form['pedido_id']
         nombre = request.form['nombre_cliente']
-        archivo = request.files.get('firma')  # 👈 cambio importante
+        archivo = request.files.get('firma')  
 
         if archivo and archivo.filename != "":
             filename = secure_filename(archivo.filename)
