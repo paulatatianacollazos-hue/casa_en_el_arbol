@@ -1069,7 +1069,7 @@ def instalaciones():
         db.session.add(nueva_cita)
         db.session.commit()
 
-        flash("✅ Instalación agendada con éxito", "success")
+        flash("✅ Instalación agendada con éxito", 'instalaciones_success')
         return redirect(url_for('confirmacion'))
 
     citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
