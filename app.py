@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
+import re
 
 
 
@@ -71,6 +72,35 @@ def role_required(*roles):
 
 
 # ------------------ FUNCIONES ------------------ #
+
+
+def validar_password(password: str) -> bool:
+    """
+    Valida que la contraseña cumpla:
+    - Mínimo 8 caracteres
+    - Al menos una mayúscula
+    - Al menos un caracter especial
+    - No tenga números consecutivos (ej: 123, 456, 789, etc.)
+    """
+    if len(password) < 8:
+        return False
+
+  
+    if not re.search(r"[A-Z]", password):
+        return False
+
+    
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=]", password):
+        return False
+
+   
+    for i in range(len(password) - 2):
+        if password[i].isdigit() and password[i+1].isdigit() and password[i+2].isdigit():
+            if int(password[i+1]) == int(password[i]) + 1 and int(password[i+2]) == int(password[i]) + 2:
+                return False
+
+    return True
+
 def crear_notificacion(user_id, titulo, mensaje):
     noti = Notificaciones(
         ID_Usuario=user_id,
@@ -608,6 +638,10 @@ def register():
             flash('Nombre, correo y contraseña son obligatorios.', 'warning')
             return render_template('register.html')
 
+        if not validar_password(password):
+            flash('La contraseña debe tener al menos 8 caracteres, una mayúscula, un caracter especial y no contener números consecutivos.', 'danger')
+            return render_template('register.html')
+
         partes = nombre_completo.split(" ", 1)
         nombre = partes[0]
         apellido = partes[1] if len(partes) > 1 else ""
@@ -637,6 +671,7 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
 
 # ---------- Login ----------
 @app.route('/login', methods=['GET', 'POST'])
