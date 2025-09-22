@@ -699,6 +699,12 @@ def login():
             login_user(usuario)
             flash("✅ Inicio de sesión exitoso", "success")
 
+            
+            session['username'] = usuario.Nombre  # o el campo que uses
+            session['iniciales'] = (usuario.Nombre[0] + usuario.Apellido[0]).upper()
+            session['show_welcome_modal'] = True  
+
+            # 
             if usuario.Rol == 'admin':
                 return redirect(url_for('admin_dashboard'))
             elif usuario.Rol == 'cliente':
