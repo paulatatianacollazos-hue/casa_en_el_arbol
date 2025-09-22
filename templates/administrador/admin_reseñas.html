@@ -118,7 +118,7 @@
   </style>
 </head>
 <body>
-      <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
+ <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 Casa en el Árbol
@@ -154,7 +154,27 @@
 
                     {% if session.get('user_id') %}
                     <!-- MENÚ PARA USUARIO LOGUEADO -->
-                    <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
+                <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('login') }}">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('register') }}">
+                                <i class="bi bi-person-plus me-2"></i>Registrarse
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-key me-2"></i>Recuperar contraseña
+                            </a>
+                        </li>
+                    </ul>
+                    {% else %}
+                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
+                    
+                        <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
                         <div class="d-flex align-items-center mb-3">
                             <div
                                 class="rounded-circle bg-light border text-dark fw-bold d-flex align-items-center justify-content-center me-2"
@@ -168,7 +188,7 @@
                         <li><a class="dropdown-item" href="{{ url_for('actualizacion_datos') }}">Perfil</a></li>
                         <li><a class="dropdown-item" href="#">Historial</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('gestion_roles') }}">Gestión de roles</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('estadisticas') }}">Estadísticas</a></li></a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('estadisticas') }}">Estadísticas</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('admin') }}">Reseñas</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('ver_notificaciones_admin') }}">Notificaciones</a></li>
 
@@ -176,31 +196,15 @@
                             <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
                         </div>
                     </ul>
-                    {% else %}
-                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('login') }}"
-                                ><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a
-                            >
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('register') }}"
-                                ><i class="bi bi-person-plus me-2"></i>Registrarse</a
-                            >
-                        </li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
-                    </ul>
-
                     {% endif %}
                 </div>
             </div>
-             <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
-                    <i class="bi bi-cart fs-4"></i>
-                    <span class="cart-badge" id="cart-count">0</span> 
-                </a>
+
+            <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
+                <i class="bi bi-cart fs-4"></i>
+                <span class="cart-badge" id="cart-count">0</span> 
+            </a>
         </div>
-        
     </nav>
 
     {% if session.get('show_welcome_modal') %}
