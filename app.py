@@ -110,6 +110,7 @@ def obtener_todos_los_pedidos():
             pe.ID_Pedido,
             u.Nombre AS nombre_usuario,
             u.Telefono,
+            u.Direccion,
             p.ID_Producto,
             p.NombreProducto,
             dp.Cantidad,
@@ -141,7 +142,7 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio': float(row[9])  
+            'precio': float(row[9])  # Asegura que el precio esté como número
         }
 
         fecha = row[7].strftime('%Y-%m-%d')
@@ -154,7 +155,7 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-                'id_empleado': row[10]   
+                'id_empleado': row[10]   # 👈 nuevo campo
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -168,7 +169,7 @@ def obtener_todos_los_pedidos():
         pedido['productos'] = list(pedido['productos'].values())
         total = sum(prod['cantidad'] * prod['precio']
                     for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)  
+        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
     return list(pedidos_dict.values())
 
 
@@ -236,6 +237,20 @@ def detalle():
         })
 
     return agrupado  # Retorna un dict con ID_Pedido como clave
+
+
+def obtener_empleados():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT ID_Usuario AS ID_Empleado, Nombre
+    FROM Usuario
+    WHERE Rol = 'Empleado'
+    """)
+    empleados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return empleados
 
 
 def obtener_empleados():
