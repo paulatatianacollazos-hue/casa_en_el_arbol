@@ -644,7 +644,7 @@ def register():
         if errores_password:
             for e in errores_password:
                 flash(e, 'danger')
-            # Volvemos a la vista pero solo limpiamos la contraseña
+           
             return render_template('register.html',
                                    name=nombre_completo,
                                    email=correo,
