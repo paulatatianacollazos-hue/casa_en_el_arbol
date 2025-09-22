@@ -7,14 +7,15 @@
     <h3 class="text-center fw-bold text-success mb-4">Crear cuenta</h3>
 
   <!-- Bloque de mensajes flash -->
-{% with messages = get_flashed_messages(with_categories=true, category_filter=["register_success", "register_warning", "register_danger"]) %}
+<!-- Bloque de mensajes flash CORREGIDO -->
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
       <div class="alert alert-dismissible fade show 
-                  {% if category == 'register_success' %}alert-success
-                  {% elif category == 'register_warning' %}alert-warning
-                  {% elif category == 'register_danger' %}alert-danger
-                  {% endif %}" 
+                  {% if category == 'success' or category == 'register_success' %}alert-success
+                  {% elif category == 'warning' or category == 'register_warning' %}alert-warning
+                  {% elif category == 'danger' or category == 'error' or category == 'register_danger' %}alert-danger
+                  {% else %}alert-info{% endif %}" 
            role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

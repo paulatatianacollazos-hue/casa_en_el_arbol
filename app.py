@@ -755,7 +755,7 @@ def register():
         password = request.form.get('password', '').strip()
 
         if not nombre_completo or not correo or not password:
-            flash('Nombre, correo y contraseña son obligatorios.', 'warning')
+            flash('Nombre, correo y contraseña son obligatorios.', 'register_warning')  # Cambiado
             return render_template('register.html')
 
         partes = nombre_completo.split(" ", 1)
@@ -763,7 +763,7 @@ def register():
         apellido = partes[1] if len(partes) > 1 else ""
 
         if Usuario.query.filter_by(Correo=correo).first():
-            flash('Ya existe una cuenta con ese correo.', 'danger')
+            flash('Ya existe una cuenta con ese correo.', 'register_danger')  # Cambiado
             return render_template('register.html')
 
         nuevo_usuario = Usuario(
@@ -783,7 +783,7 @@ def register():
             mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
         )
 
-        flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'success')
+        flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'register_success')  # Cambiado
         return redirect(url_for('login'))
 
     return render_template('register.html')
