@@ -181,7 +181,6 @@ def todos_los_pedidos():
             MAX(pe.FechaPedido) AS FechaPedido,
             MAX(pe.FechaEntrega) AS FechaEntrega,
             MAX(u.Nombre) AS cliente,
-            MAX(u.Direccion) AS direccion,
             GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
             SEPARATOR '<br>') AS productos,
             MAX(pe.Estado) AS Estado,
