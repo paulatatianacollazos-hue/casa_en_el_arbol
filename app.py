@@ -48,9 +48,11 @@ login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
+
 
 # ------------------ DECORADOR DE ROLES ------------------ #
 def role_required(*roles):
@@ -109,6 +111,7 @@ def crear_notificacion(user_id, titulo, mensaje):
     db.session.add(noti)
     db.session.commit()
 
+
 def send_reset_email(user_email, user_name, token):
     reset_url = url_for('reset_password', token=token, _external=True)
     msg = Message(
@@ -118,13 +121,14 @@ def send_reset_email(user_email, user_name, token):
     )
     mail.send(msg)
 
+
 def get_connection():
     return mysql.connector.connect(
         user='root',
         password='',
         host='localhost',
         database='tienda_db',
-       
+ 
     )
 
 
