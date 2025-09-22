@@ -19,7 +19,7 @@ from flask_login import (
 
 from functools import wraps
 
-from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,Producto,Pedido, Detalle_Pedido
+from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,Producto, Pedido, Detalle_Pedido
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
 instalaciones = []

@@ -97,7 +97,7 @@ class Producto(db.Model):
     novedades = db.relationship('Novedades', backref='producto', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
 
-
+    id = column_property(ID_Producto)
 
 
 # ------------------ ImagenProducto ------------------
