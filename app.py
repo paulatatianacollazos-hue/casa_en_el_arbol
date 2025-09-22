@@ -1101,13 +1101,15 @@ def add_to_cart():
     data = request.get_json()
 
     try:
-        product_id = int(data.get("id"))  # 🔹 convertir a int aquí
+        product_id = int(data.get("id"))
     except (TypeError, ValueError):
         return jsonify({"success": False, "message": "ID inválido"}), 400
 
+    # Inicializar carrito si no existe
     if "cart" not in session:
         session["cart"] = []
 
+    # Agregar solo si no está ya en el carrito
     if product_id not in session["cart"]:
         session["cart"].append(product_id)
 
@@ -1119,38 +1121,49 @@ def add_to_cart():
     })
 
 
-
 @app.route("/carrito")
 def carrito():
     ids = session.get("cart", [])
 
     try:
         ids = [int(i) for i in ids]
-    except:
+    except Exception:
         ids = []
 
     productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
 
+    # Calcular total
+    total = sum(float(p.PrecioUnidad) for p in productos) if productos else 0
+
     print("🛒 Productos encontrados:", [p.NombreProducto for p in productos])
 
-    return render_template("carrito.html", productos=productos)
-
+    return render_template("carrito.html", productos=productos, total=total)
 
 
 @app.route("/remove_from_cart/<int:product_id>", methods=["POST"])
 def remove_from_cart(product_id):
     cart = session.get("cart", [])
+
     try:
         cart = [int(i) for i in cart]
-    except:
+    except Exception:
         pass
+
     if product_id in cart:
         cart.remove(product_id)
         session["cart"] = cart
         session.modified = True
         flash("Producto eliminado del carrito", "success")
-    return redirect(url_for("carrito"))
 
+    return jsonify({"success": True, "cart_count": len(cart)})
+
+
+@app.route("/clear_cart", methods=["POST"])
+def clear_cart():
+    session["cart"] = []
+    session.modified = True
+    flash("Carrito vaciado", "info")
+    return jsonify({"success": True, "cart_count": 0})
 
 # ---------------- FAVORITOS ----------------
 @app.route("/add_to_favorites", methods=["POST"])
