@@ -105,7 +105,23 @@
 
                     {% if session.get('user_id') %}
                     <!-- MENÚ PARA USUARIO LOGUEADO -->
-                    <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
+                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('login') }}"
+                                ><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a
+                            >
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('register') }}"
+                                ><i class="bi bi-person-plus me-2"></i>Registrarse</a
+                            >
+                        </li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
+                    </ul>
+                    {% else %}
+                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
+                  
+                         <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
                         <div class="d-flex align-items-center mb-3">
                             <div
                                 class="rounded-circle bg-light border text-dark fw-bold d-flex align-items-center justify-content-center me-2"
@@ -125,21 +141,6 @@
                         <div class="mt-3">
                             <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
                         </div>
-                    </ul>
-                    {% else %}
-                    <!-- MENÚ PARA USUARIO NO LOGUEADO -->
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('login') }}"
-                                ><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a
-                            >
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('register') }}"
-                                ><i class="bi bi-person-plus me-2"></i>Registrarse</a
-                            >
-                        </li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
                     </ul>
 
                     {% endif %}
