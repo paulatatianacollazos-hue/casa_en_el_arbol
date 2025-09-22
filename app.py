@@ -27,7 +27,7 @@ reviews=[]
 
 app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
 
-DB_URL = 'mysql+pymysql://root:@127.0.0.1:3306/Tienda_db'
+DB_URL = 'mysql+pymysql://root:paula123@127.0.0.1:3306/Tienda_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
@@ -94,7 +94,7 @@ def send_reset_email(user_email, user_name, token):
 def get_connection():
     return mysql.connector.connect(
         user='root',
-        password='',
+        password='paula123',
         host='localhost',
         database='tienda_db',
        
@@ -110,6 +110,7 @@ def obtener_todos_los_pedidos():
             pe.ID_Pedido,
             u.Nombre AS nombre_usuario,
             u.Telefono,
+            u.Direccion,
             p.ID_Producto,
             p.NombreProducto,
             dp.Cantidad,
@@ -141,10 +142,11 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio':(row[9])  
+            'precio': float(row[9])  # Asegura que el precio esté como número
         }
 
-        fecha = row[7]
+        fecha = row[7].strftime('%Y-%m-%d')
+
         if id_pedido not in pedidos_dict:
             pedidos_dict[id_pedido] = {
                 'id': id_pedido,
@@ -153,7 +155,7 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-             
+                'id_empleado': row[10]   # 👈 nuevo campo
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -180,6 +182,7 @@ def todos_los_pedidos():
             MAX(pe.FechaPedido) AS FechaPedido,
             MAX(pe.FechaEntrega) AS FechaEntrega,
             MAX(u.Nombre) AS cliente,
+            MAX(u.Direccion) AS direccion,
             GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
             SEPARATOR '<br>') AS productos,
             MAX(pe.Estado) AS Estado,
@@ -207,6 +210,7 @@ def detalle():
             p.ID_Pedido,
             u.Nombre AS Nombre_Cliente,
             u.Telefono,
+            u.Direccion,
             pr.NombreProducto AS Producto,
             dp.Cantidad
         FROM Pedido p
@@ -313,7 +317,7 @@ def obtener_productos_filtrados(correo, categoria):
     for row in resultados:
         productos.append({
             'producto': row[1],
-            'precio': (row[2]),
+            'precio': float(row[2]),
             'imagen': row[3] or '',
             'categoria': row[4]
         })
