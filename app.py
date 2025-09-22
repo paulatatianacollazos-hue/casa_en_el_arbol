@@ -74,32 +74,31 @@ def role_required(*roles):
 # ------------------ FUNCIONES ------------------ #
 
 
-def validar_password(password: str) -> bool:
+
+def validar_password(password: str) -> list:
     """
-    Valida que la contraseña cumpla:
-    - Mínimo 8 caracteres
-    - Al menos una mayúscula
-    - Al menos un caracter especial
-    - No tenga números consecutivos (ej: 123, 456, 789, etc.)
+    Valida la contraseña y devuelve una lista con los errores encontrados.
+    Si la lista está vacía, la contraseña es válida.
     """
+    errores = []
+
     if len(password) < 8:
-        return False
+        errores.append("Debe tener al menos 8 caracteres.")
 
-  
     if not re.search(r"[A-Z]", password):
-        return False
+        errores.append("Debe contener al menos una letra mayúscula.")
 
-    
     if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=]", password):
-        return False
+        errores.append("Debe contener al menos un carácter especial.")
 
-   
     for i in range(len(password) - 2):
         if password[i].isdigit() and password[i+1].isdigit() and password[i+2].isdigit():
             if int(password[i+1]) == int(password[i]) + 1 and int(password[i+2]) == int(password[i]) + 2:
-                return False
+                errores.append("No debe contener números consecutivos .")
+                break  # con uno basta
 
-    return True
+    return errores
+
 
 def crear_notificacion(user_id, titulo, mensaje):
     noti = Notificaciones(
@@ -636,11 +635,21 @@ def register():
 
         if not nombre_completo or not correo or not password:
             flash('Nombre, correo y contraseña son obligatorios.', 'warning')
-            return render_template('register.html')
+            return render_template('register.html',
+                                   name=nombre_completo,
+                                   email=correo,
+                                   phone=telefono)
 
-        if not validar_password(password):
-            flash('La contraseña debe tener al menos 8 caracteres, una mayúscula, un caracter especial y no contener números consecutivos.', 'danger')
-            return render_template('register.html')
+        errores_password = validar_password(password)
+        if errores_password:
+            for e in errores_password:
+                flash(e, 'danger')
+            # Volvemos a la vista pero solo limpiamos la contraseña
+            return render_template('register.html',
+                                   name=nombre_completo,
+                                   email=correo,
+                                   phone=telefono,
+                                   password="")
 
         partes = nombre_completo.split(" ", 1)
         nombre = partes[0]
@@ -648,7 +657,10 @@ def register():
 
         if Usuario.query.filter_by(Correo=correo).first():
             flash('Ya existe una cuenta con ese correo.', 'danger')
-            return render_template('register.html')
+            return render_template('register.html',
+                                   name=nombre_completo,
+                                   email=correo,
+                                   phone=telefono)
 
         nuevo_usuario = Usuario(
             Nombre=nombre,
@@ -671,6 +683,8 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+
 
 
 # ---------- Login ----------

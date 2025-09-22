@@ -21,16 +21,20 @@
     <!-- Formulario -->
     <form method="post">
       <div class="mb-3">
-        <input type="text" class="form-control auth-input" name="name" placeholder="Nombre completo" required>
+        <input type="text" class="form-control auth-input" name="name" 
+               placeholder="Nombre completo" value="{{ name or '' }}" required>
       </div>
       <div class="mb-3">
-        <input type="email" class="form-control auth-input" name="email" placeholder="Correo electrónico" required>
+        <input type="email" class="form-control auth-input" name="email" 
+               placeholder="Correo electrónico" value="{{ email or '' }}" required>
       </div>
       <div class="mb-3">
-        <input type="tel" class="form-control auth-input" name="phone" placeholder="Teléfono" required>
+        <input type="tel" class="form-control auth-input" name="phone" 
+               placeholder="Teléfono" value="{{ phone or '' }}" required>
       </div>
       <div class="mb-3">
-        <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
+        <input type="password" class="form-control auth-input" name="password" 
+               placeholder="Contraseña" required>
       </div>
       <button type="submit" class="btn btn-success w-100 auth-btn">Registrarme</button>
     </form>
@@ -42,7 +46,7 @@
 
     <div class="close-login-btn">
      <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mt-3 w-100">Cerrar</a>
-      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
