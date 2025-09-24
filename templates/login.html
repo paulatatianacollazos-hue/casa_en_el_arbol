@@ -8,22 +8,19 @@
     <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
 
 
-<!-- Bloque de mensajes flash SOLO para login -->
-{% with messages = get_flashed_messages(with_categories=true, category_filter=["login_success", "login_warning", "login_danger"]) %}
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
-      <div class="alert alert-dismissible fade show 
-                  {% if category == 'login_success' %}alert-success
-                  {% elif category == 'login_warning' %}alert-warning
-                  {% elif category == 'login_danger' %}alert-danger
-                  {% endif %}" 
-           role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
+      {% if category in ['success', 'warning', 'danger', 'info'] %}
+        <div class="alert alert-dismissible fade show alert-{{ category }}" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
     {% endfor %}
   {% endif %}
 {% endwith %}
+
 
 
     <!-- Formulario -->

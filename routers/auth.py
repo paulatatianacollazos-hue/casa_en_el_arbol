@@ -1,10 +1,50 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
+import os
+import mysql.connector
+from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
+from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from datetime import datetime
+from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
 import re
 
-from basedatos.models import db, Usuario, Notificaciones
-from app import mail  
+
+
+from flask_login import (
+    LoginManager, login_required, current_user,
+    login_user, logout_user
+)
+
+
+from functools import wraps
+
+from basedatos.models import db, Usuario, Direccion, Notificaciones, Calendario,Producto,Pedido, Detalle_Pedido
+# ------------------ CONFIG ------------------ #
+app = Flask(__name__)
+instalaciones = []
+reviews=[]
+
+app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
+
+DB_URL = 'mysql+pymysql://root:2426@127.0.0.1:3306/Tienda_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'casaenelarbol236@gmail.com'
+app.config['MAIL_PASSWORD'] = 'usygdligtlewedju'
+app.config['MAIL_DEFAULT_SENDER'] = ('Casa en arbol', app.config['MAIL_USERNAME'])
+
+mail = Mail(app)
+s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+db.init_app(app)
+
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -126,3 +166,61 @@ def logout():
     logout_user()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('auth.login'))
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get("email")
+        user = Usuario.query.filter_by(Correo=email).first()
+        if user:
+            try:
+                token = s.dumps(email, salt='password-recovery')
+                send_reset_email(user_email=email, user_name=user.Nombre, token=token)
+                flash('📩 Se envió el enlace a tu correo', 'success')
+            except Exception as e:
+                print(f"Error al enviar correo: {e}")
+                flash('❌ No se pudo enviar el correo', 'danger')
+        else:
+            flash('⚠️ Correo no registrado', 'warning')
+    return render_template("forgot_password.html")
+
+@auth.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = s.loads(token, salt='password-recovery', max_age=3600).strip().lower()
+    except (SignatureExpired, BadSignature):
+        flash('❌ Enlace expirado o inválido', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not new_password or not confirm_password:
+            flash('⚠️ Completa ambos campos', 'warning')
+            return render_template('reset_password.html', token=token)
+        if new_password != confirm_password:
+            flash('⚠️ Las contraseñas no coinciden', 'warning')
+            return render_template('reset_password.html', token=token)
+
+        user = Usuario.query.filter_by(Correo=email).first()
+        if not user:
+            flash('❌ Usuario no encontrado', 'danger')
+            return redirect(url_for('forgot_password'))
+
+        user.Contraseña = generate_password_hash(new_password)
+        db.session.commit()
+
+        crear_notificacion(
+            user_id=user.ID_Usuario,
+            titulo="Contraseña actualizada 🔑",
+            mensaje="Tu contraseña ha sido cambiada exitosamente."
+        )
+
+        flash('✅ Contraseña restablecida. Ahora puedes iniciar sesión.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', token=token)
+
+
+

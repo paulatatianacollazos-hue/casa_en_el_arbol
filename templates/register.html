@@ -6,23 +6,21 @@
   <div class="auth-card">
     <h3 class="text-center fw-bold text-success mb-4">Crear cuenta</h3>
 
-  <!-- Bloque de mensajes flash -->
-<!-- Bloque de mensajes flash CORREGIDO -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-dismissible fade show 
-                  {% if category == 'success' or category == 'register_success' %}alert-success
-                  {% elif category == 'warning' or category == 'register_warning' %}alert-warning
-                  {% elif category == 'danger' or category == 'error' or category == 'register_danger' %}alert-danger
-                  {% else %}alert-info{% endif %}" 
-           role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+   {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-dismissible fade show 
+                      {% if category == 'success' or category == 'register_success' %}alert-success
+                      {% elif category == 'warning' or category == 'register_warning' %}alert-warning
+                      {% elif category == 'danger' or category == 'error' or category == 'register_danger' %}alert-danger
+                      {% else %}alert-info{% endif %}" 
+               role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
     <!-- Formulario -->
     <form method="post">
