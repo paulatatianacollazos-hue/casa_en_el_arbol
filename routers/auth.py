@@ -6,10 +6,14 @@ import re
 from basedatos.models import db, Usuario
 from app import mail  
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+from flask_login import ( login_required, current_user,
+    login_user, logout_user
+)
+
+auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 
-@auth_bp.route('/register', methods=['GET', 'POST'])
+@auth.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         nombre_completo = request.form.get('name', '').strip()
@@ -69,10 +73,10 @@ def register():
     return render_template('register.html')
 
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        correo = request.form.get('correo')
+        correo = request.form.get('email')
         password = request.form.get('password')
 
         usuario = Usuario.query.filter_by(Correo=correo).first()
@@ -98,7 +102,7 @@ def login():
     return render_template('login.html')
 
 
-@auth_bp.route('/logout')
+@auth.route('/logout')
 @login_required
 def logout():
     logout_user()
