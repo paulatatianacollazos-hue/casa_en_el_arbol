@@ -755,7 +755,24 @@ def register():
         password = request.form.get('password', '').strip()
 
         if not nombre_completo or not correo or not password:
-            flash('Nombre, correo y contraseña son obligatorios.', 'register_warning')  # Cambiado
+            flash('Nombre, correo y contraseña son obligatorios.', 'register_warning')
+            return render_template('register.html')
+
+        # 🔒 Validaciones de contraseña
+        if len(password) < 8:
+            flash('La contraseña debe tener al menos 8 caracteres.', 'register_danger')
+            return render_template('register.html')
+
+        if not re.search(r"[A-Z]", password):
+            flash('La contraseña debe contener al menos una letra mayúscula.', 'register_danger')
+            return render_template('register.html')
+
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+            flash('La contraseña debe contener al menos un carácter especial.', 'register_danger')
+            return render_template('register.html')
+
+        if re.search(r"(012|123|234|345|456|567|678|789)", password):
+            flash('La contraseña no puede contener números consecutivos.', 'register_danger')
             return render_template('register.html')
 
         partes = nombre_completo.split(" ", 1)
@@ -763,7 +780,7 @@ def register():
         apellido = partes[1] if len(partes) > 1 else ""
 
         if Usuario.query.filter_by(Correo=correo).first():
-            flash('Ya existe una cuenta con ese correo.', 'register_danger')  # Cambiado
+            flash('Ya existe una cuenta con ese correo.', 'register_danger')
             return render_template('register.html')
 
         nuevo_usuario = Usuario(
@@ -783,10 +800,12 @@ def register():
             mensaje="Tu cuenta se ha creado correctamente. Explora nuestros productos y promociones."
         )
 
-        flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'register_success')  # Cambiado
+        flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'register_success')
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+
 
 # ---------- Login ----------
 @app.route('/login', methods=['GET', 'POST'])
