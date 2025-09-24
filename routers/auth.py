@@ -1,6 +1,15 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
-# ---------- Registro ----------
-@app.route('/register', methods=['GET', 'POST'])
+from basedatos.models import db, Usuario
+from app import mail  
+
+auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         nombre_completo = request.form.get('name', '').strip()
@@ -12,7 +21,6 @@ def register():
             flash('Nombre, correo y contraseña son obligatorios.', 'register_warning')
             return render_template('register.html')
 
-        # 🔒 Validaciones de contraseña
         if len(password) < 8:
             flash('La contraseña debe tener al menos 8 caracteres.', 'register_danger')
             return render_template('register.html')
@@ -48,6 +56,7 @@ def register():
         db.session.add(nuevo_usuario)
         db.session.commit()
 
+        # Aquí debes tener definida la función crear_notificacion
         crear_notificacion(
             user_id=nuevo_usuario.ID_Usuario,
             titulo="¡Bienvenido a Casa en el Árbol!",
@@ -55,14 +64,12 @@ def register():
         )
 
         flash('Cuenta creada correctamente, ahora puedes iniciar sesión.', 'register_success')
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     return render_template('register.html')
 
 
-
-# ---------- Login ----------
-@app.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         correo = request.form.get('correo')
@@ -74,18 +81,26 @@ def login():
             flash("✅ Inicio de sesión exitoso", "success")
 
             if usuario.Rol == 'admin':
-                return redirect(url_for('admin_dashboard'))
+                return redirect(url_for('admin.admin_dashboard'))
             elif usuario.Rol == 'cliente':
                 return redirect(url_for('dashboard'))
             elif usuario.Rol == 'instalador':
-                return redirect(url_for('instalador_dashboard'))
+                return redirect(url_for('instalador.instalador_dashboard'))
             elif usuario.Rol == 'transportista':
-                return redirect(url_for('transportista_dashboard'))
+                return redirect(url_for('transportista.transportista_dashboard'))
             else:
                 flash("⚠️ Rol desconocido, contacta al administrador.", "warning")
-                return redirect(url_for('login'))
+                return redirect(url_for('auth.login'))
         else:
             flash("❌ Correo o contraseña incorrectos", "danger")
             return render_template('login.html')
 
     return render_template('login.html')
+
+
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Has cerrado sesión.', 'info')
+    return redirect(url_for('auth.login'))
