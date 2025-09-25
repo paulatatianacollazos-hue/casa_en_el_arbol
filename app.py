@@ -53,11 +53,11 @@ def load_user(user_id):
 # ------------------ BLUEPRINTS ------------------ #
 app.register_blueprint(cliente, url_prefix="/cliente")
 app.register_blueprint(admin, url_prefix="/admin")
-# app.register_blueprint(transportista, url_prefix="/transportista")
+
 
 # ------------------ RUTAS PÚBLICAS ------------------ #
 @app.route('/')
-def home():
+def index():
     return render_template('common/index.html')
 
 @app.route('/nosotros')
