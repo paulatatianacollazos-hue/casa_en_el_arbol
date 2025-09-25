@@ -11,51 +11,23 @@ from flask_login import (
     login_user, logout_user
 )
 
-from basedatos.models import (
-    db, Usuario
-)
-
-from basedatos.decoradores import crear_notificacion, validar_password, validar_email, send_reset_email
+from basedatos.models import db, Usuario
+from basedatos.decoradores import validar_password, validar_email, send_reset_email
+from basedatos.notificaciones import crear_notificacion
 
 # ------------------ CONFIG ------------------ #
 app = Flask(__name__)
-instalaciones = []
-reviews = []
-
-app.config['SECRET_KEY'] = "mi_clave_super_secreta_y_unica"
-
-DB_URL = 'mysql+pymysql://root:2426@127.0.0.1:3306/Tienda_db'
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
-
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'casaenelarbol236@gmail.com'
-app.config['MAIL_PASSWORD'] = 'usygdligtlewedju'
-app.config['MAIL_DEFAULT_SENDER'] = ('Casa en arbol', app.config['MAIL_USERNAME'])
-
-mail = Mail(app)
-s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-db.init_app(app)
+app.secret_key ="mi_clave_super_secreta_y_unica" 
 
 
-login_manager = LoginManager()
-login_manager.login_view = 'auth.login' 
-login_manager.init_app(app)
+s = URLSafeTimedSerializer(app.secret_key)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Usuario.query.get(int(user_id))
-
-
+# ------------------ BLUEPRINT ------------------ #
 auth = Blueprint('auth', __name__, url_prefix='/auth')
-app.register_blueprint(auth)
+# ⚠️ No registres aquí el blueprint, hazlo en app.py:
+# app.register_blueprint(auth)
 
 # ------------------ REGISTRO ------------------ #
-
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -114,7 +86,6 @@ def register():
     return render_template('register.html')
 
 # ------------------ LOGIN ------------------ #
-
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -127,7 +98,7 @@ def login():
             flash("✅ Inicio de sesión exitoso", "success")
 
             if usuario.Rol == 'admin':
-                return redirect(url_for('admin.admin_dashboard'))
+                return redirect(url_for('admin.dashboard'))
             elif usuario.Rol == 'cliente':
                 return redirect(url_for('dashboard'))
             elif usuario.Rol == 'instalador':
@@ -144,7 +115,6 @@ def login():
     return render_template('login.html')
 
 # ------------------ LOGOUT ------------------ #
-
 @auth.route('/logout')
 @login_required
 def logout():
@@ -153,7 +123,6 @@ def logout():
     return redirect(url_for('auth.login'))
 
 # ------------------ FORGOT_PASSWORD ------------------ #
-
 @auth.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -172,7 +141,6 @@ def forgot_password():
     return render_template("forgot_password.html")
 
 # ------------------ RESET_PASSWORD ------------------ #
-
 @auth.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:

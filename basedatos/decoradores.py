@@ -1,7 +1,9 @@
-import re
+
 from functools import wraps
 from flask import redirect, url_for, flash
+from flask_mail import Mail, Message
 from flask_login import current_user
+import re
 
 def role_required(*roles):
     """Decorador para restringir acceso según roles."""
@@ -37,3 +39,17 @@ def validar_password(password):
 def validar_email(email):
     """Valida formato básico de email."""
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+# --------- RESTABLECER_CONTRASEÑA ---------
+
+def send_reset_email(user_email, user_name, token):
+    reset_url = url_for('auth.reset_password', token=token, _external=True)
+    msg = Message("Restablece tu contraseña",
+                  recipients=[user_email])
+    msg.body = (
+        f"Hola {user_name},\n\n"
+        "Para restablecer tu contraseña, haz click en el siguiente enlace:\n"
+        f"{reset_url}\n\n"
+        "Si no solicitaste este cambio, ignora este correo."
+    )
+    Mail.send(msg)
