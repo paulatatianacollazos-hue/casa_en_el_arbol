@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import db, Usuario, Producto, Calendario, Notificaciones, Direccion
-from basedatos.decoradores import role_required, crear_notificacion
+from basedatos.decoradores import role_required
+from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 
 cliente = Blueprint("cliente", __name__, url_prefix="/cliente")
