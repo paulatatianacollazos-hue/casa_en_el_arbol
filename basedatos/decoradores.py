@@ -16,6 +16,15 @@ from functools import wraps
 
 from basedatos.models import db, Notificaciones
 
+def get_connection():
+    return mysql.connector.connect(
+        user='root',
+        password='2426',
+        host='localhost',
+        database='tienda_db',
+       
+    )
+
 # --------- DECORADO_ROLES ---------
 def role_required(*roles):
     """Decorador para restringir acceso según roles."""
