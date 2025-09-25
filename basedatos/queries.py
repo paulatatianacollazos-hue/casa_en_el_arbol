@@ -526,3 +526,62 @@ def asignar_calendario():
     finally:
         cursor.close()
         conn.close()
+
+def buscar_pedidos():
+    resultados = []
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha_pedido')
+        id_pedido = request.form.get('id_pedido')
+        nombre_cliente = request.form.get('nombre_cliente')
+        nombre_empleado = request.form.get('nombre_empleado')
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+        SELECT
+                p.ID_Pedido AS id_pedido,
+                p.FechaPedido AS fecha,
+                c.Nombre AS cliente,
+                c.Direccion AS direccion,
+                GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
+                SEPARATOR '<br>') AS productos,
+                p.Estado AS estado,
+                COALESCE(e.Nombre, 'Sin asignar') AS empleado
+            FROM Pedido p
+            JOIN Usuario c ON p.ID_Usuario = c.ID_Usuario
+            JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
+            JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+            LEFT JOIN Usuario e ON p.ID_Empleado = e.ID_Usuario
+            WHERE p.Estado = 'entregado'
+        """
+        params = []
+
+        if fecha:
+            query += " AND p.FechaPedido = %s"
+            params.append(fecha)
+
+        if id_pedido:
+            query += " AND p.ID_Pedido = %s"
+            params.append(id_pedido)
+
+        if nombre_cliente:
+            query += " AND c.Nombre LIKE %s"
+            params.append(f"%{nombre_cliente}%")
+
+        if nombre_empleado:
+            query += " AND e.Nombre LIKE %s"
+            params.append(f"%{nombre_empleado}%")
+
+        # 👇 agrupar y ordenar SOLO al final
+        query += """
+            GROUP BY p.ID_Pedido, p.FechaPedido, c.Nombre, c.Direccion,
+            p.Estado, e.Nombre
+            ORDER BY p.FechaPedido DESC
+        """
+
+        cursor.execute(query, tuple(params))
+        resultados = cursor.fetchall()
+        cursor.close()
+        conn.close()
