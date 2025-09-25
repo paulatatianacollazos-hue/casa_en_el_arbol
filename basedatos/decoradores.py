@@ -1,17 +1,20 @@
 import os
 import mysql.connector
-from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
-from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, redirect, url_for, flash,jsonify
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
-from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import re
 
 
-from basedatos.models import Notificaciones, db  
+from flask_login import (
+     current_user
+)
+
+
+from functools import wraps
+
+from basedatos.models import db, Notificaciones
 
 # --------- DECORADO_ROLES ---------
 def role_required(*roles):
@@ -21,7 +24,7 @@ def role_required(*roles):
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
                 flash("⚠️ Debes iniciar sesión primero", "warning")
-                return redirect(url_for('auth.login'))  # Ajusta si tu ruta de login es diferente
+                return redirect(url_for('auth.login'))  
 
             if current_user.Rol.lower() not in [r.lower() for r in roles]:
                 flash("❌ No tienes permisos para acceder a esta página", "danger")
@@ -86,6 +89,8 @@ def get_connection():
     )
 
 
+
+# ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
     conn = get_connection()
     cursor = conn.cursor()
@@ -127,7 +132,7 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio': float(row[9])  # Asegura que el precio esté como número
+            'precio': float(row[9])  
         }
 
         fecha = row[7].strftime('%Y-%m-%d')
@@ -140,7 +145,7 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-                'id_empleado': row[10]   # 👈 nuevo campo
+                'id_empleado': row[10]   
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -154,8 +159,10 @@ def obtener_todos_los_pedidos():
         pedido['productos'] = list(pedido['productos'].values())
         total = sum(prod['cantidad'] * prod['precio']
                     for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)  # Puedes redondear a 2 decimales
+        pedido['total'] = round(total, 2)  
     return list(pedidos_dict.values())
+
+# --------- TODOS_LOS_PEDIDOS ---------
 
 
 def todos_los_pedidos():
@@ -222,8 +229,9 @@ def detalle():
             'Cantidad': row['Cantidad']
         })
 
-    return agrupado  # Retorna un dict con ID_Pedido como clave
+    return agrupado 
 
+# --------- OBTENER_EMPLEADOS ---------
 
 def obtener_empleados():
     conn = get_connection()
@@ -239,6 +247,7 @@ def obtener_empleados():
     return empleados
 
 
+# --------- OBTENER_PRODUCTOS_FILTRADOS ---------
 
 def obtener_productos_filtrados(correo, categoria):
     conn = get_connection()
@@ -300,7 +309,9 @@ def obtener_productos_filtrados(correo, categoria):
     return nombre_cliente, productos
 
 
-@app.route('/asignar_empleado', methods=['POST'])
+# --------- ASIGNAR_EMPLEADO ---------
+
+
 def asignar_empleado():
     pedido_ids = request.form['pedido_id'].split(",")
     empleado_id = request.form['empleado_id']
@@ -310,7 +321,7 @@ def asignar_empleado():
 
     mensajes = []
     for pid in pedido_ids:
-        # 1️⃣ obtener hora del pedido que quiero asignar
+       
         cursor.execute("""
             SELECT HoraEntrega
             FROM Pedido
@@ -324,7 +335,7 @@ def asignar_empleado():
 
         hora_pedido = pedido['HoraEntrega']
 
-# 2️⃣ verificar si el empleado ya tiene un pedido en el mismo rango de 30 min
+
         cursor.execute("""
             SELECT ID_Pedido, HoraEntrega
             FROM Pedido
@@ -339,7 +350,7 @@ def asignar_empleado():
                             en el calendario.""")
             continue
 
-        # 3️⃣ asignar si no hay conflicto
+      
         cursor.execute("""
             UPDATE Pedido
             SET ID_Empleado = %s
@@ -380,6 +391,7 @@ def obtener_comentarios_agrupados():
     return comentarios_por_pedido
 
 
+# --------- OBTENER_PRODUCTOS ---------
 
 def obtener_productos():
     conn = get_connection()
@@ -420,6 +432,7 @@ def obtener_productos():
         })
     return productos
 
+# --------- OBTENER_PRODUCTO_ID ---------
 
 def obtener_producto_por_id(producto_id):
     conn = get_connection()
@@ -464,7 +477,7 @@ def obtener_producto_por_id(producto_id):
 
 
 
-
+# --------- OBTENER_PRODUCTO_ID ---------
 def obtener_producto_por_id(producto_id):
 
     if request.method == 'POST':
@@ -511,7 +524,7 @@ def obtener_producto_por_id(producto_id):
             query += " AND e.Nombre LIKE %s"
             params.append(f"%{nombre_empleado}%")
 
-        # 👇 agrupar y ordenar SOLO al final
+        
         query += """
             GROUP BY p.ID_Pedido, p.FechaPedido, c.Nombre, c.Direccion,
             p.Estado, e.Nombre
@@ -526,7 +539,7 @@ def obtener_producto_por_id(producto_id):
     return render_template('administrador/reportes_entrega.html', resultados=resultados)
 
 
-@app.route("/asignar_calendario", methods=["POST"])
+# --------- ASIGNAR_CALENDARIO ---------
 def asignar_calendario():
     print("📩 Datos recibidos:", request.form.to_dict())
     pedidos_ids = request.form.get("pedidosSeleccionados").split(",")
