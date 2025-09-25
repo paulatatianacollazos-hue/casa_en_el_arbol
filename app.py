@@ -1318,6 +1318,25 @@ def escribir():
 @app.route('/admin')
 def admin():
     return render_template("administrador/admin_reseñas.html", reviews=reviews)
+
+from flask import Flask, jsonify
+from basedatos.models import Usuario  # Asumiendo que tienes un modelo User
+
+app = Flask(__name__)
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = Usuario.query.all()  # Obtiene todos los usuarios de la base de datos
+    users_list = []
+    for user in users:
+        users_list.append({
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone
+        })
+    return jsonify(users_list)
+
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
     app.run(debug=True)
