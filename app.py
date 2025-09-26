@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from basedatos.models import db, Usuario
 
 # ------------------ EXTENSIONES ------------------ #
-from basedatos.decoradores import mail  # <-- aquí
+from basedatos.decoradores import mail 
 
 # ------------------ BLUEPRINTS ------------------ #
 from routes.auth import auth
@@ -29,7 +29,7 @@ app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = 'casaenelarbol236@gmail.com'
 app.config['MAIL_PASSWORD'] = 'usygdligtlewedju'
 app.config['MAIL_DEFAULT_SENDER'] = ('Casa en el Árbol', app.config['MAIL_USERNAME'])
-mail.init_app(app)  # <-- inicializamos aquí
+mail.init_app(app)  
 
 # ------------------ DB ------------------ #
 db.init_app(app)
