@@ -35,17 +35,17 @@
     </form>
 
     <div class="text-center mt-3">
-      <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
+      <a href="{{ url_for('auth.forgot_password') }}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
     </div>
     <hr>
     <div class="text-center">
       <span class="small">¿No tienes cuenta?</span>
-      <a href="{{ url_for('register') }}" class="small text-primary">Regístrate aquí</a>
+      <a href="{{ url_for('auth.register') }}" class="small text-primary">Regístrate aquí</a>
     </div>
 
     <!-- Botón cerrar -->
     <div class="close-login-btn">
-      <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mt-3 w-100">Cerrar</a>
+      <a href="{{ url_for('common.index') }}" class="btn btn-outline-secondary mt-3 w-100">Cerrar</a>
     </div>
   </div>
 </div>

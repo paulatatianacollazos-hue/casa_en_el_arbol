@@ -45,7 +45,7 @@ db.init_app(app)
 
 # ------------------ FLASK-LOGIN ------------------ #
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"  # <--- MUY IMPORTANTE, apunta a la ruta de login del blueprint auth
+login_manager.login_view = "auth.login"  
 login_manager.init_app(app)
 
 @login_manager.user_loader
