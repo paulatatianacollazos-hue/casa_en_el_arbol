@@ -274,7 +274,7 @@
               <div><strong>Departamento:</strong> {{ dir.Departamento }}</div>
               <div><strong>País:</strong> {{ dir.Pais }}</div>
             </div>
-            <form action="{{ url_for('borrar_direccion', id_direccion=dir.ID_Direccion) }}" method="POST">
+            <form action="{{ url_for('cliente.borrar_direccion', id_direccion=dir.ID_Direccion) }}" method="POST">
               <button type="submit" class="btn btn-link text-danger d-flex align-items-center gap-1 p-0">
                 <i class="bi bi-trash fs-5"></i> Borrar
               </button>
