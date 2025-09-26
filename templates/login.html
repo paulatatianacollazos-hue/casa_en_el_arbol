@@ -7,26 +7,22 @@
   <div class="auth-card">
     <h3 class="text-center fw-bold text-success mb-4">Bienvenido de vuelta</h3>
 
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      {% if category in ['success', 'warning', 'danger', 'info'] %}
-        <div class="alert alert-dismissible fade show alert-{{ category }}" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-dismissible fade show alert-{{ category }}" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
       {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-
+    {% endwith %}
 
     <!-- Formulario -->
     <form method="POST" action="{{ url_for('auth.login') }}">
       <div class="mb-3">
-        <input type="email" class="form-control auth-input" name="correo" placeholder="Correo electrónico" required>
+        <input type="email" class="form-control auth-input" name="correo" placeholder="Correo electrónico" required
+               value="{{ correo if correo else '' }}">
       </div>
       <div class="mb-3">
         <input type="password" class="form-control auth-input" name="password" placeholder="Contraseña" required>
@@ -50,7 +46,6 @@
   </div>
 </div>
 
-<!-- Scripts -->
 <script src="{{ url_for('static', filename='js/formularios.js') }}"></script>
 
 {% endblock %}

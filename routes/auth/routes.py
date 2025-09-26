@@ -74,19 +74,35 @@ def register():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        correo = request.form.get('email')
-        password = request.form.get('password')
+        # Tomar datos del formulario y quitar espacios
+        correo = request.form.get('correo', '').strip()  # Coincide con el name del input
+        password = request.form.get('password', '').strip()
 
+        # Buscar usuario en la base de datos
         usuario = Usuario.query.filter_by(Correo=correo).first()
-        if usuario and check_password_hash(usuario.Contraseña, password):
-            login_user(usuario)
-            flash("Inicio de sesión exitoso", "success")
-            return redirect(url_for('dashboard'))  # Ajusta según tu rol
+
+        if usuario:
+            # Depuración opcional
+            print("Correo ingresado:", correo)
+            print("Contraseña ingresada:", password)
+            print("Hash almacenado en DB:", usuario.Contraseña)
+            check = check_password_hash(usuario.Contraseña, password)
+            print("Resultado check_password_hash:", check)
+
+            if check:
+                login_user(usuario)
+                flash("Inicio de sesión exitoso", "success")
+                return redirect(url_for('cliente.dashboard'))  # Ajusta según tu rol
+            else:
+                flash("Correo o contraseña incorrectos", "danger")
         else:
             flash("Correo o contraseña incorrectos", "danger")
-            return render_template('login.html')
+
+        # Mantener correo en el formulario si falla login
+        return render_template('login.html', correo=correo)
 
     return render_template('login.html')
+
 
 
 # ------------------ LOGOUT ------------------ #
