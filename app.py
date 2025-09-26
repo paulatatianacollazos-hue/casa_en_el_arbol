@@ -12,7 +12,8 @@ from basedatos.decoradores import mail
 # ------------------ BLUEPRINTS ------------------ #
 from routes.auth import auth
 from routes.cliente import cliente
-from routes.administrador import admin  # ✅ Blueprint admin con url_prefix='/admin'
+from routes.administrador.routes import admin
+
 
 # ------------------ APP ------------------ #
 app = Flask(__name__)
