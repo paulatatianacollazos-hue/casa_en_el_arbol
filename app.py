@@ -1,11 +1,13 @@
 import os
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
 from flask_login import LoginManager
 
 # ------------------ MODELOS ------------------ #
 from basedatos.models import db, Usuario
+
+# ------------------ EXTENSIONES ------------------ #
+from basedatos.decoradores import mail  # <-- aquí
 
 # ------------------ BLUEPRINTS ------------------ #
 from routes.auth import auth
@@ -27,7 +29,7 @@ app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = 'casaenelarbol236@gmail.com'
 app.config['MAIL_PASSWORD'] = 'usygdligtlewedju'
 app.config['MAIL_DEFAULT_SENDER'] = ('Casa en el Árbol', app.config['MAIL_USERNAME'])
-mail = Mail(app)
+mail.init_app(app)  # <-- inicializamos aquí
 
 # ------------------ DB ------------------ #
 db.init_app(app)
