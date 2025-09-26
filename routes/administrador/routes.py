@@ -18,6 +18,7 @@ from basedatos.queries import (
 
 reviews = []
 
+# 🔑 Nombre del blueprint debe ser "admin"
 admin = Blueprint("admin", __name__, url_prefix="/admin")
 
 # ---------- DASHBOARD ----------
