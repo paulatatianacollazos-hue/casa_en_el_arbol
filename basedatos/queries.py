@@ -1,6 +1,7 @@
 from flask import request, jsonify, render_template
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
+from basedatos.models import db, Pedido, Usuario
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -585,3 +586,51 @@ def buscar_pedidos():
         resultados = cursor.fetchall()
         cursor.close()
         conn.close()
+
+def asignar_empleado(form_data):
+    """
+    Asigna un empleado (instalador/transportista) a un pedido.
+    Espera que form_data tenga: pedido_id, empleado_id.
+    """
+    try:
+        pedido_id = int(form_data.get("pedido_id"))
+        empleado_id = int(form_data.get("empleado_id"))
+
+        pedido = Pedido.query.get(pedido_id)
+        if not pedido:
+            return {"success": False, "error": "Pedido no encontrado"}
+
+        empleado = Usuario.query.get(empleado_id)
+        if not empleado:
+            return {"success": False, "error": "Empleado no encontrado"}
+
+        # Asignar empleado
+        pedido.ID_Empleado = empleado.ID_Usuario
+        db.session.commit()
+
+        return {"success": True, "message": f"Empleado {empleado.Nombre} asignado correctamente"}
+    except Exception as e:
+        db.session.rollback()
+        return {"success": False, "error": str(e)}
+
+# ----------- ACTUALIZAR PEDIDO -----------
+def actualizar_pedido(form_data):
+    """
+    Actualiza el estado de un pedido.
+    Espera que form_data tenga: pedido_id, estado.
+    """
+    try:
+        pedido_id = int(form_data.get("pedido_id"))
+        nuevo_estado = form_data.get("estado")
+
+        pedido = Pedido.query.get(pedido_id)
+        if not pedido:
+            return {"success": False, "error": "Pedido no encontrado"}
+
+        pedido.Estado = nuevo_estado
+        db.session.commit()
+
+        return {"success": True, "message": f"Pedido {pedido_id} actualizado a '{nuevo_estado}'"}
+    except Exception as e:
+        db.session.rollback()
+        return {"success": False, "error": str(e)}

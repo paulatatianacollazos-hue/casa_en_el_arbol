@@ -12,8 +12,10 @@ from basedatos.queries import (
     obtener_comentarios_agrupados,
     obtener_productos,
     obtener_producto_por_id,
-    buscar_pedidos
-
+    buscar_pedidos,
+    asignar_empleado as asignar_empleado_query,
+    actualizar_pedido as actualizar_pedido_query,
+    asignar_calendario as asignar_calendario_query
 )
 
 reviews = []
@@ -130,16 +132,16 @@ def control_pedidos():
 @admin.route("/asignar_empleado", methods=["POST"])
 @login_required
 @role_required("admin")
-def asignar_empleado():
-    data = asignar_empleado(request.form)
+def asignar_empleado_route():
+    data = asignar_empleado_query(request.form)
     return jsonify(data)
 
 # ---------- ACTUALIZAR_PEDIDO ----------
 @admin.route("/actualizar_pedido", methods=["POST"])
 @login_required
 @role_required("admin")
-def actualizar_pedido():
-    actualizar_pedido(request.form)
+def actualizar_pedido_route():
+    actualizar_pedido_query(request.form)
     return redirect(url_for("admin.control_pedidos"))
 
 # ---------- ESTADO ----------
@@ -187,8 +189,8 @@ def reporte_pedidos():
 @admin.route("/asignar_calendario", methods=["POST"])
 @login_required
 @role_required("admin")
-def asignar_calendario():
-    return jsonify(asignar_calendario(request.form))
+def asignar_calendario_route():
+    return jsonify(asignar_calendario_query(request.form))
 
 # ----------ESTADISTICAS ----------
 @admin.route("/estadisticas")
