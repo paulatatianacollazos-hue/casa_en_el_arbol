@@ -194,7 +194,7 @@ def escribir_resena():   # <- sin ñ
 # ---------- PERFIL Y DIRECCIONES ----------
 @cliente.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("cliente")
+@role_required("cliente","admin")
 def actualizacion_datos():
     usuario = current_user
     direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
