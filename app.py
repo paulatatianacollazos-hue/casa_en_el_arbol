@@ -12,7 +12,7 @@ from basedatos.decoradores import mail
 # ------------------ BLUEPRINTS ------------------ #
 from routes.auth import auth
 from routes.cliente import cliente
-from routes.administrador import admin
+from routes.administrador import admin  # Asegúrate que dentro de este Blueprint esté url_prefix='/admin'
 
 # ------------------ APP ------------------ #
 app = Flask(__name__)
@@ -46,9 +46,7 @@ def load_user(user_id):
 # ------------------ REGISTRO DE BLUEPRINTS ------------------ #
 app.register_blueprint(auth, url_prefix='/auth')
 app.register_blueprint(cliente, url_prefix='/cliente')
-app.register_blueprint(admin, url_prefix='/admin')
-
-
+app.register_blueprint(admin)  # ✅ NO repetimos url_prefix aquí, ya debe estar en el Blueprint
 
 # ------------------ RUTAS PÚBLICAS ------------------ #
 @app.route('/')
@@ -62,6 +60,12 @@ def nosotros():
 @app.route('/catalogo')
 def catalogo():
     return render_template('common/catalogo.html')
+
+# ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
+print("🔗 Rutas registradas:")
+with app.app_context():
+    for rule in app.url_map.iter_rules():
+        print(f"{rule.endpoint:30s} -> {rule}")
 
 # ------------------ MAIN ------------------ #
 if __name__ == '__main__':
