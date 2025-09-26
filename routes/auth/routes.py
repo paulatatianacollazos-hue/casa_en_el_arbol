@@ -117,8 +117,6 @@ def login():
     return render_template('login.html')
 
 
-
-
 # ------------------ LOGOUT ------------------ #
 @auth.route('/logout')
 @login_required
