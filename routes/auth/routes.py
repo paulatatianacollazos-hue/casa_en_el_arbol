@@ -93,7 +93,7 @@ def login():
 
                 
                 rutas_por_rol = {
-                'admin': 'admin.dashboard',  # ✅ CORRECTO
+                'admin': 'admin.dashboard', 
                 'cliente': 'cliente.dashboard',
                 'instalador': 'dashboards.instalador_dashboard',
                 'transportista': 'dashboards.transportista_dashboard',
