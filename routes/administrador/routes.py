@@ -192,7 +192,9 @@ def reporte_pedidos():
 def asignar_calendario_route():
     return jsonify(asignar_calendario_query(request.form))
 
-# ----------ESTADISTICAS ----------
+# ---------- ESTADISTICAS ----------
 @admin.route("/estadisticas")
+@login_required
+@role_required("admin")
 def estadisticas():
     return render_template("administrador/estadisticas.html")

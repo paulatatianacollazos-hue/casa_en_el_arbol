@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from basedatos.models import db, Usuario
 
 # ------------------ EXTENSIONES ------------------ #
-from basedatos.decoradores import mail 
+from basedatos.decoradores import mail
 
 # ------------------ BLUEPRINTS ------------------ #
 from routes.auth import auth
@@ -47,18 +47,24 @@ db.init_app(app)
 
 # ------------------ FLASK LOGIN ------------------ #
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"  # auth = nombre del blueprint, login = endpoint
+login_manager.login_view = "auth.login"
+login_manager.login_message = "Debes iniciar sesión para acceder a esta página."
+login_manager.login_message_category = "warning"
 login_manager.init_app(app)
 
 
 @login_manager.user_loader
 def load_user(user_id):
     """Carga un usuario a partir del ID para Flask-Login"""
-    return Usuario.query.get(int(user_id))
+    try:
+        return Usuario.query.get(int(user_id))
+    except Exception as e:
+        print(f"⚠️ Error cargando usuario: {e}")
+        return None
 
 
 # ------------------ REGISTRO DE BLUEPRINTS ------------------ #
-# ⚠️ No redefinimos url_prefix aquí, ya está en la definición de cada blueprint
+# No redefinimos url_prefix aquí, ya está en cada blueprint
 app.register_blueprint(auth)
 app.register_blueprint(cliente)
 app.register_blueprint(admin)
