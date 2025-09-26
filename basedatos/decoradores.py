@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import redirect, url_for, flash
+from flask import redirect, url_for, flash, render_template
 from flask_login import current_user
 import re
 from flask_mail import Message
@@ -46,16 +46,21 @@ def validar_email(email):
 
 
 def send_reset_email(user_email, user_name, token):
-    from flask import url_for
+    # Generar URL de recuperación de contraseña
     reset_url = url_for('auth.reset_password', token=token, _external=True)
+    
+    # Crear el mensaje con HTML
     msg = Message(
-        subject="Restablece tu contraseña",
-        recipients=[user_email],
-        body=(
-            f"Hola {user_name},\n\n"
-            "Para restablecer tu contraseña, haz click en el siguiente enlace:\n"
-            f"{reset_url}\n\n"
-            "Si no solicitaste este cambio, ignora este correo."
-        )
+        subject="Recuperación de contraseña - Casa en el Árbol",
+        recipients=[user_email]
     )
+    
+    # Renderizamos la plantilla HTML con tus estilos
+    msg.html = render_template(
+        'email_reset.html',  # Asegúrate de tener esta plantilla en templates/email/
+        user_name=user_name,
+        reset_url=reset_url
+    )
+    
+    # Enviar el correo
     mail.send(msg)
