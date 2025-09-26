@@ -146,10 +146,11 @@ def ver_notificaciones_cliente():
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
     return render_template("cliente/notificaciones_cliente.html", notificaciones=notificaciones)
 
+
 # ---------- RESEÑAS ----------
 @cliente.route("/reseñas", methods=["GET", "POST"])
 @login_required
-def reseñas():
+def resenas():   # <- sin ñ
     if request.method == "POST":
         pedido = request.form["pedido"]
         cliente_nombre = request.form["cliente"]
@@ -162,10 +163,33 @@ def reseñas():
             "comentario": comentario
         })
         flash("Reseña añadida con éxito", "success")
-        return redirect(url_for("cliente.reseñas"))
+        return redirect(url_for("cliente.resenas"))  # <- actualizar también aquí
 
     avg = round(sum([int(r["estrellas"]) for r in reviews]) / len(reviews), 2) if reviews else "N/A"
     return render_template("cliente/reseñas.html", reviews=reviews, avg=avg)
+
+# ---------- ESCRIBIR RESEÑA ----------
+@cliente.route("/reseñas/escribir", methods=["GET", "POST"])
+@login_required
+def escribir_resena():   # <- sin ñ
+    if request.method == "POST":
+        pedido = request.form["pedido"]
+        cliente_nombre = request.form["cliente"]
+        estrellas = request.form["estrellas"]
+        comentario = request.form["comentario"]
+
+        reviews.append({
+            "pedido": pedido,
+            "cliente": cliente_nombre,
+            "estrellas": estrellas,
+            "comentario": comentario
+        })
+
+        flash("Reseña añadida con éxito", "success")
+        return redirect(url_for("cliente.resenas"))  # Redirige a la lista de reseñas
+
+    return render_template("cliente/escribir.html")
+
 
 # ---------- PERFIL Y DIRECCIONES ----------
 @cliente.route("/actualizacion_datos", methods=["GET", "POST"])
