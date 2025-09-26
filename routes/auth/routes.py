@@ -91,10 +91,10 @@ def login():
                 login_user(usuario)
                 flash("Inicio de sesión exitoso", "success")
 
-                # Diccionario de rutas por rol
+                
                 rutas_por_rol = {
-                    'admin': 'dashboards.admin_dashboard',
-                    'cliente': 'dashboards.dashboard',
+                    'admin': 'admin.dashboard',
+                    'cliente': 'cliente.dashboard',
                     'instalador': 'dashboards.instalador_dashboard',
                     'transportista': 'dashboards.transportista_dashboard',
                 }

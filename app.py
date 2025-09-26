@@ -48,6 +48,8 @@ app.register_blueprint(auth, url_prefix='/auth')
 app.register_blueprint(cliente, url_prefix='/cliente')
 app.register_blueprint(admin, url_prefix='/admin')
 
+
+
 # ------------------ RUTAS PÚBLICAS ------------------ #
 @app.route('/')
 def index():
