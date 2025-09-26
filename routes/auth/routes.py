@@ -129,34 +129,40 @@ def reset_password(token):
         new_password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
+        # Validación: campos completos
         if not new_password or not confirm_password:
-            flash('Completa ambos campos', 'warning')
+            flash('Completa ambos campos.', 'warning')
             return render_template('reset_password.html', token=token)
 
+        # Validación: contraseñas coinciden
         if new_password != confirm_password:
-            flash('Las contraseñas no coinciden', 'warning')
+            flash('Las contraseñas no coinciden.', 'warning')
             return render_template('reset_password.html', token=token)
 
+        # Validación de política de seguridad
         error = validar_password(new_password)
         if error:
             flash(error, 'warning')
             return render_template('reset_password.html', token=token)
 
+        # Buscar usuario
         user = Usuario.query.filter_by(Correo=email).first()
         if not user:
-            flash('Usuario no encontrado', 'danger')
+            flash('Usuario no encontrado.', 'danger')
             return redirect(url_for('auth.forgot_password'))
 
+        # Actualizar contraseña
         user.Contraseña = generate_password_hash(new_password)
         db.session.commit()
 
+        # Crear notificación
         crear_notificacion(
             user_id=user.ID_Usuario,
             titulo="Contraseña actualizada",
             mensaje="Tu contraseña ha sido cambiada exitosamente."
         )
 
-        flash('Contraseña restablecida.', 'success')
+        flash('Contraseña restablecida correctamente.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('reset_password.html', token=token)
