@@ -27,7 +27,7 @@ def ver_carrito():
 @cliente.route("/carrito/add", methods=["POST"])
 @login_required
 def add_to_cart():
-    data = request.get_json()
+    data = request.get_json() or {}
     try:
         product_id = int(data.get("id"))
     except (TypeError, ValueError):
@@ -89,23 +89,26 @@ def remove_from_favorites(product_id):
 @login_required
 def instalaciones_home():
     if request.method == "POST":
-        fecha = datetime.strptime(request.form["fecha"], "%Y-%m-%d").date()
-        hora = datetime.strptime(request.form["hora"], "%H:%M").time()
-        ubicacion = request.form["ubicacion"]
-        tipo = request.form.get("tipo", "Instalación")
+        try:
+            fecha = datetime.strptime(request.form["fecha"], "%Y-%m-%d").date()
+            hora = datetime.strptime(request.form["hora"], "%H:%M").time()
+            ubicacion = request.form["ubicacion"]
+            tipo = request.form.get("tipo", "Instalación")
 
-        nueva_cita = Calendario(
-            Fecha=fecha,
-            Hora=hora,
-            Ubicacion=ubicacion,
-            Tipo=tipo,
-            ID_Usuario=current_user.ID_Usuario
-        )
-        db.session.add(nueva_cita)
-        db.session.commit()
-
-        flash("✅ Instalación agendada con éxito", "success")
-        return redirect(url_for("cliente.confirmacion_instalacion"))
+            nueva_cita = Calendario(
+                Fecha=fecha,
+                Hora=hora,
+                Ubicacion=ubicacion,
+                Tipo=tipo,
+                ID_Usuario=current_user.ID_Usuario
+            )
+            db.session.add(nueva_cita)
+            db.session.commit()
+            flash("✅ Instalación agendada con éxito", "success")
+            return redirect(url_for("cliente.confirmacion_instalacion"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"❌ Error al agendar: {str(e)}", "danger")
 
     citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
     return render_template("cliente/instalaciones.html", citas=citas)
@@ -128,12 +131,16 @@ def ver_notificaciones_cliente():
     if request.method == "POST":
         ids = request.form.getlist("ids")
         if ids:
-            Notificaciones.query.filter(
-                Notificaciones.ID_Usuario == current_user.ID_Usuario,
-                Notificaciones.ID_Notificacion.in_(ids)
-            ).delete(synchronize_session=False)
-            db.session.commit()
-            flash("✅ Notificaciones eliminadas", "success")
+            try:
+                Notificaciones.query.filter(
+                    Notificaciones.ID_Usuario == current_user.ID_Usuario,
+                    Notificaciones.ID_Notificacion.in_(ids)
+                ).delete(synchronize_session=False)
+                db.session.commit()
+                flash("✅ Notificaciones eliminadas", "success")
+            except Exception as e:
+                db.session.rollback()
+                flash(f"❌ Error al eliminar: {str(e)}", "danger")
         return redirect(url_for("cliente.ver_notificaciones_cliente"))
 
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
@@ -148,7 +155,12 @@ def reseñas():
         cliente_nombre = request.form["cliente"]
         estrellas = request.form["estrellas"]
         comentario = request.form["comentario"]
-        reviews.append({"pedido": pedido, "cliente": cliente_nombre, "estrellas": estrellas, "comentario": comentario})
+        reviews.append({
+            "pedido": pedido,
+            "cliente": cliente_nombre,
+            "estrellas": estrellas,
+            "comentario": comentario
+        })
         flash("Reseña añadida con éxito", "success")
         return redirect(url_for("cliente.reseñas"))
 
@@ -158,7 +170,7 @@ def reseñas():
 # ---------- PERFIL Y DIRECCIONES ----------
 @cliente.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("cliente", "instalador", "transportista", "admin")
+@role_required("cliente")
 def actualizacion_datos():
     usuario = current_user
     direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
@@ -193,47 +205,58 @@ def actualizacion_datos():
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
-    return render_template("cliente/Actualizacion_datos.html",
-                           usuario=usuario,
-                           direcciones=direcciones,
-                           notificaciones=notificaciones)
+    return render_template(
+        "cliente/actualizacion_datos.html",
+        usuario=usuario,
+        direcciones=direcciones,
+        notificaciones=notificaciones
+    )
 
 @cliente.route("/direccion/agregar", methods=["POST"])
 @login_required
 def agregar_direccion():
-    nueva_direccion = Direccion(
-        ID_Usuario=current_user.ID_Usuario,
-        Pais="Colombia",
-        Departamento="Bogotá, D.C.",
-        Ciudad="Bogotá",
-        Direccion=request.form.get("direccion"),
-        InfoAdicional=request.form.get("infoAdicional"),
-        Barrio=request.form.get("barrio"),
-        Destinatario=request.form.get("destinatario")
-    )
-    db.session.add(nueva_direccion)
-    db.session.commit()
+    try:
+        nueva_direccion = Direccion(
+            ID_Usuario=current_user.ID_Usuario,
+            Pais="Colombia",
+            Departamento="Bogotá, D.C.",
+            Ciudad="Bogotá",
+            Direccion=request.form.get("direccion"),
+            InfoAdicional=request.form.get("infoAdicional"),
+            Barrio=request.form.get("barrio"),
+            Destinatario=request.form.get("destinatario")
+        )
+        db.session.add(nueva_direccion)
+        db.session.commit()
 
-    crear_notificacion(
-        user_id=current_user.ID_Usuario,
-        titulo="Dirección agregada 🏠",
-        mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
-    )
+        crear_notificacion(
+            user_id=current_user.ID_Usuario,
+            titulo="Dirección agregada 🏠",
+            mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
+        )
+        flash("Dirección agregada correctamente 🏠", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"❌ Error al agregar dirección: {str(e)}", "danger")
 
     return redirect(url_for("cliente.actualizacion_datos"))
 
 @cliente.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
 @login_required
 def borrar_direccion(id_direccion):
-    direccion = Direccion.query.get_or_404(id_direccion)
-    db.session.delete(direccion)
-    db.session.commit()
+    try:
+        direccion = Direccion.query.get_or_404(id_direccion)
+        db.session.delete(direccion)
+        db.session.commit()
 
-    crear_notificacion(
-        user_id=current_user.ID_Usuario,
-        titulo="Dirección eliminada 🗑️",
-        mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
-    )
+        crear_notificacion(
+            user_id=current_user.ID_Usuario,
+            titulo="Dirección eliminada 🗑️",
+            mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
+        )
+        flash("Dirección eliminada correctamente 🗑️", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"❌ Error al eliminar dirección: {str(e)}", "danger")
 
-    flash("Dirección eliminada correctamente 🗑️", "success")
     return redirect(url_for("cliente.actualizacion_datos"))
