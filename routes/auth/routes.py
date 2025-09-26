@@ -74,25 +74,38 @@ def register():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Tomar datos del formulario y quitar espacios
-        correo = request.form.get('correo', '').strip()  # Coincide con el name del input
+        correo = request.form.get('correo', '').strip()
         password = request.form.get('password', '').strip()
 
-        # Buscar usuario en la base de datos
         usuario = Usuario.query.filter_by(Correo=correo).first()
 
         if usuario:
-            # Depuración opcional
             print("Correo ingresado:", correo)
             print("Contraseña ingresada:", password)
             print("Hash almacenado en DB:", usuario.Contraseña)
+
             check = check_password_hash(usuario.Contraseña, password)
             print("Resultado check_password_hash:", check)
 
             if check:
                 login_user(usuario)
                 flash("Inicio de sesión exitoso", "success")
-                return redirect(url_for('cliente.dashboard'))  # Ajusta según tu rol
+
+                # Diccionario de rutas por rol
+                rutas_por_rol = {
+                    'admin': 'dashboards.admin_dashboard',
+                    'cliente': 'dashboards.dashboard',
+                    'instalador': 'dashboards.instalador_dashboard',
+                    'transportista': 'dashboards.transportista_dashboard',
+                }
+
+                ruta = rutas_por_rol.get(usuario.Rol)
+
+                if ruta:
+                    return redirect(url_for(ruta))
+                else:
+                    flash("Tu cuenta no tiene un rol válido", "danger")
+                    return redirect(url_for('auth.login'))
             else:
                 flash("Correo o contraseña incorrectos", "danger")
         else:
@@ -102,6 +115,7 @@ def login():
         return render_template('login.html', correo=correo)
 
     return render_template('login.html')
+
 
 
 
