@@ -6,7 +6,7 @@ from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 
-cliente = Blueprint("cliente", __name__, url_prefix="/cliente")
+from . import cliente 
 reviews = []
 
 # ---------- DASHBOARD ----------

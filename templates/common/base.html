@@ -50,17 +50,17 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('login') }}">
+                            <a class="dropdown-item" href="{{ url_for('auth.login') }}">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('register') }}">
+                            <a class="dropdown-item" href="{{ url_for('auth.register') }}">
                                 <i class="bi bi-person-plus me-2"></i>Registrarse
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('forgot_password') }}">
+                            <a class="dropdown-item" href="{{ url_for('auth.forgot_password') }}">
                                 <i class="bi bi-key me-2"></i>Recuperar contraseña
                             </a>
                         </li>
@@ -70,7 +70,7 @@
                 <!-- Carrito -->
                 <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
                     <i class="bi bi-cart fs-4"></i>
-                    <span class="cart-badge" id="cart-count">0</span> <!-- CORREGIDO -->
+                    <span class="cart-badge" id="cart-count">0</span> 
                 </a>
             </div>
         </div>
@@ -128,7 +128,7 @@
     </main>
 
     <!-- MODALES -->
-    {% include 'partials/modals.html' %}
+    {% include 'common/partials/modals.html' %}
 
     <!-- TOASTS -->
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"> <!-- CORREGIDO -->
