@@ -18,7 +18,7 @@ from basedatos.queries import (
 
 reviews = []
 
-admin = Blueprint("admin", __name__)
+admin = Blueprint("admin", __name__, url_prefix="/admin")
 
 # ---------- DASHBOARD ----------
 @admin.route("/")
