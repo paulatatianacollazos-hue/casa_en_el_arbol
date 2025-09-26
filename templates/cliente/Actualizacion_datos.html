@@ -73,10 +73,14 @@
             <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
             <li>
           <a class="dropdown-item" 
-            href="{% if current_user.Rol == 'admin' %}{{ url_for('admin') }}
-                  {% else %}{{ url_for('cliente.reseñas') }}{% endif %}">
-            Reseñas
-          </a>
+          {% if current_user.Rol == 'admin' %}
+            href="{{ url_for('admin.envios') }}"
+          {% else %}
+            href="{{ url_for('cliente.reseñas') }}"
+          {% endif %}>
+          Reseñas
+        </a>
+
         </li>
             <li><a class="dropdown-item" href="{{ url_for('cliente.ver_notificaciones_cliente') }}">Notificaciones</a></li>
             <div class="mt-3">
