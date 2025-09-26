@@ -68,19 +68,19 @@
         </strong>
         </div>
 
-            <li><a class="dropdown-item" href="{{ url_for('actualizacion_datos') }}">Perfil</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('cliente.actualizacion_datos') }}">Perfil</a></li>
             <li><a class="dropdown-item" href="">Historial</a></li>
             <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
             <li>
           <a class="dropdown-item" 
             href="{% if current_user.Rol == 'admin' %}{{ url_for('admin') }}
-                  {% else %}{{ url_for('reseñas') }}{% endif %}">
+                  {% else %}{{ url_for('cliente.reseñas') }}{% endif %}">
             Reseñas
           </a>
         </li>
-            <li><a class="dropdown-item" href="{{ url_for('ver_notificaciones_admin') }}">Notificaciones</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('cliente.ver_notificaciones_cliente') }}">Notificaciones</a></li>
             <div class="mt-3">
-              <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
+              <a href="{{ url_for('auth.logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
             </div>
           </ul>
           {% endif %}
@@ -178,7 +178,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('instalaciones') }}">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('cliente.instalaciones_home') }}">
                         <i class="bi bi-tools me-1"></i>INSTALACIONES
                     </a>
                 </li>
@@ -200,7 +200,7 @@
         <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
         <a href="/envios"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
         <a><i class="bi bi-heart me-2"></i>Favoritos</a>
-        <a href="{{ url_for('dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
+        <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
     </div>
 
@@ -224,7 +224,7 @@
         <div class="profile-header mb-4">
           <h5 class="mb-0">PERFIL</h5>
         </div>
-        <form method="POST" action="{{ url_for('actualizacion_datos') }}">
+        <form method="POST" action="{{ url_for('cliente.actualizacion_datos') }}">
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Nombre</label>
@@ -300,7 +300,7 @@
       </div>
       <div class="modal-body">
        
-        <form method="POST" action="{{ url_for('agregar_direccion') }}">
+        <form method="POST" action="{{ url_for('cliente.agregar_direccion') }}">
           <div class="mb-3">
             <label for="pais" class="form-label">País</label>
             <select name="pais" id="pais" class="form-select rounded-pill">
