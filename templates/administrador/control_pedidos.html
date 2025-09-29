@@ -276,9 +276,8 @@
         <h5 class="modal-title">Registrar Pedido</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form action="/guardar_pedido" method="POST">
-      <div class="modal-body">
-        <form id="formPedido">
+      <form action="/registrar_pedido" method="POST" id="formPedido">
+        <div class="modal-body">
           <!-- Datos del Pedido -->
           <div class="row mb-3">
             <div class="col-md-6">
@@ -322,18 +321,16 @@
           <button type="button" class="btn btn-success" id="btnAgregarDetalle">
             + Agregar Producto
           </button>
-
-        </form>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" form="formPedido" class="btn btn-primary">Guardar Pedido</button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Pedido</button>
+        </div>
       </form>
     </div>
   </div>
 </div>
+
 
 <script>
   // Agregar fila de detalle
