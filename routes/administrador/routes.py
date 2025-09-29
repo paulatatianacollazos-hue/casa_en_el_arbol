@@ -215,7 +215,7 @@ def ver_producto(producto_id):
 @login_required
 @role_required("admin")
 def reporte_pedidos():
-    resultados = buscar_pedidos(request.form) if request.method == "POST" else []
+    resultados = buscar_pedidos() if request.method == "POST" else []
     return render_template("administrador/reportes_entrega.html", resultados=resultados)
 
 # ---------- ASIGNAR_CALENDARIO ----------
