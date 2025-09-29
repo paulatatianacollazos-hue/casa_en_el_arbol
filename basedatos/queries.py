@@ -1,7 +1,8 @@
 from flask import request, jsonify, render_template
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
-from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
+from sqlalchemy import and_
+from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios, Producto
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -529,63 +530,47 @@ def asignar_calendario():
         conn.close()
 
 def buscar_pedidos():
+    filtros = []
+    fecha = request.form.get("fecha_pedido")
+    id_pedido = request.form.get("id_pedido")
+    nombre_empleado = request.form.get("nombre_empleado")
+    nombre_cliente = request.form.get("nombre_cliente")
+
+    if fecha:
+        filtros.append(Pedido.Fecha == fecha)
+
+    if id_pedido:
+        filtros.append(Pedido.ID_Pedido == id_pedido)
+
+    if nombre_empleado:
+        filtros.append(Usuario.Nombre.ilike(f"%{nombre_empleado}%"))
+
+    if nombre_cliente:
+        filtros.append(Pedido.Nombre_Cliente.ilike(f"%{nombre_cliente}%"))
+
+    # Esto es solo ejemplo. Ajusta la lógica a tu modelo real
+    pedidos = Pedido.query \
+        .join(Usuario, Pedido.ID_Empleado == Usuario.ID_Usuario) \
+        .filter(and_(*filtros)).all()
+
     resultados = []
+    for pedido in pedidos:
+        productos_html = "<ul>"
+        for detalle in Detalle_Pedido.query.filter_by(ID_Pedido=pedido.ID_Pedido).all():
+            producto = Producto.query.get(detalle.ID_Producto)
+            productos_html += f"<li>{producto.Nombre} x {detalle.Cantidad}</li>"
+        productos_html += "</ul>"
 
-    if request.method == 'POST':
-        fecha = request.form.get('fecha_pedido')
-        id_pedido = request.form.get('id_pedido')
-        nombre_cliente = request.form.get('nombre_cliente')
-        nombre_empleado = request.form.get('nombre_empleado')
+        resultados.append({
+            "fecha": pedido.Fecha,
+            "cliente": pedido.Nombre_Cliente,
+            "direccion": pedido.Direccion,
+            "productos": productos_html,
+            "empleado": pedido.empleado.Nombre if pedido.empleado else "N/A",
+            "estado": pedido.Estado
+        })
 
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        query = """
-        SELECT
-                p.ID_Pedido AS id_pedido,
-                p.FechaPedido AS fecha,
-                c.Nombre AS cliente,
-                c.Direccion AS direccion,
-                GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
-                SEPARATOR '<br>') AS productos,
-                p.Estado AS estado,
-                COALESCE(e.Nombre, 'Sin asignar') AS empleado
-            FROM Pedido p
-            JOIN Usuario c ON p.ID_Usuario = c.ID_Usuario
-            JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
-            JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
-            LEFT JOIN Usuario e ON p.ID_Empleado = e.ID_Usuario
-            WHERE p.Estado = 'entregado'
-        """
-        params = []
-
-        if fecha:
-            query += " AND p.FechaPedido = %s"
-            params.append(fecha)
-
-        if id_pedido:
-            query += " AND p.ID_Pedido = %s"
-            params.append(id_pedido)
-
-        if nombre_cliente:
-            query += " AND c.Nombre LIKE %s"
-            params.append(f"%{nombre_cliente}%")
-
-        if nombre_empleado:
-            query += " AND e.Nombre LIKE %s"
-            params.append(f"%{nombre_empleado}%")
-
-        # 👇 agrupar y ordenar SOLO al final
-        query += """
-            GROUP BY p.ID_Pedido, p.FechaPedido, c.Nombre, c.Direccion,
-            p.Estado, e.Nombre
-            ORDER BY p.FechaPedido DESC
-        """
-
-        cursor.execute(query, tuple(params))
-        resultados = cursor.fetchall()
-        cursor.close()
-        conn.close()
+    return resultados
 
 def asignar_empleado(form_data):
     """
