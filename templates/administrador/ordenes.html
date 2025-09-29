@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Órdenes de envío</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+</head>
+<body>
+    <h2>Órdenes pendientes</h2>
+    {% with mensajes = get_flashed_messages() %}
+      {% if mensajes %}
+        <div class="alerta">
+            {{ mensajes[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="contenedor-pedidos">
+        {% for pedido in pedidos %}
+            <div class="pedido">
+                <h3>Pedido #{{ pedido.ID_Pedido }}</h3>
+                <p><b>Cliente:</b> {{ pedido.Nombre }} {{ pedido.Apellido }}</p>
+                <p><b>Producto:</b> {{ pedido.NombreProducto }}</p>
+                <p><b>Cantidad:</b> {{ pedido.Cantidad }}</p>
+                <p><b>Estado:</b> {{ pedido.Estado }}</p>
+                <a href="{{ url_for('detalle', id=pedido.ID_Pedido) }}">Ver detalles</a>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

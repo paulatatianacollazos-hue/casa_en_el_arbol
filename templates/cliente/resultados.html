@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+    <title>Resultados</title>
+</head>
+<body>
+    <h2>Resultados de la búsqueda</h2>
+    <table border="1">
+        <tr>
+            <th>Pedido</th>
+            {% if rol == "admin" %}<th>Cliente</th>{% endif %}
+            <th>Producto</th>
+            <th>Fecha</th>
+        </tr>
+        {% for r in resultados %}
+        <tr>
+            <td>#{{ r.ID_Pedido }}</td>
+            {% if rol == "admin" %}<td>{{ r.NombreComprador }}</td>{% endif %}
+            <td>{{ r.NombreProducto }}</td>
+            <td>{{ r.FechaPedido }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

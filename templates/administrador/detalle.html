@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del pedido</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+</head>
+<body>
+    <div class="detalle">
+        <h2>Detalle del Pedido #{{ pedido.ID_Pedido }}</h2>
+        <p><b>Cliente:</b> {{ pedido.Nombre }} {{ pedido.Apellido }}</p>
+        <p><b>Teléfono:</b> {{ pedido.Telefono }}</p>
+        <p><b>Correo:</b> {{ pedido.Correo }}</p>
+        <p><b>Dirección:</b> {{ pedido.Destino }}</p>
+        <p><b>Producto:</b> {{ pedido.NombreProducto }}</p>
+        <p><b>Cantidad:</b> {{ pedido.Cantidad }}</p>
+
+        <form action="{{ url_for('aprobar', id=pedido.ID_Pedido) }}" method="POST">
+            <button type="submit">Aceptar proceso de envío</button>
+        </form>
+    </div>
+</body>
+</html>

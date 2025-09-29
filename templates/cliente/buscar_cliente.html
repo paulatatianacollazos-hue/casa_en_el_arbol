@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+    <title>Buscador Cliente</title>
+</head>
+<body>
+    <h2>Buscador - Cliente</h2>
+    <form method="POST">
+        Pedido: <input type="text" name="pedido"><br>
+        Producto: <input type="text" name="producto"><br>
+        <button type="submit">Buscar</button>
+    </form>
+</body>
+</html>
