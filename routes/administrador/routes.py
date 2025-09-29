@@ -3,8 +3,10 @@ from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 
 
-from basedatos.models import db, Usuario, Notificaciones
+from basedatos.models import db, Usuario, Notificaciones ,Direccion
+from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
+from basedatos.notificaciones import crear_notificacion
 from basedatos.queries import registrar_pedido
 from basedatos.queries import (
     obtener_todos_los_pedidos,
@@ -232,3 +234,97 @@ def asignar_calendario_route():
 @role_required("admin")
 def estadisticas():
     return render_template("administrador/estadisticas.html")
+
+@admin.route("/actualizacion_datos", methods=["GET", "POST"])
+@login_required
+@role_required("cliente","admin")
+def actualizacion_datos():
+    usuario = current_user
+    direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=usuario.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre", "").strip()
+        apellido = request.form.get("apellido", "").strip()
+        correo = request.form.get("correo", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if not nombre or not apellido or not correo:
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
+        else:
+            usuario_existente = Usuario.query.filter(
+                Usuario.Correo == correo,
+                Usuario.ID_Usuario != usuario.ID_Usuario
+            ).first()
+            if usuario_existente:
+                flash("El correo ya está registrado por otro usuario.", "danger")
+            else:
+                usuario.Nombre = nombre
+                usuario.Apellido = apellido
+                usuario.Correo = correo
+                if password:
+                    usuario.Contraseña = generate_password_hash(password)
+                db.session.commit()
+                crear_notificacion(
+                    user_id=usuario.ID_Usuario,
+                    titulo="Perfil actualizado ✏️",
+                    mensaje="Tus datos personales se han actualizado correctamente."
+                )
+                flash("✅ Perfil actualizado correctamente", "success")
+
+    return render_template(
+        "cliente/actualizacion_datos.html",
+        usuario=usuario,
+        direcciones=direcciones,
+        notificaciones=notificaciones
+    )
+
+@admin.route("/direccion/agregar", methods=["POST"])
+@login_required
+def agregar_direccion():
+    try:
+        nueva_direccion = Direccion(
+            ID_Usuario=current_user.ID_Usuario,
+            Pais="Colombia",
+            Departamento="Bogotá, D.C.",
+            Ciudad="Bogotá",
+            Direccion=request.form.get("direccion"),
+            InfoAdicional=request.form.get("infoAdicional"),
+            Barrio=request.form.get("barrio"),
+            Destinatario=request.form.get("destinatario")
+        )
+        db.session.add(nueva_direccion)
+        db.session.commit()
+
+        crear_notificacion(
+            user_id=current_user.ID_Usuario,
+            titulo="Dirección agregada 🏠",
+            mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
+        )
+        flash("Dirección agregada correctamente 🏠", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"❌ Error al agregar dirección: {str(e)}", "danger")
+
+    return redirect(url_for("admin.admin_actualizacion_datos"))
+
+@admin.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
+@login_required
+def borrar_direccion(id_direccion):
+    try:
+        direccion = Direccion.query.get_or_404(id_direccion)
+        db.session.delete(direccion)
+        db.session.commit()
+
+        crear_notificacion(
+            user_id=current_user.ID_Usuario,
+            titulo="Dirección eliminada 🗑️",
+            mensaje=f"La dirección '{direccion.Direccion}' ha sido eliminada."
+        )
+        flash("Dirección eliminada correctamente 🗑️", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"❌ Error al eliminar dirección: {str(e)}", "danger")
+
+    return redirect(url_for("admin.admin_actualizacion_datos"))
+

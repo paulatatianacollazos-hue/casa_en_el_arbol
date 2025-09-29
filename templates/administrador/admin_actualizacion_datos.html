@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Usuario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}" />
+ 
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
+  <div class="container-fluid px-4">
+    <!-- Marca -->
+    <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+      Casa en el Árbol
+    </a>
+
+    <!-- Botón hamburguesa -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+      aria-controls="navbarMain" aria-expanded="false" aria-label="Menú">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenido colapsable -->
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <!-- Buscador -->
+      <div class="search-container mx-auto d-none d-md-block">
+        <input class="form-control" type="search" placeholder="¿Qué estás buscando hoy?" aria-label="Buscar" id="searchInput">
+      </div>
+
+      <!-- Iconos alineados a la derecha -->
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- Favoritos -->
+        <a href="#" class="nav-icon" aria-label="Favoritos">
+          <i class="bi bi-heart fs-4"></i>
+        </a>
+
+        <!-- Dropdown usuario -->
+        <div class="dropdown">
+          <a class="nav-icon dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-label="Cuenta de usuario">
+            <i class="bi bi-person fs-4"></i>
+          </a>
+          {% if session.get('user_id') %}
+          <!-- Usuario logueado -->
+         <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('register') }}"><i class="bi bi-person-plus me-2"></i>Registrarse</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Recuperar contraseña</a></li>
+          </ul>
+          {% else %}
+          <!-- Usuario no logueado -->
+         
+            <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 250px;">
+          <div class="d-flex align-items-center mb-3">
+        <div class="rounded-circle bg-light border text-dark fw-bold d-flex align-items-center justify-content-center me-2"
+            style="width: 45px; height: 45px; font-size: 16px;">
+            {{ session.get('iniciales', '??') }}
+        </div>
+        <strong class="text-uppercase">
+            {{ session.get('username', 'Invitado') }}
+        </strong>
+        </div>
+
+            <li><a class="dropdown-item" href="{{ url_for('cliente.actualizacion_datos') }}">Perfil</a></li>
+            <li><a class="dropdown-item" href="">Historial</a></li>
+            <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
+            <li>
+          <a class="dropdown-item" 
+          {% if current_user.Rol == 'admin' %}
+            href="{{ url_for('admin.envios') }}"
+          {% else %}
+            href="{{ url_for('cliente.resenas') }}"
+          {% endif %}>
+          Reseñas
+        </a>
+
+        </li>
+            <li><a class="dropdown-item" href="{{ url_for('cliente.ver_notificaciones_cliente') }}">Notificaciones</a></li>
+            <div class="mt-3">
+              <a href="{{ url_for('auth.logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
+            </div>
+          </ul>
+          {% endif %}
+        </div>
+
+        <!-- Carrito -->
+        <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
+          <i class="bi bi-cart fs-4"></i>
+          <span class="cart-badge" id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Bloque de mensajes flash específicos de actualización de datos -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if category.startswith('actualizacion_datos') or category.startswith('borrar_direccion') %}
+        <div 
+          class="alert 
+                 {% if 'success' in category %}alert-success
+                 {% elif 'warning' in category %}alert-warning
+                 {% elif 'danger' in category %}alert-danger
+                 {% else %}alert-info{% endif %} 
+                 alert-dismissible fade show mt-3"
+          role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+    {% if session.get('show_welcome_modal') %}
+<!-- Modal de bienvenida -->
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100" id="welcomeModalLabel">
+          ¡Bienvenid@{{ ', ' + session['username'] if session['username'] else '' }}!
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p class="mb-4">Gracias por iniciar sesión en <strong>Casa en el Árbol</strong>.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn custom-btn px-4 py-2">Ir a la página principal</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+    welcomeModal.show();
+  });
+</script>
+
+
+{% set _ = session.pop('show_welcome_modal') %}
+{% endif %}
+
+
+   
+    <div class="section-menu py-3 bg-white shadow-sm" style="margin-top: 80px;">
+        <div class="container">
+            <ul class="nav justify-content-center flex-wrap">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('all')">
+                        <i class="bi bi-grid me-1"></i>CATEGORÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}">
+                        <i class="bi bi-info-circle me-1"></i>NOSOTROS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('catalogo') }}" onclick="scrollToCatalog()">
+                        <i class="bi bi-collection me-1"></i>CATÁLOGO
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')">
+                        <i class="bi bi-tag me-1"></i>OFERTAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-shield-check me-1"></i>GARANTÍAS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('cliente.instalaciones_home') }}">
+                        <i class="bi bi-tools me-1"></i>INSTALACIONES
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="#">
+                        <i class="bi bi-chat-dots me-1"></i>CHATBOT
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+<div class="container-fluid mt-4">
+  <div class="row">
+ 
+    <div class="col-md-3 col-lg-2 mb-4">
+      <div class="sidebar shadow-sm">
+        <h4>🌿 HOLA!</h4>
+        <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
+        <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
+        <a href="admin/envios"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a><i class="bi bi-heart me-2"></i>Favoritos</a>
+        <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
+      </div>
+    </div>
+
+  
+    <div class="col-md-9 col-lg-10">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+ 
+      <div id="seccion-perfil" class="card shadow-sm p-4">
+        <div class="profile-header mb-4">
+          <h5 class="mb-0">PERFIL</h5>
+        </div>
+        <form method="POST" action="{{ url_for('cliente.actualizacion_datos') }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre</label>
+              <input type="text" name="nombre" class="form-control" value="{{ usuario.Nombre }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Apellido</label>
+              <input type="text" name="apellido" class="form-control" value="{{ usuario.Apellido or '' }}" />
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">Email</label>
+              <input type="email" name="correo" class="form-control" value="{{ usuario.Correo }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Género</label>
+              <input type="text" name="genero" class="form-control" value="{{ usuario.Genero or '' }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Teléfono</label>
+              <input type="tel" name="telefono" class="form-control" value="{{ usuario.Telefono or '' }}" />
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-green mt-3">Guardar cambios</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+
+
+
+
+
+      <div id="seccion-direcciones" class="card shadow-sm p-4" style="display:none;">
+        <div class="profile-header mb-4">
+          <h5 class="mb-0">DIRECCIONES</h5>
+          <button type="button" class="btn btn-green btn-sm" data-bs-toggle="modal" data-bs-target="#modalDireccion">
+            <i class="bi bi-plus-lg me-1"></i>Añadir dirección
+          </button>
+        </div>
+        <div class="list-group">
+          {% for dir in direcciones %}
+          <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+              <div><strong>Dirección:</strong> {{ dir.Direccion }}</div>
+              <div><strong>Ciudad:</strong> {{ dir.Ciudad }}</div>
+              <div><strong>Departamento:</strong> {{ dir.Departamento }}</div>
+              <div><strong>País:</strong> {{ dir.Pais }}</div>
+            </div>
+            <form action="{{ url_for('cliente.borrar_direccion', id_direccion=dir.ID_Direccion) }}" method="POST">
+              <button type="submit" class="btn btn-link text-danger d-flex align-items-center gap-1 p-0">
+                <i class="bi bi-trash fs-5"></i> Borrar
+              </button>
+            </form>
+          </div>
+          {% else %}
+          <p class="text-muted">No tienes direcciones registradas.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="modalDireccion" tabindex="-1" aria-labelledby="modalDireccionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4 rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="modalDireccionLabel">AÑADIR DIRECCIÓN</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+       
+        <form method="POST" action="{{ url_for('cliente.agregar_direccion') }}">
+          <div class="mb-3">
+            <label for="pais" class="form-label">País</label>
+            <select name="pais" id="pais" class="form-select rounded-pill">
+              <option selected>Colombia</option>
+            </select>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="departamento" class="form-label">Departamento</label>
+              <select name="departamento" id="departamento" class="form-select rounded-pill">
+          <option selected>Bogotá, D.C.</option>
+        </select>
+
+            </div>
+            <div class="col-md-6">
+              <label for="municipio" class="form-label">Municipio</label>
+              <select name="municipio" id="municipio" class="form-select rounded-pill">
+              <option selected>Bogotá, D.C.</option>
+            </select>
+
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="direccion" class="form-label">Dirección</label>
+              <input type="text" name="direccion" id="direccion" class="form-control rounded-pill" placeholder="Dirección" required />
+            </div>
+            <div class="col-md-6">
+              <label for="infoAdicional" class="form-label">Información adicional</label>
+              <input type="text" name="infoAdicional" id="infoAdicional" class="form-control rounded-pill" placeholder="Apto. 201, torre 5" />
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="barrio" class="form-label">Barrio</label>
+              <input type="text" name="barrio" id="barrio" class="form-control rounded-pill" placeholder="Barrio" />
+            </div>
+            <div class="col-md-6">
+              <label for="destinatario" class="form-label">Destinatario</label>
+              <input type="text" name="destinatario" id="destinatario" class="form-control rounded-pill" placeholder="Quién recibe" />
+            </div>
+          </div>
+
+          <div class="text-end mt-4">
+            <button type="submit" class="btn btn-green px-4 py-2 rounded-pill">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="modalGuardado" tabindex="-1" aria-labelledby="modalGuardadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 rounded-4 text-center">
+      <h5 class="modal-title mb-3 text-success fw-bold" id="modalGuardadoLabel">
+        Dirección guardada
+      </h5>
+      <p>Tu nueva dirección ha sido registrada correctamente.</p>
+      <div class="d-flex justify-content-center gap-3 mt-3">
+        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+       
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="modalConfirmarBorrar" tabindex="-1" aria-labelledby="modalConfirmarBorrarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 rounded-4 text-center">
+      <h5 class="modal-title mb-3 text-danger fw-bold" id="modalConfirmarBorrarLabel">
+        ¿Eliminar esta dirección?
+      </h5>
+      <p>Esta acción no se puede deshacer. ¿Seguro que deseas continuar?</p>
+      <div class="d-flex justify-content-center gap-3 mt-3">
+        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnConfirmarBorrar" class="btn btn-danger px-4 rounded-pill">Borrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal fade" id="modalEliminado" tabindex="-1" aria-labelledby="modalEliminadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 rounded-4 text-center">
+      <h5 class="modal-title mb-3 text-success fw-bold" id="modalEliminadoLabel">
+        Dirección eliminada
+      </h5>
+      <p>La dirección fue eliminada correctamente.</p>
+      <div class="d-flex justify-content-center mt-3">
+        <button type="button" class="btn btn-success px-4 rounded-pill" data-bs-dismiss="modal">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="carousel-container">
+  <div class="carousel-track">
+    <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
+    <div class="carousel-item"><i class="bi bi-cart"></i> Compra fácil y segura</div>
+    <div class="carousel-item"><i class="bi bi-award"></i> Excelente calidad</div>
+    <div class="carousel-item"><i class="bi bi-headset"></i> Productos personalizados</div>
+    <!-- Repite para que parezca infinito -->
+    <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
+    <div class="carousel-item"><i class="bi bi-cart"></i> Compra fácil y segura</div>
+    <div class="carousel-item"><i class="bi bi-award"></i> Excelente calidad</div>
+     <div class="carousel-item"><i class="bi bi-headset"></i> Productos personalizados</div>
+  </div>
+</div>
+
+
+<!-- Footer suscripción -->
+    <section class="footer-suscripcion mt-5 bg-dark text-light py-4">
+        <div class="container">
+            <div class="row footer-columns mt-4">
+                <div class="col-md-3 footer-col">
+                    <h3><strong>Casa en el Árbol</strong></h3>
+                    <p>Diseñamos y fabricamos muebles únicos con alma natural.</p>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <h5>Información</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Política de privacidad</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Términos y condiciones</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Envíos y devoluciones</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <h5>Horario de Atención</h5>
+                    <p>
+                        Lunes a Viernes: 9:00 a.m. - 6:00 p.m.<br />
+                        Sábados: 10:00 a.m. - 4:00 p.m.
+                    </p>
+                    <p><strong>Email:</strong> casaenelarbol236@gmail.com</p>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <h5>Contáctanos</h5>
+                    <div class="social-icons d-flex gap-3 fs-4">
+                        <a href="#" class="text-light"><i class="bi bi-whatsapp"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/actualizacion.js') }}"></script>
+
+
+
+</body>
+</html>
