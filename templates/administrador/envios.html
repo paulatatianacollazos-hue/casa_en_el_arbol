@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("admin/asignar_calendario", {
+      const response = await fetch("/admin/asignar_calendario", {
         method: "POST",
         body: formData
       });
