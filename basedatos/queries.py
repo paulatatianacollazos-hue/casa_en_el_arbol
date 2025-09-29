@@ -670,7 +670,7 @@ def obtener_pedidos_por_cliente(id_cliente):
     conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM pedidos WHERE id_cliente = %s", (id_cliente,))
+    cursor.execute("SELECT * FROM pedido WHERE id_cliente = %s", (ID_Usuario,))
     pedidos = cursor.fetchall()
 
     for pedido in pedidos:
