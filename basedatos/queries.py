@@ -664,7 +664,7 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
         db.session.rollback()
         return {"success": False, "message": str(e)}
     
-from basedatos import obtener_conexion
+
 
 def obtener_pedidos_por_cliente(id_cliente):
     conexion = get_connection()
