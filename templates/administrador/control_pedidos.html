@@ -365,25 +365,28 @@
 
   // Enviar formulario
   document.getElementById("formPedido").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  console.log("Formulario enviado");
 
-    const formData = new FormData(e.target);
+  const formData = new FormData(e.target);
 
-    const response = await fetch("/registrar_pedido", {
-      method: "POST",
-      body: formData
-    });
-
-    const result = await response.json();
-    if (result.success) {
-      alert("Pedido registrado correctamente");
-      e.target.reset();
-      document.querySelector("#tablaDetalles tbody").innerHTML = "";
-      bootstrap.Modal.getInstance(document.getElementById("modalPedido")).hide();
-    } else {
-      alert("Error: " + result.message);
-    }
+  const response = await fetch("/registrar_pedido", {
+    method: "POST",
+    body: formData
   });
+
+  const result = await response.json();
+  if (result.success) {
+    alert("Pedido registrado correctamente");
+    e.target.reset();
+    document.querySelector("#tablaDetalles tbody").innerHTML = "";
+    bootstrap.Modal.getInstance(document.getElementById("modalPedido")).hide();
+  } else {
+    alert("Error: " + result.message);
+  }
+});
+
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
