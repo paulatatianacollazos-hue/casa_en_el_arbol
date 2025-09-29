@@ -5,6 +5,11 @@ from basedatos.models import db, Usuario, Producto, Calendario, Notificaciones, 
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
+from basedatos.queries import obtener_pedidos_por_cliente
+from flask import render_template
+from flask_login import login_required, current_user
+from basedatos.db import get_connection
+
 
 from . import cliente 
 reviews = []
@@ -284,3 +289,19 @@ def borrar_direccion(id_direccion):
         flash(f"❌ Error al eliminar dirección: {str(e)}", "danger")
 
     return redirect(url_for("cliente.actualizacion_datos"))
+
+
+  # 👈 Importamos la función
+
+@cliente.route('/pedidos_por_cliente')
+@login_required
+def ver_mis_pedidos():
+    id_cliente = current_user.id
+
+    pedidos = obtener_pedidos_por_cliente(id_cliente)
+
+    if not pedidos:
+        return render_template("cliente/mis_pedidos.html", pedidos=[], mensaje="No has realizado ningún pedido.")
+    
+    return render_template("cliente/pedidos_por_cliente.html", pedidos=pedidos)
+

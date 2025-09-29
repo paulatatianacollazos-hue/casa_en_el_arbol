@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Mis Pedidos</h2>
+
+{% if mensaje %}
+    <p>{{ mensaje }}</p>
+{% else %}
+    {% for pedido in pedidos %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Pedido #{{ pedido.id_pedido }}</h4>
+                <p>Fecha: {{ pedido.fecha }}</p>
+                <p>Total: ${{ pedido.total }}</p>
+
+                <h5>Productos:</h5>
+
+                <div id="carousel{{ pedido.id_pedido }}" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for producto in pedido.detalles %}
+                        <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+                            <div class="d-flex justify-content-center">
+                                <img src="{{ producto.imagen or url_for('static', filename='img/default.png') }}"
+                                     class="d-block" alt="Producto" style="max-height: 200px;">
+                            </div>
+                            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                                <h5>{{ producto.producto }}</h5>
+                                <p>Cantidad: {{ producto.cantidad }} - Precio: ${{ producto.precio_unitario }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ pedido.id_pedido }}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ pedido.id_pedido }}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
