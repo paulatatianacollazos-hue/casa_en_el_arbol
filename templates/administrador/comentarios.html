@@ -245,11 +245,12 @@
                         <li><a class="dropdown-item" href="#">Historial</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('admin.gestion_roles') }}">Gestión de roles</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('admin.estadisticas') }}">Estadísticas</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.reseñas') }}">Reseñas</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('ver_notificaciones_admin') }}">Notificaciones</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.ver_reseñas') }}">Reseñas</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.ver_notificaciones') }}">Notificaciones</a></li>
+
 
                         <div class="mt-3">
-                            <a href="{{ url_for('logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
                         </div>
                     </ul>
                     {% endif %}
