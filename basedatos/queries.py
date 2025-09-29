@@ -558,7 +558,7 @@ def buscar_pedidos():
         productos_html = "<ul>"
         for detalle in Detalle_Pedido.query.filter_by(ID_Pedido=pedido.ID_Pedido).all():
             producto = Producto.query.get(detalle.ID_Producto)
-            productos_html += f"<li>{producto.Nombre} x {detalle.Cantidad}</li>"
+            productos_html += f"<li>{producto.NombreProducto} x {detalle.Cantidad}</li>"
         productos_html += "</ul>"
 
         resultados.append({
