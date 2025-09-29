@@ -2,6 +2,8 @@ from flask import request, jsonify, render_template
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from basedatos.models import db, Pedido, Usuario
+from basedatos.models import Pedido, Detalle_Pedido
+
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -664,13 +666,13 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
 
         # Insertar detalles
         for prod in productos:
-            detalle = Detalle_Pedido(
+           detalle = Detalle_Pedido(
                 ID_Pedido=pedido.ID_Pedido,
                 ID_Producto=prod["id_producto"],
                 Cantidad=prod["cantidad"],
                 PrecioUnidad=prod["precio"]
             )
-            db.session.add(detalle)
+        db.session.add(detalle)
 
         db.session.commit()
         return {"success": True, "pedido_id": pedido.ID_Pedido}

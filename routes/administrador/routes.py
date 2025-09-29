@@ -2,8 +2,10 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 
+
 from basedatos.models import db, Usuario, Notificaciones
 from basedatos.decoradores import role_required
+from basedatos.queries import registrar_pedido
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     detalle,
