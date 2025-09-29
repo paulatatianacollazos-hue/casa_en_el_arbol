@@ -3,8 +3,7 @@ from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from basedatos.models import db, Pedido, Usuario
 from basedatos.models import Pedido, Detalle_Pedido
-from basedatos.models import db
-from basedatos.models import Pedido
+from basedatos.models import db, Pedido
 
 
 # ---------OBTENER_PEDIDOS ---------
@@ -638,6 +637,7 @@ def actualizar_pedido(form_data):
     except Exception as e:
         db.session.rollback()
         return {"success": False, "error": str(e)}
+
     
     from basedatos.models import db, Pedido, DetallePedido
 from datetime import datetime
