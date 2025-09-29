@@ -18,7 +18,7 @@ from routes.administrador.routes import admin
 # ------------------ APP ------------------ #
 app = Flask(__name__)
 
-# ------------------ CONFIGURACIÓN PRINCIPAL ------------------ #
+# ------------------ CONFIGURACIÓN PRINCIPAL 2426------------------ #
 app.config.update(
     SECRET_KEY=os.getenv("SECRET_KEY", "mi_clave_super_secreta_y_unica"),
     SQLALCHEMY_DATABASE_URI=os.getenv(
