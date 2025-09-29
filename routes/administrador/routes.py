@@ -131,24 +131,50 @@ def control_pedidos():
     return render_template("administrador/control_pedidos.html", pedidos=todos_los_pedidos())
 
 @admin.route("/registrar_pedido", methods=["POST"])
+@login_required
+@role_required("admin")
 def registrar_pedido_route():
     try:
         nombre_comprador = request.form["nombreComprador"]
-        fecha_pedido = request.form["fechaPedido"]
         destino = request.form["destino"]
-        descuento = request.form.get("descuento", 0)
-        usuario_id = request.form["usuarioId"]
+        fecha_entrega = request.form["fechaEntrega"]
+        hora_entrega = request.form.get("horaEntrega")
+        usuario_id = current_user.ID_Usuario  # o request.form["usuarioId"]
 
-        # productos será una lista de diccionarios [{id: X, cantidad: Y, precio: Z}, ...]
-        productos = request.form.getlist("productos")
+        # Capturar arrays desde el form
+        nombres = request.form.getlist("producto[]")
+        cantidades = request.form.getlist("cantidad[]")
+        precios = request.form.getlist("precio[]")
 
-        registrar_pedido(nombre_comprador, fecha_pedido, destino, descuento, usuario_id, productos)
+        productos = []
+        for i in range(len(nombres)):
+            productos.append({
+                "id_producto": int(nombres[i]),
+                "cantidad": int(cantidades[i]),
+                "precio": float(precios[i])
+            })
 
-        flash("Pedido registrado correctamente", "success")
-        return redirect(url_for("dashboard.dashboard"))
-    except Exception as e:
-        flash(f"Error al registrar el pedido: {e}", "danger")
+        # Llamada a queries.py
+        resultado = registrar_pedido(
+            nombre_comprador=nombre_comprador,
+            fecha_entrega=fecha_entrega,
+            hora_entrega=hora_entrega,
+            destino=destino,
+            usuario_id=usuario_id,
+            productos=productos
+        )
+
+        if resultado["success"]:
+            flash("✅ Pedido registrado correctamente", "success")
+        else:
+            flash(f"❌ Error al registrar: {resultado['message']}", "danger")
+
         return redirect(url_for("admin.control_pedidos"))
+
+    except Exception as e:
+        flash(f"❌ Error inesperado: {e}", "danger")
+        return redirect(url_for("admin.control_pedidos"))
+
 # ---------- ASIGNAR_EMPLEADO ----------
 @admin.route("/asignar_empleado", methods=["POST"])
 @login_required

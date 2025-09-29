@@ -641,17 +641,7 @@ def actualizar_pedido(form_data):
 from datetime import datetime
 
 def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usuario_id, productos):
-    """
-    Registra un pedido y sus detalles en la base de datos.
-    
-    productos debe ser una lista de diccionarios:
-    [
-        {"id_producto": 1, "cantidad": 2, "precio": 1000},
-        {"id_producto": 3, "cantidad": 1, "precio": 5000}
-    ]
-    """
     try:
-        # Crear pedido
         pedido = Pedido(
             NombreComprador=nombre_comprador,
             Estado="pendiente",
@@ -662,17 +652,17 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
             ID_Usuario=usuario_id
         )
         db.session.add(pedido)
-        db.session.flush()  # obtener el ID_Pedido
+        db.session.flush()  # obtiene ID_Pedido
 
         # Insertar detalles
         for prod in productos:
-           detalle = Detalle_Pedido(
+            detalle = Detalle_Pedido(
                 ID_Pedido=pedido.ID_Pedido,
                 ID_Producto=prod["id_producto"],
                 Cantidad=prod["cantidad"],
                 PrecioUnidad=prod["precio"]
             )
-        db.session.add(detalle)
+            db.session.add(detalle)  # ✅ dentro del loop
 
         db.session.commit()
         return {"success": True, "pedido_id": pedido.ID_Pedido}
