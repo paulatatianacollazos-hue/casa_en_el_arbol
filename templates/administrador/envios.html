@@ -224,7 +224,7 @@
             style="border-radius: 10px; border: 0; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
       Asignar pedidos
     </button>
-    <a href="/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
+    <a href="/admin/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
   </div>
   {% for pedido in pedidos %}
     <div class="name"><p><strong>Usuario:</strong> {{ pedido.usuario }}</p></div>
@@ -321,10 +321,6 @@
 
   </div>
 </div>
-
-
-
-
 
   <script>
     function abrirModal(id) {
