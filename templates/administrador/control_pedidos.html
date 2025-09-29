@@ -245,6 +245,9 @@
 
         <div class="contenedor-pedidos">
             <h2>Pedidos Registrados</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPedido">
+              Nuevo Pedido
+            </button>
             {% for pedido in pedidos %}
             <div class="pedidos">
                 <p><strong>ID Pedido:</strong> {{ pedido.ID_Pedido }}</p>
@@ -259,6 +262,127 @@
         </div>
     </div>
 </div>
+
+<!-- Botón para abrir el modal -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="modalPedido" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Registrar Pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formPedido">
+          <!-- Datos del Pedido -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label>Nombre Comprador</label>
+              <input type="text" class="form-control" name="nombreComprador" required>
+            </div>
+            <div class="col-md-6">
+              <label>Destino</label>
+              <input type="text" class="form-control" name="destino" required>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label>Fecha Entrega</label>
+              <input type="date" class="form-control" name="fechaEntrega" required>
+            </div>
+            <div class="col-md-6">
+              <label>Hora Entrega</label>
+              <input type="time" class="form-control" name="horaEntrega">
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Tabla Detalles de Pedido -->
+          <h6>Detalles del Pedido</h6>
+          <table class="table table-bordered" id="tablaDetalles">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unidad</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <button type="button" class="btn btn-success" id="btnAgregarDetalle">
+            + Agregar Producto
+          </button>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formPedido" class="btn btn-primary">Guardar Pedido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Agregar fila de detalle
+  document.getElementById("btnAgregarDetalle").addEventListener("click", () => {
+    const tbody = document.querySelector("#tablaDetalles tbody");
+
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td><input type="text" class="form-control" name="producto[]" required></td>
+      <td><input type="number" class="form-control" name="cantidad[]" min="1" required></td>
+      <td><input type="number" class="form-control" name="precio[]" min="0" required></td>
+      <td><input type="text" class="form-control total" readonly></td>
+      <td><button type="button" class="btn btn-danger btn-sm btnEliminar">X</button></td>
+    `;
+
+    tbody.appendChild(fila);
+
+    // Evento para eliminar fila
+    fila.querySelector(".btnEliminar").addEventListener("click", () => fila.remove());
+
+    // Evento para calcular total
+    fila.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", () => {
+        const cantidad = fila.querySelector('[name="cantidad[]"]').value || 0;
+        const precio = fila.querySelector('[name="precio[]"]').value || 0;
+        fila.querySelector(".total").value = (cantidad * precio).toFixed(2);
+      });
+    });
+  });
+
+  // Enviar formulario
+  document.getElementById("formPedido").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const response = await fetch("/registrar_pedido", {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert("Pedido registrado correctamente");
+      e.target.reset();
+      document.querySelector("#tablaDetalles tbody").innerHTML = "";
+      bootstrap.Modal.getInstance(document.getElementById("modalPedido")).hide();
+    } else {
+      alert("Error: " + result.message);
+    }
+  });
+</script>
 
 
 </body>
