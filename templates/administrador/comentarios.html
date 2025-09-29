@@ -241,10 +241,10 @@
                             <strong class="text-uppercase">{{ session['username'] }}</strong>
                         </div>
 
-                        <li><a class="dropdown-item" href="{{ url_for('actualizacion_datos') }}">Perfil</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('cliente.actualizacion_datos') }}">Perfil</a></li>
                         <li><a class="dropdown-item" href="#">Historial</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('gestion_roles') }}">Gestión de roles</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('estadisticas') }}">Estadísticas</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.gestion_roles') }}">Gestión de roles</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.estadisticas') }}">Estadísticas</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('admin') }}">Reseñas</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('ver_notificaciones_admin') }}">Notificaciones</a></li>
 
