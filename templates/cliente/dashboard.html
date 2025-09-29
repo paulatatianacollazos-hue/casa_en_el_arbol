@@ -98,8 +98,7 @@
 </nav>
 
 
-    {% if session.get('show_welcome_modal') %}
-{% if session.get('username') %}
+{% if session.get('show_welcome_modal') and session.get('username') %}
   <!-- Modal de bienvenida -->
   <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -124,7 +123,10 @@
       welcomeModal.show();
     });
   </script>
+
+  {% set _ = session.pop('show_welcome_modal') %}
 {% endif %}
+
 
 
 <!-- Eliminar la variable de sesión para que no vuelva a mostrarse -->

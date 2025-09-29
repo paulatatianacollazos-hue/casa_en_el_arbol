@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash , session
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from flask_login import login_required, login_user, logout_user
@@ -91,14 +91,16 @@ def login():
                 login_user(usuario)
                 flash("Inicio de sesión exitoso", "success")
 
-                
-                rutas_por_rol = {
-                'admin': 'admin.dashboard', 
-                'cliente': 'cliente.dashboard',
-                'instalador': 'dashboards.instalador_dashboard',
-                'transportista': 'dashboards.transportista_dashboard',
-            }
+                # Guardar nombre completo y bandera en sesión para modal
+                session['username'] = f"{usuario.Nombre} {usuario.Apellido or ''}".strip()
+                session['show_welcome_modal'] = True
 
+                rutas_por_rol = {
+                    'admin': 'admin.dashboard', 
+                    'cliente': 'cliente.dashboard',
+                    'instalador': 'dashboards.instalador_dashboard',
+                    'transportista': 'dashboards.transportista_dashboard',
+                }
 
                 ruta = rutas_por_rol.get(usuario.Rol)
 
@@ -116,6 +118,7 @@ def login():
         return render_template('login.html', correo=correo)
 
     return render_template('login.html')
+
 
 
 # ------------------ LOGOUT ------------------ #
