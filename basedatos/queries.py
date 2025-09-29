@@ -4,7 +4,8 @@ from basedatos.db import get_connection
 from basedatos.models import db, Pedido, Usuario
 from basedatos.models import Pedido, Detalle_Pedido
 from basedatos.models import db, Pedido
-
+from basedatos.models import db, Pedido, Detalle_Pedido
+from datetime import datetime
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -639,8 +640,7 @@ def actualizar_pedido(form_data):
         return {"success": False, "error": str(e)}
 
     
-    from basedatos.models import db, Pedido, DetallePedido
-from datetime import datetime
+
 
 def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usuario_id, productos):
     try:
