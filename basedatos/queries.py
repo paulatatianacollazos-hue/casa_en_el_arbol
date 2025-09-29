@@ -663,3 +663,5 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
     except Exception as e:
         db.session.rollback()
         return {"success": False, "message": str(e)}
+    
+
