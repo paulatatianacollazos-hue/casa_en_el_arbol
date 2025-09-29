@@ -537,7 +537,8 @@ def buscar_pedidos():
     nombre_cliente = request.form.get("nombre_cliente")
 
     if fecha:
-        filtros.append(Pedido.Fecha == fecha)
+        filtros.append(Pedido.FechaPedido == fecha)
+
 
     if id_pedido:
         filtros.append(Pedido.ID_Pedido == id_pedido)
