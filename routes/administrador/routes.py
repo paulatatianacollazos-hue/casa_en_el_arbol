@@ -235,7 +235,7 @@ def asignar_calendario_route():
 def estadisticas():
     return render_template("administrador/estadisticas.html")
 
-@admin.route("/admin_actualizacion_datos", methods=["GET", "POST"])
+@admin.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
 def actualizacion_datos():
@@ -273,7 +273,7 @@ def actualizacion_datos():
                 flash("✅ Perfil actualizado correctamente", "success")
 
     return render_template(
-        "admin/admin_actualizacion_datos.html",
+        "administrador/admin_actualizacion_datos.html",
         usuario=usuario,
         direcciones=direcciones,
         notificaciones=notificaciones
@@ -306,7 +306,7 @@ def agregar_direccion():
         db.session.rollback()
         flash(f"❌ Error al agregar dirección: {str(e)}", "danger")
 
-    return redirect(url_for("admin.admin_actualizacion_datos"))
+    return redirect(url_for("admin_actualizacion_datos"))
 
 @admin.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
 @login_required
@@ -326,5 +326,5 @@ def borrar_direccion(id_direccion):
         db.session.rollback()
         flash(f"❌ Error al eliminar dirección: {str(e)}", "danger")
 
-    return redirect(url_for("admin.admin_actualizacion_datos"))
+    return redirect(url_for("admin_actualizacion_datos"))
 
