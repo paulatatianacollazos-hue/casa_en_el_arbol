@@ -564,7 +564,7 @@ def buscar_pedidos():
         resultados.append({
             "fecha": pedido.FechaEntrega,
             "cliente": pedido.NombreComprador,
-            "direccion": pedido.Direccion,
+            "direccion": pedido.Destino,
             "productos": productos_html,
             "empleado": pedido.empleado.Nombre if pedido.empleado else "N/A",
             "estado": pedido.Estado
