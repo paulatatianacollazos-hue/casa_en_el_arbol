@@ -301,7 +301,7 @@ def ver_mis_pedidos():
     pedidos = obtener_pedidos_por_cliente(id_cliente)
 
     if not pedidos:
-        return render_template("cliente/mis_pedidos.html", pedidos=[], mensaje="No has realizado ningún pedido.")
+        return render_template("cliente/pedidos_por_cliente.html", pedidos=[], mensaje="No has realizado ningún pedido.")
     
     return render_template("cliente/pedidos_por_cliente.html", pedidos=pedidos)
 
