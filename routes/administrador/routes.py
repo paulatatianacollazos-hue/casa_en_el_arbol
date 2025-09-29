@@ -235,9 +235,9 @@ def asignar_calendario_route():
 def estadisticas():
     return render_template("administrador/estadisticas.html")
 
-@admin.route("/actualizacion_datos", methods=["GET", "POST"])
+@admin.route("/admin_actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("cliente","admin")
+@role_required("admin")
 def actualizacion_datos():
     usuario = current_user
     direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
@@ -273,7 +273,7 @@ def actualizacion_datos():
                 flash("✅ Perfil actualizado correctamente", "success")
 
     return render_template(
-        "cliente/actualizacion_datos.html",
+        "admin/admin_actualizacion_datos.html",
         usuario=usuario,
         direcciones=direcciones,
         notificaciones=notificaciones
