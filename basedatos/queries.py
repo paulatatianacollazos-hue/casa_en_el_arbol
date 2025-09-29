@@ -562,8 +562,8 @@ def buscar_pedidos():
         productos_html += "</ul>"
 
         resultados.append({
-            "fecha": pedido.Fecha,
-            "cliente": pedido.Nombre_Cliente,
+            "fecha": pedido.FechaEntrega,
+            "cliente": pedido.NombreComprador,
             "direccion": pedido.Direccion,
             "productos": productos_html,
             "empleado": pedido.empleado.Nombre if pedido.empleado else "N/A",
