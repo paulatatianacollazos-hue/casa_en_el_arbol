@@ -128,6 +128,25 @@ def envios():
 def control_pedidos():
     return render_template("administrador/control_pedidos.html", pedidos=todos_los_pedidos())
 
+@admin.route("/registrar_pedido", methods=["POST"])
+def registrar_pedido_route():
+    try:
+        nombre_comprador = request.form["nombreComprador"]
+        fecha_pedido = request.form["fechaPedido"]
+        destino = request.form["destino"]
+        descuento = request.form.get("descuento", 0)
+        usuario_id = request.form["usuarioId"]
+
+        # productos será una lista de diccionarios [{id: X, cantidad: Y, precio: Z}, ...]
+        productos = request.form.getlist("productos")
+
+        registrar_pedido(nombre_comprador, fecha_pedido, destino, descuento, usuario_id, productos)
+
+        flash("Pedido registrado correctamente", "success")
+        return redirect(url_for("dashboard.dashboard"))
+    except Exception as e:
+        flash(f"Error al registrar el pedido: {e}", "danger")
+        return redirect(url_for("admin.control_pedidos"))
 # ---------- ASIGNAR_EMPLEADO ----------
 @admin.route("/asignar_empleado", methods=["POST"])
 @login_required
