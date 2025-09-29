@@ -1,7 +1,7 @@
 from flask import request, jsonify, render_template
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
-from basedatos.models import db, Pedido, Usuario, Detalle_Pedido
+from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -615,25 +615,35 @@ def asignar_empleado(form_data):
 
 # ----------- ACTUALIZAR PEDIDO -----------
 def actualizar_pedido(form_data):
-    """
-    Actualiza el estado de un pedido.
-    Espera que form_data tenga: pedido_id, estado.
-    """
     try:
         pedido_id = int(form_data.get("pedido_id"))
         nuevo_estado = form_data.get("estado")
+        texto_comentario = form_data.get("comentario", "").strip()
 
         pedido = Pedido.query.get(pedido_id)
         if not pedido:
             return {"success": False, "error": "Pedido no encontrado"}
 
+        # Actualiza estado del pedido
         pedido.Estado = nuevo_estado
+        db.session.add(pedido)
+
+        # Inserta comentario si no está vacío
+        if texto_comentario:
+            comentario = Comentarios(
+                pedido_id=pedido_id,
+                texto=texto_comentario,
+                fecha=datetime.utcnow()
+            )
+            db.session.add(comentario)
+
         db.session.commit()
 
-        return {"success": True, "message": f"Pedido {pedido_id} actualizado a '{nuevo_estado}'"}
+        return {"success": True, "message": f"Pedido {pedido_id} actualizado correctamente"}
     except Exception as e:
         db.session.rollback()
         return {"success": False, "error": str(e)}
+
 
     
 
