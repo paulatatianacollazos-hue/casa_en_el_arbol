@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from basedatos.models import db, Pedido, Usuario
 from basedatos.models import Pedido, Detalle_Pedido
-from yourapp.extensions import db
-from yourapp.models import Pedido
+from basedatos.models import db
+from basedatos.models import Pedido
 
 
 # ---------OBTENER_PEDIDOS ---------
