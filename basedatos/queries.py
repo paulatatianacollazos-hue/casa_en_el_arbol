@@ -666,15 +666,15 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
     
 
 
-def obtener_pedidos_por_cliente(id_cliente):
+def obtener_pedidos_por_cliente(id_usuario):
     conexion = get_connection()
-    cursor = conexion.cursor(dictionary=True)
+    cursor = conexion.cursor(dictionary=True)  # ✅ Aquí
 
-    cursor.execute("SELECT * FROM pedido WHERE id_usuario = %s", (id_cliente,))
+    cursor.execute("SELECT * FROM pedido WHERE id_usuario = %s", (id_usuario,))
     pedidos = cursor.fetchall()
 
     for pedido in pedidos:
-        cursor.execute("SELECT * FROM detalles_pedido WHERE id_pedido = %s", (pedido['id_pedido'],))
+        cursor.execute("SELECT * FROM detalles_pedido WHERE id_pedido = %s", (pedido['id_pedido'],))  # ✅ Ya no falla
         detalles = cursor.fetchall()
         pedido['detalles'] = detalles
 
