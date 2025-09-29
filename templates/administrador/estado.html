@@ -222,7 +222,7 @@
         <div class="volver"><a href="/envios">VOLVER</a></div>
     </div>
 
-    <form method="POST" action="/actualizar_pedido">
+    <form method="POST" action="{{ url_for('admin.actualizar_pedido_route') }}">
         <h2>ACTUALIZACION DE ESTADO</h2>
         <div class="content">
             <label for="pedido_id">ID del pedido:</label><br>
