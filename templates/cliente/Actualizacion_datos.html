@@ -76,7 +76,7 @@
           {% if current_user.Rol == 'admin' %}
             href="{{ url_for('admin.envios') }}"
           {% else %}
-            href="{{ url_for('cliente.reseñas') }}"
+            href="{{ url_for('cliente.resenas') }}"
           {% endif %}>
           Reseñas
         </a>
@@ -202,7 +202,7 @@
         <h4>🌿 HOLA!</h4>
         <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
         <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
-        <a href="/envios"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a href="admin/envios"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
         <a><i class="bi bi-heart me-2"></i>Favoritos</a>
         <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
