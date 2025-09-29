@@ -681,3 +681,14 @@ def obtener_pedidos_por_cliente(id_usuario):
     conexion.close()
     return pedidos
 
+
+def registrar_firma(pedido_id, nombre_cliente, ruta_firma):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO firmas (pedido_id, nombre_cliente, firma)
+        VALUES (%s, %s, %s)
+    """, (pedido_id, nombre_cliente, ruta_firma))
+    conn.commit()
+    cursor.close()
+    conn.close()
