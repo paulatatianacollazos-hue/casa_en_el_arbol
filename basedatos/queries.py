@@ -749,8 +749,8 @@ def get_productos():
     query = """
     SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
            p.ID_Categoria, p.ID_Proveedor,
-           (SELECT i.RutaImagen 
-            FROM imagen i 
+           (SELECT i.Ruta
+            FROM imagenproducto i 
             WHERE i.ID_Producto = p.ID_Producto 
             LIMIT 1) AS Imagen
     FROM producto p;
