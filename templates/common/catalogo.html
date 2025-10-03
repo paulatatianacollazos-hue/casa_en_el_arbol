@@ -60,64 +60,74 @@
 
 {% block content %}
 
-<button id="openModalBtn">Abrir formulario</button>
+<button id="openModalBtn" class="btn btn-primary">Nuevo Producto</button>
 
-  <!-- Modal -->
-  <div id="myModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Formulario</h2>
-        <button class="close" id="closeModalBtn">&times;</button>
-      </div>
-
-      <form id="formulario">
-        <label>Nombre:</label><br>
-        <input type="text" name="nombre" required><br><br>
-
-        <label>Email:</label><br>
-        <input type="email" name="correo" required><br><br>
-
-        <label>Mensaje:</label><br>
-        <textarea name="mensaje" required></textarea><br><br>
-
-        <button type="submit">Enviar</button>
-      </form>
+<!-- Modal -->
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Agregar Producto</h2>
+      <button class="close" id="closeModalBtn">&times;</button>
     </div>
+
+    <form id="productoForm" enctype="multipart/form-data">
+      <label>Nombre Producto:</label><br>
+      <input type="text" name="NombreProducto" required><br><br>
+
+      <label>Stock:</label><br>
+      <input type="number" name="Stock" required><br><br>
+
+      <label>Material:</label><br>
+      <input type="text" name="Material" required><br><br>
+
+      <label>Color:</label><br>
+      <input type="text" name="Color" required><br><br>
+
+      <label>Precio Unidad:</label><br>
+      <input type="number" step="0.01" name="PrecioUnidad" required><br><br>
+
+      <label>ID Categoría:</label><br>
+      <input type="number" name="ID_Categoria" required><br><br>
+
+      <label>ID Proveedor:</label><br>
+      <input type="number" name="ID_Proveedor" required><br><br>
+
+      <label>Imágenes (puedes seleccionar varias):</label><br>
+      <input type="file" name="imagenes" multiple accept="image/*"><br><br>
+
+      <button type="submit" class="btn btn-success">Guardar</button>
+    </form>
   </div>
+</div>
 
-  <script>
-    // Elementos
-    const modal = document.getElementById("myModal");
-    const openBtn = document.getElementById("openModalBtn");
-    const closeBtn = document.getElementById("closeModalBtn");
-    const form = document.getElementById("formulario");
+<script>
+  const modal = document.getElementById("myModal");
+  const openBtn = document.getElementById("openModalBtn");
+  const closeBtn = document.getElementById("closeModalBtn");
+  const form = document.getElementById("productoForm");
 
-    // Abrir modal
-    openBtn.onclick = () => {
-      modal.style.display = "flex";
-    };
+  openBtn.onclick = () => modal.style.display = "flex";
+  closeBtn.onclick = () => modal.style.display = "none";
+  window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
-    // Cerrar modal
-    closeBtn.onclick = () => {
+  // Enviar formulario con fetch
+  form.onsubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+
+    const resp = await fetch("{{ url_for('guardar_producto') }}", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await resp.json();
+    alert(data.message);
+    if (data.success) {
       modal.style.display = "none";
-    };
-
-    // Cerrar al hacer clic fuera
-    window.onclick = (event) => {
-      if (event.target === modal) {
-        modal.style.display = "none";
-      }
-    };
-
-    // Enviar formulario
-    form.onsubmit = (event) => {
-      event.preventDefault(); // evita que se recargue
-      const datos = new FormData(form);
-      alert(`Nombre: ${datos.get("nombre")}\nCorreo: ${datos.get("correo")}\nMensaje: ${datos.get("mensaje")}`);
-      modal.style.display = "none"; // cerrar modal después de enviar
-      form.reset(); // limpiar formulario
-    };
-  </script>
+      form.reset();
+    }
+  };
+</script>
 
 {% endblock %}
 
