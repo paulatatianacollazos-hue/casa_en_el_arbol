@@ -115,7 +115,7 @@
     event.preventDefault();
     const formData = new FormData(form);
 
-    const resp = await fetch("{{ url_for('guardar_producto') }}", {
+    const resp = await fetch("{{ url_for('admin.guardar_producto') }}", {
       method: "POST",
       body: formData
     });
