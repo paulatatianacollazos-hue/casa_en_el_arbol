@@ -13,9 +13,111 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo.css') }}">
+  <style>
+    /* Fondo oscuro */
+    .modal {
+      display: none; /* Oculto por defecto */
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    input{
+      height: 30px;
+      width: 80%;
+      border-radius: 20px;
+    }
+
+    /* Caja del modal */
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+      max-width: 90%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .close {
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      background: none;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
+
+<button id="openModalBtn">Abrir formulario</button>
+
+  <!-- Modal -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Formulario</h2>
+        <button class="close" id="closeModalBtn">&times;</button>
+      </div>
+
+      <form id="formulario">
+        <label>Nombre:</label><br>
+        <input type="text" name="nombre" required><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" name="correo" required><br><br>
+
+        <label>Mensaje:</label><br>
+        <textarea name="mensaje" required></textarea><br><br>
+
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Elementos
+    const modal = document.getElementById("myModal");
+    const openBtn = document.getElementById("openModalBtn");
+    const closeBtn = document.getElementById("closeModalBtn");
+    const form = document.getElementById("formulario");
+
+    // Abrir modal
+    openBtn.onclick = () => {
+      modal.style.display = "flex";
+    };
+
+    // Cerrar modal
+    closeBtn.onclick = () => {
+      modal.style.display = "none";
+    };
+
+    // Cerrar al hacer clic fuera
+    window.onclick = (event) => {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    // Enviar formulario
+    form.onsubmit = (event) => {
+      event.preventDefault(); // evita que se recargue
+      const datos = new FormData(form);
+      alert(`Nombre: ${datos.get("nombre")}\nCorreo: ${datos.get("correo")}\nMensaje: ${datos.get("mensaje")}`);
+      modal.style.display = "none"; // cerrar modal después de enviar
+      form.reset(); // limpiar formulario
+    };
+  </script>
 
 {% endblock %}
 
@@ -27,70 +129,7 @@
 
 
 
-<section class="catalog-section">
-  <div class="container">
-    
-    <h2 class="section-title text-center fw-bold">
-      Catálogo de Productos
-    </h2>
 
-    
-
-    <div class="row g-4 product-grid">
-      {% for p in productos %}
-      <div class="col-lg-3 col-md-4 col-sm-6 product-item">
-        <div class="card product-card h-100 border rounded-3 shadow-sm position-relative">
-          
-          <!-- Descuento -->
-          {% if p.Descuento %}
-          <span class="discount-badge">-{{ p.Descuento }}%</span>
-          {% endif %}
-
-          <!-- Imagen -->
-          <div class="product-image-wrapper">
-            {% if p.imagenes %}
-              <img src="{{ p.imagenes[0].ruta }}" class="product-image" alt="{{ p.NombreProducto }}">
-            {% else %}
-              <img src="/static/img/placeholder.jpg" class="product-image" alt="Sin imagen disponible">
-            {% endif %}
-          </div>
-
-          <!-- Información -->
-          <div class="card-body product-info d-flex flex-column text-center">
-            <h5 class="product-name">{{ p.NombreProducto }}</h5>
-
-            {% if p.Descuento %}
-              {% set precio_final = p.PrecioUnidad - (p.PrecioUnidad * p.Descuento / 100) %}
-              <p class="price mb-1">
-                <span class="price-final">${{ "%.0f"|format(precio_final) }}</span>
-                <span class="price-old">${{ "%.0f"|format(p.PrecioUnidad) }}</span>
-              </p>
-            {% else %}
-              <p class="price mb-1">
-                <span class="price-final">${{ "%.0f"|format(p.PrecioUnidad) }}</span>
-              </p>
-            {% endif %}
-
-            <!-- Botón -->
-        <a href="#"
-          class="btn-add-to-cart mt-auto"
-          data-id="{{ p.id if p.id else p.ID_Producto }}">
-          🛒 Agregar al carrito
-        </a>
-
-
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-
-    <!-- Botón Ver Todo -->
-    <div class="text-center mt-5">
-      <a href="#" class="btn-see-all">Ver todo</a>
-    </div>
-  </div>
-</section>
 
 <style>
 /* --- Sección --- */
@@ -267,41 +306,5 @@
   .product-image-wrapper { height: 180px; }
 }
 </style>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const cartButtons = document.querySelectorAll(".btn-add-to-cart");
 
-  cartButtons.forEach(button => {
-    button.addEventListener("click", (e) => {
-      e.preventDefault();
-      const productId = button.getAttribute("data-id");
 
-      fetch("/add_to_cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id: productId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar contador
-          document.getElementById("cart-count").innerText = data.cart_count;
-
-          // Feedback al usuario
-          button.innerText = "✅ Agregado";
-          button.classList.add("btn-success");
-          setTimeout(() => {
-            button.innerText = "🛒 Agregar al carrito";
-            button.classList.remove("btn-success");
-          }, 1500);
-        } else {
-          alert("Error: " + data.message);
-        }
-      })
-      .catch(err => console.error(err));
-    });
-  });
-});
-</script>
