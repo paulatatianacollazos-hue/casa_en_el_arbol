@@ -764,22 +764,21 @@ def get_productos():
 
 
 def get_producto_by_id(id_producto):
-    """Obtiene todos los datos de un producto específico (incluyendo imágenes)."""
-    connection = get_connection()
-    cursor = connection.cursor(dictionary=True)
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
 
     query = """
-    SELECT p.*, c.NombreCategoria, pr.NombreEmpresa,
-           i.RutaImagen
+    SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+           c.NombreCategoria, pr.NombreEmpresa, i.RutaImagen
     FROM producto p
     LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
     LEFT JOIN proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
-    LEFT JOIN imagen i ON i.ID_Producto = p.ID_Producto
+    LEFT JOIN imagenproducto i ON i.ID_Producto = p.ID_Producto
     WHERE p.ID_Producto = %s;
     """
     cursor.execute(query, (id_producto,))
-    producto = cursor.fetchall()  # trae el producto con todas sus imágenes
+    producto = cursor.fetchall()
 
     cursor.close()
-    connection.close()
+    conn.close()
     return producto
