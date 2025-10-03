@@ -761,25 +761,23 @@ def get_productos():
 
 
 
-def obtener_producto_por_id(producto_id):
+def get_producto_by_id(id_producto):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     query = """
         SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+               c.NombreCategoria, pr.NombreEmpresa,
                i.ruta AS Imagen
         FROM producto p
+        LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
+        LEFT JOIN proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
         LEFT JOIN imagenproducto i ON i.ID_Producto = p.ID_Producto
         WHERE p.ID_Producto = %s
     """
-    cursor.execute(query, (producto_id,))
-    resultados = cursor.fetchall()  # 👈 siempre devuelve algo (aunque sea lista vacía)
+    cursor.execute(query, (id_producto,))
+    producto = cursor.fetchall()
 
     cursor.close()
     conn.close()
-
-    # si no hay resultados, devolvemos lista vacía para que no truene
-    if not resultados:
-        resultados = []
-
-    return render_template('administrador/reportes_entrega.html', resultados=resultados)
+    return producto
