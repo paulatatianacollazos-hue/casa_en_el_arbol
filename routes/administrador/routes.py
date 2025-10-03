@@ -329,6 +329,10 @@ def borrar_direccion(id_direccion):
 
     return redirect(url_for("admin_actualizacion_datos"))
 
+@admin.route("/catalogo")
+@login_required
+def catalogo():
+    return render_template("administrador/catalogo.html")
 
 @admin.route("/guardar_producto", methods=["POST"])
 def guardar_producto_route():

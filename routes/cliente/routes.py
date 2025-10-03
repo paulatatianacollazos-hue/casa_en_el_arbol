@@ -309,5 +309,5 @@ def ver_mis_pedidos():
 @cliente.route("/catalogo")
 @login_required
 def catalogo():
-    return render_template("catalogo.html")
+    return render_template("catalogo_cliente.html")
 
