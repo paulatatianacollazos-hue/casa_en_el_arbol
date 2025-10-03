@@ -9,6 +9,7 @@ from basedatos.queries import obtener_pedidos_por_cliente
 from flask import render_template
 from flask_login import login_required, current_user
 from basedatos.db import get_connection
+from basedatos.queries import guardar_producto
 
 
 from . import cliente 
