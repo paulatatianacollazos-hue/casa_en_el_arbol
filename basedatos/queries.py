@@ -748,12 +748,12 @@ def get_productos():
 
     query = """
     SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
-           p.ID_Categoria, p.ID_Proveedor,
-           (SELECT i.Ruta
+        (SELECT SUBSTRING_INDEX(i.Ruta, '\\\\', -1) 
             FROM imagenproducto i 
             WHERE i.ID_Producto = p.ID_Producto 
             LIMIT 1) AS Imagen
     FROM producto p;
+
     """
     cursor.execute(query)
     productos = cursor.fetchall()
