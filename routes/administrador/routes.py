@@ -332,7 +332,8 @@ def borrar_direccion(id_direccion):
 @admin.route("/catalogo")
 @login_required
 def catalogo():
-    return render_template("administrador/catalogo.html")
+    productos = get_productos()
+    return render_template("administrador/catalogo.html",productos=productos)
 
 @admin.route("/guardar_producto", methods=["POST"])
 @login_required
@@ -342,12 +343,6 @@ def guardar_producto_route():
 
     success, msg = guardar_producto(data, imagenes)
     return jsonify({"success": success, "message": msg})
-
-@admin.route("/producto")
-@login_required
-def mostrar_productos():
-    productos = get_productos()
-    return render_template("administrador/catalogo.html", productos=productos)
 
 
 @admin.route("/producto/<int:id_producto>")

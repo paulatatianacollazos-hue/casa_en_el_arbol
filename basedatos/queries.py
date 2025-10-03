@@ -777,8 +777,23 @@ def get_producto_by_id(id_producto):
     WHERE p.ID_Producto = %s;
     """
     cursor.execute(query, (id_producto,))
-    producto = cursor.fetchall()
+    rows = cursor.fetchall()
 
     cursor.close()
     conn.close()
+
+    if not rows:
+        return None
+
+    producto = {
+        "ID_Producto": rows[0]["ID_Producto"],
+        "NombreProducto": rows[0]["NombreProducto"],
+        "Material": rows[0]["Material"],
+        "PrecioUnidad": rows[0]["PrecioUnidad"],
+        "Color": rows[0]["Color"],
+        "NombreCategoria": rows[0]["NombreCategoria"],
+        "NombreEmpresa": rows[0]["NombreEmpresa"],
+        "Imagenes": [row["RutaImagen"] for row in rows if row["RutaImagen"]]
+    }
+
     return producto
