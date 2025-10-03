@@ -776,8 +776,8 @@ def get_producto_by_id(id_producto):
         WHERE p.ID_Producto = %s
     """
     cursor.execute(query, (id_producto,))
-    resultados = cursor.fetchall()
+    producto = cursor.fetchone()   # 👈 un solo producto
 
     cursor.close()
     conn.close()
-    return resultados
+    return producto
