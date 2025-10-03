@@ -742,58 +742,44 @@ def guardar_producto(data, imagenes):
         return False, str(e)
     
 def get_productos():
-    """Obtiene todos los productos con al menos una imagen."""
-    connection = get_connection()
-    cursor = connection.cursor(dictionary=True)
-
+    conn = get_connection()  # 👈 aquí faltaba crear la conexión
     query = """
-    SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
-        (SELECT SUBSTRING_INDEX(i.Ruta, '\\\\', -1) 
-            FROM imagenproducto i 
-            WHERE i.ID_Producto = p.ID_Producto 
-            LIMIT 1) AS Imagen
-    FROM producto p;
-
+        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+               (SELECT i.ruta 
+                FROM imagenproducto i 
+                WHERE i.ID_Producto = p.ID_Producto 
+                LIMIT 1) AS Imagen
+        FROM producto p;
     """
+    cursor = conn.cursor(dictionary=True)
     cursor.execute(query)
     productos = cursor.fetchall()
-
     cursor.close()
-    connection.close()
+    conn.close()  # 👈 no olvides cerrar la conexión
     return productos
 
 
-def get_producto_by_id(id_producto):
+
+
+def obtener_producto_por_id(producto_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     query = """
-    SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
-           c.NombreCategoria, pr.NombreEmpresa, i.RutaImagen
-    FROM producto p
-    LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
-    LEFT JOIN proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
-    LEFT JOIN imagenproducto i ON i.ID_Producto = p.ID_Producto
-    WHERE p.ID_Producto = %s;
+        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+               i.ruta AS Imagen
+        FROM producto p
+        LEFT JOIN imagenproducto i ON i.ID_Producto = p.ID_Producto
+        WHERE p.ID_Producto = %s
     """
-    cursor.execute(query, (id_producto,))
-    rows = cursor.fetchall()
+    cursor.execute(query, (producto_id,))
+    resultados = cursor.fetchall()  # 👈 siempre devuelve algo (aunque sea lista vacía)
 
     cursor.close()
     conn.close()
 
-    if not rows:
-        return None
+    # si no hay resultados, devolvemos lista vacía para que no truene
+    if not resultados:
+        resultados = []
 
-    producto = {
-        "ID_Producto": rows[0]["ID_Producto"],
-        "NombreProducto": rows[0]["NombreProducto"],
-        "Material": rows[0]["Material"],
-        "PrecioUnidad": rows[0]["PrecioUnidad"],
-        "Color": rows[0]["Color"],
-        "NombreCategoria": rows[0]["NombreCategoria"],
-        "NombreEmpresa": rows[0]["NombreEmpresa"],
-        "Imagenes": [row["RutaImagen"] for row in rows if row["RutaImagen"]]
-    }
-
-    return producto
+    return render_template('administrador/reportes_entrega.html', resultados=resultados)
