@@ -343,15 +343,15 @@ def guardar_producto_route():
     success, msg = guardar_producto(data, imagenes)
     return jsonify({"success": success, "message": msg})
 
-@admin.route("/productos")
+@admin.route("/producto")
 @login_required
 def mostrar_productos():
     productos = get_productos()
-    return render_template("productos/lista.html", productos=productos)
+    return render_template("administrador/catalogo.html", productos=productos)
 
 
 @admin.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
     producto = get_producto_by_id(id_producto)
-    return render_template("productos/detalle.html", producto=producto)
+    return render_template("administrador/detalle.html", producto=producto)
