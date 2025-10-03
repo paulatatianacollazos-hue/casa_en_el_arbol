@@ -2,7 +2,14 @@ from flask import request, jsonify, render_template
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
-from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios, Producto
+from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios, Producto,ImagenProducto
+import os
+from werkzeug.utils import secure_filename
+from basedatos.db import get_connection
+
+
+UPLOAD_FOLDER = os.path.join("static", "img")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -692,3 +699,44 @@ def registrar_firma(pedido_id, nombre_cliente, ruta_firma):
     conn.commit()
     cursor.close()
     conn.close()
+    
+    
+def guardar_producto(data, imagenes):
+    """
+    Inserta un producto con sus imágenes en la BD.
+    - data: diccionario con los campos del producto
+    - imagenes: lista de archivos subidos (FileStorage)
+    """
+    try:
+        # Crear objeto Producto
+        nuevo_producto = Producto(
+            NombreProducto=data.get("NombreProducto"),
+            Stock=int(data.get("Stock")),
+            Material=data.get("Material"),
+            Color=data.get("Color"),
+            PrecioUnidad=float(data.get("PrecioUnidad")),
+            ID_Categoria=int(data.get("ID_Categoria")),
+            ID_Proveedor=int(data.get("ID_Proveedor"))
+        )
+        db.session.add(nuevo_producto)
+        db.session.commit()  # necesitamos el ID_Producto
+
+        # Guardar imágenes en carpeta + BD
+        for img in imagenes:
+            if img and img.filename:
+                filename = secure_filename(img.filename)
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                img.save(filepath)
+
+                nueva_img = ImagenProducto(
+                    ID_Producto=nuevo_producto.ID_Producto,
+                    ruta=f"static/img/{filename}"
+                )
+                db.session.add(nueva_img)
+
+        db.session.commit()
+        return True, f"Producto '{nuevo_producto.NombreProducto}' guardado con éxito"
+
+    except Exception as e:
+        db.session.rollback()
+        return False, str(e)

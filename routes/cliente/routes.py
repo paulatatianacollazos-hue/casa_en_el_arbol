@@ -305,3 +305,15 @@ def ver_mis_pedidos():
     
     return render_template("cliente/pedidos_por_cliente.html", pedidos=pedidos)
 
+@cliente.route("/catalogo")
+@login_required
+def catalogo():
+    return render_template("catalogo.html")
+
+@cliente.route("/guardar_producto", methods=["POST"])
+def guardar_producto_route():
+    data = request.form
+    imagenes = request.files.getlist("imagenes")
+
+    success, msg = guardar_producto(data, imagenes)
+    return jsonify({"success": success, "message": msg})
