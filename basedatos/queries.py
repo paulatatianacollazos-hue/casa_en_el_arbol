@@ -776,8 +776,17 @@ def get_producto_by_id(id_producto):
         WHERE p.ID_Producto = %s
     """
     cursor.execute(query, (id_producto,))
-    producto = cursor.fetchone()   # 👈 un solo producto
+    rows = cursor.fetchall()
 
     cursor.close()
     conn.close()
+
+    if not rows:
+        return None
+
+    # Tomamos los datos del producto
+    producto = rows[0]
+    # Creamos lista de imágenes
+    producto["imagenes"] = [row["Imagen"] for row in rows if row["Imagen"]]
+
     return producto
