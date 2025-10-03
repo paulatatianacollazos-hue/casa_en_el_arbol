@@ -1,0 +1,56 @@
+
+{% extends "common/base.html" %}
+
+{% block title %}Catálogo | Casa en el Árbol{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+
+
+<!-- Carrusel de imágenes -->
+<div id="carouselProducto" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    {% for i, p in enumerate(producto) %}
+      <div class="carousel-item {% if i == 0 %}active{% endif %}">
+        <img src="{{ url_for('static', filename='uploads/' ~ (p.RutaImagen if p.RutaImagen else 'default.jpg')) }}"
+             class="d-block w-100"
+             style="max-height: 400px; object-fit: cover;"
+             alt="Imagen de {{ p.NombreProducto }}">
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Botones de control -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Siguiente</span>
+  </button>
+</div>
+
+<h2>{{ producto[0].NombreProducto }}</h2>
+<p><b>Material:</b> {{ producto[0].Material }}</p>
+<p><b>Precio:</b> ${{ producto[0].PrecioUnidad }}</p>
+<p><b>Color:</b> {{ producto[0].Color }}</p>
+<p><b>Categoría:</b> {{ producto[0].NombreCategoria }}</p>
+<p><b>Proveedor:</b> {{ producto[0].NombreEmpresa }}</p>
+
+
+
+<style>
+.carousel-item img {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+</style>
+
+{% endblock %}
+
+{% block extra_foour %}
+<script src="{{ url_for('static', filename='js/catalogo.js') }}"></script>
+{% endblock %}
