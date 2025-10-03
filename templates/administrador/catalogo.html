@@ -30,11 +30,11 @@
       height: 35px;
       width: 100%;
       border-radius: 20px;
-      margin: 0 0 20px 20px;
+      margin: 0 0 20px 50px;
     }
 
     .input1{
-      width: 86%;
+      width: 89%;
     }
 
     /* Caja del modal */
@@ -68,7 +68,7 @@
 {% endblock %}
 
 {% block content %}
-
+<br>
 <button id="openModalBtn" class="btn btn-primary" style="padding-left: 20px; padding-right: 20px;">Nuevo Producto</button>
 
 <!-- Modal -->
@@ -79,7 +79,7 @@
       <button class="close" id="closeModalBtn">&times;</button>
     </div>
 
-    <form id="productoForm" enctype="multipart/form-data"><br><br>
+    <form id="productoForm" enctype="multipart/form-data"><br>
       
       <input type="text" name="NombreProducto" required placeholder="Nombre Producto:" class="col-lg-5">
       
@@ -96,7 +96,7 @@
       <input type="number" name="ID_Proveedor" required placeholder="ID Proveedor:" class="input1" ><br>
 
       <label>Imágenes (puedes seleccionar varias):</label><br>
-      <input type="file" name="imagenes" multiple accept="image/*"><br><br>
+      <input type="file" name="imagenes" multiple accept="image/*"><br>
 
       <button type="submit" class="btn btn-success " style="padding-left: 20px; padding-right: 20px;">Guardar</button>
     </form>
