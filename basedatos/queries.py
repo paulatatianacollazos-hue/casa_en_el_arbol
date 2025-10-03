@@ -740,3 +740,46 @@ def guardar_producto(data, imagenes):
     except Exception as e:
         db.session.rollback()
         return False, str(e)
+    
+def get_productos():
+    """Obtiene todos los productos con al menos una imagen."""
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    query = """
+    SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+           p.ID_Categoria, p.ID_Proveedor,
+           (SELECT i.RutaImagen 
+            FROM imagen i 
+            WHERE i.ID_Producto = p.ID_Producto 
+            LIMIT 1) AS Imagen
+    FROM producto p;
+    """
+    cursor.execute(query)
+    productos = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+    return productos
+
+
+def get_producto_by_id(id_producto):
+    """Obtiene todos los datos de un producto específico (incluyendo imágenes)."""
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    query = """
+    SELECT p.*, c.NombreCategoria, pr.NombreEmpresa,
+           i.RutaImagen
+    FROM producto p
+    LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
+    LEFT JOIN proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
+    LEFT JOIN imagen i ON i.ID_Producto = p.ID_Producto
+    WHERE p.ID_Producto = %s;
+    """
+    cursor.execute(query, (id_producto,))
+    producto = cursor.fetchall()  # trae el producto con todas sus imágenes
+
+    cursor.close()
+    connection.close()
+    return producto

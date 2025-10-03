@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
-from basedatos.queries import guardar_producto
+from basedatos.queries import guardar_producto, get_productos, get_producto_by_id
 
 
 from basedatos.models import db, Usuario, Notificaciones ,Direccion
@@ -335,9 +335,23 @@ def catalogo():
     return render_template("administrador/catalogo.html")
 
 @admin.route("/guardar_producto", methods=["POST"])
+@login_required
 def guardar_producto_route():
     data = request.form
     imagenes = request.files.getlist("imagenes")
 
     success, msg = guardar_producto(data, imagenes)
     return jsonify({"success": success, "message": msg})
+
+@admin.route("/productos")
+@login_required
+def mostrar_productos():
+    productos = get_productos()
+    return render_template("productos/lista.html", productos=productos)
+
+
+@admin.route("/producto/<int:id_producto>")
+@login_required
+def detalle_producto(id_producto):
+    producto = get_producto_by_id(id_producto)
+    return render_template("productos/detalle.html", producto=producto)

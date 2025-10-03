@@ -79,7 +79,34 @@
   transform: translateY(-2px); /* opcional: efecto flotante */
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.producto-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+.producto-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+.imagen img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.info {
+  padding: 10px;
+}
 
+</style>
 
   </style>
 
@@ -119,6 +146,23 @@
       <button type="submit" class="btn btn-success " style="padding-left: 300px; padding-right: 300px; border-radius: 50px; margin-left: 15%;">Guardar</button>
     </form>
   </div>
+</div>
+
+<h2>Productos</h2>
+<div class="grid">
+  {% for p in productos %}
+    <div class="producto-card" onclick="window.location.href='/admin/producto/{{ p.ID_Producto }}'">
+      <div class="imagen">
+        <img src="{{ url_for('static', filename='uploads/' ~ (p.Imagen if p.Imagen else 'default.jpg')) }}" 
+             alt="{{ p.NombreProducto }}">
+      </div>
+      <div class="info">
+        <h3>{{ p.NombreProducto }}</h3>
+        <p>Material: {{ p.Material }}</p>
+        <p>Precio: ${{ p.PrecioUnidad }}</p>
+      </div>
+    </div>
+  {% endfor %}
 </div>
 
 <script>
