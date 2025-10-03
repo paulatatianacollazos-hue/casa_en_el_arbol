@@ -16,27 +16,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h1 class="mb-4">Catálogo de productos</h1>
 
-  <div class="row" id="product-list">
-    {% for producto in productos %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100 shadow-sm">
-        <img src="{{ url_for('static', filename='img/' + producto.imagen) }}" 
-             class="card-img-top" alt="{{ producto.nombre }}">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ producto.nombre }}</h5>
-          <p class="card-text">{{ producto.descripcion }}</p>
-          <p class="fw-bold">{{ producto.precio }} €</p>
-          <a href="{{ url_for('cliente.detalle_producto', id=producto.id) }}" 
-             class="btn btn-primary mt-auto">Ver detalle</a>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_foour %}
