@@ -7,13 +7,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
   
-{% extends "common/base.html" %}
+{% extends "layout.html" %}
 
-{% block title %}Inicio{% endblock %}
+{% block title %}Catálogo | Casa en el Árbol{% endblock %}
 
 {% block content %}
-    
+<div class="container my-5">
+    <h1>Catálogo de productos</h1>
+    <div class="row">
+        {% for producto in productos %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <img src="{{ url_for('static', filename='img/' ~ producto.imagen) }}" class="card-img-top" alt="{{ producto.nombre }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                    <p class="card-text">{{ producto.descripcion }}</p>
+                    <p class="fw-bold">${{ producto.precio }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
+
 
 
 <section class="catalog-section">
