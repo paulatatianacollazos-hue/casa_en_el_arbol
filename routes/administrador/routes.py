@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
+from basedatos.queries import guardar_producto
 
 
 from basedatos.models import db, Usuario, Notificaciones ,Direccion
@@ -328,3 +329,11 @@ def borrar_direccion(id_direccion):
 
     return redirect(url_for("admin_actualizacion_datos"))
 
+
+@admin.route("/guardar_producto", methods=["POST"])
+def guardar_producto_route():
+    data = request.form
+    imagenes = request.files.getlist("imagenes")
+
+    success, msg = guardar_producto(data, imagenes)
+    return jsonify({"success": success, "message": msg})

@@ -9,7 +9,7 @@ from basedatos.queries import obtener_pedidos_por_cliente
 from flask import render_template
 from flask_login import login_required, current_user
 from basedatos.db import get_connection
-from basedatos.queries import guardar_producto
+
 
 
 from . import cliente 
@@ -311,10 +311,3 @@ def ver_mis_pedidos():
 def catalogo():
     return render_template("catalogo.html")
 
-@cliente.route("/guardar_producto", methods=["POST"])
-def guardar_producto_route():
-    data = request.form
-    imagenes = request.files.getlist("imagenes")
-
-    success, msg = guardar_producto(data, imagenes)
-    return jsonify({"success": success, "message": msg})
