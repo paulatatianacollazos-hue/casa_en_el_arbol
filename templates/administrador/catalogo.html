@@ -27,9 +27,14 @@
     }
 
     input{
-      height: 30px;
-      width: 80%;
+      height: 35px;
+      width: 100%;
       border-radius: 20px;
+      margin: 0 0 20px 20px;
+    }
+
+    .input1{
+      width: 86%;
     }
 
     /* Caja del modal */
@@ -37,8 +42,9 @@
       background: #fff;
       padding: 20px;
       border-radius: 10px;
-      width: 400px;
+      width: 1000px;
       max-width: 90%;
+      margin-top: 80px;
     }
 
     .modal-header {
@@ -55,12 +61,15 @@
       border: none;
       background: none;
     }
+
+
   </style>
+
 {% endblock %}
 
 {% block content %}
 
-<button id="openModalBtn" class="btn btn-primary">Nuevo Producto</button>
+<button id="openModalBtn" class="btn btn-primary" style="padding-left: 20px; padding-right: 20px;">Nuevo Producto</button>
 
 <!-- Modal -->
 <div id="myModal" class="modal">
@@ -70,32 +79,26 @@
       <button class="close" id="closeModalBtn">&times;</button>
     </div>
 
-    <form id="productoForm" enctype="multipart/form-data">
-      <label>Nombre Producto:</label><br>
-      <input type="text" name="NombreProducto" required><br><br>
+    <form id="productoForm" enctype="multipart/form-data"><br><br>
+      
+      <input type="text" name="NombreProducto" required placeholder="Nombre Producto:" class="col-lg-5">
+      
+      <input type="number" name="Stock" required placeholder="Stock:" class="col-lg-5">
 
-      <label>Stock:</label><br>
-      <input type="number" name="Stock" required><br><br>
+      <input type="text" name="Material" required placeholder="Material:" class="col-lg-5">
 
-      <label>Material:</label><br>
-      <input type="text" name="Material" required><br><br>
+      <input type="text" name="Color" required placeholder="Color:" class="col-lg-5">
 
-      <label>Color:</label><br>
-      <input type="text" name="Color" required><br><br>
+      <input type="number" step="0.01" name="PrecioUnidad" required placeholder="Precio Unidad:" class="col-lg-5">
 
-      <label>Precio Unidad:</label><br>
-      <input type="number" step="0.01" name="PrecioUnidad" required><br><br>
+      <input type="number" name="ID_Categoria" required placeholder="ID Categoría:" class="col-lg-5">
 
-      <label>ID Categoría:</label><br>
-      <input type="number" name="ID_Categoria" required><br><br>
-
-      <label>ID Proveedor:</label><br>
-      <input type="number" name="ID_Proveedor" required><br><br>
+      <input type="number" name="ID_Proveedor" required placeholder="ID Proveedor:" class="input1" ><br>
 
       <label>Imágenes (puedes seleccionar varias):</label><br>
       <input type="file" name="imagenes" multiple accept="image/*"><br><br>
 
-      <button type="submit" class="btn btn-success">Guardar</button>
+      <button type="submit" class="btn btn-success " style="padding-left: 20px; padding-right: 20px;">Guardar</button>
     </form>
   </div>
 </div>
@@ -115,7 +118,7 @@
     event.preventDefault();
     const formData = new FormData(form);
 
-    const resp = await fetch("{{ url_for('admin.guardar_producto') }}", {
+    const resp = await fetch("{{ url_for('admin.guardar_producto_route') }}", {
       method: "POST",
       body: formData
     });
