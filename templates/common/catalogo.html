@@ -9,8 +9,11 @@
   
 {% extends "cliente/dashboard.html" %}
 
-
 {% block title %}Catálogo | Casa en el Árbol{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -31,6 +34,12 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/catalogo.js') }}"></script>
+{% endblock %}
+
+
 
 
 
