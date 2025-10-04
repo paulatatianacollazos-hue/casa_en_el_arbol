@@ -197,21 +197,7 @@ def estado_pedido():
 def mostrar_comentarios():
     return render_template("administrador/comentarios.html", comentarios=obtener_comentarios_agrupados())
 
-# ---------- PRODUCTOS ----------
-@admin.route("/productos")
-@login_required
-@role_required("admin")
-def listar_productos():
-    return render_template("productos.html", productos=obtener_productos())
 
-@admin.route("/producto/<int:producto_id>")
-@login_required
-@role_required("admin")
-def ver_producto(producto_id):
-    producto = obtener_producto_por_id(producto_id)
-    if not producto:
-        return "Producto no encontrado", 404
-    return render_template("detalles.html", producto=producto)
 
 # ---------- REPORTES ----------
 @admin.route("/reporte", methods=["GET", "POST"])
