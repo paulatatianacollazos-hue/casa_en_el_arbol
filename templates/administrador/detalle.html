@@ -10,6 +10,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
 </head>
 <body>
+
+    {% if producto.imagenes %}
+    <div id="carouselProducto" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {% for img in producto.imagenes %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+        <img src="{{ producto.Imagen.replace('/static/', '') | url_for('static', filename=_) }}" 
+            alt="{{ producto.NombreProducto }}">
+
+        </div>
+        {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+    </button>
+    </div>
+    {% else %}
+        <p>Sin imágenes disponibles</p>
+    {% endif %}
+
+
     <div class="detalle">
         <h2>Detalle del Pedido #{{ pedido.ID_Pedido }}</h2>
         <p><b>Cliente:</b> {{ pedido.Nombre }} {{ pedido.Apellido }}</p>
