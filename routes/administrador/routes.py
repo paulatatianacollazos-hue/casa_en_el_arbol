@@ -336,4 +336,4 @@ def detalle_producto(id_producto):
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
-    return render_template("administrador/detalle.html", producto=producto)
+    return render_template("administrador/admin_detalle.html", producto=producto)
