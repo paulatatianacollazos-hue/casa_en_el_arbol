@@ -677,6 +677,7 @@ def get_producto_by_id(id_producto):
         return None
 
     producto = rows[0]
-    producto["imagenes"] = [row["Imagen"] for row in rows if row["Imagen"]]
+    producto["Imagenes"] = [row["Imagen"] for row in rows if row["Imagen"]]
+
 
     return producto
