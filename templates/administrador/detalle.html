@@ -16,9 +16,9 @@
     <div class="carousel-inner">
         {% for img in producto.imagenes %}
         <div class="carousel-item {% if loop.first %}active{% endif %}">
-        <img src="{{ producto.Imagen.replace('/static/', '') | url_for('static', filename=_) }}" 
-            alt="{{ producto.NombreProducto }}">
-
+            <img src="{{ url_for('static', filename=img.replace('static/', '')) }}" 
+                class="d-block w-100"
+                alt="{{ producto.NombreProducto }}">
         </div>
         {% endfor %}
     </div>
@@ -32,7 +32,7 @@
     </button>
     </div>
     {% else %}
-        <p>Sin imágenes disponibles</p>
+    <p>Sin imágenes disponibles</p>
     {% endif %}
 
 

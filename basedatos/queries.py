@@ -784,9 +784,8 @@ def get_producto_by_id(id_producto):
     if not rows:
         return None
 
-    # Tomamos los datos del producto
     producto = rows[0]
-    # Creamos lista de imágenes
     producto["imagenes"] = [row["Imagen"] for row in rows if row["Imagen"]]
 
     return producto
+
