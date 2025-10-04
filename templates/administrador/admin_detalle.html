@@ -14,12 +14,13 @@
   <div class="carousel-inner">
     {% for img in producto.Imagenes %}
       <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
-        <img src="{{ url_for('static', filename='uploads/' ~ img) }}"
+        <img src="{{ url_for('static', filename=img.split('static/')[1]) }}"
             class="d-block w-100"
             style="max-height: 400px; object-fit: cover;"
             alt="Imagen de {{ producto.NombreProducto }}">
       </div>
     {% endfor %}
+
 
 
   </div>

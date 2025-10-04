@@ -676,8 +676,18 @@ def get_producto_by_id(id_producto):
     if not rows:
         return None
 
-    producto = rows[0]
-    producto["Imagenes"] = [row["Imagen"] for row in rows if row["Imagen"]]
-
+    # Tomar datos del producto de la primera fila
+    producto = {
+        "ID_Producto": rows[0]["ID_Producto"],
+        "NombreProducto": rows[0]["NombreProducto"],
+        "Material": rows[0]["Material"],
+        "PrecioUnidad": rows[0]["PrecioUnidad"],
+        "Color": rows[0]["Color"],
+        "NombreCategoria": rows[0]["NombreCategoria"],
+        "NombreEmpresa": rows[0]["NombreEmpresa"],
+        "Imagenes": [row["Imagen"] for row in rows if row["Imagen"]]
+    }
 
     return producto
+
+
