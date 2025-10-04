@@ -653,9 +653,7 @@ def get_productos():
     return productos
 
 
-
-
-def obtener_producto_por_id(id_producto):
+def get_producto_by_id(id_producto):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
