@@ -15,8 +15,6 @@ from basedatos.queries import (
     obtener_empleados,
     todos_los_pedidos,
     obtener_comentarios_agrupados,
-    obtener_productos,
-    obtener_producto_por_id,
     buscar_pedidos,
     asignar_empleado as asignar_empleado_query,
     actualizar_pedido as actualizar_pedido_query,
@@ -334,7 +332,7 @@ def guardar_producto_route():
 @admin.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
-    producto = get_producto_by_id(id_producto)
+    producto = get_producto_by_id(id_producto)  
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
