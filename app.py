@@ -81,10 +81,6 @@ def nosotros():
     return render_template("common/nosotros.html")
 
 
-@app.route("/catalogo")
-def catalogo():
-    return render_template("common/catalogo.html")
-
 
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
 with app.app_context():
