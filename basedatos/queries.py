@@ -399,65 +399,34 @@ def obtener_producto_por_id(producto_id):
 
 
 # --------- OBTENER_PRODUCTO_ID ---------
-def obtener_producto_por_id(producto_id):
+def obtener_producto_por_id(id_producto):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
 
-    if request.method == 'POST':
-        fecha = request.form.get('fecha_pedido')
-        id_pedido = request.form.get('id_pedido')
-        nombre_cliente = request.form.get('nombre_cliente')
-        nombre_empleado = request.form.get('nombre_empleado')
+    query = """
+        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+               c.NombreCategoria, pr.NombreEmpresa,
+               i.ruta AS Imagen
+        FROM producto p
+        LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
+        LEFT JOIN proveedor pr ON p.ID_Proveedor = pr.ID_Proveedor
+        LEFT JOIN imagenproducto i ON i.ID_Producto = p.ID_Producto
+        WHERE p.ID_Producto = %s
+    """
+    cursor.execute(query, (id_producto,))
+    rows = cursor.fetchall()
 
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+    cursor.close()
+    conn.close()
 
-        query = """
-        SELECT
-                p.ID_Pedido AS id_pedido,
-                p.FechaPedido AS fecha,
-                c.Nombre AS cliente,
-                c.Direccion AS direccion,
-                GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
-                SEPARATOR '<br>') AS productos,
-                p.Estado AS estado,
-                COALESCE(e.Nombre, 'Sin asignar') AS empleado
-            FROM Pedido p
-            JOIN Usuario c ON p.ID_Usuario = c.ID_Usuario
-            JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
-            JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
-            LEFT JOIN Usuario e ON p.ID_Empleado = e.ID_Usuario
-            WHERE p.Estado = 'entregado'
-        """
-        params = []
+    if not rows:
+        return None
 
-        if fecha:
-            query += " AND p.FechaPedido = %s"
-            params.append(fecha)
+    producto = rows[0]
+    producto["imagenes"] = [row["Imagen"] for row in rows if row["Imagen"]]
 
-        if id_pedido:
-            query += " AND p.ID_Pedido = %s"
-            params.append(id_pedido)
+    return producto
 
-        if nombre_cliente:
-            query += " AND c.Nombre LIKE %s"
-            params.append(f"%{nombre_cliente}%")
-
-        if nombre_empleado:
-            query += " AND e.Nombre LIKE %s"
-            params.append(f"%{nombre_empleado}%")
-
-        
-        query += """
-            GROUP BY p.ID_Pedido, p.FechaPedido, c.Nombre, c.Direccion,
-            p.Estado, e.Nombre
-            ORDER BY p.FechaPedido DESC
-        """
-
-        cursor.execute(query, tuple(params))
-        resultados = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
-    return render_template('administrador/reportes_entrega.html', resultados=resultados)
 
 
 # --------- ASIGNAR_CALENDARIO ---------
