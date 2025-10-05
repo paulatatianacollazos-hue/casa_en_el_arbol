@@ -28,7 +28,7 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <a href="{{ url_for('favoritos') }}" class="nav-icon" aria-label="Favoritos">
+                <a href="{{ url_for('cliente.ver_favoritos') }}" class="nav-icon" aria-label="Favoritos">
                     <i class="bi bi-heart fs-4"></i>
                 </a>
 
@@ -75,12 +75,12 @@
                     
                          <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('login') }}">
+                            <a class="dropdown-item" href="{{ url_for('auth.login') }}">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('register') }}">
+                            <a class="dropdown-item" href="{{ url_for('auth.register') }}">
                                 <i class="bi bi-person-plus me-2"></i>Registrarse
                             </a>
                         </li>
@@ -147,7 +147,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                   <a class="nav-link fw-semibold text-dark" href="{{ url_for('catalogo') }}">
+                   <a class="nav-link fw-semibold text-dark" href="{{ url_for('admin.catalogo') }}">
                 <i class="bi bi-collection me-1"></i>CATÁLOGO
                 </a>
 
