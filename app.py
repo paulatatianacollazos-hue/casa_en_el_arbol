@@ -26,7 +26,16 @@ app.config.update(
     ),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True},
+    
+     # 📂 Carpeta de subida de imágenes
+    UPLOAD_FOLDER=os.path.join(os.path.dirname(__file__), "static", "img"),
+
+    # 🔒 Opcional: límite de tamaño de archivos (5 MB en este caso)
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
+
+if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
 
 # ------------------ CONFIGURACIÓN MAIL ------------------ #
 app.config.update(
