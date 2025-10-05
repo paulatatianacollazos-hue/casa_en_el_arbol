@@ -616,11 +616,13 @@ def guardar_producto(data, files):
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
+            image_url = f"/static/img/{filename}"
+
             cursor.execute("""
-                INSERT INTO imagenproducto (ID_Producto, ruta)
+                INSERT INTO imagenproducto (ID_Producto, Imagen)
                 VALUES (%s, %s)
-            """, (producto_id, filename))
-    conn.commit()
+            """, (producto_id, image_url))
+        conn.commit()
     return producto_id
 
 def guardar_producto_route():
