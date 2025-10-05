@@ -8,7 +8,7 @@ from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from flask import render_template
 from flask_login import login_required, current_user
-from basedatos.db import get_connection
+from basedatos.queries import get_productos, get_producto_by_id
 
 
 
@@ -309,5 +309,15 @@ def ver_mis_pedidos():
 @cliente.route("/catalogo")
 @login_required
 def catalogo():
-    return render_template("catalogo_cliente.html")
+    productos = get_productos()
+    return render_template("administrador/cliente_catalogo.html",productos=productos)
+
+@cliente.route("/producto/<int:id_producto>")
+@login_required
+def detalle_producto(id_producto):
+    producto = get_producto_by_id(id_producto)  
+    if not producto:
+        flash("Producto no encontrado", "error")
+        return redirect(url_for("admin.catalogo"))
+    return render_template("administrador/cliente_detalle.html", producto=producto)
 
