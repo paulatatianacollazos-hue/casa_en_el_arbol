@@ -156,9 +156,11 @@
 
       <input type="number" name="ID_Proveedor" required placeholder="ID Proveedor:" class="input1" ><br>
 
-      <label style="margin-left: 50px;">Imágenes (puedes seleccionar varias):</label><br>
-      <input type="file" name="imagenes" multiple accept="image/*"><br>
-
+      <label style="margin-left: 50px;">Imágenes:</label><br>
+      <div id="imagenesContainer">
+        <input type="file" name="imagenes[]" accept="image/*">
+      </div>
+      <button type="button" id="addImageBtn" class="btn btn-secondary mt-2">+ Agregar otra imagen</button>
       <button type="submit" class="btn btn-success " style="padding-left: 300px; padding-right: 300px; border-radius: 50px; margin-left: 15%;">Guardar</button>
     </form>
   </div>
@@ -208,6 +210,19 @@
       form.reset();
     }
   };
+  // Botón para agregar más inputs de imagen
+const addImageBtn = document.getElementById("addImageBtn");
+const imagenesContainer = document.getElementById("imagenesContainer");
+
+addImageBtn.onclick = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.name = "imagenes[]"; // importante para enviarlas como array
+  input.accept = "image/*";
+  input.classList.add("mt-2");
+  imagenesContainer.appendChild(input);
+};
+
 </script>
 
 {% endblock %}

@@ -319,15 +319,13 @@ def catalogo():
     productos = get_productos()
     return render_template("administrador/catalogo.html",productos=productos)
 
-@admin.route("/guardar_producto", methods=["POST"])
-@login_required
+@admin.route('/guardar_producto', methods=['POST'])
 def guardar_producto_route():
-    data = request.form
-    imagenes = request.files.getlist("imagenes")
-
-    success, msg = guardar_producto(data, imagenes)
-    return jsonify({"success": success, "message": msg})
-
+    try:
+        producto_id = guardar_producto(request.form, request.files.getlist('imagenes[]'))
+        return jsonify({"success": True, "message": "Producto guardado con éxito", "id": producto_id})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
 
 @admin.route("/producto/<int:id_producto>")
 @login_required
