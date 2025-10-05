@@ -619,7 +619,7 @@ def guardar_producto(data, files):
             image_url = f"/static/img/{filename}"
 
             cursor.execute("""
-                INSERT INTO imagenproducto (ID_Producto, Imagen)
+                INSERT INTO imagenproducto (ID_Producto, ruta)
                 VALUES (%s, %s)
             """, (producto_id, image_url))
         conn.commit()
