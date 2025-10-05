@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 
 
+
 UPLOAD_FOLDER = os.path.join("static", "img")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -621,6 +622,50 @@ def guardar_producto(data, files):
             """, (producto_id, filename))
     conn.commit()
     return producto_id
+
+def guardar_producto_route():
+    try:
+        # ✅ Guardar datos del producto primero
+        cursor = db.connection.cursor()
+        cursor.execute("""
+            INSERT INTO producto (NombreProducto, Stock, Material, Color, PrecioUnidad, ID_Categoria, ID_Proveedor)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (
+            request.form['NombreProducto'],
+            request.form['Stock'],
+            request.form['Material'],
+            request.form['Color'],
+            request.form['PrecioUnidad'],
+            request.form['ID_Categoria'],
+            request.form['ID_Proveedor']
+        ))
+        producto_id = cursor.lastrowid
+
+        # ✅ Guardar imágenes
+        if 'imagenes' in request.files:
+            files = request.files.getlist('imagenes')
+            for file in files:
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
+                    # Guardar físicamente en static/img
+                    file.save(filepath)
+
+                    # Guardar la ruta completa en DB (ejemplo: static/img/sofa1.jpg)
+                    image_url = f"static/img/{filename}"
+
+                    cursor.execute("""
+                        INSERT INTO imagenproducto (ID_Producto, Imagen)
+                        VALUES (%s, %s)
+                    """, (producto_id, image_url))
+
+        db.connection.commit()
+        return jsonify({"success": True, "message": "Producto guardado con éxito"})
+
+    except Exception as e:
+        db.connection.rollback()
+        return jsonify({"success": False, "message": str(e)})
     
 def get_productos():
     conn = get_connection()  # 👈 aquí faltaba crear la conexión
