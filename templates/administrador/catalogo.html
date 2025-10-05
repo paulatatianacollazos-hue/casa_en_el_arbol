@@ -153,8 +153,8 @@
   {% for p in productos %}
     <div class="producto-card" onclick="window.location.href='/admin/producto/{{ p.ID_Producto }}'">
       <div class="imagen">
-        <img src="{{ url_for('static', filename='img/' ~ (p.Imagen if p.Imagen else 'default.jpg')) }}" 
-             alt="{{ p.NombreProducto }}">
+        <img src="{{ p.Imagen if p.Imagen else url_for('static', filename='img/default.jpg') }}"
+          alt="{{ p.NombreProducto }}">
       </div>
       <div class="info">
         <h3>{{ p.NombreProducto }}</h3>
