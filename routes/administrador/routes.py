@@ -320,6 +320,7 @@ def catalogo():
     return render_template("administrador/catalogo.html",productos=productos)
 
 @admin.route('/guardar_producto', methods=['POST'])
+@login_required
 def guardar_producto_route():
     try:
         producto_id = guardar_producto(request.form, request.files.getlist('imagenes[]'))
