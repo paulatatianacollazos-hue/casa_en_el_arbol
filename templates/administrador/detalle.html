@@ -12,37 +12,45 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-    .carousel-item {
-  display: none;
+
+.carousel-item img {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-.carousel-item.active {
-  display: block;
-}
+
 </style>
 </head>
 <body>
 
+    <!-- Carrusel de imágenes -->
+{% if producto.Imagenes %}
+<div id="carouselProducto" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000" style="width: 60%; margin: auto;">
+  <div class="carousel-inner">
     {% for img in producto.Imagenes %}
-    <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
-        <img src="{{ url_for('static', filename=img.split('static/')[1]) }}"
-            class="d-block w-100"
-            style="max-height: 400px; object-fit: cover;"
-            alt="Imagen de {{ producto.NombreProducto }}">
-    </div>
+      <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
+        <img src="{{ url_for('static', filename=img) }}"
+             class="d-block w-100"
+             style="max-height: 400px; object-fit: cover;"
+             alt="Imagen de {{ producto.NombreProducto }}">
+      </div>
     {% endfor %}
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Siguiente</span>
-    </button>
-    </div>
-    {% else %}
-    <p>Sin imágenes disponibles</p>
-    {% endif %}
+  </div>
+
+  <!-- Controles del carrusel -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Siguiente</span>
+  </button>
+</div>
+{% else %}
+  <p>Sin imágenes disponibles</p>
+{% endif %}
+
+
 
 
     <div class="detalle">
@@ -60,6 +68,7 @@
     </div>
     <!-- Bootstrap Bundle JS (incluye Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
 </body>
 </html>
