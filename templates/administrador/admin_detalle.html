@@ -10,26 +10,29 @@
 
 
 <!-- Carrusel de imágenes -->
-<div id="carouselProducto" class="carousel slide" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    {% for img in producto.Imagenes %}
-      <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
-        <img src="{{ url_for('static', filename=img) }}"
-             class="d-block w-100"
-             style="max-height: 400px; object-fit: cover;"
-             alt="Imagen de {{ producto.NombreProducto }}">
-      </div>
-    {% endfor %}
-  </div>
+<div class="container text-center my-4">
+  <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+    <div class="carousel-inner">
+      {% for img in producto.Imagenes %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <img src="{{ url_for('static', filename=img) }}"
+               class="d-block w-100"
+               style="max-height: 400px; object-fit: cover;"
+               alt="Imagen de {{ producto.NombreProducto }}">
+        </div>
+      {% endfor %}
+    </div>
 
-  <!-- Controles -->
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </button>
+    <!-- Botones -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
 </div>
+
 
 
 <h2>{{ producto.NombreProducto }}</h2>
