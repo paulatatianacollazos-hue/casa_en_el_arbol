@@ -8,7 +8,7 @@
 
 {% block content %}
 
-
+<div class="content1">
 <!-- Carrusel de imágenes -->
 <div class="container text-center my-4">
   <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
@@ -34,18 +34,36 @@
 </div>
 
 
+<div class="caja">
+  <h2>{{ producto.NombreProducto }}</h2>
+  <p><b>Material:</b> {{ producto.Material }}</p>
+  <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+  <p><b>Color:</b> {{ producto.Color }}</p>
+  <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
+  <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
+</div>
 
-<h2>{{ producto.NombreProducto }}</h2>
-<p><b>Material:</b> {{ producto.Material }}</p>
-<p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-<p><b>Color:</b> {{ producto.Color }}</p>
-<p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
-<p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
+</div>
+
 
 
 
 
 <style>
+
+.caja{
+  width: 70%;
+  height: 400px;
+  background-color: #fff;
+  margin: 25px 5% 0 0;
+  padding: 20px 20px;
+  border-radius: 15px;
+}
+
+.content1{
+  display: flex;
+}
+
 .carousel-item {
   display: none;              /* Ocultar todas las imágenes por defecto */
   transition: transform 0.6s ease-in-out;
