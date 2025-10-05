@@ -46,10 +46,20 @@
 
 
 <style>
+.carousel-item {
+  display: none;              /* Ocultar todas las imágenes por defecto */
+  transition: transform 0.6s ease-in-out;
+}
+.carousel-item.active {
+  display: block;             /* Solo mostrar la activa */
+}
 .carousel-item img {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  object-fit: cover;
+  height: 400px;              /* Todas las imágenes con la misma altura */
 }
+
 </style>
 
 {% endblock %}
