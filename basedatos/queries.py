@@ -685,9 +685,10 @@ def get_producto_by_id(id_producto):
         "Color": rows[0]["Color"],
         "NombreCategoria": rows[0]["NombreCategoria"],
         "NombreEmpresa": rows[0]["NombreEmpresa"],
-        "Imagenes": [row["Imagen"] for row in rows if row["Imagen"]]
+        # Limpiar rutas para que sean relativas a /static/
+        "Imagenes": [
+            row["Imagen"].replace("static/", "") for row in rows if row["Imagen"]
+        ]
     }
 
     return producto
-
-
