@@ -134,14 +134,14 @@
 
 {% block content %}
 <br>
-<button id="openModalBtn" class="btn btn-primary" style="padding-left: 20px; padding-right: 20px;">Nuevo Producto</button>
+
 
 <!-- Modal -->
 
-<h2>Productos</h2>
+<h2>Productos</h2><br>
 <div class="grid">
   {% for p in productos %}
-    <div class="producto-card" onclick="window.location.href='/admin/producto/{{ p.ID_Producto }}'">
+    <div class="producto-card" onclick="window.location.href='/cliente/producto/{{ p.ID_Producto }}'">
       <div class="imagen">
         <img src="{{ p.Imagen if p.Imagen else url_for('static', filename='img/default.jpg') }}"
           alt="{{ p.NombreProducto }}">
