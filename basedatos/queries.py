@@ -716,14 +716,33 @@ def obtener_pedidos_por_cliente(id_usuario):
     conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
-    # ⚡ Nombres de columnas corregidos
-    cursor.execute("SELECT * FROM pedido WHERE ID_Usuario = %s", (id_usuario,))
+    # Obtener pedidos del usuario
+    cursor.execute("SELECT * FROM pedido WHERE ID_Usuario = %s ORDER BY FechaPedido DESC", (id_usuario,))
     pedidos = cursor.fetchall()
 
     for pedido in pedidos:
-        cursor.execute("SELECT * FROM detalles_pedido WHERE ID_Pedido = %s", (pedido['ID_Pedido'],))
+        # Obtener detalles de cada pedido con info del producto e imagen
+        cursor.execute("""
+            SELECT dp.ID_Producto, dp.Cantidad, p.NombreProducto, p.PrecioUnidad,
+                   ip.ruta AS Imagen
+            FROM detalles_pedido dp
+            JOIN producto p ON dp.ID_Producto = p.ID_Producto
+            LEFT JOIN imagenproducto ip ON p.ID_Producto = ip.ID_Producto
+            WHERE dp.ID_Pedido = %s
+        """, (pedido['ID_Pedido'],))
         detalles = cursor.fetchall()
+
+        # Ajustar ruta de imagen para frontend
+        for item in detalles:
+            if item['Imagen']:
+                item['Imagen'] = item['Imagen'].replace("static/", "")
+
         pedido['detalles'] = detalles
+
+        # Calcular total del pedido
+        total = sum(item['Cantidad'] * float(item['PrecioUnidad']) for item in detalles)
+        pedido['total'] = round(total, 2)
 
     conexion.close()
     return pedidos
+
