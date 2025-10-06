@@ -220,6 +220,11 @@ def asignar_calendario_route():
 def estadisticas():
     return render_template("administrador/estadisticas.html")
 
+
+
+
+# ---------- Perfil y Direcciones ----------
+
 @admin.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
