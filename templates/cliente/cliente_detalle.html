@@ -41,14 +41,15 @@
   <p><b>Color:</b> {{ producto.Color }}</p>
   <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
   <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
-
-  <div class="botones">
-  <div class="boton"><button>reseñas</button></div>
-  <div class="boton"><button>garantia</button></div>
-  </div>
-  <div class="botones">
-  <div class="boton"><button>añadir al carrito</button></div>
-  <div class="boton"><button>personalizar</button></div>
+  <div>
+    <div class="">
+    <div class="boton"><button>reseñas</button></div>
+    <div class="boton"><button>garantia</button></div>
+    </div>
+    <div class="">
+    <div class="boton"><button>añadir al carrito</button></div>
+    <div class="boton"><button>personalizar</button></div>
+    </div>
   </div>
 </div>
 
@@ -61,7 +62,7 @@
 <style>
 
 .botones{
-    display: flex;
+    
 }
 
 :root {
@@ -78,7 +79,7 @@
 .boton button{
   background: linear-gradient(135deg, var(--bg-cream) 0%, #f0f4ec 100%);
   border: none;
-  padding: 10px 20px;
+  padding: 10px 40px;
   border-radius: 20px;
 }
 
