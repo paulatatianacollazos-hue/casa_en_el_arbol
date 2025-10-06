@@ -9,6 +9,7 @@ from flask import current_app
 
 
 
+
 UPLOAD_FOLDER = os.path.join("static", "img")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -728,53 +729,32 @@ def get_producto_by_id(id_producto):
     return producto
 
 def obtener_pedidos_por_cliente(user_id):
-    """
-    Obtiene todos los pedidos y sus productos asociados
-    (incluyendo UNA imagen desde la tabla ImagenProducto)
-    para un cliente específico.
-    """
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # 🔹 Obtener los pedidos del cliente
-    cursor.execute("""
-        SELECT p.ID_Pedido, p.Fechapedido, p.Estado
-        FROM Pedido p
-        WHERE p.ID_Usuario = %s
-        ORDER BY p.Fechapedido DESC
-    """, (user_id,))
-    pedidos = cursor.fetchall()
-
-    # 🔹 Obtener los detalles del pedido (productos + UNA imagen)
-    cursor.execute("""
-        SELECT dp.ID_Pedido,
-               pr.Nombreproducto AS Producto,
-               pr.Preciounidad,
-               dp.Cantidad,
-               img.Ruta AS Imagen
-        FROM Detalle_Pedido dp
-        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
-        LEFT JOIN (
-            SELECT ID_Producto, MIN(Ruta) AS Ruta
-            FROM ImagenProducto
-            GROUP BY ID_Producto
-        ) img ON pr.ID_Producto = img.ID_Producto
-        WHERE dp.ID_Pedido IN (
-            SELECT ID_Pedido FROM Pedido WHERE ID_Usuario = %s
-        )
-    """, (user_id,))
-    detalles = cursor.fetchall()
-
-    # 🔹 Combinar pedidos y detalles
+    pedidos = Pedido.query.filter_by(ID_Usuario=user_id).all()
     pedidos_con_detalles = []
+
     for pedido in pedidos:
-        pedido_detalles = [
-            d for d in detalles if d['ID_Pedido'] == pedido['ID_Pedido']
+        detalles = (
+            db.session.query(Detalle_Pedido, Producto)
+            .join(Producto, Detalle_Pedido.ID_Producto == Producto.ID_Producto)
+            .filter(Detalle_Pedido.ID_Pedido == pedido.ID_Pedido)
+            .all()
+        )
+
+        detalles_formateados = [
+            {
+                "Producto": producto.Nombre,
+                "Cantidad": detalle.Cantidad,
+                "PrecioUnidad": detalle.PrecioUnidad,
+                "Imagen": producto.Imagen
+            }
+            for detalle, producto in detalles
         ]
+
         pedidos_con_detalles.append({
-            'pedido': pedido,
-            'detalles': pedido_detalles
+            "ID_Pedido": pedido.ID_Pedido,
+            "Fecha": pedido.Fecha,
+            "Estado": pedido.Estado,
+            "detalles": detalles_formateados
         })
 
-    cursor.close()
     return pedidos_con_detalles
