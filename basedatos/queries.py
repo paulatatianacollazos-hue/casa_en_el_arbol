@@ -737,16 +737,16 @@ def obtener_pedidos_por_cliente(user_id):
 
     # Obtener los pedidos del cliente
     cursor.execute("""
-        SELECT p.ID_Pedido, p.Fecha, p.Estado, p.Total
+        SELECT p.ID_Pedido, p.Fechapedido, p.Estado
         FROM Pedido p
         WHERE p.ID_Usuario = %s
-        ORDER BY p.Fecha DESC
+        ORDER BY p.Fechapedido DESC
     """, (user_id,))
     pedidos = cursor.fetchall()
 
     # Obtener detalles de cada pedido (productos)
     cursor.execute("""
-        SELECT dp.ID_Pedido, pr.Nombre AS Producto, pr.Imagen, pr.Precio, dp.Cantidad
+        SELECT dp.ID_Pedido, pr.Nombreproducto AS Producto, pr.ruta, pr.Precio, dp.Cantidadunidad
         FROM Detalle_Pedido dp
         JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
         WHERE dp.ID_Pedido IN (
