@@ -413,6 +413,57 @@
   </div>
 </div>
 
+<div id="seccion-pedidos" class="card shadow-sm p-4 mt-4">
+  <div class="profile-header mb-4">
+    <h5 class="mb-0">MIS PEDIDOS</h5>
+  </div>
+
+  {% if pedidos_con_detalles %}
+    {% for item in pedidos_con_detalles %}
+      <div class="pedido-item mb-5">
+        <h6 class="fw-bold mb-3">
+          Pedido #{{ item.pedido.ID_Pedido }} - {{ item.pedido.Fecha }}  
+          <span class="badge bg-info text-dark">{{ item.pedido.Estado }}</span>
+        </h6>
+
+        <!-- Carrusel de productos -->
+        <div id="carouselPedido{{ item.pedido.ID_Pedido }}" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            {% for producto in item.detalles %}
+              <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <div class="d-flex justify-content-center">
+                  <div class="card" style="width: 18rem;">
+                    <img src="{{ url_for('static', filename='img/productos/' + producto.Imagen) }}" class="card-img-top" alt="{{ producto.Producto }}">
+                    <div class="card-body text-center">
+                      <h6 class="card-title">{{ producto.Producto }}</h6>
+                      <p class="card-text">Cantidad: {{ producto.Cantidad }}</p>
+                      <p class="fw-bold text-success">${{ producto.Precio }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Controles del carrusel -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ item.pedido.ID_Pedido }}" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ item.pedido.ID_Pedido }}" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+          </button>
+        </div>
+
+        <hr class="my-4">
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No tienes pedidos registrados aún.</p>
+  {% endif %}
+</div>
+
 <div class="carousel-container">
   <div class="carousel-track">
     <div class="carousel-item"><i class="bi bi-truck"></i> Envíos a nivel nacional</div>
