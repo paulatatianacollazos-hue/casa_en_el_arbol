@@ -569,22 +569,6 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
     
 
 
-def obtener_pedidos_por_cliente(id_usuario):
-    conexion = get_connection()
-    cursor = conexion.cursor(dictionary=True)  # ✅ Aquí
-
-    cursor.execute("SELECT * FROM pedido WHERE id_usuario = %s", (id_usuario,))
-    pedidos = cursor.fetchall()
-
-    for pedido in pedidos:
-        cursor.execute("SELECT * FROM detalles_pedido WHERE id_pedido = %s", (pedido['id_pedido'],))  # ✅ Ya no falla
-        detalles = cursor.fetchall()
-        pedido['detalles'] = detalles
-
-    conexion.close()
-    return pedidos
-
-
 def registrar_firma(pedido_id, nombre_cliente, ruta_firma):
     conn = get_connection()
     cursor = conn.cursor()
@@ -728,33 +712,18 @@ def get_producto_by_id(id_producto):
 
     return producto
 
-def obtener_pedidos_por_cliente(user_id):
-    pedidos = Pedido.query.filter_by(ID_Usuario=user_id).all()
-    pedidos_con_detalles = []
+def obtener_pedidos_por_cliente(id_usuario):
+    conexion = get_connection()
+    cursor = conexion.cursor(dictionary=True)
+
+    # ⚡ Nombres de columnas corregidos
+    cursor.execute("SELECT * FROM pedido WHERE ID_Usuario = %s", (id_usuario,))
+    pedidos = cursor.fetchall()
 
     for pedido in pedidos:
-        detalles = (
-            db.session.query(Detalle_Pedido, Producto)
-            .join(Producto, Detalle_Pedido.ID_Producto == Producto.ID_Producto)
-            .filter(Detalle_Pedido.ID_Pedido == pedido.ID_Pedido)
-            .all()
-        )
+        cursor.execute("SELECT * FROM detalles_pedido WHERE ID_Pedido = %s", (pedido['ID_Pedido'],))
+        detalles = cursor.fetchall()
+        pedido['detalles'] = detalles
 
-        detalles_formateados = [
-            {
-                "Producto": producto.Nombre,
-                "Cantidad": detalle.Cantidad,
-                "PrecioUnidad": detalle.PrecioUnidad,
-                "Imagen": producto.Imagen
-            }
-            for detalle, producto in detalles
-        ]
-
-        pedidos_con_detalles.append({
-            "ID_Pedido": pedido.ID_Pedido,
-            "Fecha": pedido.Fecha,
-            "Estado": pedido.Estado,
-            "detalles": detalles_formateados
-        })
-
-    return pedidos_con_detalles
+    conexion.close()
+    return pedidos
