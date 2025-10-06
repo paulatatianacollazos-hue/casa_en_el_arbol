@@ -292,20 +292,6 @@ def borrar_direccion(id_direccion):
     return redirect(url_for("cliente.actualizacion_datos"))
 
 
-  # 👈 Importamos la función
-
-@cliente.route('/pedidos_por_cliente')
-@login_required
-def ver_mis_pedidos():
-    id_cliente = current_user.id
-
-    pedidos = obtener_pedidos_por_cliente(id_cliente)
-
-    if not pedidos:
-        return render_template("cliente/pedidos_por_cliente.html", pedidos=[], mensaje="No has realizado ningún pedido.")
-    
-    return render_template("cliente/pedidos_por_cliente.html", pedidos=pedidos)
-
 @cliente.route("/catalogo")
 @login_required
 def catalogo():
