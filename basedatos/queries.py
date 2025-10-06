@@ -730,6 +730,7 @@ def get_producto_by_id(id_producto):
 def obtener_pedidos_por_cliente(user_id):
     """
     Obtiene todos los pedidos y sus productos asociados
+    (incluyendo la imagen desde la tabla imagenproducto)
     para un cliente específico.
     """
     conn = get_connection()
@@ -744,11 +745,16 @@ def obtener_pedidos_por_cliente(user_id):
     """, (user_id,))
     pedidos = cursor.fetchall()
 
-    # Obtener detalles de cada pedido (productos)
+    # Obtener los detalles del pedido (productos + imagen)
     cursor.execute("""
-        SELECT dp.ID_Pedido, pr.Nombreproducto AS Producto, pr.ruta, pr.Precio, dp.Cantidadunidad
+        SELECT dp.ID_Pedido,
+               pr.Nombreproducto AS Producto,
+               pr.Preciounidad,
+               dp.Cantidad,
+               img.Ruta AS Imagen
         FROM Detalle_Pedido dp
         JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        LEFT JOIN ImagenProducto img ON pr.ID_Producto = img.ID_Producto
         WHERE dp.ID_Pedido IN (
             SELECT ID_Pedido FROM Pedido WHERE ID_Usuario = %s
         )
@@ -758,7 +764,9 @@ def obtener_pedidos_por_cliente(user_id):
     # Combinar pedidos y detalles
     pedidos_con_detalles = []
     for pedido in pedidos:
-        pedido_detalles = [d for d in detalles if d['ID_Pedido'] == pedido['ID_Pedido']]
+        pedido_detalles = [
+            d for d in detalles if d['ID_Pedido'] == pedido['ID_Pedido']
+        ]
         pedidos_con_detalles.append({
             'pedido': pedido,
             'detalles': pedido_detalles
