@@ -54,57 +54,52 @@
 
 </div>
 
-<div id="seccion-personalizar" class="card shadow-sm p-4 mt-4" style="width: 80%; position: relative; left: 18%; bottom: 680px; display: none;">
-  <div class="profile-header mb-4">
-    
-  </div>
-  <div class="content1">
-<!-- Carrusel de imágenes -->
-<div class="container text-center my-4">
-  <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
-    <div class="carousel-inner">
-      {% for img in producto.Imagenes %}
-        <div class="carousel-item {% if loop.first %}active{% endif %}">
-          <img src="{{ url_for('static', filename=img) }}"
-               class="d-block w-100"
-               style="max-height: 400px; object-fit: cover;"
-               alt="Imagen de {{ producto.NombreProducto }}">
+<div id="seccion-personalizar" class="card shadow-sm p-4 mt-4 d-none">
+  <div class="profile-header mb-4"></div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-6 text-center">
+      <!-- Carrusel de imágenes -->
+      <div id="carouselPersonalizar" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 100%;">
+        <div class="carousel-inner">
+          {% for img in producto.Imagenes %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+              <img src="{{ url_for('static', filename=img) }}"
+                   class="d-block w-100"
+                   style="max-height: 400px; object-fit: cover;"
+                   alt="Imagen de {{ producto.NombreProducto }}">
+            </div>
+          {% endfor %}
         </div>
-      {% endfor %}
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
+      </div>
     </div>
 
-    <!-- Botones -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
-  </div>
-</div>
+    <div class="col-12 col-md-6">
+      <div class="caja p-3">
+        <h2>{{ producto.NombreProducto }}</h2>
+        <p><b>Material:</b> {{ producto.Material }}</p>
+        <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+        <p><b>Color:</b> {{ producto.Color }}</p>
+        <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
+        <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
 
-
-<div class="caja col-lg-5 col-sm-4">
-  <h2>{{ producto.NombreProducto }}</h2>
-  <p><b>Material:</b> {{ producto.Material }}</p>
-  <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-  <p><b>Color:</b> {{ producto.Color }}</p>
-  <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
-  <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
-  <div class="botones">
-    <div class="">
-    <div class="boton"><button>garantia</button></div>
-    <div class="boton"><button id="btn-volver-personalizar">volver</button></div>
-    </div>
-    <div class="">
-    <div class="boton"><button>añadir al carrito</button></div>
+        <div class="botones mt-3 d-flex flex-wrap gap-2">
+          <button class="btn btn-outline-secondary">Garantía</button>
+          <button class="btn btn-success">Añadir al carrito</button>
+          <button id="btn-volver-personalizar" class="btn btn-danger">Volver</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-</div>
- 
-</div>
 
 
 
@@ -171,38 +166,14 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const seccionPerfil = document.getElementById("seccion-perfil");
-    const seccionDirecciones = document.getElementById("seccion-direcciones");
     const seccionPersonalizar = document.getElementById("seccion-personalizar");
-
-    function mostrarSeccion(seccion) {
-        [seccionPerfil, seccionDirecciones, seccionPersonalizar].forEach(s => {
-            if (s) s.style.display = "none";
-        });
-        if (seccion) seccion.style.display = "block";
-    }
-
-    const btnPerfil = document.getElementById("menu-perfil");
-    if (btnPerfil) {
-        btnPerfil.addEventListener("click", e => {
-            e.preventDefault();
-            mostrarSeccion(seccionPerfil);
-        });
-    }
-
-    const btnDirecciones = document.getElementById("menu-direcciones");
-    if (btnDirecciones) {
-        btnDirecciones.addEventListener("click", e => {
-            e.preventDefault();
-            mostrarSeccion(seccionDirecciones);
-        });
-    }
 
     const btnPersonalizar = document.getElementById("menu-personalizar");
     if (btnPersonalizar) {
         btnPersonalizar.addEventListener("click", e => {
             e.preventDefault();
-            mostrarSeccion(seccionPersonalizar);
+            seccionPersonalizar.classList.remove("d-none");
+            seccionPersonalizar.scrollIntoView({ behavior: "smooth" });
         });
     }
 
@@ -210,11 +181,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnVolver) {
         btnVolver.addEventListener("click", e => {
             e.preventDefault();
-            seccionPersonalizar.style.display = "none";
+            seccionPersonalizar.classList.add("d-none");
         });
     }
 });
 </script>
+
 
 
 
