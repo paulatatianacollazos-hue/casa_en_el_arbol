@@ -308,13 +308,19 @@ def detalle_producto(id_producto):
     return render_template("cliente/cliente_detalle.html", producto=producto)
 
 @cliente.route('/pedidos_por_cliente')
+@login_required
 def pedidos_por_cliente():
-    """
-    Muestra la vista del dashboard con los pedidos del cliente.
-    """
     user_id = current_user.ID_Usuario
-    if not user_id:
-        return "Usuario no autenticado", 401
-
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
-    return render_template('cliente/Actualizacion_datos.html', pedidos_con_detalles=pedidos_con_detalles)
+
+    usuario = current_user
+    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
+
+    return render_template(
+        "cliente/Actualizacion_datos.html",
+        usuario=usuario,
+        direcciones=direcciones,
+        notificaciones=notificaciones,
+        pedidos_con_detalles=pedidos_con_detalles
+    )
