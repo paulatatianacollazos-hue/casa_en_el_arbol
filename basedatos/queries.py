@@ -729,27 +729,25 @@ def get_producto_by_id(id_producto):
 
 def obtener_pedidos_por_cliente(user_id):
     """
-    Obtiene todos los pedidos y sus productos asociados
-    (incluyendo la imagen desde la tabla imagenproducto)
-    para un cliente específico.
+    Obtiene todos los pedidos y sus productos asociados (con imagen).
     """
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Obtener los pedidos del cliente
+    # Pedidos del cliente
     cursor.execute("""
-        SELECT p.ID_Pedido, p.Fechapedido, p.Estado
+        SELECT p.ID_Pedido, p.Fechapedido AS Fecha, p.Estado
         FROM Pedido p
         WHERE p.ID_Usuario = %s
         ORDER BY p.Fechapedido DESC
     """, (user_id,))
     pedidos = cursor.fetchall()
 
-    # Obtener los detalles del pedido (productos + imagen)
+    # Detalles de productos con imagen
     cursor.execute("""
         SELECT dp.ID_Pedido,
                pr.Nombreproducto AS Producto,
-               pr.Preciounidad,
+               pr.Preciounidad AS Precio,
                dp.Cantidad,
                img.Ruta AS Imagen
         FROM Detalle_Pedido dp
