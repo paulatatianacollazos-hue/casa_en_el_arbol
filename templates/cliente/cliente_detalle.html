@@ -43,11 +43,13 @@
   <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
   <div class="botones">
     <div class="">
-    <div class="boton"><button>garantia</button></div>
-    <div class="boton"><button>añadir al carrito</button></div>
+      <div class="boton"><button>garantia</button></div>
+      <div class="boton"><button>añadir al carrito</button></div>
     </div>
-    <div class="">
-    <a href="#" id="menu-personalizar" style="cursor:pointer;">Personalizar</a>
+    <div class="botones">
+      <a id="menu-personalizar" href="javascript:void(0);" class="btn btn-primary">
+        Personalizar
+      </a>
     </div>
   </div>
 </div>
@@ -55,23 +57,17 @@
 </div>
 
 <div id="seccion-personalizar" class="card shadow-sm p-4 mt-4 d-none">
-  <div class="profile-header mb-4"></div>
-
   <div class="row g-3">
     <div class="col-12 col-md-6 text-center">
-      <!-- Carrusel de imágenes -->
-      <div id="carouselPersonalizar" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 100%;">
+      <!-- Carrusel -->
+      <div id="carouselPersonalizar" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           {% for img in producto.Imagenes %}
             <div class="carousel-item {% if loop.first %}active{% endif %}">
-              <img src="{{ url_for('static', filename=img) }}"
-                   class="d-block w-100"
-                   style="max-height: 400px; object-fit: cover;"
-                   alt="Imagen de {{ producto.NombreProducto }}">
+              <img src="{{ url_for('static', filename=img) }}" class="d-block w-100" style="max-height:400px; object-fit:cover;">
             </div>
           {% endfor %}
         </div>
-
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="prev">
           <span class="carousel-control-prev-icon"></span>
         </button>
@@ -167,25 +163,24 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const seccionPersonalizar = document.getElementById("seccion-personalizar");
-
     const btnPersonalizar = document.getElementById("menu-personalizar");
-    if (btnPersonalizar) {
-        btnPersonalizar.addEventListener("click", e => {
-            e.preventDefault();
-            seccionPersonalizar.classList.remove("d-none");
-            seccionPersonalizar.scrollIntoView({ behavior: "smooth" });
-        });
-    }
-
     const btnVolver = document.getElementById("btn-volver-personalizar");
-    if (btnVolver) {
-        btnVolver.addEventListener("click", e => {
-            e.preventDefault();
-            seccionPersonalizar.classList.add("d-none");
-        });
-    }
+
+    // Abrir sección Personalizar
+    btnPersonalizar.addEventListener("click", e => {
+        e.preventDefault();
+        seccionPersonalizar.classList.remove("d-none");
+        seccionPersonalizar.scrollIntoView({ behavior: "smooth" });
+    });
+
+    // Cerrar sección Personalizar
+    btnVolver.addEventListener("click", e => {
+        e.preventDefault();
+        seccionPersonalizar.classList.add("d-none");
+    });
 });
 </script>
+
 
 
 
