@@ -726,3 +726,43 @@ def get_producto_by_id(id_producto):
     }
 
     return producto
+
+def obtener_pedidos_por_cliente(user_id):
+    """
+    Obtiene todos los pedidos y sus productos asociados
+    para un cliente específico.
+    """
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Obtener los pedidos del cliente
+    cursor.execute("""
+        SELECT p.ID_Pedido, p.Fecha, p.Estado, p.Total
+        FROM Pedido p
+        WHERE p.ID_Usuario = %s
+        ORDER BY p.Fecha DESC
+    """, (user_id,))
+    pedidos = cursor.fetchall()
+
+    # Obtener detalles de cada pedido (productos)
+    cursor.execute("""
+        SELECT dp.ID_Pedido, pr.Nombre AS Producto, pr.Imagen, pr.Precio, dp.Cantidad
+        FROM Detalle_Pedido dp
+        JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        WHERE dp.ID_Pedido IN (
+            SELECT ID_Pedido FROM Pedido WHERE ID_Usuario = %s
+        )
+    """, (user_id,))
+    detalles = cursor.fetchall()
+
+    # Combinar pedidos y detalles
+    pedidos_con_detalles = []
+    for pedido in pedidos:
+        pedido_detalles = [d for d in detalles if d['ID_Pedido'] == pedido['ID_Pedido']]
+        pedidos_con_detalles.append({
+            'pedido': pedido,
+            'detalles': pedido_detalles
+        })
+
+    cursor.close()
+    return pedidos_con_detalles
