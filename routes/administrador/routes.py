@@ -341,3 +341,16 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
     return render_template("administrador/admin_detalle.html", producto=producto)
+
+@admin.route('/registrar-envio', methods=['POST'])
+def registrar_envio():
+    numero = request.form['numero_pedido']
+    cliente = request.form['cliente']
+    direccion = request.form['direccion_envio']
+    ciudad = request.form['ciudad']
+    fecha = request.form['fecha_envio']
+    estado = request.form['estado']
+    # Aquí podrías guardar los datos en la base
+    flash('Orden de envío registrada correctamente', 'success')
+    return redirect(url_for('admin.dashboard'))
+
