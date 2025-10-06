@@ -312,9 +312,9 @@ def pedidos_por_cliente():
     """
     Muestra la vista del dashboard con los pedidos del cliente.
     """
-    user_id = session.get('user_id')
+    user_id = current_user.ID_Usuario
     if not user_id:
         return "Usuario no autenticado", 401
 
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
-    return render_template('cliente/dashboard.html', pedidos_con_detalles=pedidos_con_detalles)
+    return render_template('cliente/Actualizacion_datos.html', pedidos_con_detalles=pedidos_con_detalles)
