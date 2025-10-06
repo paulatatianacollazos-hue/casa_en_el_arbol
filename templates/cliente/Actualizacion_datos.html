@@ -433,7 +433,7 @@
               <div class="carousel-item {% if loop.first %}active{% endif %}">
                 <div class="d-flex justify-content-center">
                   <div class="card" style="width: 18rem;">
-                    <img src="{{ url_for('static', filename='img/productos/' + producto.Imagen) }}" class="card-img-top" alt="{{ producto.Producto }}">
+                    <img src="{{ producto.Imagen }}" class="card-img-top" alt="{{ producto.Producto }}">
                     <div class="card-body text-center">
                       <h6 class="card-title">{{ producto.Producto }}</h6>
                       <p class="card-text">Cantidad: {{ producto.Cantidad }}</p>

@@ -729,37 +729,43 @@ def get_producto_by_id(id_producto):
 
 def obtener_pedidos_por_cliente(user_id):
     """
-    Obtiene todos los pedidos y sus productos asociados (con imagen).
+    Obtiene todos los pedidos y sus productos asociados
+    (incluyendo UNA imagen desde la tabla ImagenProducto)
+    para un cliente específico.
     """
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Pedidos del cliente
+    # 🔹 Obtener los pedidos del cliente
     cursor.execute("""
-        SELECT p.ID_Pedido, p.Fechapedido AS Fecha, p.Estado
+        SELECT p.ID_Pedido, p.Fechapedido, p.Estado
         FROM Pedido p
         WHERE p.ID_Usuario = %s
         ORDER BY p.Fechapedido DESC
     """, (user_id,))
     pedidos = cursor.fetchall()
 
-    # Detalles de productos con imagen
+    # 🔹 Obtener los detalles del pedido (productos + UNA imagen)
     cursor.execute("""
         SELECT dp.ID_Pedido,
                pr.Nombreproducto AS Producto,
-               pr.Preciounidad AS Precio,
+               pr.Preciounidad,
                dp.Cantidad,
                img.Ruta AS Imagen
         FROM Detalle_Pedido dp
         JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
-        LEFT JOIN ImagenProducto img ON pr.ID_Producto = img.ID_Producto
+        LEFT JOIN (
+            SELECT ID_Producto, MIN(Ruta) AS Ruta
+            FROM ImagenProducto
+            GROUP BY ID_Producto
+        ) img ON pr.ID_Producto = img.ID_Producto
         WHERE dp.ID_Pedido IN (
             SELECT ID_Pedido FROM Pedido WHERE ID_Usuario = %s
         )
     """, (user_id,))
     detalles = cursor.fetchall()
 
-    # Combinar pedidos y detalles
+    # 🔹 Combinar pedidos y detalles
     pedidos_con_detalles = []
     for pedido in pedidos:
         pedido_detalles = [
