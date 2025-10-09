@@ -54,7 +54,7 @@ def obtener_todos_los_pedidos():
             'nombre': row[5],
             'cantidad': row[6],
             'imagen': row[8] or '',
-            'precio': float(row[9])  
+            'precio': float(row[9])
         }
 
         fecha = row[7].strftime('%Y-%m-%d')
@@ -67,7 +67,7 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-                'id_empleado': row[10]   
+                'id_empleado': row[10]
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -81,7 +81,7 @@ def obtener_todos_los_pedidos():
         pedido['productos'] = list(pedido['productos'].values())
         total = sum(prod['cantidad'] * prod['precio']
                     for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)  
+        pedido['total'] = round(total, 2)
     return list(pedidos_dict.values())
 
 # --------- TODOS_LOS_PEDIDOS ---------
@@ -734,7 +734,7 @@ def obtener_pedidos_por_cliente(id_usuario):
     cursor = conexion.cursor(dictionary=True)
 
     cursor.execute(
-        "SELECT * FROM pedido WHERE id_usuario = %s ORDER BY FechaPedido DESC",
+        "SELECT * FROM pedido WHERE ID_Usuario = %s ORDER BY FechaPedido DESC",
         (id_usuario,))
     pedidos = cursor.fetchall()
 

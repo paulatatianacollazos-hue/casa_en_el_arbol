@@ -12,7 +12,7 @@ from basedatos.queries import get_productos, get_producto_by_id
 
 
 
-from . import cliente 
+from . import cliente
 reviews = []
 
 # ---------- DASHBOARD ----------
@@ -301,7 +301,7 @@ def catalogo():
 @cliente.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
-    producto = get_producto_by_id(id_producto)  
+    producto = get_producto_by_id(id_producto)
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
