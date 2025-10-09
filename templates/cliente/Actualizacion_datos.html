@@ -490,47 +490,37 @@
     {% for item in pedidos_con_detalles %}
       <div class="pedido-item mb-5">
         <h6 class="fw-bold mb-3">
-          Pedido #{{ item.pedido.ID_Pedido }} - {{ item.pedido.Fecha }}  
-          <span class="badge bg-info text-dark">{{ item.pedido.Estado }}</span>
+          Pedido #{{ item.id_pedido }} - {{ item.FechaPedido }}
+          <span class="badge bg-info text-dark">{{ item.Estado }}</span>
         </h6>
 
-        <!-- Carrusel de productos -->
-        <div id="carouselPedido{{ item.pedido.ID_Pedido }}" class="carousel slide" data-bs-ride="false">
-          <div class="carousel-inner">
+        <div class="carousel-wrapper">
+          <button class="carousel-btn prev" onclick="moverCarousel('{{ item.id_pedido }}', -1)">❮</button>
 
-            {% for grupo in item.detalles|batch(3, fill_with=None) %}
-              <div class="pedido-container">
-                <h5>Pedido #{{ item.pedido.ID_Pedido }} — {{ item.pedido.Fechapedido }}</h5>
-
-                <div class="carousel-wrapper">
-                  <button class="carousel-btn prev" onclick="moverCarousel('{{ item.pedido.ID_Pedido }}', -1)">❮</button>
-
-                  <div class="carousel" id="carousel-{{ item.pedido.ID_Pedido }}">
-                    {% for producto in item.detalles %}
-                      <div class="producto-card">
-                        <img src="{{ producto.Imagen }}" alt="{{ producto.Producto }}">
-                        <h6>{{ producto.Producto }}</h6>
-                        <p>Cantidad: {{ producto.Cantidad }}</p>
-                        <p class="precio">${{ producto.Preciounidad }}</p>
-                      </div>
-                    {% endfor %}
-                  </div>
-
-                  <button class="carousel-btn next" onclick="moverCarousel('{{ item.pedido.ID_Pedido }}', 1)">❯</button>
-                </div>
+          <div class="carousel" id="carousel-{{ item.id_pedido }}">
+            {% for producto in item.detalles %}
+              <div class="producto-card">
+                <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
+                <h6>{{ producto.NombreProducto }}</h6>
+                <p>Cantidad: {{ producto.cantidad }}</p>
+                <p class="precio">${{ producto.PrecioUnidad }}</p>
               </div>
-
             {% endfor %}
           </div>
 
+          <button class="carousel-btn next" onclick="moverCarousel('{{ item.id_pedido }}', 1)">❯</button>
+        </div>
+
+        <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
         <hr class="my-4">
-        <a href="/firmar">confimacion de entrega</a>
+        <a href="/firmar">Confirmación de entrega</a>
       </div>
     {% endfor %}
   {% else %}
     <p class="text-muted">No tienes pedidos registrados aún.</p>
   {% endif %}
 </div>
+
 
 <div class="carousel-container">
   <div class="carousel-track">
