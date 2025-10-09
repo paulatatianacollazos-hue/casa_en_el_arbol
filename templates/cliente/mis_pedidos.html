@@ -1,0 +1,34 @@
+
+  {% if pedidos_con_detalles %}
+    {% for item in pedidos_con_detalles %}
+      <div class="pedido-item mb-5">
+        <h6 class="fw-bold mb-3">
+          Pedido #{{ item.id_pedido }} - {{ item.FechaPedido }}
+          <span class="badge bg-info text-dark">{{ item.Estado }}</span>
+        </h6>
+
+        <div class="carousel-wrapper">
+          <button class="carousel-btn prev" onclick="moverCarousel('{{ item.id_pedido }}', -1)">❮</button>
+
+          <div class="carousel" id="carousel-{{ item.id_pedido }}">
+            {% for producto in item.detalles %}
+              <div class="producto-card">
+                <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
+                <h6>{{ producto.NombreProducto }}</h6>
+                <p>Cantidad: {{ producto.cantidad }}</p>
+                <p class="precio">${{ producto.PrecioUnidad }}</p>
+              </div>
+            {% endfor %}
+          </div>
+
+          <button class="carousel-btn next" onclick="moverCarousel('{{ item.id_pedido }}', 1)">❯</button>
+        </div>
+
+        <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
+        <hr class="my-4">
+        <a href="/firmar">Confirmación de entrega</a>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No tienes pedidos registrados aún.</p>
+  {% endif %}
