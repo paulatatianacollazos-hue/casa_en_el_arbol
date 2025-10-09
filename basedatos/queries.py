@@ -740,13 +740,14 @@ def obtener_pedidos_por_cliente(id_usuario):
 
     for pedido in pedidos:
         cursor.execute("""
-            SELECT dp.id_producto, dp.cantidad, p.NombreProducto,
-            p.PrecioUnidad,
-                   ip.ruta AS Imagen
-            FROM detalle_pedido dp
-            JOIN producto p ON dp.id_producto = p.id_producto
-            LEFT JOIN imagenproducto ip ON p.id_producto = ip.id_producto
-            WHERE dp.id_pedido = %s
+            SELECT dp.id_producto, dp.cantidad, p.NombreProducto,pe.ID_usuario,
+                        p.PrecioUnidad,
+                            ip.ruta AS Imagen
+                        FROM detalle_pedido dp
+                        JOIN producto p ON dp.id_producto = p.id_producto
+                        LEFT JOIN imagenproducto ip ON p.id_producto = ip.id_producto
+                        join pedido pe on pe.ID_Pedido = dp.ID_Pedido
+                        WHERE pe.id_usuario = %s
         """, (pedido['id_pedido'],))
         detalles = cursor.fetchall()
 
