@@ -8,10 +8,9 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 
 
-
-
 UPLOAD_FOLDER = os.path.join("static", "img")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 
 # ---------OBTENER_PEDIDOS ---------
 def obtener_todos_los_pedidos():
@@ -152,9 +151,10 @@ def detalle():
             'Cantidad': row['Cantidad']
         })
 
-    return agrupado 
+    return agrupado
 
 # --------- OBTENER_EMPLEADOS ---------
+
 
 def obtener_empleados():
     conn = get_connection()
@@ -244,7 +244,7 @@ def asignar_empleado():
 
     mensajes = []
     for pid in pedido_ids:
-       
+
         cursor.execute("""
             SELECT HoraEntrega
             FROM Pedido
@@ -257,7 +257,6 @@ def asignar_empleado():
             continue
 
         hora_pedido = pedido['HoraEntrega']
-
 
         cursor.execute("""
             SELECT ID_Pedido, HoraEntrega
@@ -273,7 +272,6 @@ def asignar_empleado():
                             en el calendario.""")
             continue
 
-      
         cursor.execute("""
             UPDATE Pedido
             SET ID_Empleado = %s
@@ -374,10 +372,12 @@ def asignar_calendario():
     try:
         for pedido_id in pedidos_ids:
             # Ver si el pedido es instalación
-            cursor.execute("SELECT Instalacion FROM Pedido WHERE ID_Pedido = %s", (pedido_id,))
+            cursor.execute("""SELECT Instalacion FROM Pedido WHERE
+                           ID_Pedido = %s""", (pedido_id,))
             instalacion = cursor.fetchone()[0]
 
-            intervalo = timedelta(minutes=60) if instalacion == "si" else timedelta(minutes=30)
+            intervalo = timedelta(minutes=60) if instalacion == """
+            si""" else timedelta(minutes=30)
 
             # 🔹 Validar si ya existe una cita en ese día, hora y empleado
             cursor.execute("""

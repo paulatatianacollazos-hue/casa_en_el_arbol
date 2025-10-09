@@ -307,6 +307,7 @@ def detalle_producto(id_producto):
         return redirect(url_for("admin.catalogo"))
     return render_template("cliente/cliente_detalle.html", producto=producto)
 
+
 @cliente.route('/pedidos_por_cliente')
 @login_required
 def pedidos_por_cliente():
