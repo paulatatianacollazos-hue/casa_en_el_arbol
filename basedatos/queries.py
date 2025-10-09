@@ -743,7 +743,7 @@ def obtener_pedidos_por_cliente(id_usuario):
             SELECT dp.id_producto, dp.cantidad, p.NombreProducto,
             p.PrecioUnidad,
                    ip.ruta AS Imagen
-            FROM detalles_pedido dp
+            FROM detalle_pedido dp
             JOIN producto p ON dp.id_producto = p.id_producto
             LEFT JOIN imagenproducto ip ON p.id_producto = ip.id_producto
             WHERE dp.id_pedido = %s
