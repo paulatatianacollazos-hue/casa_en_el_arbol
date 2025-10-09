@@ -733,30 +733,42 @@ def obtener_pedidos_por_cliente(id_usuario):
     conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
-    cursor.execute(
-        "SELECT * FROM pedido WHERE ID_Usuario = %s ORDER BY FechaPedido DESC",
-        (id_usuario,))
+    # 1️⃣ Obtener todos los pedidos del usuario
+    cursor.execute("""
+        SELECT *
+        FROM pedido
+        WHERE ID_Usuario = %s
+        ORDER BY FechaPedido DESC
+    """, (id_usuario,))
     pedidos = cursor.fetchall()
 
+    # 2️⃣ Agregar detalles a cada pedido
     for pedido in pedidos:
         cursor.execute("""
-            SELECT dp.id_producto, dp.cantidad, p.NombreProducto,pe.ID_usuario,
-                        p.PrecioUnidad,
-                            ip.ruta AS Imagen
-                        FROM detalle_pedido dp
-                        JOIN producto p ON dp.id_producto = p.id_producto
-                        LEFT JOIN imagenproducto ip ON p.id_producto = ip.id_producto
-                        join pedido pe on pe.ID_Pedido = dp.ID_Pedido
-                        WHERE pe.id_usuario = %s
-        """, (Usuario['ID_Usuario'],))
+            SELECT
+                dp.id_producto,
+                dp.cantidad,
+                p.NombreProducto,
+                p.PrecioUnidad,
+                COALESCE(ip.ruta, '') AS Imagen
+            FROM detalle_pedido dp
+            JOIN producto p ON dp.id_producto = p.id_producto
+            LEFT JOIN imagenproducto ip ON p.id_producto = ip.id_producto
+            WHERE dp.ID_Pedido = %s
+            GROUP BY dp.id_producto
+        """, (pedido['ID_Pedido'],))
+
         detalles = cursor.fetchall()
 
+        # 3️⃣ Limpiar rutas de imágenes
         for item in detalles:
             if item['Imagen']:
                 item['Imagen'] = item['Imagen'].replace("static/", "")
 
-        pedido['detalles'] = detalles
+        # 4️⃣ Calcular total del pedido
         total = sum(item['cantidad'] * float(item['PrecioUnidad']) for item in detalles)
+
+        pedido['detalles'] = detalles
         pedido['total'] = round(total, 2)
 
     conexion.close()
