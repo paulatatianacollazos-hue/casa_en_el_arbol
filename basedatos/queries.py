@@ -394,7 +394,8 @@ def asignar_calendario():
                 conn.close()
                 return jsonify({
                     "success": False,
-                    "message": f"⚠️ El empleado ya tiene una cita el {fecha} a las {start_datetime.strftime('%H:%M')}."
+                    "message": f"""⚠️ El empleado ya tiene una cita el {fecha}
+                    a las {start_datetime.strftime('%H:%M')}."""
                 })
 
             # 🟢 Guardamos en la tabla Pedido
@@ -404,16 +405,19 @@ def asignar_calendario():
                     FechaEntrega = %s,
                     HoraEntrega = %s
                 WHERE ID_Pedido = %s
-            """, (empleado_id, fecha, start_datetime.strftime("%H:%M:%S"), pedido_id))
+            """, (empleado_id, fecha, start_datetime.strftime("%H:%M:%S"),
+                  pedido_id))
 
             # 🟢 Insertar también en la tabla Calendario
             cursor.execute("""
-                INSERT INTO Calendario (Fecha, Hora, Ubicacion, ID_Usuario, ID_Pedido, Tipo)
+                INSERT INTO Calendario (Fecha, Hora, Ubicacion, ID_Usuario,
+                ID_Pedido, Tipo)
                 SELECT %s, %s, u.Direccion, %s, p.ID_Pedido, p.Instalacion
                 FROM Pedido p
                 JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
                 WHERE p.ID_Pedido = %s
-            """, (fecha, start_datetime.strftime("%H:%M:%S"), empleado_id, pedido_id))
+            """, (fecha, start_datetime.strftime("%H:%M:%S"), empleado_id,
+                  pedido_id))
 
             # Avanzar a la siguiente hora según instalación o normal
             start_datetime += intervalo
@@ -432,6 +436,7 @@ def asignar_calendario():
         cursor.close()
         conn.close()
 
+
 def buscar_pedidos():
     filtros = []
     fecha = request.form.get("fecha_pedido")
@@ -441,7 +446,6 @@ def buscar_pedidos():
 
     if fecha:
         filtros.append(Pedido.FechaPedido == fecha)
-
 
     if id_pedido:
         filtros.append(Pedido.ID_Pedido == id_pedido)
@@ -462,7 +466,8 @@ def buscar_pedidos():
         productos_html = "<ul>"
         for detalle in Detalle_Pedido.query.filter_by(ID_Pedido=pedido.ID_Pedido).all():
             producto = Producto.query.get(detalle.ID_Producto)
-            productos_html += f"<li>{producto.NombreProducto} x {detalle.Cantidad}</li>"
+            productos_html += f"""<li>{producto.NombreProducto}
+            x {detalle.Cantidad}</li>"""
         productos_html += "</ul>"
 
         resultados.append({
@@ -475,6 +480,7 @@ def buscar_pedidos():
         })
 
     return resultados
+
 
 def asignar_empleado(form_data):
     """
@@ -497,10 +503,12 @@ def asignar_empleado(form_data):
         pedido.ID_Empleado = empleado.ID_Usuario
         db.session.commit()
 
-        return {"success": True, "message": f"Empleado {empleado.Nombre} asignado correctamente"}
+        return {"success": True, "message": f"""Empleado {empleado.Nombre}
+                asignado correctamente"""}
     except Exception as e:
         db.session.rollback()
         return {"success": False, "error": str(e)}
+
 
 # ----------- ACTUALIZAR PEDIDO -----------
 def actualizar_pedido(form_data):
@@ -528,16 +536,15 @@ def actualizar_pedido(form_data):
 
         db.session.commit()
 
-        return {"success": True, "message": f"Pedido {pedido_id} actualizado correctamente"}
+        return {"success": True, "message": f"""Pedido {pedido_id}
+                actualizado correctamente"""}
     except Exception as e:
         db.session.rollback()
         return {"success": False, "error": str(e)}
 
 
-    
-
-
-def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usuario_id, productos):
+def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino,
+                     usuario_id, productos):
     try:
         pedido = Pedido(
             NombreComprador=nombre_comprador,
@@ -566,7 +573,6 @@ def registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usu
     except Exception as e:
         db.session.rollback()
         return {"success": False, "message": str(e)}
-    
 
 
 def registrar_firma(pedido_id, nombre_cliente, ruta_firma):
@@ -579,18 +585,20 @@ def registrar_firma(pedido_id, nombre_cliente, ruta_firma):
     conn.commit()
     cursor.close()
     conn.close()
-    
-    
+
+
 def guardar_producto(data, files):
     conn = get_connection()
     cursor = conn.cursor()
 
     # Insertar producto
     cursor.execute("""
-        INSERT INTO producto (NombreProducto, Stock, Material, Color, PrecioUnidad, ID_Categoria, ID_Proveedor)
+        INSERT INTO producto (NombreProducto, Stock, Material, Color,
+        PrecioUnidad, ID_Categoria, ID_Proveedor)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (data['NombreProducto'], data['Stock'], data['Material'],
-          data['Color'], data['PrecioUnidad'], data['ID_Categoria'], data['ID_Proveedor']))
+          data['Color'], data['PrecioUnidad'], data['ID_Categoria'],
+          data['ID_Proveedor']))
     conn.commit()
     producto_id = cursor.lastrowid
 
@@ -598,7 +606,8 @@ def guardar_producto(data, files):
     for file in files:
         if file and file.filename != '':
             filename = secure_filename(file.filename)
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'],
+                                    filename)
             file.save(filepath)
 
             image_url = f"/static/img/{filename}"
@@ -610,12 +619,14 @@ def guardar_producto(data, files):
         conn.commit()
     return producto_id
 
+
 def guardar_producto_route():
     try:
         # ✅ Guardar datos del producto primero
         cursor = db.connection.cursor()
         cursor.execute("""
-            INSERT INTO producto (NombreProducto, Stock, Material, Color, PrecioUnidad, ID_Categoria, ID_Proveedor)
+            INSERT INTO producto (NombreProducto, Stock, Material, Color,
+            PrecioUnidad, ID_Categoria, ID_Proveedor)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             request.form['NombreProducto'],
@@ -634,12 +645,12 @@ def guardar_producto_route():
             for file in files:
                 if file and file.filename != '':
                     filename = secure_filename(file.filename)
-                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    filepath = os.path.join(
+                        current_app.config['UPLOAD_FOLDER'], filename)
 
                     # Guardar físicamente en static/img
                     file.save(filepath)
 
-                    # Guardar la ruta completa en DB (ejemplo: static/img/sofa1.jpg)
                     image_url = f"static/img/{filename}"
 
                     cursor.execute("""
@@ -648,19 +659,22 @@ def guardar_producto_route():
                     """, (producto_id, image_url))
 
         db.connection.commit()
-        return jsonify({"success": True, "message": "Producto guardado con éxito"})
+        return jsonify({"success": True,
+                        "message": "Producto guardado con éxito"})
 
     except Exception as e:
         db.connection.rollback()
         return jsonify({"success": False, "message": str(e)})
-    
+
+
 def get_productos():
     conn = get_connection()  # 👈 aquí faltaba crear la conexión
     query = """
-        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
-               (SELECT i.ruta 
-                FROM imagenproducto i 
-                WHERE i.ID_Producto = p.ID_Producto 
+        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad,
+        p.Color,
+               (SELECT i.ruta
+                FROM imagenproducto i
+                WHERE i.ID_Producto = p.ID_Producto
                 LIMIT 1) AS Imagen
         FROM producto p;
     """
@@ -677,7 +691,8 @@ def get_producto_by_id(id_producto):
     cursor = conn.cursor(dictionary=True)
 
     query = """
-        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad, p.Color,
+        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad,
+        p.Color,
                c.NombreCategoria, pr.NombreEmpresa,
                i.ruta AS Imagen
         FROM producto p
@@ -706,22 +721,27 @@ def get_producto_by_id(id_producto):
         "NombreEmpresa": rows[0]["NombreEmpresa"],
         # Limpiar rutas para que sean relativas a /static/
         "Imagenes": [
-            row["Imagen"].replace("static/", "") for row in rows if row["Imagen"]
+            row["Imagen"].replace(
+                "static/", "") for row in rows if row["Imagen"]
         ]
     }
 
     return producto
 
+
 def obtener_pedidos_por_cliente(id_usuario):
     conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM pedido WHERE id_usuario = %s ORDER BY FechaPedido DESC", (id_usuario,))
+    cursor.execute(
+        "SELECT * FROM pedido WHERE id_usuario = %s ORDER BY FechaPedido DESC",
+        (id_usuario,))
     pedidos = cursor.fetchall()
 
     for pedido in pedidos:
         cursor.execute("""
-            SELECT dp.id_producto, dp.cantidad, p.NombreProducto, p.PrecioUnidad,
+            SELECT dp.id_producto, dp.cantidad, p.NombreProducto,
+            p.PrecioUnidad,
                    ip.ruta AS Imagen
             FROM detalles_pedido dp
             JOIN producto p ON dp.id_producto = p.id_producto
