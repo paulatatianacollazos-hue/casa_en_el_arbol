@@ -748,7 +748,7 @@ def obtener_pedidos_por_cliente(id_usuario):
                         LEFT JOIN imagenproducto ip ON p.id_producto = ip.id_producto
                         join pedido pe on pe.ID_Pedido = dp.ID_Pedido
                         WHERE pe.id_usuario = %s
-        """, (pedido['id_pedido'],))
+        """, (Usuario['ID_Usuario'],))
         detalles = cursor.fetchall()
 
         for item in detalles:
