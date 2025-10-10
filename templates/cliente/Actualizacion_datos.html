@@ -79,12 +79,6 @@
         right: 5px;
       }
 
-      .menu-item.active {
-        background-color: #8dc63f; /* color verde */
-        color: #fff;
-        font-weight: bold;
-        border-radius: 8px;
-      }
 
     </style>
 </head>
@@ -274,25 +268,10 @@
     <div class="col-md-3 col-lg-2 mb-4">
       <div class="sidebar shadow-sm">
         <h4>🌿 HOLA!</h4>
-         <a href="{{ url_for('cliente.actualizacion_datos') }}" 
-          class="menu-item {% if request.endpoint == 'cliente.actualizacion_datos' %}active{% endif %}">
-          Perfil
-        </a>
-
-        <a href="{{ url_for('cliente.direcciones') }}" 
-          class="menu-item {% if request.endpoint == 'cliente.direcciones' %}active{% endif %}">
-          Direcciones
-        </a>
-
-        <a href="{{ url_for('cliente.pedidos_por_cliente') }}" 
-          class="menu-item {% if request.endpoint == 'cliente.pedidos_por_cliente' %}active{% endif %}">
-          Pedidos
-        </a>
-
-        <a href="{{ url_for('cliente.favoritos') }}" 
-          class="menu-item {% if request.endpoint == 'cliente.favoritos' %}active{% endif %}">
-          Favoritos
-        </a>
+        <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
+        <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
+        <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a><i class="bi bi-heart me-2"></i>Favoritos</a>
         <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
     </div>
