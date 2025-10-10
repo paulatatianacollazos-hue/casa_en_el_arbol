@@ -308,7 +308,7 @@ def detalle_producto(id_producto):
     return render_template("cliente/cliente_detalle.html", producto=producto)
 
 
-@cliente.route('/actualizacion_datos')
+@cliente.route('/pedidos_por_cliente')
 @login_required
 def pedidos_por_cliente():
     user_id = current_user.ID_Usuario

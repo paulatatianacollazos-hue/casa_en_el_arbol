@@ -486,8 +486,8 @@
     <h5 class="mb-0">MIS PEDIDOS</h5>
   </div>
 
-  {% if pedidos_con_detalles %}
-    {% for item in pedidos_con_detalles %}
+  {% if pedidos_por_cliente %}
+    {% for item in pedidos_por_cliente %}
       <div class="pedido-item mb-5">
         <h6 class="fw-bold mb-3">
           Pedido #{{ item.id_pedido }} - {{ item.FechaPedido }}
