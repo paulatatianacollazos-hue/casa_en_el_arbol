@@ -204,6 +204,7 @@ def escribir_resena():   # <- sin ñ
 def actualizacion_datos():
 
     usuario = current_user
+    user_id = usuario.ID_Usuario
     direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=usuario.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
 
