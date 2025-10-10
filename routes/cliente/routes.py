@@ -202,6 +202,7 @@ def escribir_resena():   # <- sin ñ
 @login_required
 @role_required("cliente","admin")
 def actualizacion_datos():
+
     usuario = current_user
     direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=usuario.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
@@ -241,7 +242,23 @@ def actualizacion_datos():
         direcciones=direcciones,
         notificaciones=notificaciones
     )
-    
+
+
+def pedidos_por_cliente():
+    user_id = current_user.ID_Usuario
+    pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
+
+    usuario = current_user
+    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
+
+    return render_template(
+        "cliente/Actualizacion_datos.html",
+        usuario=usuario,
+        direcciones=direcciones,
+        notificaciones=notificaciones,
+        pedidos_con_detalles=pedidos_con_detalles
+    )
 
 
 @cliente.route("/direccion/agregar", methods=["POST"])
@@ -308,22 +325,3 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
     return render_template("cliente/cliente_detalle.html", producto=producto)
-
-
-@cliente.route('/pedidos_por_cliente')
-@login_required
-def pedidos_por_cliente():
-    user_id = current_user.ID_Usuario
-    pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
-
-    usuario = current_user
-    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
-
-    return render_template(
-        "cliente/Actualizacion_datos.html",
-        usuario=usuario,
-        direcciones=direcciones,
-        notificaciones=notificaciones,
-        pedidos_con_detalles=pedidos_con_detalles
-    )
