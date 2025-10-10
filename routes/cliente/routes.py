@@ -207,6 +207,8 @@ def actualizacion_datos():
     direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
     notificaciones = Notificaciones.query.filter_by(ID_Usuario=usuario.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
 
+    pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
+
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         apellido = request.form.get("apellido", "").strip()
@@ -238,22 +240,6 @@ def actualizacion_datos():
 
     return render_template(
         "cliente/actualizacion_datos.html",
-        usuario=usuario,
-        direcciones=direcciones,
-        notificaciones=notificaciones
-    )
-
-
-def pedidos_por_cliente():
-    user_id = current_user.ID_Usuario
-    pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
-
-    usuario = current_user
-    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
-
-    return render_template(
-        "cliente/Actualizacion_datos.html",
         usuario=usuario,
         direcciones=direcciones,
         notificaciones=notificaciones,
