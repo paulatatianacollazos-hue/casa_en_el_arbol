@@ -270,7 +270,7 @@
         <h4>🌿 HOLA!</h4>
         <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
         <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
-        <a id="menu-pedidos" href="/pedidos_por_cliente"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
+        <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
         <a><i class="bi bi-heart me-2"></i>Favoritos</a>
         <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
@@ -486,8 +486,8 @@
     <h5 class="mb-0">MIS PEDIDOS</h5>
   </div>
 
-  {% if pedidos_por_cliente %}
-    {% for item in pedidos_por_cliente %}
+  {% if pedidos_con_detalles %}
+    {% for item in pedidos_con_detalles %}
       <div class="pedido-item mb-5">
         <h6 class="fw-bold mb-3">
           Pedido #{{ item.id_pedido }} - {{ item.FechaPedido }}
