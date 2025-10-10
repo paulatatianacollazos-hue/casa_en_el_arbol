@@ -241,6 +241,8 @@ def actualizacion_datos():
         direcciones=direcciones,
         notificaciones=notificaciones
     )
+    
+
 
 @cliente.route("/direccion/agregar", methods=["POST"])
 @login_required
