@@ -14,6 +14,28 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
 
     <style>
+      .sidebar a {
+        display: block;
+        color: #333;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      .sidebar a:hover {
+        background-color: #eaf5ec;
+        color: #1b8a3d;
+      }
+
+      .sidebar a.active {
+        background-color: #1b8a3d;
+        color: white !important;
+        font-weight: 600;
+      }
+
+
       .pedido-container {
         margin-bottom: 40px;
       }
@@ -521,12 +543,12 @@
 
           <div class="carousel" id="carousel-{{ item.id_pedido }}">
             {% for producto in item.detalles %}
-              <div class="producto-card">
+              <a class="producto-card">
                 <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
                 <h6>{{ producto.NombreProducto }}</h6>
                 <p>Cantidad: {{ producto.cantidad }}</p>
                 <p class="precio">${{ producto.PrecioUnidad }}</p>
-              </div>
+              </a>
             {% endfor %}
           </div>
 
@@ -631,29 +653,43 @@
   }
 </script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const seccionPerfil = document.getElementById("seccion-perfil");
-    const seccionDirecciones = document.getElementById("seccion-direcciones");
-    const seccionPedidos = document.getElementById("seccion-pedidos");
+ document.addEventListener("DOMContentLoaded", () => {
+  const seccionPerfil = document.getElementById("seccion-perfil");
+  const seccionDirecciones = document.getElementById("seccion-direcciones");
+  const seccionPedidos = document.getElementById("seccion-pedidos");
+  const menuLinks = document.querySelectorAll(".sidebar a");
 
-    document.getElementById("menu-perfil").addEventListener("click", () => {
+  function mostrarSeccion(activa) {
+    // Oculta todas las secciones
+    seccionPerfil.style.display = "none";
+    seccionDirecciones.style.display = "none";
+    seccionPedidos.style.display = "none";
+
+    // Quita "active" de todos los enlaces
+    menuLinks.forEach(link => link.classList.remove("active"));
+
+    // Muestra la sección activa y resalta el botón
+    if (activa === "perfil") {
       seccionPerfil.style.display = "block";
-      seccionDirecciones.style.display = "none";
-      seccionPedidos.style.display = "none";
-    });
-
-    document.getElementById("menu-direcciones").addEventListener("click", () => {
-      seccionPerfil.style.display = "none";
+      document.getElementById("menu-perfil").classList.add("active");
+    } else if (activa === "direcciones") {
       seccionDirecciones.style.display = "block";
-      seccionPedidos.style.display = "none";
-    });
-
-    document.getElementById("menu-pedidos").addEventListener("click", () => {
-      seccionPerfil.style.display = "none";
-      seccionDirecciones.style.display = "none";
+      document.getElementById("menu-direcciones").classList.add("active");
+    } else if (activa === "pedidos") {
       seccionPedidos.style.display = "block";
-    });
-  });
+      document.getElementById("menu-pedidos").classList.add("active");
+    }
+  }
+
+  // Asignar eventos
+  document.getElementById("menu-perfil").addEventListener("click", () => mostrarSeccion("perfil"));
+  document.getElementById("menu-direcciones").addEventListener("click", () => mostrarSeccion("direcciones"));
+  document.getElementById("menu-pedidos").addEventListener("click", () => mostrarSeccion("pedidos"));
+
+  // Por defecto, mostrar Perfil
+  mostrarSeccion("perfil");
+});
+
 </script>
 
 
