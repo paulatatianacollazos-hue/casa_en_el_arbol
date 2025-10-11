@@ -200,7 +200,7 @@ def escribir_resena():   # <- sin ñ
 # ---------- PERFIL Y DIRECCIONES ----------
 @cliente.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("cliente","admin")
+@role_required("cliente", "admin")
 def actualizacion_datos():
 
     usuario = current_user
@@ -312,3 +312,4 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
     return render_template("cliente/cliente_detalle.html", producto=producto)
+
