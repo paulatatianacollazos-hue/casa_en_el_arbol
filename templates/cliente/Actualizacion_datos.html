@@ -79,6 +79,28 @@
         right: 5px;
       }
 
+      .carousel {
+        display: flex;
+        gap: 15px;
+        transition: transform 0.5s ease;
+        will-change: transform;
+        width: max-content;
+      }
+
+      .carousel-wrapper {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .producto-card {
+        flex: 0 0 300px; /* ancho fijo para control del movimiento */
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        padding: 10px;
+      }
 
     </style>
 </head>
@@ -579,25 +601,33 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/actualizacion.js') }}"></script>
 <script>
-  const posiciones = {}; // Guardará la posición actual de cada carrusel
+  const posiciones = {}; // guarda la posición actual de cada carrusel
 
   function moverCarousel(pedidoId, direccion) {
     const carrusel = document.getElementById(`carousel-${pedidoId}`);
+    if (!carrusel) return;
+
     const productos = carrusel.querySelectorAll(".producto-card");
     const totalProductos = productos.length;
+    const productosPorVista = 3; // mostramos 3 por vista
 
+    // Inicializa posición
     if (!posiciones[pedidoId]) posiciones[pedidoId] = 0;
 
-    const productosPorVista = 3;
-    const maxPos = totalProductos - productosPorVista;
+    // Calcula el ancho de una tarjeta
+    const cardWidth = productos[0].offsetWidth + 15; // 15 = gap
 
+    // Actualiza posición
     posiciones[pedidoId] += direccion;
 
+    // Límite del carrusel
+    const maxPos = totalProductos - productosPorVista;
     if (posiciones[pedidoId] < 0) posiciones[pedidoId] = 0;
     if (posiciones[pedidoId] > maxPos) posiciones[pedidoId] = maxPos;
 
-    const desplazamiento = posiciones[pedidoId] * (100 / productosPorVista);
-    carrusel.style.transform = `translateX(-${desplazamiento}%)`;
+    // Aplica el desplazamiento
+    const desplazamiento = posiciones[pedidoId] * cardWidth;
+    carrusel.style.transform = `translateX(-${desplazamiento}px)`;
   }
 </script>
 <script>
