@@ -558,7 +558,11 @@
 
         <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
         <hr class="my-4">
-        <a href="/firmar">Confirmación de entrega</a>
+        {% if item.Estado == 'Entregado' %}
+          <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
+            Confirmación de entrega
+          </a>
+        {% endif %}
       </div>
     {% endfor %}
   {% else %}

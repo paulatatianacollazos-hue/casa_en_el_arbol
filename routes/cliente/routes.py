@@ -9,7 +9,9 @@ from basedatos.queries import obtener_pedidos_por_cliente
 from flask import render_template
 from flask_login import login_required, current_user
 from basedatos.queries import get_productos, get_producto_by_id
-
+from basedatos.models import db, Comentarios
+import base64
+import os
 
 
 from . import cliente
@@ -313,3 +315,36 @@ def detalle_producto(id_producto):
         return redirect(url_for("admin.catalogo"))
     return render_template("cliente/cliente_detalle.html", producto=producto)
 
+
+@cliente.route("/firmar/<int:id_pedido>", methods=["GET", "POST"])
+@login_required
+def firmar_entrega(id_pedido):
+    if request.method == "POST":
+        # Obtener la imagen de la firma (si se usa canvas)
+        firma_base64 = request.form.get("firma")
+
+        if not firma_base64:
+            flash("⚠️ Debes firmar antes de confirmar la entrega.", "warning")
+            return redirect(url_for("cliente.firmar_entrega", id_pedido=id_pedido))
+
+        # Guardar la imagen en el servidor (opcional)
+        firma_data = base64.b64decode(firma_base64.split(",")[1])
+        firma_path = f"static/firmas/firma_{id_pedido}.png"
+        os.makedirs(os.path.dirname(firma_path), exist_ok=True)
+        with open(firma_path, "wb") as f:
+            f.write(firma_data)
+
+        # Crear comentario en la tabla comentarios
+        nuevo_comentario = Comentarios(
+            ID_Pedido=id_pedido,
+            ID_Usuario=current_user.ID_Usuario,
+            Texto="El pedido fue entregado y confirmado por el cliente.",
+            ImagenFirma=firma_path  # si tu modelo tiene un campo para la imagen
+        )
+        db.session.add(nuevo_comentario)
+        db.session.commit()
+
+        flash("✅ Entrega confirmada correctamente.", "success")
+        return redirect(url_for("cliente.actualizacion_datos"))
+
+    return render_template("cliente/confirmacion_firma.html", id_pedido=id_pedido)
