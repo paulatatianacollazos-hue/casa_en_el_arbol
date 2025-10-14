@@ -97,6 +97,7 @@
   </div>
 </nav>
 
+{% block content %}{% endblock %}
 
 {% if session.get('show_welcome_modal') and session.get('username') %}
   <!-- Modal de bienvenida -->
