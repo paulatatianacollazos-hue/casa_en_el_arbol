@@ -95,7 +95,7 @@ def nosotros():
 @app.route("/catalogo")
 def catalogo():
     productos = get_productos()
-    return render_template("cliente/cliente_catalogo.html",productos=productos)
+    return render_template("common/catalogo.html",productos=productos)
 
 @app.route("/producto/<int:id_producto>")
 def detalle_producto(id_producto):
