@@ -1,7 +1,8 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from basedatos.queries import get_productos, get_producto_by_id
 
 # ------------------ MODELOS ------------------ #
 from basedatos.models import db, Usuario
@@ -89,6 +90,20 @@ def index():
 @app.route("/nosotros")
 def nosotros():
     return render_template("common/nosotros.html")
+
+
+@app.route("/catalogo")
+def catalogo():
+    productos = get_productos()
+    return render_template("cliente/cliente_catalogo.html",productos=productos)
+
+@app.route("/producto/<int:id_producto>")
+def detalle_producto(id_producto):
+    producto = get_producto_by_id(id_producto)
+    if not producto:
+        flash("Producto no encontrado", "error")
+        return redirect(url_for("admin.catalogo"))
+    return render_template("cliente/cliente_detalle.html", producto=producto)
 
 
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
