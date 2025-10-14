@@ -79,6 +79,7 @@ app.register_blueprint(auth)
 app.register_blueprint(cliente)
 app.register_blueprint(admin)
 
+
 # ------------------ RUTAS PÚBLICAS ------------------ #
 @app.route("/")
 def index():
@@ -88,7 +89,6 @@ def index():
 @app.route("/nosotros")
 def nosotros():
     return render_template("common/nosotros.html")
-
 
 
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
