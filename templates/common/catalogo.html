@@ -11,6 +11,7 @@
 
 {% block title %}Catálogo | Casa en el Árbol{% endblock %}
 
+{% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo.css') }}">
   <style>
     /* Fondo oscuro */
@@ -129,7 +130,7 @@
 
   </style>
 
-
+{% endblock %}
 
 {% block content %}
 <br>
