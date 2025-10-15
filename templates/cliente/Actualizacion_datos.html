@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
 
-    <style>
+  <style>
       .sidebar a {
         display: block;
         color: #333;
@@ -44,32 +44,21 @@
 
       /* --- Corrige visibilidad de slides --- */
 .carousel-inner {
-  position: relative;
-  width: 100%;
   overflow: hidden;
 }
 
 .carousel-item {
   display: none;
-  justify-content: center;
-  align-items: stretch;
   transition: transform 0.6s ease-in-out;
 }
 
-.carousel-item.active,
-.carousel-item-next,
-.carousel-item-prev {
+.carousel-item.active {
   display: flex;
-}
-
-/* --- Distribución de productos por slide --- */
-.carousel-item .producto-card {
-  flex: 0 0 calc(33.333% - 2rem);
-  max-width: 18rem;
-  margin: 0 1rem;
+  justify-content: center;
 }
 
 .producto-card {
+  width: 18rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
@@ -84,21 +73,24 @@
   color: #1b8a3d;
 }
 
-/* --- Responsividad --- */
+/* Flechas centradas */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Responsivo */
 @media (max-width: 992px) {
-  .carousel-item .producto-card {
-    flex: 0 0 calc(50% - 1rem);
-  }
+  .producto-card { width: 45%; }
 }
 
 @media (max-width: 576px) {
-  .carousel-item .producto-card {
-    flex: 0 0 100%;
-  }
+  .producto-card { width: 90%; }
 }
 
-
-    </style>
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
@@ -508,35 +500,25 @@
   <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide mb-5" data-bs-ride="carousel">
     <div class="carousel-inner">
 
-      {# Agrupamos los productos de este pedido de 3 en 3 #}
+      {# Agrupamos productos de 3 en 3 #}
       {% for grupo in item.detalles | batch(3, None) %}
-        <div class="carousel-item {% if loop.first %}active{% endif %}">
-          <div class="d-flex justify-content-center gap-4 flex-wrap">
-            {% for producto in grupo %}
-              {% if producto %}
-                <div class="card producto-card mx-auto" style="width: 18rem;">
-                  <img src="{{ url_for('static', filename=producto.Imagen) }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
-                  <div class="card-body text-center">
-                    <h6 class="card-title">{{ producto.NombreProducto }}</h6>
-                    <p class="mb-1">Cantidad: {{ producto.cantidad }}</p>
-                    <p class="precio mb-0">${{ producto.PrecioUnidad }}</p>
-                  </div>
-                </div>
-              {% endif %}
-            {% endfor %}
+      <div class="carousel-item {% if loop.first %}active{% endif %}">
+        <div class="d-flex justify-content-center align-items-stretch">
+          {% for producto in grupo %}
+          {% if producto %}
+          <div class="card producto-card mx-2">
+            <img src="{{ url_for('static', filename=producto.Imagen) }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
+            <div class="card-body text-center">
+              <h6 class="card-title">{{ producto.NombreProducto }}</h6>
+              <p class="mb-1">Cantidad: {{ producto.cantidad }}</p>
+              <p class="precio mb-0">${{ producto.PrecioUnidad }}</p>
+            </div>
           </div>
+          {% endif %}
+          {% endfor %}
         </div>
+      </div>
       {% endfor %}
-    </div>
-
-    <div class="text-center mt-3">
-      <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
-      <hr class="my-4 w-75 mx-auto">
-      {% if item.Estado == 'entregado' %}
-        <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
-          Confirmación de entrega
-        </a>
-      {% endif %}
     </div>
 
     <!-- Controles -->
@@ -548,8 +530,18 @@
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Siguiente</span>
     </button>
+
+    <div class="text-center mt-3">
+      <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
+      {% if item.Estado == 'entregado' %}
+      <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
+        Confirmación de entrega
+      </a>
+      {% endif %}
+    </div>
   </div>
 {% endfor %}
+</div>
 
        
  
@@ -613,35 +605,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/actualizacion.js') }}"></script>
 <script>
-  const posiciones = {}; // guarda la posición actual de cada carrusel
-
-  function moverCarousel(pedidoId, direccion) {
-    const carrusel = document.getElementById(`carousel-${pedidoId}`);
-    if (!carrusel) return;
-
-    const productos = carrusel.querySelectorAll(".producto-card");
-    const totalProductos = productos.length;
-    const productosPorVista = 3; // mostramos 3 por vista
-
-    // Inicializa posición
-    if (!posiciones[pedidoId]) posiciones[pedidoId] = 0;
-
-    // Calcula el ancho de una tarjeta
-    const cardWidth = productos[0].offsetWidth + 15; // 15 = gap
-
-    // Actualiza posición
-    posiciones[pedidoId] += direccion;
-
-    // Límite del carrusel
-    const maxPos = totalProductos - productosPorVista;
-    if (posiciones[pedidoId] < 0) posiciones[pedidoId] = 0;
-    if (posiciones[pedidoId] > maxPos) posiciones[pedidoId] = maxPos;
-
-    // Aplica el desplazamiento
-    const desplazamiento = posiciones[pedidoId] * cardWidth;
-    carrusel.style.transform = `translateX(-${desplazamiento}px)`;
-  }
+  document.addEventListener('DOMContentLoaded', function () {
+    const carousels = document.querySelectorAll('.carousel');
+    carousels.forEach(carousel => new bootstrap.Carousel(carousel));
+  });
 </script>
+
 <script>
  document.addEventListener("DOMContentLoaded", () => {
   const seccionPerfil = document.getElementById("seccion-perfil");
