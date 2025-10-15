@@ -95,7 +95,8 @@ def nosotros():
 @app.route("/catalogo")
 def catalogo():
     productos = get_productos()
-    return render_template("common/catalogo.html",productos=productos)
+    return render_template("common/catalogo.html", productos=productos)
+
 
 @app.route("/producto/<int:id_producto>")
 def detalle_producto(id_producto):
@@ -103,7 +104,7 @@ def detalle_producto(id_producto):
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
-    return render_template("cliente/cliente_detalle.html", producto=producto)
+    return render_template("common/detalles.html", producto=producto)
 
 
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
