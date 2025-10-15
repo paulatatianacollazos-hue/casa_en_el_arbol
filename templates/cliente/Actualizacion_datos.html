@@ -635,7 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Quita "active" de todos los enlaces
     menuLinks.forEach(link => link.classList.remove("active"));
 
-    // Muestra la sección activa y resalta el botón
+    // Muestra la sección activa
     if (activa === "perfil") {
       seccionPerfil.style.display = "block";
       document.getElementById("menu-perfil").classList.add("active");
@@ -646,19 +646,23 @@ document.addEventListener("DOMContentLoaded", () => {
       seccionPedidos.style.display = "block";
       document.getElementById("menu-pedidos").classList.add("active");
 
-      // 👇 Inicializar carruseles SOLO cuando se muestran los pedidos
-      const carousels = seccionPedidos.querySelectorAll('.carousel');
-      carousels.forEach(carousel => {
-        if (!bootstrap.Carousel.getInstance(carousel)) {
-          new bootstrap.Carousel(carousel, {
-            interval: false, // No auto-slide
-            ride: false,     // No iniciar automáticamente
-            pause: false,
-            wrap: true       // Permite ciclo entre primero y último
-          });
-        }
+      // 🧩 Asegurar que los carruseles se re-inicialicen correctamente
+      setTimeout(() => {
+        const carousels = seccionPedidos.querySelectorAll('.carousel');
+        carousels.forEach(carousel => {
+          // Eliminar instancias anteriores
+          const existing = bootstrap.Carousel.getInstance(carousel);
+          if (existing) existing.dispose();
 
-      });
+          // Crear una nueva instancia estable
+          new bootstrap.Carousel(carousel, {
+            interval: false,
+            ride: false,
+            pause: false,
+            wrap: true
+          });
+        });
+      }, 100); // ⏳ Espera a que se renderice la sección
     }
   }
 
@@ -667,13 +671,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("menu-direcciones").addEventListener("click", () => mostrarSeccion("direcciones"));
   document.getElementById("menu-pedidos").addEventListener("click", () => mostrarSeccion("pedidos"));
 
-  // Por defecto, mostrar Perfil
+  // Mostrar perfil por defecto
   mostrarSeccion("perfil");
 });
 </script>
-
-
-
 
 </body>
 </html>
