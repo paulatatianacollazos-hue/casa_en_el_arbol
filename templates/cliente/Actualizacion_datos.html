@@ -54,7 +54,7 @@
 
 .carousel-item.active {
   display: flex;
-  justify-content: center;
+  
 }
 
 .producto-card {
@@ -67,7 +67,7 @@
 
 .producto-card img{
   width: 80%;
-  height: 200px;
+  height: 180px;
 }
 
 .producto-card:hover {
@@ -613,7 +613,7 @@
 
 
 <script>
- document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const seccionPerfil = document.getElementById("seccion-perfil");
   const seccionDirecciones = document.getElementById("seccion-direcciones");
   const seccionPedidos = document.getElementById("seccion-pedidos");
@@ -638,6 +638,12 @@
     } else if (activa === "pedidos") {
       seccionPedidos.style.display = "block";
       document.getElementById("menu-pedidos").classList.add("active");
+
+      // 👇 Inicializar carruseles SOLO cuando se muestran los pedidos
+      const carousels = seccionPedidos.querySelectorAll('.carousel');
+      carousels.forEach(carousel => {
+        bootstrap.Carousel.getInstance(carousel) || new bootstrap.Carousel(carousel);
+      });
     }
   }
 
@@ -649,8 +655,8 @@
   // Por defecto, mostrar Perfil
   mostrarSeccion("perfil");
 });
-
 </script>
+
 
 
 
