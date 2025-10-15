@@ -49,12 +49,16 @@
 
 .carousel-item {
   display: none;
-  transition: transform 0.6s ease-in-out;
 }
 
 .carousel-item.active {
-  display: flex;
-  
+  display: block; /* <-- Bootstrap lo necesita */
+}
+
+.carousel-inner > .carousel-item > .d-flex {
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
 }
 
 .producto-card {
