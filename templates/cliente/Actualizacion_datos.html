@@ -55,19 +55,13 @@
       }
 
       .producto-card {
-        flex: 0 0 calc(33.33% - 10px);
-        background: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        text-align: center;
-        padding: 10px;
+        transition: transform 0.3s ease;
       }
 
-      .producto-card img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 8px;
+      .producto-card:hover {
+        transform: translateY(-5px);
       }
 
       .precio {
@@ -531,44 +525,56 @@
     <h5 class="mb-0">MIS PEDIDOS</h5>
   </div>
 
-  {% if pedidos_con_detalles %}
-    {% for item in pedidos_con_detalles %}
-      <div class="pedido-item mb-5">
-        <h6 class="fw-bold mb-3">
-          Pedido #{{ item.id_pedido }} - {{ item.FechaPedido }}
-          <span class="badge bg-info text-dark">{{ item.Estado }}</span>
-        </h6>
+{% for item in pedidos_con_detalles %}
+  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-inner">
 
-        <div class="carousel-wrapper">
-          <button class="carousel-btn prev" onclick="moverCarousel('{{ item.id_pedido }}', -1)">❮</button>
-
-          <div class="carousel" id="carousel-{{ item.id_pedido }}">
-            {% for producto in item.detalles %}
-              <a class="producto-card">
-                <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
-                <h6>{{ producto.NombreProducto }}</h6>
-                <p>Cantidad: {{ producto.cantidad }}</p>
-                <p class="precio">${{ producto.PrecioUnidad }}</p>
-              </a>
+      {# Agrupamos los productos de este pedido de 3 en 3 #}
+      {% for grupo in item.detalles | batch(3, None) %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <div class="d-flex justify-content-center gap-4 flex-wrap">
+            {% for producto in grupo %}
+              {% if producto %}
+                <div class="card producto-card mx-auto" style="width: 18rem;">
+                  <img src="{{ url_for('static', filename=producto.Imagen) }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
+                  <div class="card-body text-center">
+                    <h6 class="card-title">{{ producto.NombreProducto }}</h6>
+                    <p class="mb-1">Cantidad: {{ producto.cantidad }}</p>
+                    <p class="precio mb-0">${{ producto.PrecioUnidad }}</p>
+                  </div>
+                </div>
+              {% endif %}
             {% endfor %}
           </div>
-
-          <button class="carousel-btn next" onclick="moverCarousel('{{ item.id_pedido }}', 1)">❯</button>
         </div>
+      {% endfor %}
+    </div>
 
-        <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
-        <hr class="my-4">
-        {% if item.Estado == 'entregado' %}
-          <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
-            Confirmación de entrega
-          </a>
-        {% endif %}
-      </div>
-    {% endfor %}
-  {% else %}
-    <p class="text-muted">No tienes pedidos registrados aún.</p>
-  {% endif %}
-</div>
+    <div class="text-center mt-3">
+      <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
+      <hr class="my-4 w-75 mx-auto">
+      {% if item.Estado == 'entregado' %}
+        <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
+          Confirmación de entrega
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Controles -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#pedidoCarousel{{ item.id_pedido }}" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#pedidoCarousel{{ item.id_pedido }}" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+  </div>
+{% endfor %}
+
+       
+ 
+
 
 
 <div class="carousel-container">
