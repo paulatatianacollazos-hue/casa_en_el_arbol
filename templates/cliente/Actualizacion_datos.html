@@ -507,8 +507,11 @@
   </div>
 
 {% for item in pedidos_con_detalles %}
-  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide mb-5" data-bs-ride="carousel">
+  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide mb-5" data-bs-ride="carousel"
+     data-bs-interval="false">
+
     <div class="carousel-inner">
+
 
       {# Agrupamos productos de 3 en 3 #}
       {% for grupo in item.detalles | batch(3, None) %}
