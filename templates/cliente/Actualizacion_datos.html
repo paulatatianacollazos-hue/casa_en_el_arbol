@@ -42,47 +42,60 @@
       }
 
 
-      .carousel-inner {
-        display: flex;
-        flex-direction: column;
-      }
+      /* --- Corrige visibilidad de slides --- */
+.carousel-inner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
 
-      .carousel-item {
-        display: flex;
-        justify-content: center;
-      }
+.carousel-item {
+  display: none;
+  justify-content: center;
+  align-items: stretch;
+  transition: transform 0.6s ease-in-out;
+}
 
-      .carousel-item .producto-card {
-        flex: 0 0 calc(33.333% - 2rem);
-        max-width: 18rem;
-      }
+.carousel-item.active,
+.carousel-item-next,
+.carousel-item-prev {
+  display: flex;
+}
 
-      .producto-card {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-      }
+/* --- Distribución de productos por slide --- */
+.carousel-item .producto-card {
+  flex: 0 0 calc(33.333% - 2rem);
+  max-width: 18rem;
+  margin: 0 1rem;
+}
 
-      .producto-card:hover {
-        transform: translateY(-5px);
-      }
+.producto-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
 
-      .precio {
-        font-weight: bold;
-        color: #1b8a3d;
-      }
+.producto-card:hover {
+  transform: translateY(-5px);
+}
 
-      @media (max-width: 992px) {
-        .carousel-item .producto-card {
-          flex: 0 0 calc(50% - 1rem);
-        }
-      }
+.precio {
+  font-weight: bold;
+  color: #1b8a3d;
+}
 
-      @media (max-width: 576px) {
-        .carousel-item .producto-card {
-          flex: 0 0 100%;
-        }
-      }
+/* --- Responsividad --- */
+@media (max-width: 992px) {
+  .carousel-item .producto-card {
+    flex: 0 0 calc(50% - 1rem);
+  }
+}
+
+@media (max-width: 576px) {
+  .carousel-item .producto-card {
+    flex: 0 0 100%;
+  }
+}
 
 
     </style>
