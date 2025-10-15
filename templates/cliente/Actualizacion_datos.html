@@ -507,7 +507,7 @@
   </div>
 
 {% for item in pedidos_con_detalles %}
-  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide mb-5" data-bs-ride="carousel"
+  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide mb-5"
      data-bs-interval="false">
 
     <div class="carousel-inner">
@@ -649,7 +649,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // 👇 Inicializar carruseles SOLO cuando se muestran los pedidos
       const carousels = seccionPedidos.querySelectorAll('.carousel');
       carousels.forEach(carousel => {
-        bootstrap.Carousel.getInstance(carousel) || new bootstrap.Carousel(carousel);
+        if (!bootstrap.Carousel.getInstance(carousel)) {
+          new bootstrap.Carousel(carousel, {
+            interval: false, // No auto-slide
+            ride: false,     // No iniciar automáticamente
+            pause: false,
+            wrap: true       // Permite ciclo entre primero y último
+          });
+        }
+
       });
     }
   }
