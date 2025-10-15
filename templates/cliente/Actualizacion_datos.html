@@ -39,16 +39,22 @@
 
       .pedido-container {
         margin-bottom: 40px;
+        
       }
 
+      .carousel{
+        margin-bottom: 40px;
+      }
 
       /* --- Corrige visibilidad de slides --- */
 .carousel-inner {
   overflow: hidden;
+
 }
 
 .carousel-item {
   display: none;
+  
 }
 
 .carousel-item.active {
@@ -59,7 +65,28 @@
   justify-content: center;
   gap: 1rem;
   flex-wrap: nowrap;
+  overflow: hidden;
 }
+
+.carousel-item .producto-card {
+  flex: 0 0 calc(100% / 3 - 1rem); /* exactamente 3 productos */
+  max-width: calc(100% / 3 - 1rem);
+}
+
+@media (max-width: 992px) {
+  .carousel-item .producto-card {
+    flex: 0 0 calc(100% / 2 - 1rem); /* 2 productos en tablets */
+    max-width: calc(100% / 2 - 1rem);
+  }
+}
+
+@media (max-width: 576px) {
+  .carousel-item .producto-card {
+    flex: 0 0 100%; /* 1 producto en móviles */
+    max-width: 100%;
+  }
+}
+
 
 .producto-card {
   height: 300px;
@@ -70,7 +97,7 @@
 }
 
 .producto-card img{
-  width: 80%;
+  width: 100%;
   height: 180px;
 }
 
