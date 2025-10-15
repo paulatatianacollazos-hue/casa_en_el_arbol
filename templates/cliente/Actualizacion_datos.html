@@ -512,7 +512,7 @@
 
       {# Agrupamos productos de 3 en 3 #}
       {% for grupo in item.detalles | batch(3, None) %}
-      <div class="carousel-item {% if loop.first %}active{% endif %}">
+      <div class="carousel-item {% if loop.first %}active{% endif %} w-100">
         <div class="d-flex justify-content-center align-items-stretch">
           {% for producto in grupo %}
           {% if producto %}
