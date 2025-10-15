@@ -41,17 +41,20 @@
         margin-bottom: 40px;
       }
 
-      .carousel-wrapper {
+
+      .carousel-inner {
         display: flex;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
+        flex-direction: column;
       }
 
-      .carousel {
+      .carousel-item {
         display: flex;
-        transition: transform 0.4s ease-in-out;
-        gap: 15px;
+        justify-content: center;
+      }
+
+      .carousel-item .producto-card {
+        flex: 0 0 calc(33.333% - 2rem);
+        max-width: 18rem;
       }
 
       .producto-card {
@@ -69,55 +72,18 @@
         color: #1b8a3d;
       }
 
-      .carousel-btn {
-        background-color: rgba(0,0,0,0.6);
-        border: none;
-        color: white;
-        font-size: 24px;
-        width: 40px;
-        height: 60px;
-        cursor: pointer;
-        z-index: 10;
-        border-radius: 8px;
-        transition: background-color 0.3s;
+      @media (max-width: 992px) {
+        .carousel-item .producto-card {
+          flex: 0 0 calc(50% - 1rem);
+        }
       }
 
-      .carousel-btn:hover {
-        background-color: rgba(0,0,0,0.8);
+      @media (max-width: 576px) {
+        .carousel-item .producto-card {
+          flex: 0 0 100%;
+        }
       }
 
-      .prev {
-        position: absolute;
-        left: 5px;
-      }
-
-      .next {
-        position: absolute;
-        right: 5px;
-      }
-
-      .carousel {
-        display: flex;
-        gap: 15px;
-        transition: transform 0.5s ease;
-        will-change: transform;
-        width: max-content;
-      }
-
-      .carousel-wrapper {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-      }
-
-      .producto-card {
-        flex: 0 0 300px; /* ancho fijo para control del movimiento */
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        text-align: center;
-        padding: 10px;
-      }
 
     </style>
 </head>
