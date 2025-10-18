@@ -15,14 +15,15 @@ function toggleCart() {
 // =========================
 //   AGREGAR DESDE BOTÓN
 // =========================
-function addToCartFromButton(btn) {
+function addToCartFromButton(button) {
   const product = {
-    id: btn.dataset.id,
-    name: btn.dataset.name,
-    price: parseFloat(btn.dataset.price),
-    image: btn.dataset.image,
-    material: btn.dataset.material
+    id: button.getAttribute("data-id"),
+    name: button.getAttribute("data-name"),
+    price: parseFloat(button.getAttribute("data-price")) || 0,
+    image: button.getAttribute("data-image"),
+    material: button.getAttribute("data-material")
   };
+
   addToCart(product);
 }
 
