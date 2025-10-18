@@ -139,3 +139,63 @@ document.addEventListener("DOMContentLoaded", () => {
     loadFavorites();
 });
 
+
+let cart = [];
+
+// Mostrar/ocultar carrito lateral
+function toggleCart() {
+  document.getElementById('cart-panel').classList.toggle('active');
+}
+
+// Añadir producto al carrito
+function addToCart(product) {
+  // Evitar duplicados
+  const exists = cart.find(p => p.id === product.id);
+  if (exists) {
+    alert("Este producto ya está en tu carrito.");
+    return;
+  }
+
+  cart.push(product);
+  updateCartUI();
+}
+
+// Actualizar número e interfaz del carrito
+function updateCartUI() {
+  const count = document.getElementById('cart-count');
+  const itemsContainer = document.getElementById('cart-items');
+
+  count.textContent = cart.length;
+
+  if (cart.length === 0) {
+    itemsContainer.innerHTML = `<p class="text-muted text-center">Tu carrito está vacío</p>`;
+    return;
+  }
+
+  itemsContainer.innerHTML = cart.map(p => `
+    <div class="cart-item d-flex align-items-center" onclick="showProductDetail(${p.id})">
+      <img src="${p.image}" alt="${p.name}">
+      <div>
+        <strong>${p.name}</strong><br>
+        <span class="text-muted">$${p.price}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Mostrar detalle del producto (puedes abrir modal o redirigir)
+function showProductDetail(id) {
+  const product = cart.find(p => p.id === id);
+  if (!product) return;
+
+  alert(`📦 ${product.name}\nPrecio: $${product.price}\nMaterial: ${product.material}`);
+}
+
+// Simular checkout
+function checkoutCart() {
+  if (cart.length === 0) {
+    alert("Tu carrito está vacío.");
+    return;
+  }
+  alert("Procesando compra...");
+}
