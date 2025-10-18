@@ -348,3 +348,8 @@ def firmar_entrega(id_pedido):
         return redirect(url_for("cliente.actualizacion_datos"))
 
     return render_template("cliente/confirmacion_firma.html", id_pedido=id_pedido)
+
+
+@cliente.route("/nosotros")
+def nosotros():
+    return render_template("cliente/Nosotros.html")
