@@ -88,10 +88,15 @@
         </div>
 
         <!-- Carrito -->
-        <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
-          <i class="bi bi-cart fs-4"></i>
-          <span class="cart-badge" id="cart-count">0</span>
-        </a>
+       <!-- Carrito -->
+<a href="javascript:void(0)" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
+  <i class="bi bi-cart fs-4"></i>
+  <span id="cart-count" 
+        class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    0
+  </span>
+</a>
+
       </div>
     </div>
   </div>
@@ -353,22 +358,17 @@
 
     <!-- Panel lateral del carrito -->
 <!-- Panel lateral del carrito -->
-<div id="cart-panel" class="cart-panel shadow-lg">
+<div id="cart-panel">
   <div class="cart-header d-flex justify-content-between align-items-center p-3 border-bottom">
-    <h5 class="mb-0">Tu carrito</h5>
-    <button class="btn btn-sm btn-outline-secondary" onclick="toggleCart()">
-      <i class="bi bi-x-lg"></i>
-    </button>
+    <h5 class="mb-0">🛍️ Tu carrito</h5>
+    <button class="btn btn-sm btn-outline-danger" onclick="toggleCart()">✖</button>
   </div>
-
-  <div class="cart-body p-3" id="cart-items">
-    <p class="text-muted text-center">Tu carrito está vacío</p>
-  </div>
-
-  <div class="cart-footer border-top p-3">
+  <div id="cart-items" class="p-3"></div>
+  <div class="cart-footer p-3 border-top text-center">
     <button class="btn btn-success w-100" onclick="checkoutCart()">Finalizar compra</button>
   </div>
 </div>
+
 
 <!-- Script del carrito -->
 <script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
