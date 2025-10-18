@@ -878,5 +878,42 @@
 }
 
 
+.cart-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 350px;
+  height: 100%;
+  background-color: #fff;
+  transition: right 0.3s ease;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-panel.active {
+  right: 0;
+}
+
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 150px);
+}
+
+.cart-item:hover {
+  background-color: #f9f9f9;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  padding: 2px 6px;
+}
 
 

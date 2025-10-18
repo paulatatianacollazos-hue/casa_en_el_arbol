@@ -44,9 +44,11 @@
   <div class="botones">
     <div class="">
       <div class="boton"><button>garantia</button></div>
-      <div class="boton"><button class="btn btn-success"onclick="addToCart({id: {{ producto.IDProducto }},name: '{{ producto.NombreProducto }}',price: {{ producto.PrecioUnidad }},image: '{{ url_for('static', filename=producto.Imagenes[0]) }}',material: '{{ producto.Material }}'})">
+      <div class="boton"><button class="btn btn-success"
+  onclick="addToCart({id: {{ producto.IDProducto }}, name: '{{ producto.NombreProducto }}', price: {{ producto.PrecioUnidad }}, image: '{{ url_for('static', filename=producto.Imagenes[0]) }}', material: '{{ producto.Material }}'})">
   Añadir al carrito
 </button>
+
 </div>
     </div>
     <div class="botones">
