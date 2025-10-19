@@ -6,7 +6,7 @@
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 // ------------------------------------------------------------
-// Renderizar página del carrito
+// Renderizar página del carrito (cada producto distinto en su propio div)
 // ------------------------------------------------------------
 function renderCartPage() {
   const itemsContainer = document.getElementById('cart-items');
@@ -25,31 +25,46 @@ function renderCartPage() {
   }
 
   let total = 0;
-  itemsContainer.innerHTML = cart.map(p => {
+
+  // Agrupar productos por ID (para evitar duplicados visuales)
+  const grouped = {};
+  cart.forEach(p => {
+    const id = String(p.id);
+    if (!grouped[id]) {
+      grouped[id] = { ...p, quantity: p.quantity || 1 };
+    } else {
+      grouped[id].quantity += p.quantity || 1;
+    }
+  });
+
+  // Renderizar cada producto en su propio div
+  itemsContainer.innerHTML = Object.values(grouped).map(p => {
     const price = parseFloat(p.price) || 0;
     const subtotal = price * p.quantity;
     total += subtotal;
 
     return `
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <img src="${p.image}" alt="${p.name}" 
-               style="width:80px; height:80px; object-fit:cover; border-radius:10px; margin-right:10px;">
-          <div>
-            <h5 class="mb-1">${p.name}</h5>
-            <p class="mb-0 text-muted">Material: ${p.material}</p>
-            <div class="input-group input-group-sm mt-2" style="width:120px;">
-              <button class="btn btn-outline-secondary" onclick="changeQuantity(${p.id}, -1)">-</button>
-              <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
-              <button class="btn btn-outline-secondary" onclick="changeQuantity(${p.id}, 1)">+</button>
+      <div class="card mb-3 shadow-sm p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <img src="${p.image}" alt="${p.name}" 
+                 style="width:90px; height:90px; object-fit:cover; border-radius:10px; margin-right:15px;">
+            <div>
+              <h5 class="mb-1">${p.name}</h5>
+              <p class="mb-0 text-muted">Material: ${p.material}</p>
+              <div class="input-group input-group-sm mt-2" style="width:130px;">
+                <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', -1)">-</button>
+                <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
+                <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', 1)">+</button>
+              </div>
             </div>
           </div>
-        </div>
-        <div>
-          <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
-          <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart(${p.id})">
-            <i class="bi bi-trash"></i>
-          </button>
+          <div>
+            <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
+            <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart('${p.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -62,7 +77,9 @@ function renderCartPage() {
 // Agregar producto al carrito
 // ------------------------------------------------------------
 function addToCart(product) {
+  product.id = String(product.id); // aseguramos tipo string
   const exists = cart.find(p => p.id === product.id);
+
   if (exists) {
     exists.quantity += 1;
   } else {
@@ -79,7 +96,8 @@ function addToCart(product) {
 // Cambiar cantidad de un producto
 // ------------------------------------------------------------
 function changeQuantity(id, delta) {
-  const item = cart.find(p => p.id == id);
+  id = String(id);
+  const item = cart.find(p => p.id === id);
   if (!item) return;
 
   item.quantity += delta;
@@ -97,7 +115,8 @@ function changeQuantity(id, delta) {
 // Eliminar producto
 // ------------------------------------------------------------
 function removeFromCart(id) {
-  cart = cart.filter(p => p.id != id);
+  id = String(id);
+  cart = cart.filter(p => p.id !== id);
   localStorage.setItem('cart', JSON.stringify(cart));
   renderCartPage();
   updateCartCount();
@@ -123,7 +142,7 @@ function checkoutCart() {
 // ------------------------------------------------------------
 function addToCartFromButton(button) {
   const product = {
-    id: button.getAttribute("data-id"),
+    id: String(button.getAttribute("data-id")),
     name: button.getAttribute("data-name"),
     price: parseFloat(button.getAttribute("data-price")) || 0,
     image: button.getAttribute("data-image"),
