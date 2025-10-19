@@ -12,7 +12,7 @@ function renderCartPage() {
   const itemsContainer = document.getElementById('cart-items');
   const totalEl = document.getElementById('cart-total');
 
-  if (!itemsContainer || !totalEl) return; // Evita errores en otras páginas
+  if (!itemsContainer || !totalEl) return;
 
   if (cart.length === 0) {
     itemsContainer.innerHTML = `
@@ -27,7 +27,8 @@ function renderCartPage() {
   let total = 0;
   itemsContainer.innerHTML = cart.map(p => {
     const price = parseFloat(p.price) || 0;
-    total += price;
+    const subtotal = price * p.quantity;
+    total += subtotal;
 
     return `
       <div class="list-group-item d-flex justify-content-between align-items-center">
@@ -37,10 +38,15 @@ function renderCartPage() {
           <div>
             <h5 class="mb-1">${p.name}</h5>
             <p class="mb-0 text-muted">Material: ${p.material}</p>
+            <div class="input-group input-group-sm mt-2" style="width:120px;">
+              <button class="btn btn-outline-secondary" onclick="changeQuantity(${p.id}, -1)">-</button>
+              <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
+              <button class="btn btn-outline-secondary" onclick="changeQuantity(${p.id}, 1)">+</button>
+            </div>
           </div>
         </div>
         <div>
-          <span class="fw-bold text-success">$${price.toFixed(2)}</span>
+          <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
           <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart(${p.id})">
             <i class="bi bi-trash"></i>
           </button>
@@ -58,14 +64,33 @@ function renderCartPage() {
 function addToCart(product) {
   const exists = cart.find(p => p.id === product.id);
   if (exists) {
-    alert("⚠️ Este producto ya está en tu carrito.");
-    return;
+    exists.quantity += 1;
+  } else {
+    product.quantity = 1;
+    cart.push(product);
   }
 
-  cart.push(product);
   localStorage.setItem('cart', JSON.stringify(cart));
   updateCartCount();
   alert("✅ Producto añadido al carrito");
+}
+
+// ------------------------------------------------------------
+// Cambiar cantidad de un producto
+// ------------------------------------------------------------
+function changeQuantity(id, delta) {
+  const item = cart.find(p => p.id == id);
+  if (!item) return;
+
+  item.quantity += delta;
+  if (item.quantity <= 0) {
+    removeFromCart(id);
+    return;
+  }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  renderCartPage();
+  updateCartCount();
 }
 
 // ------------------------------------------------------------
@@ -113,7 +138,8 @@ function addToCartFromButton(button) {
 function updateCartCount() {
   const countElement = document.getElementById('cart-count');
   const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
-  if (countElement) countElement.textContent = currentCart.length;
+  const totalCount = currentCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  if (countElement) countElement.textContent = totalCount;
 }
 
 // ------------------------------------------------------------
@@ -121,5 +147,5 @@ function updateCartCount() {
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   updateCartCount();
-  renderCartPage(); // Solo se ejecutará si existe el contenedor del carrito
+  renderCartPage();
 });
