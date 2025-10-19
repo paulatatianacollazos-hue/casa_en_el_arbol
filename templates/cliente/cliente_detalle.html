@@ -1,65 +1,53 @@
-
 {% extends "cliente/dashboard.html" %}
-
-{% block title %}Catálogo | Casa en el Árbol{% endblock %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-{% block extra_css %}
-{% endblock %}
+{% block title %}{{ producto.NombreProducto }} | Casa en el Árbol{% endblock %}
 
 {% block content %}
-
 <div class="content1">
-<!-- Carrusel de imágenes -->
-<div class="container text-center my-4">
-  <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
-    <div class="carousel-inner">
-      {% for img in producto.Imagenes %}
-        <div class="carousel-item {% if loop.first %}active{% endif %}">
-          <img src="{{ url_for('static', filename=img) }}"
-               class="d-block w-100"
-               style="max-height: 400px; object-fit: cover;"
-               alt="Imagen de {{ producto.NombreProducto }}">
-        </div>
-      {% endfor %}
-    </div>
-
-    <!-- Botones -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
-  </div>
-</div>
-
-
-<div class="caja col-lg-5 col-sm-4">
-  <h2>{{ producto.NombreProducto }}</h2>
-  <p><b>Material:</b> {{ producto.Material }}</p>
-  <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-  <p><b>Color:</b> {{ producto.Color }}</p>
-  <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
-  <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
-  <div class="botones">
-    <div class="">
-      <div class="boton"><button>garantia</button></div>
-      <div class="boton">
-        <button class="btn btn-success"
-          data-id="{{ producto.IDProducto }}"
-          data-name="{{ producto.NombreProducto }}"
-          data-price="{{ producto.PrecioUnidad }}"
-          data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-          data-material="{{ producto.Material }}"
-          onclick="addToCartFromButton(this)">
-          Añadir al carrito
-        </button>
+  <!-- Carrusel -->
+  <div class="container text-center my-4">
+    <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+      <div class="carousel-inner">
+        {% for img in producto.Imagenes %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename=img) }}"
+                 class="d-block w-100"
+                 style="max-height: 400px; object-fit: cover;"
+                 alt="Imagen de {{ producto.NombreProducto }}">
+          </div>
+        {% endfor %}
       </div>
-
-
-</div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
     </div>
-    <div class="botones">
+  </div>
+
+  <!-- Datos del producto -->
+  <div class="caja col-lg-5 col-sm-4">
+    <h2>{{ producto.NombreProducto }}</h2>
+    <p><b>Material:</b> {{ producto.Material }}</p>
+    <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+    <p><b>Color:</b> {{ producto.Color }}</p>
+    <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
+    <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
+
+    <div class="botones mt-3">
+      <button class="btn btn-primary">Garantía</button>
+      <button class="btn btn-success btn btn-primary"
+        data-id="{{ producto.IDProducto }}"
+        data-name="{{ producto.NombreProducto }}"
+        data-price="{{ producto.PrecioUnidad }}"
+        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+        data-material="{{ producto.Material }}"
+        onclick="addToCartFromButton(this)">
+        Añadir al carrito
+      </button>
+    </div>
+
+    <div class="botones mt-3">
       <a id="menu-personalizar" href="javascript:void(0);" class="btn btn-primary">
         Personalizar
       </a>
@@ -67,8 +55,7 @@
   </div>
 </div>
 
-</div>
-
+<!-- Sección Personalizar -->
 <div id="seccion-personalizar" class="card shadow-sm p-4 mt-4 d-none">
   <div class="row g-3">
     <div class="col-12 col-md-6 text-center">
@@ -108,121 +95,55 @@
   </div>
 </div>
 
-
-
-
-
-
-<style>
-
-.botones{
-    display: flex;
-}
-
-:root {
-      --primary-green: #5f8f3f;
-      --secondary-green: #4e7b33;
-      --light-green: #6c9a50;
-      --accent-green: #7cb342;
-      --bg-cream: #f8f6f0;
-      --text-dark: #2c3e50;
-      --shadow-light: rgba(0, 0, 0, 0.08);
-      --shadow-medium: rgba(0, 0, 0, 0.15);
-    }
-
-.boton button{
-  background: linear-gradient(135deg, var(--bg-cream) 0%, #f0f4ec 100%);
-  border: none;
-  padding: 10px 40px;
-  border-radius: 20px;
-}
-
-.caja{
-  
-  height: 400px;
-  background-color: #fff;
-  margin: 25px 5% 0 0;
-  padding: 20px 20px;
-  border-radius: 15px;
-}
-
-.content1{
-  display: flex;
-}
-
-.carousel-item {
-  overflow: hidden; 
-  display: none;              /* Ocultar todas las imágenes por defecto */
-  transition: transform 0.6s ease-in-out;
-}
-.carousel-item.active {
-  display: block;             /* Solo mostrar la activa */
-}
-.carousel-item img {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  object-fit: contain;
-  height: 400px;              /* Todas las imágenes con la misma altura */
-}
-
-</style>
-
 {% endblock %}
 
 {% block extra_footer %}
-<script src="{{ url_for('static', filename='js/catalogo.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+  // Mostrar/Ocultar personalización
+  document.addEventListener("DOMContentLoaded", () => {
     const seccionPersonalizar = document.getElementById("seccion-personalizar");
     const btnPersonalizar = document.getElementById("menu-personalizar");
     const btnVolver = document.getElementById("btn-volver-personalizar");
 
-    // Abrir sección Personalizar
     btnPersonalizar.addEventListener("click", e => {
-        e.preventDefault();
-        seccionPersonalizar.classList.remove("d-none");
-        seccionPersonalizar.scrollIntoView({ behavior: "smooth" });
+      e.preventDefault();
+      seccionPersonalizar.classList.remove("d-none");
+      seccionPersonalizar.scrollIntoView({ behavior: "smooth" });
     });
 
-    // Cerrar sección Personalizar
     btnVolver.addEventListener("click", e => {
-        e.preventDefault();
-        seccionPersonalizar.classList.add("d-none");
+      e.preventDefault();
+      seccionPersonalizar.classList.add("d-none");
     });
-});
-</script>
-<script>
+  });
+
+  // Carrito con localStorage
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-function addToCart(product) {
-  const exists = cart.find(p => p.id === product.id);
-  if (exists) {
-    alert("⚠️ Este producto ya está en tu carrito.");
-    return;
+  function addToCart(product) {
+    const exists = cart.find(p => p.id === product.id);
+    if (exists) {
+      alert("⚠️ Este producto ya está en tu carrito.");
+      return;
+    }
+
+    cart.push(product);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    alert("✅ Producto añadido al carrito");
+
+    const count = document.getElementById('cart-count');
+    if (count) count.textContent = cart.length;
   }
 
-  cart.push(product);
-  localStorage.setItem('cart', JSON.stringify(cart));
-  alert("✅ Producto añadido al carrito");
-}
-
-function addToCartFromButton(button) {
-  const product = {
-    id: button.getAttribute("data-id"),
-    name: button.getAttribute("data-name"),
-    price: parseFloat(button.getAttribute("data-price")) || 0,
-    image: button.getAttribute("data-image"),
-    material: button.getAttribute("data-material")
-  };
-
-  addToCart(product);
-}
-
+  function addToCartFromButton(button) {
+    const product = {
+      id: button.getAttribute("data-id"),
+      name: button.getAttribute("data-name"),
+      price: parseFloat(button.getAttribute("data-price")) || 0,
+      image: button.getAttribute("data-image"),
+      material: button.getAttribute("data-material")
+    };
+    addToCart(product);
+  }
 </script>
-
-
-
-
-
 {% endblock %}

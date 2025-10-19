@@ -5,9 +5,9 @@
 {% block content %}
 <div class="container my-5">
   <h2 class="mb-4 text-success">🛒 Tu carrito</h2>
-  
+
   <div id="cart-items" class="list-group mb-4"></div>
-  
+
   <div class="d-flex justify-content-between align-items-center">
     <h4>Total: <span id="cart-total" class="text-success">$0.00</span></h4>
     <button class="btn btn-success" onclick="checkoutCart()">Finalizar compra</button>
@@ -26,7 +26,7 @@ function renderCartPage() {
   if (cart.length === 0) {
     itemsContainer.innerHTML = `
       <div class="alert alert-info text-center">
-        Tu carrito está vacío. <a href="{{ url_for('cliente.cliente_catalogo') }}" class="alert-link">Ir al catálogo</a>
+        Tu carrito está vacío. <a href="{{ url_for('cliente.catalogo') }}" class="alert-link">Ir al catálogo</a>
       </div>`;
     totalEl.textContent = "$0.00";
     return;
