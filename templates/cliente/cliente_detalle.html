@@ -128,4 +128,28 @@
 
 {% block extra_footer %}
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnPersonalizar = document.getElementById("menu-personalizar");
+  const seccionPersonalizar = document.getElementById("seccion-personalizar");
+  const btnVolver = document.getElementById("btn-volver-personalizar");
+  const content1 = document.querySelector(".content1");
+
+  if (btnPersonalizar && seccionPersonalizar && content1) {
+    btnPersonalizar.addEventListener("click", () => {
+      // Oculta la vista principal y muestra la de personalizar
+      content1.classList.add("d-none");
+      seccionPersonalizar.classList.remove("d-none");
+    });
+  }
+
+  if (btnVolver && seccionPersonalizar && content1) {
+    btnVolver.addEventListener("click", () => {
+      // Vuelve a mostrar la vista principal
+      seccionPersonalizar.classList.add("d-none");
+      content1.classList.remove("d-none");
+    });
+  }
+});
+</script>
 {% endblock %}
