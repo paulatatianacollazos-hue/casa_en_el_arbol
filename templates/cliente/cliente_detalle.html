@@ -79,49 +79,55 @@
 <!-- Sección Personalizar -->
 <div id="seccion-personalizar" class="card shadow-sm p-4 mt-4 d-none">
   <div class="row g-3">
-    <div class="col-12 col-md-6 text-center">
-      <div id="carouselPersonalizar" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-          {% for img in producto.Imagenes %}
-          <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <img src="{{ url_for('static', filename=img) }}" class="d-block w-100" style="max-height:400px; object-fit:cover;">
-          </div>
-          {% endfor %}
+   <div class="content1">
+  <!-- Carrusel -->
+  <div class="container text-center my-4">
+    <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+      <div class="carousel-inner">
+        {% for img in producto.Imagenes %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <img src="{{ url_for('static', filename=img) }}"
+               class="d-block w-100"
+               style="max-height: 400px; object-fit: cover;"
+               alt="Imagen de {{ producto.NombreProducto }}">
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="next">
-          <span class="carousel-control-next-icon"></span>
-        </button>
+        {% endfor %}
       </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Datos del producto -->
+  <div class="caja col-lg-5 col-sm-4">
+    <h2>{{ producto.NombreProducto }}</h2>
+    <p><b>Material:</b> {{ producto.Material }}</p>
+    <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+    <p><b>Color:</b> {{ producto.Color }}</p>
+    <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
+    <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
+
+    <div class="botones mt-3">
+      <button class="btn btn-primary">Garantía</button>
+      <button class="btn btn-primary"
+        data-id="{{ producto.ID_Producto }}"
+        data-name="{{ producto.NombreProducto }}"
+        data-price="{{ producto.PrecioUnidad }}"
+        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+        data-material="{{ producto.Material }}"
+        onclick="addToCartFromButton(this)">
+        Añadir al carrito
+      </button>
     </div>
 
-    <div class="col-12 col-md-6">
-      <div class="caja p-3" style="height:auto;">
-        <h2>{{ producto.NombreProducto }}</h2>
-        <p><b>Material:</b> {{ producto.Material }}</p>
-        <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-        <p><b>Color:</b> {{ producto.Color }}</p>
-        <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
-        <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
-
-        <div class="botones mt-3 d-flex flex-wrap gap-2">
-          <button class="btn btn-outline-secondary">Garantía</button>
-          <button class="btn btn-success"
-            data-id="{{ producto.ID_Producto }}"
-            data-name="{{ producto.NombreProducto }}"
-            data-price="{{ producto.PrecioUnidad }}"
-            data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-            data-material="{{ producto.Material }}"
-            onclick="addToCartFromButton(this)">
-            Añadir al carrito
-          </button>
-
-          <button id="btn-volver-personalizar" class="btn btn-danger">Volver</button>
-        </div>
-      </div>
+    
     </div>
+  </div>
+</div>
   </div>
 </div>
 {% endblock %}
