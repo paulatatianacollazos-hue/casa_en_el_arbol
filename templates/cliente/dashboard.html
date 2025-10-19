@@ -364,6 +364,18 @@
       if (count) count.textContent = cart.length;
     });
   </script>
+<script>
+  // Inicializa carrito global desde localStorage
+  document.addEventListener("DOMContentLoaded", () => {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Actualiza contador del carrito
+    const cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+      cartCount.textContent = cart.length;
+    }
+  });
+</script>
 
 </body>
 </html>
