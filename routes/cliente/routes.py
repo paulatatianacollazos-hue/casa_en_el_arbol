@@ -304,7 +304,8 @@ def borrar_direccion(id_direccion):
 @login_required
 def catalogo():
     productos = get_productos()
-    return render_template("cliente/cliente_catalogo.html",productos=productos)
+    return render_template("cliente/cliente_catalogo.html",
+                           productos=productos)
 
 
 @cliente.route("/producto/<int:id_producto>")
@@ -326,7 +327,8 @@ def firmar_entrega(id_pedido):
 
         if not firma_base64:
             flash("⚠️ Debes firmar antes de confirmar la entrega.", "warning")
-            return redirect(url_for("cliente.firmar_entrega", id_pedido=id_pedido))
+            return redirect(url_for("cliente.firmar_entrega",
+                                    id_pedido=id_pedido))
 
         # Guardar la imagen en el servidor (opcional)
         firma_data = base64.b64decode(firma_base64.split(",")[1])
@@ -348,7 +350,8 @@ def firmar_entrega(id_pedido):
         flash("✅ Entrega confirmada correctamente.", "success")
         return redirect(url_for("cliente.actualizacion_datos"))
 
-    return render_template("cliente/confirmacion_firma.html", id_pedido=id_pedido)
+    return render_template("cliente/confirmacion_firma.html",
+                           id_pedido=id_pedido)
 
 
 @cliente.route("/nosotros")
