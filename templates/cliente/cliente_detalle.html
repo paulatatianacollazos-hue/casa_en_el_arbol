@@ -54,7 +54,6 @@
           onclick="addToCartFromButton(this)">
           Añadir al carrito
         </button>
-
       </div>
 
 
@@ -193,7 +192,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+<script>
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+function addToCart(product) {
+  const exists = cart.find(p => p.id === product.id);
+  if (exists) {
+    alert("⚠️ Este producto ya está en tu carrito.");
+    return;
+  }
+
+  cart.push(product);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  alert("✅ Producto añadido al carrito");
+}
+
+function addToCartFromButton(button) {
+  const product = {
+    id: button.getAttribute("data-id"),
+    name: button.getAttribute("data-name"),
+    price: parseFloat(button.getAttribute("data-price")) || 0,
+    image: button.getAttribute("data-image"),
+    material: button.getAttribute("data-material")
+  };
+
+  addToCart(product);
+}
+
+</script>
 
 
 

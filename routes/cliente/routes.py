@@ -353,3 +353,8 @@ def firmar_entrega(id_pedido):
 @cliente.route("/nosotros")
 def nosotros():
     return render_template("cliente/Nosotros.html")
+
+
+@cliente.route('/carrito')
+def carrito():
+    return render_template('cliente/carrito.html')
