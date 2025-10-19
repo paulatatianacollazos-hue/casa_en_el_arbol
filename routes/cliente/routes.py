@@ -306,6 +306,7 @@ def catalogo():
     productos = get_productos()
     return render_template("cliente/cliente_catalogo.html",productos=productos)
 
+
 @cliente.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
