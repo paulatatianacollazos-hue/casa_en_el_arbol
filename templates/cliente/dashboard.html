@@ -90,10 +90,9 @@
         <!-- Carrito -->
        <!-- Carrito -->
         <a href="{{ url_for('cliente.carrito') }}" class="nav-icon position-relative">
-            <i class="bi bi-cart fs-4"></i>
-            <span class="cart-badge" id="cart-count">0</span>
-          </a>
-
+        <i class="bi bi-cart fs-4"></i>
+        <span class="cart-badge" id="cart-count">0</span>
+        </a>
 
 
       </div>
@@ -356,26 +355,6 @@
 <!-- Script del carrito -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  <script>
-    // Actualiza el contador del carrito
-    document.addEventListener('DOMContentLoaded', () => {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const count = document.getElementById('cart-count');
-      if (count) count.textContent = cart.length;
-    });
-  </script>
-<script>
-  // Inicializa carrito global desde localStorage
-  document.addEventListener("DOMContentLoaded", () => {
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    // Actualiza contador del carrito
-    const cartCount = document.getElementById('cart-count');
-    if (cartCount) {
-      cartCount.textContent = cart.length;
-    }
-  });
-</script>
-
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 </body>
 </html>

@@ -5,9 +5,7 @@
 {% block content %}
 <div class="container my-5">
   <h2 class="mb-4 text-success">🛒 Tu carrito</h2>
-
   <div id="cart-items" class="list-group mb-4"></div>
-
   <div class="d-flex justify-content-between align-items-center">
     <h4>Total: <span id="cart-total" class="text-success">$0.00</span></h4>
     <button class="btn btn-success" onclick="checkoutCart()">Finalizar compra</button>
@@ -17,67 +15,7 @@
 
 {% block extra_footer %}
 <script>
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-function renderCartPage() {
-  const itemsContainer = document.getElementById('cart-items');
-  const totalEl = document.getElementById('cart-total');
-
-  if (cart.length === 0) {
-    itemsContainer.innerHTML = `
-      <div class="alert alert-info text-center">
-        Tu carrito está vacío. <a href="{{ url_for('cliente.catalogo') }}" class="alert-link">Ir al catálogo</a>
-      </div>`;
-    totalEl.textContent = "$0.00";
-    return;
-  }
-
-  let total = 0;
-
-  itemsContainer.innerHTML = cart.map(p => {
-    const price = parseFloat(p.price) || 0;
-    total += price;
-
-    return `
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <img src="${p.image}" alt="${p.name}" 
-               style="width:80px; height:80px; object-fit:cover; border-radius:10px; margin-right:10px;">
-          <div>
-            <h5 class="mb-1">${p.name}</h5>
-            <p class="mb-0 text-muted">Material: ${p.material}</p>
-          </div>
-        </div>
-        <div>
-          <span class="fw-bold text-success">$${price.toFixed(2)}</span>
-          <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart(${p.id})">
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  totalEl.textContent = "$" + total.toFixed(2);
-}
-
-function removeFromCart(id) {
-  cart = cart.filter(p => p.id != id);
-  localStorage.setItem('cart', JSON.stringify(cart));
-  renderCartPage();
-}
-
-function checkoutCart() {
-  if (cart.length === 0) {
-    alert("Tu carrito está vacío.");
-    return;
-  }
-  alert("✅ Compra procesada correctamente.");
-  localStorage.removeItem('cart');
-  cart = [];
-  renderCartPage();
-}
-
-document.addEventListener("DOMContentLoaded", renderCartPage);
 </script>
 {% endblock %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
