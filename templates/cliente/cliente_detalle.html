@@ -77,105 +77,85 @@
 </div>
 
 <!-- Sección Personalizar -->
-<!-- Sección Personalizar -->
 <div id="seccion-personalizar" class="card shadow-sm p-4 mt-4 d-none">
   <div class="row g-3">
-    <div class="col-12 col-md-6 text-center">
-      <!-- Carrusel personalizado -->
-      <div id="carouselPersonalizar" class="position-relative">
-        <img id="personalizar-imagen" 
-             src="{{ url_for('static', filename=producto.Imagenes[0]) }}" 
-             class="d-block w-100 rounded" 
-             style="max-height:400px; object-fit:cover;"
-             alt="Imagen del producto">
-        <button id="prevPersonalizar" class="btn btn-light position-absolute top-50 start-0 translate-middle-y">
-          ‹
-        </button>
-        <button id="nextPersonalizar" class="btn btn-light position-absolute top-50 end-0 translate-middle-y">
-          ›
-        </button>
+   <div class="content1">
+  <!-- Carrusel -->
+  <div class="container text-center my-4">
+    <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+      <div class="carousel-inner">
+        {% for img in producto.Imagenes %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <img src="{{ url_for('static', filename=img) }}"
+               class="d-block w-100"
+               style="max-height: 400px; object-fit: cover;"
+               alt="Imagen de {{ producto.NombreProducto }}">
+        </div>
+        {% endfor %}
       </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Datos del producto -->
+  <div class="caja col-lg-5 col-sm-4">
+    <h2>{{ producto.NombreProducto }}</h2>
+    <p><b>Material:</b> {{ producto.Material }}</p>
+    <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+    <p><b>Color:</b> {{ producto.Color }}</p>
+    <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
+    <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
+
+    <div class="botones mt-3">
+      <button class="btn btn-primary">Garantía</button>
+      <button class="btn btn-primary"
+        data-id="{{ producto.ID_Producto }}"
+        data-name="{{ producto.NombreProducto }}"
+        data-price="{{ producto.PrecioUnidad }}"
+        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+        data-material="{{ producto.Material }}"
+        onclick="addToCartFromButton(this)">
+        Añadir al carrito
+      </button>
     </div>
 
-    <div class="col-12 col-md-6">
-      <div class="caja p-3" style="height:auto;">
-        <h2>{{ producto.NombreProducto }}</h2>
-        <p><b>Material:</b> {{ producto.Material }}</p>
-        <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-        <p><b>Color:</b> {{ producto.Color }}</p>
-        <p><b>Categoría:</b> {{ producto.NombreCategoria }}</p>
-        <p><b>Proveedor:</b> {{ producto.NombreEmpresa }}</p>
-
-        <div class="botones mt-3 d-flex flex-wrap gap-2">
-          <button class="btn btn-outline-secondary">Garantía</button>
-          <button class="btn btn-success"
-            data-id="{{ producto.ID_Producto }}"
-            data-name="{{ producto.NombreProducto }}"
-            data-price="{{ producto.PrecioUnidad }}"
-            data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-            data-material="{{ producto.Material }}"
-            onclick="addToCartFromButton(this)">
-            Añadir al carrito
-          </button>
-
-          <button id="btn-volver-personalizar" class="btn btn-danger">Volver</button>
-        </div>
-      </div>
+    
     </div>
   </div>
 </div>
-
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_footer %}
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
-  // Variables principales
+document.addEventListener("DOMContentLoaded", () => {
   const btnPersonalizar = document.getElementById("menu-personalizar");
   const seccionPersonalizar = document.getElementById("seccion-personalizar");
   const btnVolver = document.getElementById("btn-volver-personalizar");
   const content1 = document.querySelector(".content1");
 
-  // Imágenes del producto (inyectadas desde Jinja)
-  const imagenesProducto = [
-    {% for img in producto.Imagenes %}
-      "{{ url_for('static', filename=img) }}",
-    {% endfor %}
-  ];
-
-  // Estado del carrusel
-  let indiceActual = 0;
-  const imgElemento = document.getElementById("personalizar-imagen");
-  const btnPrev = document.getElementById("prevPersonalizar");
-  const btnNext = document.getElementById("nextPersonalizar");
-
-  // Cambiar imagen del carrusel
-  function actualizarImagen() {
-    imgElemento.src = imagenesProducto[indiceActual];
+  if (btnPersonalizar && seccionPersonalizar && content1) {
+    btnPersonalizar.addEventListener("click", () => {
+      // Oculta la vista principal y muestra la de personalizar
+      content1.classList.add("d-none");
+      seccionPersonalizar.classList.remove("d-none");
+    });
   }
 
-  // Eventos del carrusel
-  btnPrev.addEventListener("click", () => {
-    indiceActual = (indiceActual - 1 + imagenesProducto.length) % imagenesProducto.length;
-    actualizarImagen();
-  });
-
-  btnNext.addEventListener("click", () => {
-    indiceActual = (indiceActual + 1) % imagenesProducto.length;
-    actualizarImagen();
-  });
-
-  // Mostrar / ocultar secciones
-  btnPersonalizar.addEventListener("click", () => {
-    content1.classList.add("d-none");
-    seccionPersonalizar.classList.remove("d-none");
-    indiceActual = 0;
-    actualizarImagen();
-  });
-
-  btnVolver.addEventListener("click", () => {
-    seccionPersonalizar.classList.add("d-none");
-    content1.classList.remove("d-none");
-  });
+  if (btnVolver && seccionPersonalizar && content1) {
+    btnVolver.addEventListener("click", () => {
+      // Vuelve a mostrar la vista principal
+      seccionPersonalizar.classList.add("d-none");
+      content1.classList.remove("d-none");
+    });
+  }
+});
 </script>
 {% endblock %}
