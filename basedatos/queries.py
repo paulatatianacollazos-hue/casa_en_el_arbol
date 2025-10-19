@@ -691,7 +691,7 @@ def get_producto_by_id(id_producto):
     cursor = conn.cursor(dictionary=True)
 
     query = """
-        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad,
+        SELECT p.ID_Producto,p.Stock, p.NombreProducto, p.Material, p.PrecioUnidad,
         p.Color,
                c.NombreCategoria, pr.NombreEmpresa,
                i.ruta AS Imagen
@@ -713,6 +713,7 @@ def get_producto_by_id(id_producto):
     # Tomar datos del producto de la primera fila
     producto = {
         "ID_Producto": rows[0]["ID_Producto"],
+        "Stock": rows[0]["Stock"],
         "NombreProducto": rows[0]["NombreProducto"],
         "Material": rows[0]["Material"],
         "PrecioUnidad": rows[0]["PrecioUnidad"],
