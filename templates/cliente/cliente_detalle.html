@@ -8,12 +8,12 @@
     <div id="carouselProducto" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
       <div class="carousel-inner">
         {% for img in producto.Imagenes %}
-          <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <img src="{{ url_for('static', filename=img) }}"
-                 class="d-block w-100"
-                 style="max-height: 400px; object-fit: cover;"
-                 alt="Imagen de {{ producto.NombreProducto }}">
-          </div>
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <img src="{{ url_for('static', filename=img) }}"
+               class="d-block w-100"
+               style="max-height: 400px; object-fit: cover;"
+               alt="Imagen de {{ producto.NombreProducto }}">
+        </div>
         {% endfor %}
       </div>
       <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
@@ -36,7 +36,7 @@
 
     <div class="botones mt-3">
       <button class="btn btn-primary">Garantía</button>
-      <button class="btn btn-success btn btn-primary"
+      <button class="btn btn-success"
         data-id="{{ producto.IDProducto }}"
         data-name="{{ producto.NombreProducto }}"
         data-price="{{ producto.PrecioUnidad }}"
@@ -87,19 +87,26 @@
 
         <div class="botones mt-3 d-flex flex-wrap gap-2">
           <button class="btn btn-outline-secondary">Garantía</button>
-          <button class="btn btn-success">Añadir al carrito</button>
+          <button class="btn btn-success"
+            data-id="{{ producto.IDProducto }}"
+            data-name="{{ producto.NombreProducto }}"
+            data-price="{{ producto.PrecioUnidad }}"
+            data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+            data-material="{{ producto.Material }}"
+            onclick="addToCartFromButton(this)">
+            Añadir al carrito
+          </button>
           <button id="btn-volver-personalizar" class="btn btn-danger">Volver</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block extra_footer %}
 <script>
-  // Mostrar/Ocultar personalización
+  // Mostrar/Ocultar sección de personalización
   document.addEventListener("DOMContentLoaded", () => {
     const seccionPersonalizar = document.getElementById("seccion-personalizar");
     const btnPersonalizar = document.getElementById("menu-personalizar");
@@ -115,11 +122,14 @@
       e.preventDefault();
       seccionPersonalizar.classList.add("d-none");
     });
+
+    updateCartCount(); // inicializa el contador
   });
 
-  // Carrito con localStorage
+  // Recuperar carrito del localStorage o crear uno vacío
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+  // Añadir producto al carrito
   function addToCart(product) {
     const exists = cart.find(p => p.id === product.id);
     if (exists) {
@@ -129,12 +139,11 @@
 
     cart.push(product);
     localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
     alert("✅ Producto añadido al carrito");
-
-    const count = document.getElementById('cart-count');
-    if (count) count.textContent = cart.length;
   }
 
+  // Obtener datos desde el botón
   function addToCartFromButton(button) {
     const product = {
       id: button.getAttribute("data-id"),
@@ -144,6 +153,13 @@
       material: button.getAttribute("data-material")
     };
     addToCart(product);
+  }
+
+  // Actualizar el contador del carrito globalmente
+  function updateCartCount() {
+    const countElement = document.getElementById('cart-count');
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (countElement) countElement.textContent = cart.length;
   }
 </script>
 {% endblock %}
