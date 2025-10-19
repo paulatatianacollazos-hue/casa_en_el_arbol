@@ -1,6 +1,27 @@
 {% extends "cliente/dashboard.html" %}
 {% block title %}{{ producto.NombreProducto }} | Casa en el Árbol{% endblock %}
+{% block extra_css %}
+<style>
+  .content1{
+    display: flex;
+  }
 
+  .caja{
+    background-color: #fff;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-right: 10%;
+    height: 70%;
+    width: 30%;
+    padding:50px;
+    padding-top: 30px;
+  }
+
+  .btn-primary{
+    padding: 10px 20px;
+  }
+</style>
+{% endblock %}
 {% block content %}
 <div class="content1">
   <!-- Carrusel -->
@@ -36,7 +57,7 @@
 
     <div class="botones mt-3">
       <button class="btn btn-primary">Garantía</button>
-      <button class="btn btn-success"
+      <button class="btn btn-primary"
         data-id="{{ producto.ID_Producto }}"
         data-name="{{ producto.NombreProducto }}"
         data-price="{{ producto.PrecioUnidad }}"
