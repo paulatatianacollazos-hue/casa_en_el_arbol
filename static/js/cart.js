@@ -89,7 +89,7 @@ function addToCart(product) {
 
   localStorage.setItem('cart', JSON.stringify(cart));
   updateCartCount();
-  alert("✅ Producto añadido al carrito");
+  
 }
 
 // ------------------------------------------------------------
