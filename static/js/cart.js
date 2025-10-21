@@ -1,12 +1,29 @@
 // ============================================================
-// 🛒 MÓDULO DE CARRITO - CASA EN EL ÁRBOL
+// 🛒 MÓDULO DE CARRITO - CASA EN EL ÁRBOL (versión por usuario)
 // ============================================================
 
-// Recuperar carrito del localStorage
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+// ------------------------------------------------------------
+// 🔸 Manejo de usuario actual
+// ------------------------------------------------------------
+let currentUserId = localStorage.getItem('currentUserId') || null;
+
+// Función para obtener la clave de carrito asociada al usuario actual
+function getCartKey() {
+  return currentUserId ? `cart_${currentUserId}` : 'cart';
+}
 
 // ------------------------------------------------------------
-// Renderizar página del carrito (cada producto distinto en su propio div)
+// 🔸 Cargar carrito inicial desde localStorage
+// ------------------------------------------------------------
+let cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
+
+// Guardar carrito del usuario actual
+function saveCart() {
+  localStorage.setItem(getCartKey(), JSON.stringify(cart));
+}
+
+// ------------------------------------------------------------
+// 🔸 Renderizar página del carrito (cada producto distinto en su propio div)
 // ------------------------------------------------------------
 function renderCartPage() {
   const itemsContainer = document.getElementById('cart-items');
@@ -26,7 +43,7 @@ function renderCartPage() {
 
   let total = 0;
 
-  // Agrupar productos por ID (para evitar duplicados visuales)
+  // Agrupar productos por ID
   const grouped = {};
   cart.forEach(p => {
     const id = String(p.id);
@@ -37,7 +54,7 @@ function renderCartPage() {
     }
   });
 
-  // Renderizar cada producto en su propio div
+  // Renderizar productos
   itemsContainer.innerHTML = Object.values(grouped).map(p => {
     const price = parseFloat(p.price) || 0;
     const subtotal = price * p.quantity;
@@ -74,10 +91,10 @@ function renderCartPage() {
 }
 
 // ------------------------------------------------------------
-// Agregar producto al carrito
+// 🔸 Agregar producto al carrito
 // ------------------------------------------------------------
 function addToCart(product) {
-  product.id = String(product.id); // aseguramos tipo string
+  product.id = String(product.id);
   const exists = cart.find(p => p.id === product.id);
 
   if (exists) {
@@ -87,13 +104,12 @@ function addToCart(product) {
     cart.push(product);
   }
 
-  localStorage.setItem('cart', JSON.stringify(cart));
+  saveCart();
   updateCartCount();
-  
 }
 
 // ------------------------------------------------------------
-// Cambiar cantidad de un producto
+// 🔸 Cambiar cantidad de un producto
 // ------------------------------------------------------------
 function changeQuantity(id, delta) {
   id = String(id);
@@ -106,24 +122,24 @@ function changeQuantity(id, delta) {
     return;
   }
 
-  localStorage.setItem('cart', JSON.stringify(cart));
+  saveCart();
   renderCartPage();
   updateCartCount();
 }
 
 // ------------------------------------------------------------
-// Eliminar producto
+// 🔸 Eliminar producto del carrito
 // ------------------------------------------------------------
 function removeFromCart(id) {
   id = String(id);
   cart = cart.filter(p => p.id !== id);
-  localStorage.setItem('cart', JSON.stringify(cart));
+  saveCart();
   renderCartPage();
   updateCartCount();
 }
 
 // ------------------------------------------------------------
-// Finalizar compra
+// 🔸 Finalizar compra
 // ------------------------------------------------------------
 function checkoutCart() {
   if (cart.length === 0) {
@@ -131,14 +147,14 @@ function checkoutCart() {
     return;
   }
   alert("✅ Compra procesada correctamente.");
-  localStorage.removeItem('cart');
+  localStorage.removeItem(getCartKey());
   cart = [];
   renderCartPage();
   updateCartCount();
 }
 
 // ------------------------------------------------------------
-// Añadir producto desde botón (HTML data attributes)
+// 🔸 Añadir producto desde botón con data attributes
 // ------------------------------------------------------------
 function addToCartFromButton(button) {
   const product = {
@@ -152,19 +168,44 @@ function addToCartFromButton(button) {
 }
 
 // ------------------------------------------------------------
-// Actualizar contador del carrito globalmente
+// 🔸 Actualizar contador del carrito globalmente
 // ------------------------------------------------------------
 function updateCartCount() {
   const countElement = document.getElementById('cart-count');
-  const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+  const currentCart = JSON.parse(localStorage.getItem(getCartKey())) || [];
   const totalCount = currentCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
   if (countElement) countElement.textContent = totalCount;
 }
 
 // ------------------------------------------------------------
-// Inicialización
+// 🔸 Manejo de sesión de usuario
+// ------------------------------------------------------------
+function loginUser(userId) {
+  currentUserId = userId;
+  localStorage.setItem('currentUserId', userId);
+  cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
+  updateCartCount();
+  renderCartPage();
+  alert(`🔓 Sesión iniciada como: ${userId}`);
+}
+
+function logoutUser() {
+  if (!currentUserId) return;
+  localStorage.removeItem(getCartKey());
+  localStorage.removeItem('currentUserId');
+  cart = [];
+  currentUserId = null;
+  updateCartCount();
+  renderCartPage();
+  alert("👋 Sesión cerrada. Tu carrito ha sido vaciado.");
+}
+
+// ------------------------------------------------------------
+// 🔸 Inicialización al cargar la página
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  currentUserId = localStorage.getItem('currentUserId');
+  cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
   updateCartCount();
   renderCartPage();
 });
