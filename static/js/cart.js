@@ -1,33 +1,38 @@
 // ============================================================
-// 🛒 MÓDULO DE CARRITO - CASA EN EL ÁRBOL (versión por usuario)
+// 🛒 MÓDULO DE CARRITO - CASA EN EL ÁRBOL
+// Adaptado a Flask-Login (app.py) — cada usuario tiene su carrito
 // ============================================================
 
 // ------------------------------------------------------------
-// 🔸 Manejo de usuario actual
+// 🔸 Obtener ID de usuario desde Flask (inyectado en HTML)
 // ------------------------------------------------------------
-let currentUserId = localStorage.getItem('currentUserId') || null;
+// En tu plantilla base (por ejemplo base.html), debes tener:
+// <script>const FLASK_USER_ID = "{{ current_user.id if current_user.is_authenticated else null }}";</script>
 
-// Función para obtener la clave de carrito asociada al usuario actual
+let currentUserId = typeof FLASK_USER_ID !== "undefined" && FLASK_USER_ID ? String(FLASK_USER_ID) : null;
+
+// ------------------------------------------------------------
+// 🔸 Clave única de carrito por usuario
+// ------------------------------------------------------------
 function getCartKey() {
-  return currentUserId ? `cart_${currentUserId}` : 'cart';
+  return currentUserId ? `cart_${currentUserId}` : "cart_guest";
 }
 
 // ------------------------------------------------------------
-// 🔸 Cargar carrito inicial desde localStorage
+// 🔸 Cargar carrito del usuario actual
 // ------------------------------------------------------------
 let cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
 
-// Guardar carrito del usuario actual
 function saveCart() {
   localStorage.setItem(getCartKey(), JSON.stringify(cart));
 }
 
 // ------------------------------------------------------------
-// 🔸 Renderizar página del carrito (cada producto distinto en su propio div)
+// 🔸 Renderizar página del carrito
 // ------------------------------------------------------------
 function renderCartPage() {
-  const itemsContainer = document.getElementById('cart-items');
-  const totalEl = document.getElementById('cart-total');
+  const itemsContainer = document.getElementById("cart-items");
+  const totalEl = document.getElementById("cart-total");
 
   if (!itemsContainer || !totalEl) return;
 
@@ -35,7 +40,7 @@ function renderCartPage() {
     itemsContainer.innerHTML = `
       <div class="alert alert-info text-center">
         Tu carrito está vacío. 
-        <a href="/cliente/catalogo" class="alert-link">Ir al catálogo</a>
+        <a href="/catalogo" class="alert-link">Ir al catálogo</a>
       </div>`;
     totalEl.textContent = "$0.00";
     return;
@@ -54,38 +59,40 @@ function renderCartPage() {
     }
   });
 
-  // Renderizar productos
-  itemsContainer.innerHTML = Object.values(grouped).map(p => {
-    const price = parseFloat(p.price) || 0;
-    const subtotal = price * p.quantity;
-    total += subtotal;
+  // Renderizar productos agrupados
+  itemsContainer.innerHTML = Object.values(grouped)
+    .map(p => {
+      const price = parseFloat(p.price) || 0;
+      const subtotal = price * p.quantity;
+      total += subtotal;
 
-    return `
-      <div class="card mb-3 shadow-sm p-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <img src="${p.image}" alt="${p.name}" 
-                 style="width:90px; height:90px; object-fit:cover; border-radius:10px; margin-right:15px;">
-            <div>
-              <h5 class="mb-1">${p.name}</h5>
-              <p class="mb-0 text-muted">Material: ${p.material}</p>
-              <div class="input-group input-group-sm mt-2" style="width:130px;">
-                <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', -1)">-</button>
-                <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
-                <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', 1)">+</button>
+      return `
+        <div class="card mb-3 shadow-sm p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <img src="${p.image}" alt="${p.name}"
+                   style="width:90px; height:90px; object-fit:cover; border-radius:10px; margin-right:15px;">
+              <div>
+                <h5 class="mb-1">${p.name}</h5>
+                <p class="mb-0 text-muted">Material: ${p.material}</p>
+                <div class="input-group input-group-sm mt-2" style="width:130px;">
+                  <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', -1)">-</button>
+                  <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
+                  <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', 1)">+</button>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
-            <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart('${p.id}')">
-              <i class="bi bi-trash"></i>
-            </button>
+            <div>
+              <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
+              <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart('${p.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    })
+    .join("");
 
   totalEl.textContent = "$" + total.toFixed(2);
 }
@@ -94,6 +101,12 @@ function renderCartPage() {
 // 🔸 Agregar producto al carrito
 // ------------------------------------------------------------
 function addToCart(product) {
+  if (!currentUserId) {
+    alert("⚠️ Debes iniciar sesión para agregar productos al carrito.");
+    window.location.href = "/login"; // Redirigir al login de Flask
+    return;
+  }
+
   product.id = String(product.id);
   const exists = cart.find(p => p.id === product.id);
 
@@ -106,10 +119,11 @@ function addToCart(product) {
 
   saveCart();
   updateCartCount();
+  alert(`🛍️ ${product.name} agregado al carrito`);
 }
 
 // ------------------------------------------------------------
-// 🔸 Cambiar cantidad de un producto
+// 🔸 Cambiar cantidad
 // ------------------------------------------------------------
 function changeQuantity(id, delta) {
   id = String(id);
@@ -128,7 +142,7 @@ function changeQuantity(id, delta) {
 }
 
 // ------------------------------------------------------------
-// 🔸 Eliminar producto del carrito
+// 🔸 Eliminar producto
 // ------------------------------------------------------------
 function removeFromCart(id) {
   id = String(id);
@@ -139,13 +153,20 @@ function removeFromCart(id) {
 }
 
 // ------------------------------------------------------------
-// 🔸 Finalizar compra
+// 🔸 Finalizar compra (enviar al backend si quieres)
 // ------------------------------------------------------------
 function checkoutCart() {
+  if (!currentUserId) {
+    alert("⚠️ Debes iniciar sesión para finalizar la compra.");
+    window.location.href = "/login";
+    return;
+  }
+
   if (cart.length === 0) {
     alert("Tu carrito está vacío.");
     return;
   }
+
   alert("✅ Compra procesada correctamente.");
   localStorage.removeItem(getCartKey());
   cart = [];
@@ -154,7 +175,7 @@ function checkoutCart() {
 }
 
 // ------------------------------------------------------------
-// 🔸 Añadir producto desde botón con data attributes
+// 🔸 Agregar desde botón HTML (usando data-attributes)
 // ------------------------------------------------------------
 function addToCartFromButton(button) {
   const product = {
@@ -168,43 +189,19 @@ function addToCartFromButton(button) {
 }
 
 // ------------------------------------------------------------
-// 🔸 Actualizar contador del carrito globalmente
+// 🔸 Contador de carrito global
 // ------------------------------------------------------------
 function updateCartCount() {
-  const countElement = document.getElementById('cart-count');
+  const countElement = document.getElementById("cart-count");
   const currentCart = JSON.parse(localStorage.getItem(getCartKey())) || [];
   const totalCount = currentCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
   if (countElement) countElement.textContent = totalCount;
 }
 
 // ------------------------------------------------------------
-// 🔸 Manejo de sesión de usuario
-// ------------------------------------------------------------
-function loginUser(userId) {
-  currentUserId = userId;
-  localStorage.setItem('currentUserId', userId);
-  cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
-  updateCartCount();
-  renderCartPage();
-  alert(`🔓 Sesión iniciada como: ${userId}`);
-}
-
-function logoutUser() {
-  if (!currentUserId) return;
-  localStorage.removeItem(getCartKey());
-  localStorage.removeItem('currentUserId');
-  cart = [];
-  currentUserId = null;
-  updateCartCount();
-  renderCartPage();
-  alert("👋 Sesión cerrada. Tu carrito ha sido vaciado.");
-}
-
-// ------------------------------------------------------------
 // 🔸 Inicialización al cargar la página
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  currentUserId = localStorage.getItem('currentUserId');
   cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
   updateCartCount();
   renderCartPage();
