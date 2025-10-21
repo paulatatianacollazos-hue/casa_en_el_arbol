@@ -318,11 +318,13 @@ def borrar_direccion(id_direccion):
 
     return redirect(url_for("admin_actualizacion_datos"))
 
+
 @admin.route("/catalogo")
 @login_required
 def catalogo():
     productos = get_productos()
-    return render_template("administrador/catalogo.html",productos=productos)
+    return render_template("administrador/catalogo.html", productos=productos)
+
 
 @admin.route('/guardar_producto', methods=['POST'])
 @login_required
@@ -333,6 +335,7 @@ def guardar_producto_route():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
+
 @admin.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
@@ -341,6 +344,7 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
     return render_template("administrador/admin_detalle.html", producto=producto)
+
 
 @admin.route('/registrar-envio', methods=['POST'])
 def registrar_envio():
