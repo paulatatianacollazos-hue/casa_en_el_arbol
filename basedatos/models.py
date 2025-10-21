@@ -4,6 +4,7 @@ from sqlalchemy.orm import column_property
 
 db = SQLAlchemy()
 
+
 # ------------------ Usuario ------------------
 class Usuario(UserMixin, db.Model):
     __tablename__ = 'Usuario'
