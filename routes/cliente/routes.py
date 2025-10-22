@@ -13,6 +13,8 @@ from basedatos.models import db, Comentarios
 import base64
 import os
 
+cliente = Blueprint("cliente", __name__, url_prefix="/cliente")
+
 
 from . import cliente
 reviews = []
@@ -22,7 +24,7 @@ reviews = []
 @login_required
 @role_required("cliente")
 def dashboard():
-    return render_template("cliente/dashboard.html")
+    return render_template("cliente/dashboard.html", user_id=current_user.id)
 
 # ---------- CARRITO ----------
 @cliente.route("/carrito")
