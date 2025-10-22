@@ -355,10 +355,8 @@
 <!-- Script del carrito -->
 
 <script>
-  window.FLASK_USER_ID = JSON.parse('{{ user_id | default(0) | tojson | safe }}');
+  window.FLASK_USER_ID = "{{ user_id or '' }}";
 </script>
-
-
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>

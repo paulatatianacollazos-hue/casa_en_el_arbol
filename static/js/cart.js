@@ -7,7 +7,7 @@
 // ------------------------------------------------------------
 let currentUserId = null;
 
-if (typeof window.FLASK_USER_ID !== "undefined" && window.FLASK_USER_ID) {
+if (window.FLASK_USER_ID && window.FLASK_USER_ID !== "") {
   currentUserId = String(window.FLASK_USER_ID);
   localStorage.setItem("currentUserId", currentUserId);
 } else {
