@@ -21,7 +21,7 @@ reviews = []
 @cliente.route('/dashboard')
 def dashboard():
     user_id = session.get('user_id')  # viene del login
-    return render_template('dashboard.html', user_id=user_id)
+    return render_template('cliente/dashboard.html', user_id=user_id)
 
 
 # ---------- FAVORITOS ----------
