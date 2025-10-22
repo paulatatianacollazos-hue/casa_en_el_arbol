@@ -1,8 +1,10 @@
-from flask import request, jsonify, render_template
+from flask import request, jsonify
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
-from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios, Producto
+from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
+from datetime import date
+from basedatos.models import Pagos, Producto
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
@@ -774,3 +776,74 @@ def obtener_pedidos_por_cliente(id_usuario):
 
     conexion.close()
     return pedidos
+
+
+def crear_pedido_y_pago(usuario, metodo_pago, destino, items):
+    """
+    Crea un pedido con sus detalles y el pago (si aplica).
+    """
+    total = 0
+    detalles = []
+
+    # Validar y calcular total
+    for item in items:
+        producto = Producto.query.get(item["id"])
+        if not producto:
+            return {"error": f"Producto con ID {item['id']} no encontrado."}, 404
+
+        if producto.Stock < item["cantidad"]:
+            return {"error": f"Stock insuficiente para {producto.NombreProducto}."}, 400
+
+        subtotal = producto.PrecioUnidad * item["cantidad"]
+        total += subtotal
+        detalles.append({
+            "producto": producto,
+            "cantidad": item["cantidad"],
+            "precio": producto.PrecioUnidad
+        })
+
+        # Descontar stock
+        producto.Stock -= item["cantidad"]
+
+    # Crear pedido
+    pedido = Pedido(
+        NombreComprador=f"{usuario.Nombre} {usuario.Apellido or ''}".strip(),
+        Estado='pendiente' if metodo_pago == 'contraentrega' else 'en proceso',
+        FechaPedido=date.today(),
+        Destino=destino,
+        Descuento=0.0,
+        Instalacion=0,
+        ID_Usuario=usuario.ID_Usuario
+    )
+    db.session.add(pedido)
+    db.session.flush()  # obtiene el ID_Pedido antes del commit
+
+    # Crear los detalles del pedido
+    for d in detalles:
+        detalle = Detalle_Pedido(
+            ID_Pedido=pedido.ID_Pedido,
+            ID_Producto=d["producto"].ID_Producto,
+            Cantidad=d["cantidad"],
+            PrecioUnidad=d["precio"]
+        )
+        db.session.add(detalle)
+
+    # Registrar pago (solo si no es contraentrega)
+    if metodo_pago != 'contraentrega':
+        pago = Pagos(
+            MetodoPago=metodo_pago,
+            FechaPago=date.today(),
+            Monto=total,
+            ID_Pedido=pedido.ID_Pedido
+        )
+        db.session.add(pago)
+
+    db.session.commit()
+
+    return {
+        "mensaje": "Pedido registrado exitosamente.",
+        "pedido_id": pedido.ID_Pedido,
+        "metodo_pago": metodo_pago,
+        "total": total,
+        "estado": pedido.Estado
+    }, 200

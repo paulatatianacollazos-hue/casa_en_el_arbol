@@ -99,8 +99,6 @@ class Producto(db.Model):
     detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
 
 
-
-
 # ------------------ ImagenProducto ------------------
 class ImagenProducto(db.Model):
     __tablename__ = 'ImagenProducto'

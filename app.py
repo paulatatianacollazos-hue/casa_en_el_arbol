@@ -16,6 +16,7 @@ from routes.cliente import cliente
 from routes.administrador.routes import admin
 
 
+
 # ------------------ APP ------------------ #
 app = Flask(__name__)
 
