@@ -26,40 +26,7 @@ reviews = []
 def dashboard():
     return render_template("cliente/dashboard.html", user_id=current_user.id)
 
-# ---------- CARRITO ----------
-@cliente.route("/carrito")
-@login_required
-def ver_carrito():
-    ids = [int(i) for i in session.get("cart", []) if str(i).isdigit()]
-    productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
-    return render_template("cliente/carrito.html", productos=productos)
 
-
-@cliente.route("/carrito/add", methods=["POST"])
-@login_required
-def add_to_cart():
-    data = request.get_json() or {}
-    try:
-        product_id = int(data.get("id"))
-    except (TypeError, ValueError):
-        return jsonify({"success": False, "message": "ID inválido"}), 400
-
-    session.setdefault("cart", [])
-    if product_id not in session["cart"]:
-        session["cart"].append(product_id)
-    session.modified = True
-    return jsonify({"success": True, "cart_count": len(session["cart"])})
-
-@cliente.route("/carrito/remove/<int:product_id>", methods=["POST"])
-@login_required
-def remove_from_cart(product_id):
-    cart = [int(i) for i in session.get("cart", []) if str(i).isdigit()]
-    if product_id in cart:
-        cart.remove(product_id)
-        session["cart"] = cart
-        session.modified = True
-        flash("Producto eliminado del carrito", "success")
-    return redirect(url_for("cliente.ver_carrito"))
 
 # ---------- FAVORITOS ----------
 @cliente.route("/favoritos")
@@ -362,6 +329,7 @@ def nosotros():
     return render_template("cliente/Nosotros.html")
 
 
+# ---------- CARRITO ----------
 @cliente.route('/carrito')
 def carrito():
     return render_template('cliente/carrito.html')
