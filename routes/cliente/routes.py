@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import db, Usuario, Producto, Calendario, Notificaciones, Direccion
@@ -13,7 +13,7 @@ from basedatos.models import db, Comentarios
 import base64
 import os
 
-cliente = Blueprint("cliente", __name__, url_prefix="/cliente")
+
 
 
 from . import cliente
