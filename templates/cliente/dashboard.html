@@ -353,16 +353,11 @@
     </section>
 {% block extra_footer %}
 <!-- Script del carrito -->
-{% if session.get('user_id') %}
-<script>
-  window.FLASK_USER_ID = "{{ session.get('user_id') }}";
-</script>
-{% else %}
-<script>
-  window.FLASK_USER_ID = null;
-</script>
-{% endif %}
 
+<script>
+  window.FLASK_USER_ID = JSON.parse('{{ user_id | default(0) | tojson | safe }}');
+  console.log("Usuario Flask ID:", window.FLASK_USER_ID);
+</script>
 
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>

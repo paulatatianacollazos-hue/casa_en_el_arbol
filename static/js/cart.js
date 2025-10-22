@@ -5,19 +5,25 @@
 // ------------------------------------------------------------
 // 🔸 Manejo de usuario actual (desde Flask)
 // ------------------------------------------------------------
-let currentUserId = window.FLASK_USER_ID || localStorage.getItem('currentUserId') || null;
+let currentUserId = null;
 
-// Función para obtener la clave de carrito asociada al usuario actual
+if (typeof window.FLASK_USER_ID !== "undefined" && window.FLASK_USER_ID) {
+  currentUserId = String(window.FLASK_USER_ID);
+  localStorage.setItem("currentUserId", currentUserId);
+} else {
+  currentUserId = localStorage.getItem("currentUserId");
+}
+
+// Función para obtener la clave del carrito
 function getCartKey() {
-  return currentUserId ? `cart_${currentUserId}` : 'cart';
+  return currentUserId ? `cart_${currentUserId}` : "cart_global";
 }
 
 // ------------------------------------------------------------
-// 🔸 Cargar carrito inicial desde localStorage
+// 🔸 Cargar y guardar carrito
 // ------------------------------------------------------------
 let cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
 
-// Guardar carrito del usuario actual
 function saveCart() {
   localStorage.setItem(getCartKey(), JSON.stringify(cart));
 }
@@ -26,8 +32,8 @@ function saveCart() {
 // 🔸 Renderizar carrito
 // ------------------------------------------------------------
 function renderCartPage() {
-  const itemsContainer = document.getElementById('cart-items');
-  const totalEl = document.getElementById('cart-total');
+  const itemsContainer = document.getElementById("cart-items");
+  const totalEl = document.getElementById("cart-total");
   if (!itemsContainer || !totalEl) return;
 
   if (cart.length === 0) {
@@ -43,48 +49,50 @@ function renderCartPage() {
   let total = 0;
   const grouped = {};
 
-  cart.forEach(p => {
+  cart.forEach((p) => {
     const id = String(p.id);
     if (!grouped[id]) grouped[id] = { ...p, quantity: p.quantity || 1 };
     else grouped[id].quantity += p.quantity || 1;
   });
 
-  itemsContainer.innerHTML = Object.values(grouped).map(p => {
-    const price = parseFloat(p.price) || 0;
-    const subtotal = price * p.quantity;
-    total += subtotal;
+  itemsContainer.innerHTML = Object.values(grouped)
+    .map((p) => {
+      const price = parseFloat(p.price) || 0;
+      const subtotal = price * p.quantity;
+      total += subtotal;
 
-    return `
-      <div class="card mb-3 shadow-sm p-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <img src="${p.image}" alt="${p.name}" style="width:90px; height:90px; object-fit:cover; border-radius:10px; margin-right:15px;">
-            <div>
-              <h5 class="mb-1">${p.name}</h5>
-              <p class="mb-0 text-muted">Material: ${p.material}</p>
-              <div class="input-group input-group-sm mt-2" style="width:130px;">
-                <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', -1)">-</button>
-                <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
-                <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', 1)">+</button>
+      return `
+        <div class="card mb-3 shadow-sm p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <img src="${p.image}" alt="${p.name}" style="width:90px; height:90px; object-fit:cover; border-radius:10px; margin-right:15px;">
+              <div>
+                <h5 class="mb-1">${p.name}</h5>
+                <p class="mb-0 text-muted">Material: ${p.material}</p>
+                <div class="input-group input-group-sm mt-2" style="width:130px;">
+                  <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', -1)">-</button>
+                  <input type="text" class="form-control text-center" value="${p.quantity}" readonly>
+                  <button class="btn btn-outline-secondary" onclick="changeQuantity('${p.id}', 1)">+</button>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
-            <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart('${p.id}')">
-              <i class="bi bi-trash"></i>
-            </button>
+            <div>
+              <span class="fw-bold text-success">$${subtotal.toFixed(2)}</span>
+              <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeFromCart('${p.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    })
+    .join("");
 
   totalEl.textContent = "$" + total.toFixed(2);
 }
 
 // ------------------------------------------------------------
-// 🔸 Añadir producto al carrito
+// 🔸 Funciones del carrito
 // ------------------------------------------------------------
 function addToCart(product) {
   if (!currentUserId) {
@@ -93,7 +101,7 @@ function addToCart(product) {
   }
 
   product.id = String(product.id);
-  const exists = cart.find(p => p.id === product.id);
+  const exists = cart.find((p) => p.id === product.id);
 
   if (exists) exists.quantity += 1;
   else {
@@ -105,11 +113,8 @@ function addToCart(product) {
   updateCartCount();
 }
 
-// ------------------------------------------------------------
-// 🔸 Cambiar cantidad
-// ------------------------------------------------------------
 function changeQuantity(id, delta) {
-  const item = cart.find(p => p.id === id);
+  const item = cart.find((p) => p.id === id);
   if (!item) return;
   item.quantity += delta;
   if (item.quantity <= 0) removeFromCart(id);
@@ -118,19 +123,13 @@ function changeQuantity(id, delta) {
   updateCartCount();
 }
 
-// ------------------------------------------------------------
-// 🔸 Eliminar producto
-// ------------------------------------------------------------
 function removeFromCart(id) {
-  cart = cart.filter(p => p.id !== id);
+  cart = cart.filter((p) => p.id !== id);
   saveCart();
   renderCartPage();
   updateCartCount();
 }
 
-// ------------------------------------------------------------
-// 🔸 Finalizar compra
-// ------------------------------------------------------------
 function checkoutCart() {
   if (cart.length === 0) {
     alert("Tu carrito está vacío.");
@@ -143,9 +142,6 @@ function checkoutCart() {
   updateCartCount();
 }
 
-// ------------------------------------------------------------
-// 🔸 Botón "Añadir al carrito"
-// ------------------------------------------------------------
 function addToCartFromButton(button) {
   const product = {
     id: String(button.getAttribute("data-id")),
@@ -158,10 +154,10 @@ function addToCartFromButton(button) {
 }
 
 // ------------------------------------------------------------
-// 🔸 Actualizar contador global
+// 🔸 Contador global
 // ------------------------------------------------------------
 function updateCartCount() {
-  const countElement = document.getElementById('cart-count');
+  const countElement = document.getElementById("cart-count");
   const currentCart = JSON.parse(localStorage.getItem(getCartKey())) || [];
   const totalCount = currentCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
   if (countElement) countElement.textContent = totalCount;
@@ -171,8 +167,6 @@ function updateCartCount() {
 // 🔸 Inicialización
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  if (window.FLASK_USER_ID) localStorage.setItem('currentUserId', window.FLASK_USER_ID);
-  currentUserId = window.FLASK_USER_ID || localStorage.getItem('currentUserId');
   cart = JSON.parse(localStorage.getItem(getCartKey())) || [];
   updateCartCount();
   renderCartPage();
