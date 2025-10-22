@@ -1,4 +1,4 @@
-# basedatos/db.py 
+# basedatos/db.py
 import mysql.connector
 
 

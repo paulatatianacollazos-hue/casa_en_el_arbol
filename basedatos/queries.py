@@ -2,7 +2,7 @@ from flask import request, jsonify, render_template
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
-from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios, Producto,ImagenProducto
+from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios, Producto
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app

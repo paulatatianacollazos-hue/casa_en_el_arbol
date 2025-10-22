@@ -1,14 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for
+from flask import flash, jsonify
 from flask_login import login_required, current_user
-from datetime import datetime, timedelta
-from basedatos.queries import guardar_producto, get_productos, get_producto_by_id
-
-
-from basedatos.models import db, Usuario, Notificaciones ,Direccion
+from basedatos.queries import guardar_producto, get_productos
+from basedatos.models import db, Usuario, Notificaciones, Direccion
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from basedatos.queries import registrar_pedido
+from basedatos.queries import registrar_pedido, get_producto_by_id
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     detalle,
@@ -57,6 +55,7 @@ def gestion_roles():
     roles_disponibles = ["admin", "cliente", "instalador", "transportista"]
     return render_template("administrador/gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
 
+
 # ---------- CAMBIAR_ROL ----------
 @admin.route("/cambiar_rol/<int:user_id>", methods=["POST"])
 @login_required
@@ -74,12 +73,14 @@ def cambiar_rol(user_id):
 
     return redirect(url_for("admin.gestion_roles"))
 
+
 # ---------- RESEÑAS ----------
 @admin.route("/reseñas")
 @login_required
 @role_required("admin")
 def ver_reseñas():
     return render_template("administrador/admin_reseñas.html", reviews=reviews)
+
 
 # ---------- NOTIFICACIONES ----------
 @admin.route("/notificaciones", methods=["GET", "POST"])
@@ -112,6 +113,7 @@ def ver_notificaciones():
 
     return render_template("administrador/notificaciones_admin.html", notificaciones=notificaciones)
 
+
 # ---------- ENVIOS ----------
 @admin.route("/envios")
 @login_required
@@ -123,6 +125,7 @@ def envios():
         detalles=detalle(),
         empleados=obtener_empleados(),
     )
+
 
 # ---------- CONTROL_PEDIDOS ----------
 @admin.route("/control_pedidos")
@@ -155,12 +158,15 @@ def registrar_pedido_route():
 
         # Llamar función queries.py
         from basedatos.queries import registrar_pedido
-        resultado = registrar_pedido(nombre_comprador, fecha_entrega, hora_entrega, destino, usuario_id, productos)
+        resultado = registrar_pedido(nombre_comprador, fecha_entrega,
+                                     hora_entrega, destino, usuario_id,
+                                     productos)
 
         return jsonify(resultado)
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
+
 
 # ---------- ASIGNAR_EMPLEADO ----------
 @admin.route("/asignar_empleado", methods=["POST"])
@@ -170,6 +176,7 @@ def asignar_empleado_route():
     data = asignar_empleado_query(request.form)
     return jsonify(data)
 
+
 # ---------- ACTUALIZAR_PEDIDO ----------
 @admin.route("/actualizar_pedido", methods=["POST"])
 @login_required
@@ -177,6 +184,7 @@ def asignar_empleado_route():
 def actualizar_pedido_route():
     actualizar_pedido_query(request.form)
     return redirect(url_for("admin.control_pedidos"))
+
 
 # ---------- ESTADO ----------
 @admin.route("/estado", methods=["GET", "POST"])
@@ -203,7 +211,8 @@ def mostrar_comentarios():
 @role_required("admin")
 def reporte_pedidos():
     resultados = buscar_pedidos() if request.method == "POST" else []
-    return render_template("administrador/reportes_entrega.html", resultados=resultados)
+    return render_template("administrador/reportes_entrega.html",
+                           resultados=resultados)
 
 # ---------- ASIGNAR_CALENDARIO ----------
 @admin.route("/asignar_calendario", methods=["POST"])
@@ -221,17 +230,17 @@ def estadisticas():
     return render_template("administrador/estadisticas.html")
 
 
-
-
 # ---------- Perfil y Direcciones ----------
-
 @admin.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
 def actualizacion_datos():
     usuario = current_user
-    direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=usuario.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
+    direcciones = Direccion.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario).all()
+    notificaciones = Notificaciones.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario).order_by(
+            Notificaciones.Fecha.desc()).all()
 
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
@@ -240,14 +249,16 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
+                  "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.", "danger")
+                flash("El correo ya está registrado por otro usuario.",
+                      "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -269,6 +280,7 @@ def actualizacion_datos():
         notificaciones=notificaciones
     )
 
+
 @admin.route("/direccion/agregar", methods=["POST"])
 @login_required
 def agregar_direccion():
@@ -289,7 +301,8 @@ def agregar_direccion():
         crear_notificacion(
             user_id=current_user.ID_Usuario,
             titulo="Dirección agregada 🏠",
-            mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
+            mensaje=f"Se ha agregado una nueva dirección: {
+                nueva_direccion.Direccion}"
         )
         flash("Dirección agregada correctamente 🏠", "success")
     except Exception as e:
@@ -297,6 +310,7 @@ def agregar_direccion():
         flash(f"❌ Error al agregar dirección: {str(e)}", "danger")
 
     return redirect(url_for("admin_actualizacion_datos"))
+
 
 @admin.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
 @login_required
@@ -330,8 +344,10 @@ def catalogo():
 @login_required
 def guardar_producto_route():
     try:
-        producto_id = guardar_producto(request.form, request.files.getlist('imagenes[]'))
-        return jsonify({"success": True, "message": "Producto guardado con éxito", "id": producto_id})
+        producto_id = guardar_producto(
+            request.form, request.files.getlist('imagenes[]'))
+        return jsonify({"success": True, "message":
+                        "Producto guardado con éxito", "id": producto_id})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
@@ -339,11 +355,12 @@ def guardar_producto_route():
 @admin.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
-    producto = get_producto_by_id(id_producto)  
+    producto = get_producto_by_id(id_producto)
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
-    return render_template("administrador/admin_detalle.html", producto=producto)
+    return render_template("administrador/admin_detalle.html",
+                           producto=producto)
 
 
 @admin.route('/registrar-envio', methods=['POST'])
@@ -357,4 +374,3 @@ def registrar_envio():
     # Aquí podrías guardar los datos en la base
     flash('Orden de envío registrada correctamente', 'success')
     return redirect(url_for('admin.dashboard'))
-

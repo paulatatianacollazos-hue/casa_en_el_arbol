@@ -1,31 +1,27 @@
-from flask import render_template, request, redirect, url_for, flash, session, jsonify
+from flask import render_template, request, redirect, url_for, flash, session
+from flask import jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import db, Usuario, Producto, Calendario, Notificaciones, Direccion
+from basedatos.models import Usuario, Producto, Calendario, Notificaciones
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
-from flask import render_template
-from flask_login import login_required, current_user
 from basedatos.queries import get_productos, get_producto_by_id
-from basedatos.models import db, Comentarios
+from basedatos.models import db, Comentarios, Direccion
 import base64
 import os
-
-
 
 
 from . import cliente
 reviews = []
 
-# ---------- DASHBOARD ----------
-@cliente.route("/dashboard")
-@login_required
-@role_required("cliente")
-def dashboard():
-    return render_template("cliente/dashboard.html", user_id=current_user.id)
 
+# ---------- DASHBOARD ----------
+@cliente.route('/dashboard')
+def dashboard():
+    user_id = session.get('user_id')  # viene del login
+    return render_template('dashboard.html', user_id=user_id)
 
 
 # ---------- FAVORITOS ----------
@@ -35,6 +31,7 @@ def ver_favoritos():
     ids = [int(i) for i in session.get("favorites", []) if str(i).isdigit()]
     productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
     return render_template("cliente/favoritos.html", productos=productos)
+
 
 @cliente.route("/favoritos/add", methods=["POST"])
 @login_required
@@ -51,6 +48,7 @@ def add_to_favorites():
     session.modified = True
     return jsonify({"success": True, "fav_count": len(session["favorites"])})
 
+
 @cliente.route("/favoritos/remove/<int:product_id>", methods=["POST"])
 @login_required
 def remove_from_favorites(product_id):
@@ -61,6 +59,7 @@ def remove_from_favorites(product_id):
         session.modified = True
         flash("Producto eliminado de favoritos", "success")
     return redirect(url_for("cliente.ver_favoritos"))
+
 
 # ---------- INSTALACIONES ----------
 @cliente.route("/instalaciones", methods=["GET", "POST"])
@@ -88,19 +87,24 @@ def instalaciones_home():
             db.session.rollback()
             flash(f"❌ Error al agendar: {str(e)}", "danger")
 
-    citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    citas = Calendario.query.filter_by(
+        ID_Usuario=current_user.ID_Usuario).all()
     return render_template("cliente/instalaciones.html", citas=citas)
+
 
 @cliente.route("/instalaciones/confirmacion")
 @login_required
 def confirmacion_instalacion():
     return render_template("cliente/confirmacion.html")
 
+
 @cliente.route("/instalaciones/lista")
 @login_required
 def lista_instalaciones():
-    citas = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    citas = Calendario.query.filter_by(
+        ID_Usuario=current_user.ID_Usuario).all()
     return render_template("cliente/lista.html", citas=citas)
+
 
 # ---------- NOTIFICACIONES ----------
 @cliente.route("/notificaciones", methods=["GET", "POST"])
@@ -121,8 +125,11 @@ def ver_notificaciones_cliente():
                 flash(f"❌ Error al eliminar: {str(e)}", "danger")
         return redirect(url_for("cliente.ver_notificaciones_cliente"))
 
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=current_user.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
-    return render_template("cliente/notificaciones_cliente.html", notificaciones=notificaciones)
+    notificaciones = Notificaciones.query.filter_by(
+        ID_Usuario=current_user.ID_Usuario).order_by(
+            Notificaciones.Fecha.desc()).all()
+    return render_template("cliente/notificaciones_cliente.html",
+                           notificaciones=notificaciones)
 
 
 # ---------- RESEÑAS ----------
@@ -141,10 +148,12 @@ def resenas():   # <- sin ñ
             "comentario": comentario
         })
         flash("Reseña añadida con éxito", "success")
-        return redirect(url_for("cliente.resenas"))  # <- actualizar también aquí
+        return redirect(url_for("cliente.resenas"))
 
-    avg = round(sum([int(r["estrellas"]) for r in reviews]) / len(reviews), 2) if reviews else "N/A"
+    avg = round(sum([int(r["estrellas"]) for r in reviews]) / len(
+        reviews), 2) if reviews else "N/A"
     return render_template("cliente/reseñas.html", reviews=reviews, avg=avg)
+
 
 # ---------- ESCRIBIR RESEÑA ----------
 @cliente.route("/reseñas/escribir", methods=["GET", "POST"])
@@ -164,7 +173,7 @@ def escribir_resena():   # <- sin ñ
         })
 
         flash("Reseña añadida con éxito", "success")
-        return redirect(url_for("cliente.resenas"))  # Redirige a la lista de reseñas
+        return redirect(url_for("cliente.resenas"))
 
     return render_template("cliente/escribir.html")
 
@@ -177,8 +186,11 @@ def actualizacion_datos():
 
     usuario = current_user
     user_id = usuario.ID_Usuario
-    direcciones = Direccion.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=usuario.ID_Usuario).order_by(Notificaciones.Fecha.desc()).all()
+    direcciones = Direccion.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario).all()
+    notificaciones = Notificaciones.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario).order_by(
+            Notificaciones.Fecha.desc()).all()
 
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
 
@@ -189,14 +201,16 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
+                  "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.", "danger")
+                flash("El correo ya está registrado por otro usuario.",
+                      "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -240,7 +254,8 @@ def agregar_direccion():
         crear_notificacion(
             user_id=current_user.ID_Usuario,
             titulo="Dirección agregada 🏠",
-            mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
+            mensaje=f"Se ha agregado una nueva dirección: {
+                nueva_direccion.Direccion}"
         )
         flash("Dirección agregada correctamente 🏠", "success")
     except Exception as e:
@@ -248,6 +263,7 @@ def agregar_direccion():
         flash(f"❌ Error al agregar dirección: {str(e)}", "danger")
 
     return redirect(url_for("cliente.actualizacion_datos"))
+
 
 @cliente.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
 @login_required
@@ -312,7 +328,7 @@ def firmar_entrega(id_pedido):
             ID_Pedido=id_pedido,
             ID_Usuario=current_user.ID_Usuario,
             Texto="El pedido fue entregado y confirmado por el cliente.",
-            ImagenFirma=firma_path  # si tu modelo tiene un campo para la imagen
+            ImagenFirma=firma_path
         )
         db.session.add(nuevo_comentario)
         db.session.commit()
