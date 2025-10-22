@@ -353,15 +353,16 @@
     </section>
 {% block extra_footer %}
 <!-- Script del carrito -->
- {% if current_user.is_authenticated %}
+{% if session.get('user_id') %}
 <script>
-  window.FLASK_USER_ID = "{{ current_user.id }}";
+  window.FLASK_USER_ID = "{{ session.get('user_id') }}";
 </script>
 {% else %}
 <script>
   window.FLASK_USER_ID = null;
 </script>
 {% endif %}
+
 
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
