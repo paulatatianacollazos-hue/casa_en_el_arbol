@@ -216,7 +216,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('nosotros') }}">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('cliente.nosotros') }}">
                         <i class="bi bi-info-circle me-1"></i>NOSOTROS
                     </a>
                 </li>
@@ -329,6 +329,19 @@
   }
 });
 
+
 </script>
+{% if current_user.is_authenticated %}
+<script>
+  window.FLASK_USER_ID = "{{ current_user.id }}";
+</script>
+{% else %}
+<script>
+  window.FLASK_USER_ID = null;
+</script>
+{% endif %}
+
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 </body>
 </html>
