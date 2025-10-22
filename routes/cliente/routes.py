@@ -34,6 +34,7 @@ def ver_carrito():
     productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
     return render_template("cliente/carrito.html", productos=productos)
 
+
 @cliente.route("/carrito/add", methods=["POST"])
 @login_required
 def add_to_cart():
