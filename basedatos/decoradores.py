@@ -18,8 +18,10 @@ def role_required(*roles):
                 flash("⚠️ Debes iniciar sesión primero", "warning")
                 return redirect(url_for('auth.login'))
 
-            if current_user.Rol.lower() not in [r.lower() for r in roles]:
-                flash("❌ No tienes permisos para acceder a esta página", "danger")
+            if getattr(current_user, 'rol', '').lower() not in [r.lower(
+                    ) for r in roles]:
+                flash("❌ No tienes permisos para acceder a esta página",
+                      "danger")
                 return redirect(url_for('auth.login'))
 
             return fn(*args, **kwargs)
