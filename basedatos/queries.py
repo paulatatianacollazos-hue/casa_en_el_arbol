@@ -3,15 +3,10 @@ from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
 from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
-from datetime import date
 from basedatos.models import Pagos, Producto
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
-from datetime import datetime
-from database import db
-from models.pedido import Pedido
-from models.detalle_pedido import DetallePedido
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")
@@ -804,7 +799,7 @@ def crear_pedido_y_pago(nombre_comprador, id_usuario, metodo_pago, productos):
 
         # Crear detalle de pedido por cada producto
         for p in productos:
-            detalle = DetallePedido(
+            detalle = Detalle_Pedido(
                 ID_Pedido=nuevo_pedido.ID_Pedido,
                 ID_Producto=p.get('id'),
                 Cantidad=p.get('quantity', 1),
