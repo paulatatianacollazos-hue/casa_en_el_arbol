@@ -106,6 +106,9 @@ def login():
                     usuario.Apellido or ''}".strip()
                 session['show_welcome_modal'] = True
 
+                print("ROL ACTUAL:", getattr(current_user, 'rol', getattr(
+                    current_user, 'Rol', None)))
+
                 rutas_por_rol = {
                     'admin': 'admin.dashboard',
                     'cliente': 'cliente.dashboard',
@@ -127,7 +130,7 @@ def login():
 
         # Mantener correo en el formulario si falla login
         return render_template('login.html', correo=correo)
-    print("ROL ACTUAL:", getattr(current_user, 'rol', getattr(current_user, 'Rol', None)))
+
     return render_template('login.html')
 
 
