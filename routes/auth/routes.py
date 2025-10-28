@@ -1,10 +1,12 @@
-from flask import render_template, request, redirect, url_for, flash , session
+from flask import render_template, request, redirect, url_for
+from flask import session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from flask_login import login_required, login_user, logout_user
 
 from basedatos.models import db, Usuario
-from basedatos.decoradores import validar_password, validar_email, send_reset_email
+from basedatos.decoradores import validar_password, validar_email
+from basedatos.decoradores import send_reset_email
 from basedatos.notificaciones import crear_notificacion
 from . import auth
 
@@ -23,16 +25,19 @@ def register():
 
         if not nombre_completo or not correo or not password:
             flash('Nombre, correo y contraseña son obligatorios.', 'warning')
-            return render_template('register.html', name=nombre_completo, email=correo, phone=telefono)
+            return render_template('register.html', name=nombre_completo,
+                                   email=correo, phone=telefono)
 
         if not validar_email(correo):
             flash('Correo inválido.', 'danger')
-            return render_template('register.html', name=nombre_completo, email=correo, phone=telefono)
+            return render_template('register.html', name=nombre_completo,
+                                   email=correo, phone=telefono)
 
         error = validar_password(password)
         if error:
             flash(error, 'danger')
-            return render_template('register.html', name=nombre_completo, email=correo, phone=telefono)
+            return render_template('register.html', name=nombre_completo,
+                                   email=correo, phone=telefono)
 
         partes = nombre_completo.split(" ", 1)
         nombre = partes[0]
@@ -40,7 +45,8 @@ def register():
 
         if Usuario.query.filter_by(Correo=correo).first():
             flash('Correo ya registrado.', 'danger')
-            return render_template('register.html', name=nombre_completo, email=correo, phone=telefono)
+            return render_template('register.html', name=nombre_completo,
+                                   email=correo, phone=telefono)
 
         try:
             nuevo_usuario = Usuario(
@@ -65,7 +71,8 @@ def register():
         except Exception as e:
             db.session.rollback()
             flash(f'Error: {str(e)}', 'danger')
-            return render_template('register.html', name=nombre_completo, email=correo, phone=telefono)
+            return render_template('register.html', name=nombre_completo,
+                                   email=correo, phone=telefono)
 
     return render_template('register.html')
 
@@ -92,11 +99,12 @@ def login():
                 flash("Inicio de sesión exitoso", "success")
 
                 # Guardar nombre completo y bandera en sesión para modal
-                session['username'] = f"{usuario.Nombre} {usuario.Apellido or ''}".strip()
+                session['username'] = f"{usuario.Nombre} {
+                    usuario.Apellido or ''}".strip()
                 session['show_welcome_modal'] = True
 
                 rutas_por_rol = {
-                    'admin': 'admin.dashboard', 
+                    'admin': 'admin.dashboard',
                     'cliente': 'cliente.dashboard',
                     'instalador': 'dashboards.instalador_dashboard',
                     'transportista': 'dashboards.transportista_dashboard',
@@ -120,7 +128,6 @@ def login():
     return render_template('login.html')
 
 
-
 # ------------------ LOGOUT ------------------ #
 @auth.route('/logout')
 @login_required
@@ -139,7 +146,8 @@ def forgot_password():
         if user:
             try:
                 token = s.dumps(email, salt='password-recovery')
-                send_reset_email(user_email=email, user_name=user.Nombre, token=token)
+                send_reset_email(user_email=email, user_name=user.Nombre,
+                                 token=token)
                 flash('Correo enviado.', 'success')
             except Exception as e:
                 flash(f'Error: {e}', 'danger')

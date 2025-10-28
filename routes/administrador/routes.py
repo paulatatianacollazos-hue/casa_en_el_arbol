@@ -6,7 +6,7 @@ from basedatos.models import db, Usuario, Notificaciones, Direccion
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from basedatos.queries import registrar_pedido, get_producto_by_id
+from basedatos.queries import get_producto_by_id
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     detalle,
@@ -24,12 +24,14 @@ reviews = []
 # 🔑 Nombre del blueprint debe ser "admin"
 admin = Blueprint("admin", __name__, url_prefix="/admin")
 
+
 # ---------- DASHBOARD ----------
 @admin.route("/")
 @login_required
 @role_required("admin")
 def dashboard():
     return render_template("administrador/admin_dashboard.html")
+
 
 # ---------- GESTION_ROLES ----------
 @admin.route("/gestion_roles", methods=["GET", "POST"])
@@ -48,12 +50,14 @@ def gestion_roles():
         usuario.Rol = nuevo_rol
         db.session.commit()
 
-        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}", "success")
+        flash(f"✅ Rol de {usuario.Nombre} actualizado a {nuevo_rol}",
+              "success")
         return redirect(url_for("admin.gestion_roles"))
 
     usuarios = Usuario.query.all()
     roles_disponibles = ["admin", "cliente", "instalador", "transportista"]
-    return render_template("administrador/gestion_roles.html", usuarios=usuarios, roles=roles_disponibles)
+    return render_template("administrador/gestion_roles.html",
+                           usuarios=usuarios, roles=roles_disponibles)
 
 
 # ---------- CAMBIAR_ROL ----------
@@ -111,7 +115,8 @@ def ver_notificaciones():
         ID_Usuario=current_user.ID_Usuario
     ).order_by(Notificaciones.Fecha.desc()).all()
 
-    return render_template("administrador/notificaciones_admin.html", notificaciones=notificaciones)
+    return render_template("administrador/notificaciones_admin.html",
+                           notificaciones=notificaciones)
 
 
 # ---------- ENVIOS ----------
@@ -132,7 +137,9 @@ def envios():
 @login_required
 @role_required("admin")
 def control_pedidos():
-    return render_template("administrador/control_pedidos.html", pedidos=todos_los_pedidos())
+    return render_template("administrador/control_pedidos.html",
+                           pedidos=todos_los_pedidos())
+
 
 @admin.route("/registrar_pedido", methods=["POST"])
 def registrar_pedido_route():
@@ -141,7 +148,7 @@ def registrar_pedido_route():
         fecha_entrega = request.form.get("fechaEntrega")
         hora_entrega = request.form.get("horaEntrega")
         destino = request.form.get("destino")
-        usuario_id = request.form.get("usuarioId", 1)  # puedes ajustar según login
+        usuario_id = request.form.get("usuarioId", 1)
 
         # Armar lista de productos [{id, cantidad, precio}]
         productos = []
@@ -196,13 +203,14 @@ def estado_pedido():
         return redirect(url_for("admin.control_pedidos", pedido_id=pedido_id))
     return render_template("administrador/estado.html")
 
+
 # ---------- COMENTARIOS ----------
 @admin.route("/comentarios")
 @login_required
 @role_required("admin")
 def mostrar_comentarios():
-    return render_template("administrador/comentarios.html", comentarios=obtener_comentarios_agrupados())
-
+    return render_template("administrador/comentarios.html",
+                           comentarios=obtener_comentarios_agrupados())
 
 
 # ---------- REPORTES ----------
@@ -213,6 +221,7 @@ def reporte_pedidos():
     resultados = buscar_pedidos() if request.method == "POST" else []
     return render_template("administrador/reportes_entrega.html",
                            resultados=resultados)
+
 
 # ---------- ASIGNAR_CALENDARIO ----------
 @admin.route("/asignar_calendario", methods=["POST"])
@@ -269,7 +278,8 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="Tus datos personales se han actualizado correctamente."
+                    mensaje="""Tus datos personales se han actualizado
+                    correctamente."""
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
@@ -361,16 +371,3 @@ def detalle_producto(id_producto):
         return redirect(url_for("admin.catalogo"))
     return render_template("administrador/admin_detalle.html",
                            producto=producto)
-
-
-@admin.route('/registrar-envio', methods=['POST'])
-def registrar_envio():
-    numero = request.form['numero_pedido']
-    cliente = request.form['cliente']
-    direccion = request.form['direccion_envio']
-    ciudad = request.form['ciudad']
-    fecha = request.form['fecha_envio']
-    estado = request.form['estado']
-    # Aquí podrías guardar los datos en la base
-    flash('Orden de envío registrada correctamente', 'success')
-    return redirect(url_for('admin.dashboard'))

@@ -465,7 +465,8 @@ def buscar_pedidos():
     resultados = []
     for pedido in pedidos:
         productos_html = "<ul>"
-        for detalle in Detalle_Pedido.query.filter_by(ID_Pedido=pedido.ID_Pedido).all():
+        for detalle in Detalle_Pedido.query.filter_by(
+                ID_Pedido=pedido.ID_Pedido).all():
             producto = Producto.query.get(detalle.ID_Producto)
             productos_html += f"""<li>{producto.NombreProducto}
             x {detalle.Cantidad}</li>"""
@@ -692,8 +693,8 @@ def get_producto_by_id(id_producto):
     cursor = conn.cursor(dictionary=True)
 
     query = """
-        SELECT p.ID_Producto,p.Stock, p.NombreProducto, p.Material, p.PrecioUnidad,
-        p.Color,
+        SELECT p.ID_Producto,p.Stock, p.NombreProducto, p.Material,
+        p.PrecioUnidad, p.Color,
                c.NombreCategoria, pr.NombreEmpresa,
                i.ruta AS Imagen
         FROM producto p
@@ -768,7 +769,8 @@ def obtener_pedidos_por_cliente(id_usuario):
                 item['Imagen'] = item['Imagen'].replace("static/", "")
 
         # 4️⃣ Calcular total del pedido
-        total = sum(item['cantidad'] * float(item['PrecioUnidad']) for item in detalles)
+        total = sum(item['cantidad'] * float(item[
+            'PrecioUnidad']) for item in detalles)
 
         pedido['detalles'] = detalles
         pedido['total'] = round(total, 2)
@@ -777,11 +779,10 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido_y_pago(nombre_comprador, id_usuario, metodo_pago, productos):
+def crear_pedido_y_pago(id_usuario, metodo_pago, productos):
     try:
         # Crear el pedido
         nuevo_pedido = Pedido(
-            NombreComprador=nombre_comprador,
             Estado="pendiente",
             FechaPedido=datetime.now(),
             FechaEntrega=None,

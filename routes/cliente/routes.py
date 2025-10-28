@@ -29,7 +29,8 @@ def dashboard():
 @login_required
 def ver_favoritos():
     ids = [int(i) for i in session.get("favorites", []) if str(i).isdigit()]
-    productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all() if ids else []
+    productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all(
+        ) if ids else []
     return render_template("cliente/favoritos.html", productos=productos)
 
 
@@ -221,7 +222,8 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="Tus datos personales se han actualizado correctamente."
+                    mensaje="""Tus datos personales se han actualizado
+                    correctamente."""
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 

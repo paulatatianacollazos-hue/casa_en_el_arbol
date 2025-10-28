@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy.orm import column_property
+
 
 db = SQLAlchemy()
 
@@ -21,11 +21,16 @@ class Usuario(UserMixin, db.Model):
 
     # Relaciones
     calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
-    notificaciones = db.relationship('Notificaciones', backref='usuario', lazy=True)
+    notificaciones = db.relationship('Notificaciones', backref='usuario',
+                                     lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
-    pedidos = db.relationship('Pedido', backref='usuario', lazy=True, foreign_keys='Pedido.ID_Usuario')
-    pedidos_asignados = db.relationship('Pedido', backref='empleado', lazy=True, foreign_keys='Pedido.ID_Empleado')
-    direcciones = db.relationship('Direccion', backref='usuario', lazy=True, cascade="all, delete-orphan")
+    pedidos = db.relationship('Pedido', backref='usuario', lazy=True,
+                              foreign_keys='Pedido.ID_Usuario')
+    pedidos_asignados = db.relationship('Pedido', backref='empleado',
+                                        lazy=True,
+                                        foreign_keys='Pedido.ID_Empleado')
+    direcciones = db.relationship('Direccion', backref='usuario',
+                                  lazy=True, cascade="all, delete-orphan")
 
     def get_id(self):
         return str(self.ID_Usuario)
@@ -43,7 +48,9 @@ class Direccion(db.Model):
     __tablename__ = 'Direccion'
 
     ID_Direccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario', ondelete="CASCADE"), nullable=False)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario',
+                                                     ondelete="CASCADE"),
+                           nullable=False)
     Pais = db.Column(db.String(100), default="Colombia")
     Departamento = db.Column(db.String(100))
     Ciudad = db.Column(db.String(100))
@@ -64,7 +71,8 @@ class Proveedor(db.Model):
     Pais = db.Column(db.String(50))
     CargoContacto = db.Column(db.String(50))
 
-    productos = db.relationship('Producto', back_populates='proveedor', lazy=True)
+    productos = db.relationship('Producto', back_populates='proveedor',
+                                lazy=True)
 
 
 # ------------------ Categorias ------------------
@@ -75,7 +83,8 @@ class Categorias(db.Model):
     NombreCategoria = db.Column(db.String(100), nullable=False)
     Descripcion = db.Column(db.Text)
 
-    productos = db.relationship('Producto', back_populates='categoria', lazy=True)
+    productos = db.relationship('Producto', back_populates='categoria',
+                                lazy=True)
 
 
 # ------------------ Producto ------------------
@@ -89,14 +98,17 @@ class Producto(db.Model):
     PrecioUnidad = db.Column(db.Float, nullable=False)
     Color = db.Column(db.String(30))
 
-    ID_Proveedor = db.Column(db.Integer, db.ForeignKey('Proveedor.ID_Proveedor'), nullable=False)
-    ID_Categoria = db.Column(db.Integer, db.ForeignKey('Categorias.ID_Categoria'))
+    ID_Proveedor = db.Column(db.Integer, db.ForeignKey(
+        'Proveedor.ID_Proveedor'), nullable=False)
+    ID_Categoria = db.Column(db.Integer, db.ForeignKey(
+        'Categorias.ID_Categoria'))
 
     proveedor = db.relationship('Proveedor', back_populates='productos')
     categoria = db.relationship('Categorias', back_populates='productos')
     imagenes = db.relationship('ImagenProducto', backref='producto', lazy=True)
     novedades = db.relationship('Novedades', backref='producto', lazy=True)
-    detalles_pedido = db.relationship('Detalle_Pedido', backref='producto', lazy=True)
+    detalles_pedido = db.relationship('Detalle_Pedido', backref='producto',
+                                      lazy=True)
 
 
 # ------------------ ImagenProducto ------------------
@@ -105,7 +117,8 @@ class ImagenProducto(db.Model):
 
     ID_Imagen = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ruta = db.Column(db.String(200), nullable=False)
-    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), nullable=False)
+    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'),
+                            nullable=False)
 
 
 # ------------------ Calendario ------------------
@@ -118,7 +131,8 @@ class Calendario(db.Model):
     Ubicacion = db.Column(db.String(200))
     Tipo = db.Column(db.String(50), default="Instalación")
 
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+                           nullable=False)
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'))
 
 
@@ -126,12 +140,14 @@ class Calendario(db.Model):
 class Notificaciones(db.Model):
     __tablename__ = 'Notificaciones'
 
-    ID_Notificacion = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ID_Notificacion = db.Column(db.Integer, primary_key=True,
+                                autoincrement=True)
     Titulo = db.Column(db.String(200), nullable=False)
     Mensaje = db.Column(db.Text, nullable=False)
     Fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
     Leida = db.Column(db.Boolean, default=False)
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+                           nullable=False)
 
 
 # ------------------ Novedades ------------------
@@ -143,8 +159,10 @@ class Novedades(db.Model):
     EstadoNovedad = db.Column(db.String(50))
     FechaReporte = db.Column(db.Date)
 
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
-    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), nullable=False)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+                           nullable=False)
+    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'),
+                            nullable=False)
 
 
 # ------------------ Pedido ------------------
@@ -152,19 +170,21 @@ class Pedido(db.Model):
     __tablename__ = 'Pedido'
 
     ID_Pedido = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    NombreComprador = db.Column(db.String(100))
-    Estado = db.Column(db.Enum('pendiente','en proceso','en reparto','entregado'))
+    Estado = db.Column(db.Enum('pendiente', 'en proceso', 'en reparto',
+                               'entregado'))
     FechaPedido = db.Column(db.Date)
     FechaEntrega = db.Column(db.Date)
     Destino = db.Column(db.String(200))
     Descuento = db.Column(db.Float)
     Instalacion = db.Column(db.Integer)
 
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'), nullable=False)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+                           nullable=False)
     ID_Empleado = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'))
 
     pagos = db.relationship('Pagos', backref='pedido', lazy=True)
-    detalles_pedido = db.relationship('Detalle_Pedido', backref='pedido', lazy=True)
+    detalles_pedido = db.relationship('Detalle_Pedido', backref='pedido',
+                                      lazy=True)
     firmas = db.relationship('Firmas', backref='pedido', lazy=True)
     comentarios = db.relationship('Comentarios', backref='pedido', lazy=True)
     calendario = db.relationship('Calendario', backref='pedido', lazy=True)
@@ -178,15 +198,18 @@ class Pagos(db.Model):
     MetodoPago = db.Column(db.String(50))
     FechaPago = db.Column(db.Date)
     Monto = db.Column(db.Float)
-    ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), nullable=False)
+    ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'),
+                          nullable=False)
 
 
 # ------------------ Detalle Pedido ------------------
 class Detalle_Pedido(db.Model):
     __tablename__ = 'Detalle_Pedido'
 
-    ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), primary_key=True)
-    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'), primary_key=True)
+    ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'),
+                          primary_key=True)
+    ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'),
+                            primary_key=True)
     Cantidad = db.Column(db.Integer)
     PrecioUnidad = db.Column(db.Float)
 
@@ -196,7 +219,8 @@ class Firmas(db.Model):
     __tablename__ = 'Firmas'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    pedido_id = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'), nullable=False)
+    pedido_id = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'),
+                          nullable=False)
     nombre_cliente = db.Column(db.String(100), nullable=False)
     firma = db.Column(db.Text, nullable=False)
     fecha_firma = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -207,6 +231,7 @@ class Comentarios(db.Model):
     __tablename__ = 'Comentarios'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    pedido_id = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido', ondelete="CASCADE"))
+    pedido_id = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido',
+                                                    ondelete="CASCADE"))
     texto = db.Column(db.Text)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
