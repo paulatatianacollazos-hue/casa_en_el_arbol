@@ -355,4 +355,4 @@ def carrito():
 
 @cliente.route('/pagos')
 def pagos():
-    return render_template('pagos.html')
+    return render_template('cliente/pagos.html')
