@@ -8,5 +8,6 @@ empleado = Blueprint('empleado', __name__, url_prefix='/empleado')
 
 @empleado.route('/dadashboard')
 @login_required
+@role_required('instalador,transportista')
 def dashboard():
     return render_template('empleado/dashboard.html')
