@@ -356,3 +356,23 @@ def carrito():
 @cliente.route('/pagos')
 def pagos():
     return render_template('cliente/pagos.html')
+
+
+@cliente.route('/confirmar_pago', methods=['POST'])
+def confirmar_pago():
+    data = request.get_json()
+    metodo_pago = data.get('metodo_pago')
+    productos = data.get('productos')
+
+    if not metodo_pago or not productos:
+        return jsonify({'error': 'Faltan datos del pago o productos'}), 400
+
+    nombre = session.get('nombre_usuario', 'Cliente')
+    id_usuario = session.get('user_id', None)
+
+    ok, id_pedido = crear_pedido_y_pago(nombre, id_usuario, metodo_pago,
+                                        productos)
+    if ok:
+        return jsonify({'success': True, 'id_pedido': id_pedido})
+    else:
+        return jsonify({'error': 'Error al registrar el pedido'}), 500
