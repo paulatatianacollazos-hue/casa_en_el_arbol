@@ -5,6 +5,14 @@ from basedatos.decoradores import role_required
 # 🔸 Creamos el Blueprint con el nombre correcto
 empleado = Blueprint('empleado', __name__, url_prefix='/empleado')
 
+
+@empleado.route('/dadashboard')
+@login_required
+@role_required('instalador, transportista')
+def dashboard():
+    return render_template('empleado/dashboard.html')
+
+
 # ---------- DASHBOARDS EMPLEADO ----------
 @empleado.route('/instalador')
 @login_required
