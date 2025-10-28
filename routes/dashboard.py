@@ -26,11 +26,11 @@ def dashboard():
 @login_required
 @role_required('instalador')
 def instalador_dashboard():
-    return render_template('instalador_dashboard.html')
+    return render_template('empleado/dashboard.html')
 
 
 @dashboards.route('/transportista')
 @login_required
 @role_required('transportista')
 def transportista_dashboard():
-    return render_template('transportista_dashboard.html')
+    return render_template('empleado/dashboard.html')
