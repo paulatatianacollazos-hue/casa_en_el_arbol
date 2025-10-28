@@ -353,22 +353,6 @@ def carrito():
     return render_template('cliente/carrito.html')
 
 
-@cliente.route('/procesar_pago', methods=['POST'])
-@login_required
-def procesar_pago():
-    """
-    Endpoint para procesar pagos o pedidos contraentrega.
-    """
-    data = request.get_json()
-
-    metodo_pago = data.get('metodo_pago')
-    destino = data.get('destino', 'Sin dirección')
-    items = data.get('items', [])
-
-    if not metodo_pago or not items:
-        return jsonify({
-            "error": "Faltan datos del pago o los productos."}), 400
-
-    resultado, codigo = crear_pedido_y_pago(current_user, metodo_pago, destino,
-                                            items)
-    return jsonify(resultado), codigo
+@cliente.route('/pagos') 
+def pagos():
+    return render_template('pagos.html')
