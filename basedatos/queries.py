@@ -8,6 +8,10 @@ from basedatos.models import Pagos, Producto
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
+from datetime import datetime
+from database import db
+from models.pedido import Pedido
+from models.detalle_pedido import DetallePedido
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")
@@ -778,9 +782,9 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido(nombre_comprador, id_usuario, metodo_pago, productos):
+def crear_pedido_y_pago(nombre_comprador, id_usuario, metodo_pago, productos):
     try:
-        # 🔸 Crear pedido
+        # Crear el pedido
         nuevo_pedido = Pedido(
             NombreComprador=nombre_comprador,
             Estado="pendiente",
@@ -798,9 +802,9 @@ def crear_pedido(nombre_comprador, id_usuario, metodo_pago, productos):
         db.session.add(nuevo_pedido)
         db.session.commit()
 
-        # 🔸 Crear detalles
+        # Crear detalle de pedido por cada producto
         for p in productos:
-            detalle = Detalle_Pedido(
+            detalle = DetallePedido(
                 ID_Pedido=nuevo_pedido.ID_Pedido,
                 ID_Producto=p.get('id'),
                 Cantidad=p.get('quantity', 1),
@@ -813,5 +817,5 @@ def crear_pedido(nombre_comprador, id_usuario, metodo_pago, productos):
 
     except Exception as e:
         db.session.rollback()
-        print(f"❌ Error al crear pedido: {e}")
+        print(f"❌ Error en crear_pedido_y_pago: {e}")
         return False, None
