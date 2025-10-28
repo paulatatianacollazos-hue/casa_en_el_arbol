@@ -106,7 +106,6 @@
       return;
     }
 
-    // 🔹 Mostrar 3 productos por slide
     const chunkSize = 3;
     let total = 0;
     const slides = [];
@@ -144,7 +143,6 @@
     carouselContent.innerHTML = slides.join("");
     totalPago.textContent = "$" + total.toFixed(2);
 
-    // 🔹 Mostrar mensaje si método no disponible
     const metodoPago = document.getElementById("metodo-pago");
     const mensaje = document.getElementById("mensaje-no-disponible");
 
@@ -157,8 +155,8 @@
     });
 
     // 🔹 Confirmar pago
-    document.getElementById("confirmar-pago").addEventListener("click", () => {
-      if (metodoPago.value === "" || metodoPago.value === null) {
+    document.getElementById("confirmar-pago").addEventListener("click", async () => {
+      if (!metodoPago.value) {
         alert("⚠️ Debes seleccionar un método de pago antes de confirmar.");
         return;
       }
@@ -168,12 +166,34 @@
         return;
       }
 
-      alert("✅ Pago confirmado correctamente. ¡Gracias por tu compra!");
-      localStorage.removeItem(getCartKey());
-      window.location.href = "/cliente/catalogo";
+      try {
+        const response = await fetch("/confirmar_pago", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            metodo_pago: metodoPago.value,
+            productos: productos,
+            total: total
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert("✅ Pedido registrado correctamente.");
+          localStorage.removeItem(getCartKey());
+          window.location.href = "/catalogo";
+        } else {
+          alert("❌ Error al registrar el pedido: " + (result.error || 'Desconocido'));
+        }
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error de conexión con el servidor.");
+      }
     });
   });
 </script>
+
 {% endblock %}
 </body>
 

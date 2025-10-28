@@ -778,72 +778,40 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido_y_pago(usuario, metodo_pago, destino, items):
-    """
-    Crea un pedido con sus detalles y el pago (si aplica).
-    """
-    total = 0
-    detalles = []
-
-    # Validar y calcular total
-    for item in items:
-        producto = Producto.query.get(item["id"])
-        if not producto:
-            return {"error": f"Producto con ID {item['id']} no encontrado."}, 404
-
-        if producto.Stock < item["cantidad"]:
-            return {"error": f"Stock insuficiente para {producto.NombreProducto}."}, 400
-
-        subtotal = producto.PrecioUnidad * item["cantidad"]
-        total += subtotal
-        detalles.append({
-            "producto": producto,
-            "cantidad": item["cantidad"],
-            "precio": producto.PrecioUnidad
-        })
-
-        # Descontar stock
-        producto.Stock -= item["cantidad"]
-
-    # Crear pedido
-    pedido = Pedido(
-        NombreComprador=f"{usuario.Nombre} {usuario.Apellido or ''}".strip(),
-        Estado='pendiente' if metodo_pago == 'contraentrega' else 'en proceso',
-        FechaPedido=date.today(),
-        Destino=destino,
-        Descuento=0.0,
-        Instalacion=0,
-        ID_Usuario=usuario.ID_Usuario
-    )
-    db.session.add(pedido)
-    db.session.flush()  # obtiene el ID_Pedido antes del commit
-
-    # Crear los detalles del pedido
-    for d in detalles:
-        detalle = Detalle_Pedido(
-            ID_Pedido=pedido.ID_Pedido,
-            ID_Producto=d["producto"].ID_Producto,
-            Cantidad=d["cantidad"],
-            PrecioUnidad=d["precio"]
+def crear_pedido(nombre_comprador, id_usuario, metodo_pago, productos):
+    try:
+        # 🔸 Crear pedido
+        nuevo_pedido = Pedido(
+            NombreComprador=nombre_comprador,
+            Estado="pendiente",
+            FechaPedido=datetime.now(),
+            FechaEntrega=None,
+            Destino="Por asignar",
+            Descuento=0,
+            ID_Usuario=id_usuario,
+            ID_Empleado=None,
+            instalacion=False,
+            HoraEntrega=None,
+            metodo_pago=metodo_pago
         )
-        db.session.add(detalle)
 
-    # Registrar pago (solo si no es contraentrega)
-    if metodo_pago != 'contraentrega':
-        pago = Pagos(
-            MetodoPago=metodo_pago,
-            FechaPago=date.today(),
-            Monto=total,
-            ID_Pedido=pedido.ID_Pedido
-        )
-        db.session.add(pago)
+        db.session.add(nuevo_pedido)
+        db.session.commit()
 
-    db.session.commit()
+        # 🔸 Crear detalles
+        for p in productos:
+            detalle = Detalle_Pedido(
+                ID_Pedido=nuevo_pedido.ID_Pedido,
+                ID_Producto=p.get('id'),
+                Cantidad=p.get('quantity', 1),
+                PrecioUnidad=p.get('price', 0)
+            )
+            db.session.add(detalle)
 
-    return {
-        "mensaje": "Pedido registrado exitosamente.",
-        "pedido_id": pedido.ID_Pedido,
-        "metodo_pago": metodo_pago,
-        "total": total,
-        "estado": pedido.Estado
-    }, 200
+        db.session.commit()
+        return True, nuevo_pedido.ID_Pedido
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error al crear pedido: {e}")
+        return False, None
