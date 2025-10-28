@@ -11,8 +11,6 @@ from basedatos.queries import get_productos, get_producto_by_id
 from basedatos.models import db, Comentarios, Direccion
 import base64
 import os
-from flask import Blueprint
-from flask_login import login_required, current_user
 from basedatos.queries import crear_pedido_y_pago
 
 from . import cliente
