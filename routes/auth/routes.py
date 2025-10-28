@@ -9,6 +9,9 @@ from basedatos.decoradores import validar_password, validar_email
 from basedatos.decoradores import send_reset_email
 from basedatos.notificaciones import crear_notificacion
 from . import auth
+from flask_login import current_user
+
+
 
 # Serializer
 s = URLSafeTimedSerializer("mi_clave_super_secreta_y_unica")
@@ -124,7 +127,7 @@ def login():
 
         # Mantener correo en el formulario si falla login
         return render_template('login.html', correo=correo)
-
+    print("ROL ACTUAL:", getattr(current_user, 'rol', getattr(current_user, 'Rol', None)))
     return render_template('login.html')
 
 
