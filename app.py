@@ -19,6 +19,7 @@ from routes.Empleado.routers import empleado
 # ------------------ APP ------------------ #
 app = Flask(__name__)
 app.register_blueprint(empleado)
+
 # ------------------ CONFIGURACIÓN PRINCIPAL ------------------ #
 app.config.update(
     SECRET_KEY=os.getenv("SECRET_KEY", "mi_clave_super_secreta_y_unica"),
