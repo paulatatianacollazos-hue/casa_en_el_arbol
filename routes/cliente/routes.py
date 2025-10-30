@@ -359,27 +359,33 @@ def pagos():
 
 
 @cliente.route('/confirmar_pago', methods=['POST'])
+@login_required
 def confirmar_pago():
-    carrito = session.get('carrito', [])
-    # Ejemplo: [{'id': 1, 'cantidad': 2, 'precio': 450.0}, ...]
-    metodo_pago = request.form.get('metodo_pago')
-    total = sum(item['cantidad'] * item['precio'] for item in carrito)
+    data = request.get_json()
+    print("📦 Datos recibidos:", data)
 
-    id_usuario = session.get('user_id')
-    destino = request.form.get('direccion')
+    metodo_pago = data.get("metodo_pago")
+    productos = data.get("productos", [])
+    total = data.get("total", 0)
 
-    pedido_id = crear_pedido_y_pago(
-        id_usuario=id_usuario,
-        carrito=carrito,
-        metodo_pago=metodo_pago,
-        monto_total=total,
-        destino=destino
-    )
+    print("🎭 Rol actual:", getattr(current_user, "rol", "Desconocido"))
 
-    if pedido_id:
-        flash("✅ Pedido y pago registrados correctamente", "success")
-        session.pop('carrito', None)
-        return redirect(url_for('cliente.dashboard'))
-    else:
-        flash("❌ Hubo un error al procesar tu pedido", "danger")
-        return redirect(url_for('cliente.carrito'))
+    try:
+        pedido_id = crear_pedido_y_pago(
+            id_usuario=current_user.id,
+            carrito=productos,
+            metodo_pago=metodo_pago,
+            monto_total=total,
+            destino="Dirección registrada"
+        )
+
+        if pedido_id:
+            print("✅ Pedido creado con ID:", pedido_id)
+            return jsonify({"success": True, "pedido_id": pedido_id}), 200
+        else:
+            print("⚠️ No se pudo crear el pedido")
+            return jsonify({"success": False, "error": "Error al crear el pedido"}), 500
+
+    except Exception as e:
+        print("💥 Error en confirmar_pago:", e)
+        return jsonify({"success": False, "error": str(e)}), 500

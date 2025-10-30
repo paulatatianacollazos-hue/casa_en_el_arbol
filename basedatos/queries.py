@@ -779,62 +779,25 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total,
-                        destino=None, descuento=None, instalacion=None):
-    """
-    Crea un pedido, su pago y los detalles del pedido.
+def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total, destino):
+    # Ejemplo simplificado
+    from basedatos.db import get_db
+    db = get_db()
+    cursor = db.cursor()
 
-    Parámetros:
-    - id_usuario: ID del cliente que realiza el pedido
-    - carrito: lista de diccionarios con productos (cada uno debe tener 'id',
-    'cantidad', 'precio')
-    - metodo_pago: cadena ('tarjeta', 'efectivo', etc.)
-    - monto_total: total del pedido
-    - destino: dirección de entrega (opcional)
-    - descuento: valor de descuento aplicado (opcional)
-    - instalacion: indica si incluye instalación (opcional)
-    """
+    cursor.execute("""
+        INSERT INTO pedidos (id_usuario, metodo_pago, monto_total, destino)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id_pedido;
+    """, (id_usuario, metodo_pago, monto_total, destino))
 
-    try:
-        # 1️⃣ Crear el pedido
-        nuevo_pedido = Pedido(
-            ID_Usuario=id_usuario,
-            Estado='pendiente',
-            FechaPedido=date.today(),
-            Destino=destino or "Por definir",
-            Descuento=descuento or 0,
-            Instalacion=instalacion or 0
-        )
-        db.session.add(nuevo_pedido)
-        db.session.flush()  # Para obtener el ID del pedido antes del commit
+    pedido_id = cursor.fetchone()[0]
 
-        # 2️⃣ Crear el registro de pago
-        nuevo_pago = Pagos(
-            MetodoPago=metodo_pago,
-            FechaPago=date.today(),
-            Monto=monto_total,
-            ID_Pedido=nuevo_pedido.ID_Pedido
-        )
-        db.session.add(nuevo_pago)
+    for item in carrito:
+        cursor.execute("""
+            INSERT INTO detalle_pedido (id_pedido, producto, cantidad, precio)
+            VALUES (%s, %s, %s, %s);
+        """, (pedido_id, item["name"], item["quantity"], item["price"]))
 
-        # 3️⃣ Crear los detalles del pedido
-        for item in carrito:
-            detalle = Detalle_Pedido(
-                ID_Pedido=nuevo_pedido.ID_Pedido,
-                ID_Producto=item['id'],
-                Cantidad=item['cantidad'],
-                PrecioUnidad=item['precio']
-            )
-            db.session.add(detalle)
-
-        # 4️⃣ Confirmar todo
-        db.session.commit()
-        current_app.logger.info(f"""✅ Pedido {nuevo_pedido.ID_Pedido}
-                                creado con pago y detalles.""")
-        return nuevo_pedido.ID_Pedido
-
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"❌ Error al crear pedido y pago: {e}")
-        print("❌ Error al crear pedido y pago:", e)
-        return None
+    db.commit()
+    return pedido_id
