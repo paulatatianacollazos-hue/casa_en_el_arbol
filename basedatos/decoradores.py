@@ -18,10 +18,8 @@ def role_required(*roles):
                 flash("⚠️ Debes iniciar sesión primero", "warning")
                 return redirect(url_for('auth.login'))
 
-            if getattr(current_user, 'rol', '').lower() not in [r.lower(
-                    ) for r in roles]:
-                flash("❌ No tienes permisos para acceder a esta página",
-                      "danger")
+            if current_user.Rol.lower() not in [r.lower() for r in roles]:
+                flash("❌ No tienes permisos para acceder a esta página", "danger")
                 return redirect(url_for('auth.login'))
 
             return fn(*args, **kwargs)
@@ -50,20 +48,19 @@ def validar_email(email):
 def send_reset_email(user_email, user_name, token):
     # Generar URL de recuperación de contraseña
     reset_url = url_for('auth.reset_password', token=token, _external=True)
-
+    
     # Crear el mensaje con HTML
     msg = Message(
         subject="Recuperación de contraseña - Casa en el Árbol",
         recipients=[user_email]
     )
-
+    
     # Renderizamos la plantilla HTML con tus estilos
     msg.html = render_template(
-        'email_reset.html',
-        # Asegúrate de tener esta plantilla en templates/email/
+        'email_reset.html',  # Asegúrate de tener esta plantilla en templates/email/
         user_name=user_name,
         reset_url=reset_url
     )
-
+    
     # Enviar el correo
     mail.send(msg)

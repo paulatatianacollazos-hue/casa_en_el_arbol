@@ -777,3 +777,41 @@ def obtener_pedidos_por_cliente(id_usuario):
 
     conexion.close()
     return pedidos
+
+
+def crear_pedido_y_pago(id_usuario, metodo_pago, productos):
+    try:
+        # Crear el pedido
+        nuevo_pedido = Pedido(
+            Estado="pendiente",
+            FechaPedido=datetime.now(),
+            FechaEntrega=None,
+            Destino="Por asignar",
+            Descuento=0,
+            ID_Usuario=id_usuario,
+            ID_Empleado=None,
+            instalacion=False,
+            HoraEntrega=None,
+            metodo_pago=metodo_pago
+        )
+
+        db.session.add(nuevo_pedido)
+        db.session.commit()
+
+        # Crear detalle de pedido por cada producto
+        for p in productos:
+            detalle = Detalle_Pedido(
+                ID_Pedido=nuevo_pedido.ID_Pedido,
+                ID_Producto=p.get('id'),
+                Cantidad=p.get('quantity', 1),
+                PrecioUnidad=p.get('price', 0)
+            )
+            db.session.add(detalle)
+
+        db.session.commit()
+        return True, nuevo_pedido.ID_Pedido
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error en crear_pedido_y_pago: {e}")
+        return False, None
