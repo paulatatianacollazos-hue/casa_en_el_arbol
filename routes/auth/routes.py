@@ -12,7 +12,6 @@ from . import auth
 from flask_login import current_user
 
 
-
 # Serializer
 s = URLSafeTimedSerializer("mi_clave_super_secreta_y_unica")
 
