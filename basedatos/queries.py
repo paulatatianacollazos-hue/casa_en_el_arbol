@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from basedatos.db import get_connection
 from sqlalchemy import and_
 from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
@@ -779,39 +779,62 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido_y_pago(id_usuario, metodo_pago, productos):
+def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total,
+                        destino=None, descuento=None, instalacion=None):
+    """
+    Crea un pedido, su pago y los detalles del pedido.
+
+    Parámetros:
+    - id_usuario: ID del cliente que realiza el pedido
+    - carrito: lista de diccionarios con productos (cada uno debe tener 'id',
+    'cantidad', 'precio')
+    - metodo_pago: cadena ('tarjeta', 'efectivo', etc.)
+    - monto_total: total del pedido
+    - destino: dirección de entrega (opcional)
+    - descuento: valor de descuento aplicado (opcional)
+    - instalacion: indica si incluye instalación (opcional)
+    """
+
     try:
-        # Crear el pedido
+        # 1️⃣ Crear el pedido
         nuevo_pedido = Pedido(
-            Estado="pendiente",
-            FechaPedido=datetime.now(),
-            FechaEntrega=None,
-            Destino="Por asignar",
-            Descuento=0,
             ID_Usuario=id_usuario,
-            ID_Empleado=None,
-            instalacion=False,
-            HoraEntrega=None,
-            metodo_pago=metodo_pago
+            Estado='pendiente',
+            FechaPedido=date.today(),
+            Destino=destino or "Por definir",
+            Descuento=descuento or 0,
+            Instalacion=instalacion or 0
         )
-
         db.session.add(nuevo_pedido)
-        db.session.commit()
+        db.session.flush()  # Para obtener el ID del pedido antes del commit
 
-        # Crear detalle de pedido por cada producto
-        for p in productos:
+        # 2️⃣ Crear el registro de pago
+        nuevo_pago = Pagos(
+            MetodoPago=metodo_pago,
+            FechaPago=date.today(),
+            Monto=monto_total,
+            ID_Pedido=nuevo_pedido.ID_Pedido
+        )
+        db.session.add(nuevo_pago)
+
+        # 3️⃣ Crear los detalles del pedido
+        for item in carrito:
             detalle = Detalle_Pedido(
                 ID_Pedido=nuevo_pedido.ID_Pedido,
-                ID_Producto=p.get('id'),
-                Cantidad=p.get('quantity', 1),
-                PrecioUnidad=p.get('price', 0)
+                ID_Producto=item['id'],
+                Cantidad=item['cantidad'],
+                PrecioUnidad=item['precio']
             )
             db.session.add(detalle)
 
+        # 4️⃣ Confirmar todo
         db.session.commit()
-        return True, nuevo_pedido.ID_Pedido
+        current_app.logger.info(f"""✅ Pedido {nuevo_pedido.ID_Pedido}
+                                creado con pago y detalles.""")
+        return nuevo_pedido.ID_Pedido
 
     except Exception as e:
         db.session.rollback()
-        print(f"❌ Error en crear_pedido_y_pago: {e}")
-        return False, None
+        current_app.logger.error(f"❌ Error al crear pedido y pago: {e}")
+        print("❌ Error al crear pedido y pago:", e)
+        return None

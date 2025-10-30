@@ -360,19 +360,26 @@ def pagos():
 
 @cliente.route('/confirmar_pago', methods=['POST'])
 def confirmar_pago():
-    data = request.get_json()
-    metodo_pago = data.get('metodo_pago')
-    productos = data.get('productos')
+    carrito = session.get('carrito', [])
+    # Ejemplo: [{'id': 1, 'cantidad': 2, 'precio': 450.0}, ...]
+    metodo_pago = request.form.get('metodo_pago')
+    total = sum(item['cantidad'] * item['precio'] for item in carrito)
 
-    if not metodo_pago or not productos:
-        return jsonify({'error': 'Faltan datos del pago o productos'}), 400
+    id_usuario = session.get('user_id')
+    destino = request.form.get('direccion')
 
-    nombre = session.get('nombre_usuario', 'Cliente')
-    id_usuario = session.get('user_id', None)
+    pedido_id = crear_pedido_y_pago(
+        id_usuario=id_usuario,
+        carrito=carrito,
+        metodo_pago=metodo_pago,
+        monto_total=total,
+        destino=destino
+    )
 
-    ok, id_pedido = crear_pedido_y_pago(nombre, id_usuario, metodo_pago,
-                                        productos)
-    if ok:
-        return jsonify({'success': True, 'id_pedido': id_pedido})
+    if pedido_id:
+        flash("✅ Pedido y pago registrados correctamente", "success")
+        session.pop('carrito', None)
+        return redirect(url_for('cliente.dashboard'))
     else:
-        return jsonify({'error': 'Error al registrar el pedido'}), 500
+        flash("❌ Hubo un error al procesar tu pedido", "danger")
+        return redirect(url_for('cliente.carrito'))
