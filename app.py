@@ -13,7 +13,7 @@ from basedatos.decoradores import mail
 from routes.auth import auth
 from routes.cliente import cliente
 from routes.administrador.routes import admin
-from routes.Empleado.routers import empleado
+from routes.empleado.routers import empleado
 
 
 # ------------------ APP ------------------ #
