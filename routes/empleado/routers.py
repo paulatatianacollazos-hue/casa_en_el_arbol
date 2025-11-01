@@ -1,4 +1,5 @@
 from flask import current_app, Blueprint, render_template
+from basedatos.decoradores import role_required
 
 empleado = Blueprint(
     'empleado',
@@ -9,5 +10,6 @@ empleado = Blueprint(
 
 
 @empleado.route('/dashboard')
+@role_required("transportista")
 def dashboard_empleado():
     return render_template('empleado/dashboard.html')

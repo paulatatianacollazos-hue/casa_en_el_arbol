@@ -142,6 +142,8 @@ def control_pedidos():
 
 
 @admin.route("/registrar_pedido", methods=["POST"])
+@login_required
+@role_required("admin")
 def registrar_pedido_route():
     try:
         nombre_comprador = request.form.get("nombreComprador")
@@ -293,6 +295,7 @@ def actualizacion_datos():
 
 @admin.route("/direccion/agregar", methods=["POST"])
 @login_required
+@role_required("admin")
 def agregar_direccion():
     try:
         nueva_direccion = Direccion(
@@ -324,6 +327,7 @@ def agregar_direccion():
 
 @admin.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
 @login_required
+@role_required("admin")
 def borrar_direccion(id_direccion):
     try:
         direccion = Direccion.query.get_or_404(id_direccion)
@@ -345,6 +349,7 @@ def borrar_direccion(id_direccion):
 
 @admin.route("/catalogo")
 @login_required
+@role_required("admin")
 def catalogo():
     productos = get_productos()
     return render_template("administrador/catalogo.html", productos=productos)
@@ -352,6 +357,7 @@ def catalogo():
 
 @admin.route('/guardar_producto', methods=['POST'])
 @login_required
+@role_required("admin")
 def guardar_producto_route():
     try:
         producto_id = guardar_producto(
@@ -364,6 +370,7 @@ def guardar_producto_route():
 
 @admin.route("/producto/<int:id_producto>")
 @login_required
+@role_required("admin")
 def detalle_producto(id_producto):
     producto = get_producto_by_id(id_producto)
     if not producto:
