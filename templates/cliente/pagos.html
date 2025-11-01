@@ -167,7 +167,7 @@
       }
 
       try {
-        const response = await fetch("/confirmar_pago", {
+        const response = await fetch("cliente/confirmar_pago", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
