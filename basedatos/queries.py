@@ -1,9 +1,9 @@
 from flask import request, jsonify
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
 from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
-from basedatos.models import Pagos, Producto
+from basedatos.models import Producto
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
@@ -779,25 +779,48 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total, destino):
-    # Ejemplo simplificado
-    from basedatos.db import get_db
-    db = get_db()
+def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total,
+                        destino):
+    db = get_connection()
     cursor = db.cursor()
 
-    cursor.execute("""
-        INSERT INTO pedidos (id_usuario, metodo_pago, monto_total, destino)
-        VALUES (%s, %s, %s, %s)
-        RETURNING id_pedido;
-    """, (id_usuario, metodo_pago, monto_total, destino))
-
-    pedido_id = cursor.fetchone()[0]
-
-    for item in carrito:
+    try:
+        # 1️⃣ Insertar pedido principal
         cursor.execute("""
-            INSERT INTO detalle_pedido (id_pedido, producto, cantidad, precio)
-            VALUES (%s, %s, %s, %s);
-        """, (pedido_id, item["name"], item["quantity"], item["price"]))
+            INSERT INTO pedidos (id_usuario, metodo_pago, monto_total,
+            destino, fecha)
+            VALUES (%s, %s, %s, %s, NOW())
+            RETURNING id_pedido;
+        """, (id_usuario, metodo_pago, monto_total, destino))
 
-    db.commit()
-    return pedido_id
+        pedido_id = cursor.fetchone()[0]
+
+        # 2️⃣ Insertar los productos del carrito
+        for item in carrito:
+            cursor.execute("""
+                INSERT INTO detalle_pedido (id_pedido, producto,
+                cantidad, precio)
+                VALUES (%s, %s, %s, %s);
+            """, (
+                pedido_id,
+                item.get("name"),
+                item.get("quantity"),
+                item.get("price")
+            ))
+
+        # 3️⃣ Insertar registro en tabla de pagos (si existe)
+        cursor.execute("""
+            INSERT INTO pagos (id_pedido, metodo_pago, monto, estado, fecha)
+            VALUES (%s, %s, %s, %s, NOW());
+        """, (pedido_id, metodo_pago, monto_total, 'pendiente'))
+
+        db.commit()
+        return pedido_id
+
+    except Exception as e:
+        db.rollback()
+        print("💥 Error al crear pedido y pago:", e)
+        raise e
+
+    finally:
+        cursor.close()

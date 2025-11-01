@@ -384,7 +384,8 @@ def confirmar_pago():
             return jsonify({"success": True, "pedido_id": pedido_id}), 200
         else:
             print("⚠️ No se pudo crear el pedido")
-            return jsonify({"success": False, "error": "Error al crear el pedido"}), 500
+            return jsonify({"success": False, "error":
+                            "Error al crear el pedido"}), 500
 
     except Exception as e:
         print("💥 Error en confirmar_pago:", e)
