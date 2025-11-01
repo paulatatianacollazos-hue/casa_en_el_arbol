@@ -419,41 +419,115 @@
   <div class="profile-header mb-4">
     <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
   </div>
-  <form method="POST" action="{{ url_for('admin.registrar_envio') }}">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Número de pedido</label>
-        <input type="text" name="numero_pedido" class="form-control" required />
+  <div class="control">
+    <button id="ocultarInputsBtn" style="display:none; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));" >x</button>
+    <button class="btn btn-primary mt-3"
+        id="abrirModalAsignacionBtn"
+        style="display:none; border-radius: 10px; border: 0; position: relative; bottom: 17px; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
+      Confirmar Asignación
+    </button>
+    <button class="btn btn-success" 
+            id="mostrarAsignacionBtn"
+            style="border-radius: 10px; border: 0; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
+      Asignar pedidos
+    </button>
+    <a href="/admin/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
+  </div>
+  {% for pedido in pedidos %}
+    <div class="name"><p><strong>Usuario:</strong> {{ pedido.usuario }}</p></div>
+    
+  <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" data-empleado="{{ pedido.id_empleado if pedido.id_empleado else '' }}"  style="display: none; position: relative; right: 45%; top: 150px; border: none;" />
+
+    <div class="pedido1">
+      <h5>ID Pedido: {{ pedido.id }}</h5>
+      <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+
+      <div class="productos">
+        {% for producto in pedido.productos %}
+          <div class="producto">
+            {% if producto.imagen %}
+              <img src="{{ producto.imagen }}" alt="Imagen del producto" width="150" style="margin-top: 10px;">
+            {% else %}
+              <p><em>Sin imagen</em></p>
+            {% endif %}
+            <p><strong>{{ producto.nombre }}</strong></p>
+            <p>Cantidad: {{ producto.cantidad }}</p>
+          </div>
+        {% endfor %}
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Cliente</label>
-        <input type="text" name="cliente" class="form-control" required />
-      </div>
-      <div class="col-md-6">
-        <label class="form-label">Dirección de envío</label>
-        <input type="text" name="direccion_envio" class="form-control" required />
-      </div>
-      <div class="col-md-6">
-        <label class="form-label">Ciudad</label>
-        <input type="text" name="ciudad" class="form-control" required />
-      </div>
-      <div class="col-md-6">
-        <label class="form-label">Fecha de envío</label>
-        <input type="date" name="fecha_envio" class="form-control" required />
-      </div>
-      <div class="col-md-6">
-        <label class="form-label">Estado</label>
-        <select name="estado" class="form-select">
-          <option>Pendiente</option>
-          <option>En camino</option>
-          <option>Entregado</option>
-        </select>
-      </div>
-      <div class="col-12 text-end">
-        <button type="submit" class="btn btn-green mt-3">Registrar envío</button>
-      </div>
+
+      <div class="boton"><button id="miboton" style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button></div>
+      <p><strong>Total del Pedido:</strong> ${{ pedido.total }}</p>
     </div>
-  </form>
+
+    <!-- Modal -->
+    <!-- Modal -->
+<!-- Modal -->
+<div id="modal-{{ pedido.id }}" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal('{{ pedido.id }}')">&times;</span>
+
+    {% set info = detalles[pedido.id] if pedido.id in detalles else None %}
+    {% if info %}
+      <p><strong>Nombre:</strong> {{ info.Nombre_Cliente }}</p>
+      <p><strong>Teléfono:</strong> {{ info.Telefono }}</p>
+      <p><strong>Dirección:</strong> {{ info.Direccion }}</p>
+
+      <hr>
+      <h6>Productos:</h6>
+      <ul>
+        {% for p in info.Productos %}
+          <li>{{ p.Producto }} - Cantidad: {{ p.Cantidad }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No hay detalles para este pedido.</p>
+    {% endif %}
+  </div>
+</div>
+
+
+  {% endfor %}
+
+  <!-- Modal para asignar empleado -->
+<!-- Modal para asignar empleado -->
+<!-- Modal para asignar empleado -->
+<!-- Modal para asignar empleado -->
+<div id="modal-empleado" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalEmpleado()">&times;</span>
+    <h5>Asignar empleado y programar envío</h5>
+    <div id="mensajesAsignacion"></div>
+
+    <!-- Único formulario -->
+    <form id="formAsignacion">
+  <input type="hidden" name="pedidosSeleccionados" id="pedidosSeleccionados">
+  <select name="empleado_id" id="empleado_id" required>
+    <option value="">-- Selecciona empleado --</option>
+    {% for emp in empleados %}
+      <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }}</option>
+    {% endfor %}
+  </select>
+
+  <input type="date" name="fecha" id="fecha" required>
+  <input type="time" name="hora" id="hora" required>
+
+  <button id="btnEnviarAsignacion" type="button">Asignar</button>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+</form>
+
+  </div>
+</div>
 </div>
 <!-- FIN SECCIÓN: REGISTRAR ÓRDEN DE ENVÍO -->
 
