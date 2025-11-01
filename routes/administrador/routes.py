@@ -6,7 +6,7 @@ from basedatos.models import db, Usuario, Notificaciones, Direccion
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from basedatos.queries import get_producto_by_id
+from basedatos.queries import registrar_pedido, get_producto_by_id
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     detalle,
@@ -371,3 +371,16 @@ def detalle_producto(id_producto):
         return redirect(url_for("admin.catalogo"))
     return render_template("administrador/admin_detalle.html",
                            producto=producto)
+
+
+@admin.route('/registrar-envio', methods=['POST'])
+def registrar_envio():
+    numero = request.form['numero_pedido']
+    cliente = request.form['cliente']
+    direccion = request.form['direccion_envio']
+    ciudad = request.form['ciudad']
+    fecha = request.form['fecha_envio']
+    estado = request.form['estado']
+    # Aquí podrías guardar los datos en la base
+    flash('Orden de envío registrada correctamente', 'success')
+    return redirect(url_for('admin.dashboard'))
