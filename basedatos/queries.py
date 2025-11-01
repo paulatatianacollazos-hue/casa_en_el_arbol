@@ -785,21 +785,20 @@ def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total,
     cursor = db.cursor()
 
     try:
-        # 1️⃣ Insertar pedido principal
+        # Insertar el pedido principal
         cursor.execute("""
-            INSERT INTO pedidos (id_usuario, metodo_pago, monto_total,
+            INSERT INTO pedidos (id_usuario, metodopago, monto,
             destino, fecha)
-            VALUES (%s, %s, %s, %s, NOW())
-            RETURNING id_pedido;
+            VALUES (%s, %s, %s, %s, NOW());
         """, (id_usuario, metodo_pago, monto_total, destino))
 
-        pedido_id = cursor.fetchone()[0]
+        # ✅ Obtener el ID del pedido recién insertado
+        pedido_id = cursor.lastrowid
 
-        # 2️⃣ Insertar los productos del carrito
+        # Insertar productos del pedido
         for item in carrito:
             cursor.execute("""
-                INSERT INTO detalle_pedido (id_pedido, producto,
-                cantidad, precio)
+                INSERT INTO detalle_pedido (id_pedido, producto, cantidad, precio)
                 VALUES (%s, %s, %s, %s);
             """, (
                 pedido_id,
@@ -808,19 +807,21 @@ def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total,
                 item.get("price")
             ))
 
-        # 3️⃣ Insertar registro en tabla de pagos (si existe)
+        # Insertar en la tabla de pagos
         cursor.execute("""
             INSERT INTO pagos (id_pedido, metodo_pago, monto, estado, fecha)
             VALUES (%s, %s, %s, %s, NOW());
         """, (pedido_id, metodo_pago, monto_total, 'pendiente'))
 
         db.commit()
+        print(f"✅ Pedido creado correctamente con ID: {pedido_id}")
         return pedido_id
 
     except Exception as e:
         db.rollback()
-        print("💥 Error al crear pedido y pago:", e)
+        print("💥 Error al crear pedido:", e)
         raise e
 
     finally:
         cursor.close()
+        db.close()
