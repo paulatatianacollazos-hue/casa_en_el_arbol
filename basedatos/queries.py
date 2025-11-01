@@ -779,47 +779,45 @@ def obtener_pedidos_por_cliente(id_usuario):
     return pedidos
 
 
-def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total,
-                        destino):
+def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total, destino):
     db = get_connection()
     cursor = db.cursor()
 
     try:
-        # Insertar el pedido principal
+        # 1️⃣ Insertar el pedido principal
         cursor.execute("""
-            INSERT INTO pedidos (id_usuario, metodopago, monto,
-            destino, fecha)
-            VALUES (%s, %s, %s, %s, NOW());
-        """, (id_usuario, metodo_pago, monto_total, destino))
-
-        # ✅ Obtener el ID del pedido recién insertado
+            INSERT INTO pedido (Estado, FechaPedido, Destino, ID_Usuario)
+            VALUES (%s, NOW(), %s, %s);
+        """, ('pendiente', destino, id_usuario))
+        
+        # Obtener el ID del pedido recién insertado
         pedido_id = cursor.lastrowid
 
-        # Insertar productos del pedido
+        # 2️⃣ Insertar los productos en detalle_pedido
         for item in carrito:
             cursor.execute("""
-                INSERT INTO detalle_pedido (id_pedido, producto, cantidad, precio)
+                INSERT INTO detalle_pedido (ID_Pedido, ID_Producto, Cantidad, PrecioUnidad)
                 VALUES (%s, %s, %s, %s);
             """, (
                 pedido_id,
-                item.get("name"),
-                item.get("quantity"),
-                item.get("price")
+                item.get("id"),          # Asegúrate de que el producto tenga "id" en el JSON
+                item.get("quantity", 1),
+                item.get("price", 0)
             ))
 
-        # Insertar en la tabla de pagos
+        # 3️⃣ Insertar registro de pago
         cursor.execute("""
-            INSERT INTO pagos (id_pedido, metodo_pago, monto, estado, fecha)
-            VALUES (%s, %s, %s, %s, NOW());
-        """, (pedido_id, metodo_pago, monto_total, 'pendiente'))
+            INSERT INTO pagos (MetodoPago, FechaPago, Monto, ID_Pedido)
+            VALUES (%s, NOW(), %s, %s);
+        """, (metodo_pago, monto_total, pedido_id))
 
         db.commit()
-        print(f"✅ Pedido creado correctamente con ID: {pedido_id}")
+        print("✅ Pedido y pago registrados correctamente.")
         return pedido_id
 
     except Exception as e:
         db.rollback()
-        print("💥 Error al crear pedido:", e)
+        print("💥 Error al crear pedido y pago:", e)
         raise e
 
     finally:
