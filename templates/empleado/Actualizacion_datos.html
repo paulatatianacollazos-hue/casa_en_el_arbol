@@ -386,17 +386,13 @@
     <h5 class="mb-0">calendario</h5>
   </div>
 
-  <div class="calendar-container">
-  <div class="calendar-header mb-3">
-    <div>
-      <button id="btn-hoy" class="btn btn-outline-success btn-sm">Hoy</button>
-      <button id="btn-mes" class="btn btn-outline-success btn-sm">Mes</button>
-      <button id="btn-dia" class="btn btn-outline-success btn-sm">Día</button>
-    </div>
-    <h2 id="titulo-mes"></h2>
-  </div>
-
-  <div class="calendar-grid" id="calendar-grid">
+  <div class="d-flex justify-content-center mb-3 gap-2">
+  <button id="btn-hoy" class="btn btn-success">Hoy</button>
+  <button id="btn-mes" class="btn btn-primary">Mes</button>
+  <button id="btn-año" class="btn btn-warning">Año</button>
+</div>
+<h4 id="titulo-mes" class="text-center text-capitalize"></h4>
+<div id="calendar-grid" class="calendar-grid"></div>
     <!-- Se genera dinámicamente con JS -->
   </div>
 </div>

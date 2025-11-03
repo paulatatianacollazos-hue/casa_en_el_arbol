@@ -1,5 +1,5 @@
 .day.hoy {
-  border: 2px solid #28a745; /* Verde */
+  border: 2px solid #28a745;
   border-radius: 10px;
   background-color: rgba(40, 167, 69, 0.05);
 }
@@ -12,7 +12,6 @@
   0%, 100% { box-shadow: 0 0 0 0 rgba(40,167,69,0.8); }
   50% { box-shadow: 0 0 10px 3px rgba(40,167,69,0.8); }
 }
-
 /* === ESTILOS DE CALENDARIO === */
 .calendar-container {
   background: #fff;

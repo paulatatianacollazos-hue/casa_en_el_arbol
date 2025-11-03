@@ -6,6 +6,7 @@ const grid = document.getElementById("calendar-grid");
 const mesTitulo = document.getElementById("titulo-mes");
 const btnHoy = document.getElementById("btn-hoy");
 const btnMes = document.getElementById("btn-mes");
+const btnAño = document.getElementById("btn-año");
 const btnDia = document.getElementById("btn-dia");
 
 let fechaActual = new Date();
@@ -56,13 +57,12 @@ function renderCalendario(fecha) {
 }
 
 // =============================================================
-// 🔹 Navegación del calendario
+// 🔹 Botón "Hoy"
 // =============================================================
 btnHoy.addEventListener("click", () => {
   fechaActual = new Date();
   renderCalendario(fechaActual);
 
-  // Marcar el día actual con borde animado
   const hoyCelda = document.querySelector(".day.hoy");
   if (hoyCelda) {
     hoyCelda.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -71,18 +71,63 @@ btnHoy.addEventListener("click", () => {
   }
 });
 
+// =============================================================
+// 🔹 Botón "Mes" → Seleccionar mes y año
+// =============================================================
 btnMes.addEventListener("click", () => {
-  vistaActual = "mes";
-  renderCalendario(fechaActual);
-});
+  const selectorMes = document.createElement("input");
+  selectorMes.type = "month";
+  selectorMes.classList.add("form-control");
+  selectorMes.style.position = "absolute";
+  selectorMes.style.opacity = "0";
+  selectorMes.style.pointerEvents = "none";
+  document.body.appendChild(selectorMes);
 
-btnDia.addEventListener("click", () => {
-  vistaActual = "dia";
-  renderCalendario(fechaActual);
+  // Valor inicial
+  const año = fechaActual.getFullYear();
+  const mes = String(fechaActual.getMonth() + 1).padStart(2, "0");
+  selectorMes.value = `${año}-${mes}`;
+
+  selectorMes.addEventListener("change", (e) => {
+    const [nuevoAño, nuevoMes] = e.target.value.split("-");
+    fechaActual = new Date(parseInt(nuevoAño), parseInt(nuevoMes) - 1, 1);
+    renderCalendario(fechaActual);
+    document.body.removeChild(selectorMes);
+  });
+
+  selectorMes.showPicker?.();
+  selectorMes.click();
 });
 
 // =============================================================
-// 🔹 Clic en día → mostrar modal con pedidos + otros eventos
+// 🔹 Botón "Año" → Seleccionar año (manteniendo el mes actual)
+// =============================================================
+btnAño.addEventListener("click", () => {
+  const selectorAño = document.createElement("input");
+  selectorAño.type = "number";
+  selectorAño.min = "1900";
+  selectorAño.max = "2100";
+  selectorAño.value = fechaActual.getFullYear();
+  selectorAño.classList.add("form-control");
+  selectorAño.style.position = "absolute";
+  selectorAño.style.opacity = "0";
+  selectorAño.style.pointerEvents = "none";
+  document.body.appendChild(selectorAño);
+
+  selectorAño.addEventListener("change", (e) => {
+    const nuevoAño = parseInt(e.target.value);
+    const mes = fechaActual.getMonth();
+    fechaActual = new Date(nuevoAño, mes, 1);
+    renderCalendario(fechaActual);
+    document.body.removeChild(selectorAño);
+  });
+
+  selectorAño.showPicker?.();
+  selectorAño.click();
+});
+
+// =============================================================
+// 🔹 Clic en día → mostrar modal con programaciones
 // =============================================================
 grid.addEventListener("click", async (e) => {
   const celda = e.target.closest(".day");
@@ -114,7 +159,6 @@ grid.addEventListener("click", async (e) => {
         grupos[item.Tipo].push(item);
       });
 
-      // Construir contenido
       contenido.innerHTML = Object.entries(grupos)
         .map(([tipo, eventos]) => `
           <div class="mb-4">
