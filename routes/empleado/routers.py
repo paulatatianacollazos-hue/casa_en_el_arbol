@@ -77,3 +77,30 @@ def actualizacion_datos():
         notificaciones=notificaciones,
         eventos=eventos
     )
+
+
+@empleado.route("/calendario/pedidos/<fecha>")
+@login_required
+def pedidos_por_dia(fecha):
+    try:
+        pedidos = (
+            Calendario.query
+            .filter_by(ID_Usuario=current_user.id, Fecha=fecha)
+            .all()
+        )
+        if not pedidos:
+            return jsonify([])
+
+        resultado = [
+            {
+                "ID_Pedido": p.ID_Pedido,
+                "Ubicacion": p.Ubicacion,
+                "Hora": p.Hora.strftime("%H:%M"),
+                "Tipo": p.Tipo,
+            }
+            for p in pedidos
+        ]
+        return jsonify(resultado)
+    except Exception as e:
+        print("Error en /calendario/pedidos:", e)
+        return jsonify([]), 500

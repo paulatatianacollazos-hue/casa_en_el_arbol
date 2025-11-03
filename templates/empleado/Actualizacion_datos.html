@@ -505,23 +505,30 @@
 
 
   
-</div> <!-- ✅ aquí sí se cierra correctamente -->
-
+        </div> <!-- ✅ aquí sí se cierra correctamente -->
     </div>
   </div>
 </div>
 
-
-
-
-
-
-    <!-- Controles -->
-  
-
 </div>
 
-       
+ <!-- Modal para mostrar pedidos del día -->
+<div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-labelledby="modalPedidosDiaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalPedidosDiaLabel">Pedidos programados</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="contenidoPedidosDia" class="p-3 text-center text-muted">
+          Cargando...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
  
 
 
@@ -702,6 +709,98 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error cargando eventos:", error);
   }
 });
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const grid = document.getElementById("calendar-grid");
+  const tituloMes = document.getElementById("titulo-mes");
+
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  const fechaActual = new Date();
+  const año = fechaActual.getFullYear();
+  const mes = fechaActual.getMonth();
+  tituloMes.textContent = `${meses[mes]} ${año}`;
+
+  const primerDiaMes = new Date(año, mes, 1);
+  const ultimoDiaMes = new Date(año, mes + 1, 0);
+  const diasMes = ultimoDiaMes.getDate();
+
+  // Llenar cuadrícula
+  grid.innerHTML = "";
+  for (let i = 1; i <= diasMes; i++) {
+    const celda = document.createElement("div");
+    celda.classList.add("day");
+    celda.dataset.fecha = `${año}-${String(mes + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+    celda.innerHTML = `<div class='day-header'>${i}</div>`;
+    grid.appendChild(celda);
+  }
+
+  // Cargar eventos desde backend
+  try {
+    const response = await fetch("/calendario/eventos");
+    const eventos = await response.json();
+
+    eventos.forEach(ev => {
+      const fecha = new Date(ev.Fecha);
+      const dia = fecha.getDate();
+      const celda = grid.children[dia - 1];
+      if (celda) {
+        const tipo = ev.Tipo.toLowerCase();
+        const clase =
+          tipo.includes("entrega") ? "entrega" :
+          tipo.includes("reunion") || tipo.includes("evento") ? "reunion" :
+          "instalacion";
+        celda.innerHTML += `<div class="event ${clase}">${ev.Tipo}</div>`;
+      }
+    });
+  } catch (error) {
+    console.error("Error cargando eventos:", error);
+  }
+
+  // 🟢 Al hacer clic en un día -> abrir modal
+  grid.addEventListener("click", async (e) => {
+    const celda = e.target.closest(".day");
+    if (!celda) return;
+
+    const fechaSeleccionada = celda.dataset.fecha;
+    const modal = new bootstrap.Modal(document.getElementById("modalPedidosDia"));
+    const contenido = document.getElementById("contenidoPedidosDia");
+
+    contenido.innerHTML = "<div class='text-muted'>Cargando pedidos...</div>";
+
+    try {
+      const resp = await fetch(`/calendario/pedidos/${fechaSeleccionada}`);
+      const data = await resp.json();
+
+      if (data.length === 0) {
+        contenido.innerHTML = `
+          <div class="alert alert-warning">
+            No tienes pedidos programados para <strong>${fechaSeleccionada}</strong>.
+          </div>`;
+      } else {
+        contenido.innerHTML = data.map(p => `
+          <div class="card mb-3">
+            <div class="card-body text-start">
+              <h6 class="card-title mb-1">Pedido #${p.ID_Pedido}</h6>
+              <p class="mb-0"><strong>Ubicación:</strong> ${p.Ubicacion}</p>
+              <p class="mb-0"><strong>Hora:</strong> ${p.Hora}</p>
+              <p class="mb-0"><strong>Tipo:</strong> ${p.Tipo}</p>
+            </div>
+          </div>
+        `).join("");
+      }
+    } catch (err) {
+      console.error("Error al obtener pedidos:", err);
+      contenido.innerHTML = `<div class="alert alert-danger">Error al cargar pedidos.</div>`;
+    }
+
+    modal.show();
+  });
+});
+
 </script>
 </body>
 </html>
