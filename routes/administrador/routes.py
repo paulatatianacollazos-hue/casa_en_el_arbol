@@ -284,34 +284,6 @@ def actualizacion_datos():
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
-    pedidos = obtener_todos_los_pedidos()
-    detalles = detalle()
-
-    # 🔹 Agrupar detalles por pedido
-    pedidos_con_detalles = []
-    for pedido in pedidos:
-        productos = [
-            d for d in detalles if d.ID_Pedido == pedido.ID_Pedido
-        ]
-        pedidos_con_detalles.append({
-            "id_pedido": pedido.ID_Pedido,
-            "fecha": pedido.Fecha,
-            "total": pedido.Total,
-            "usuario": pedido.usuario.Nombre if hasattr(pedido, "usuario")
-            else None,
-            "productos": [
-                {
-                    "nombre": p.producto.Nombre,
-                    "imagen": p.producto.Imagen_URL if hasattr(p.producto,
-                                                               "Imagen_URL")
-                    else "/static/img/default.png",
-                    "cantidad": p.Cantidad,
-                    "precio": p.Precio
-                }
-                for p in productos
-            ]
-        })
-
     # 🔹 Renderizar plantilla unificada
     return render_template(
         "administrador/admin_actualizacion_datos.html",
@@ -319,7 +291,7 @@ def actualizacion_datos():
         direcciones=direcciones,
         notificaciones=notificaciones,
         calendario=calendario,
-        pedidos=pedidos_con_detalles(),
+        pedidos=obtener_todos_los_pedidos(),
         detalles=detalle(),
         empleados=obtener_empleados(),
     )

@@ -419,38 +419,38 @@
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
         {% for pedido in pedidos %}
-        <div class="card mb-4 p-4 shadow-sm rounded-3">
-          <h5 class="text-success mb-2">🧾 Pedido #{{ pedido.id_pedido }}</h5>
-          <p class="mb-1"><strong>Fecha:</strong> {{ pedido.fecha }}</p>
-          <p class="mb-3"><strong>Total:</strong> ${{ "{:,.0f}".format(pedido.total) }}</p>
+          <div class="card mb-4 p-4 shadow-sm rounded-3">
+            <h5 class="text-success mb-2">🧾 Pedido #{{ pedido.id_pedido }}</h5>
+            <p class="mb-1"><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+            <p class="mb-3"><strong>Total:</strong> ${{ "{:,.0f}".format(pedido.total) }}</p>
 
-          <div id="carouselPedido{{ pedido.id_pedido }}" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-              {% for producto in pedido.productos %}
-              <div class="carousel-item {% if loop.first %}active{% endif %}">
-                <div class="d-flex flex-column align-items-center">
-                  <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" class="d-block rounded mb-2"
-                      style="width:220px;height:220px;object-fit:cover;border:3px solid #4CAF50;">
-                  <h6>{{ producto.nombre }}</h6>
-                  <p class="mb-0">Cantidad: {{ producto.cantidad }}</p>
-                  <p class="mb-0 text-muted">Precio: ${{ "{:,.0f}".format(producto.precio) }}</p>
-                </div>
+            <div id="carouselPedido{{ pedido.id_pedido }}" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner">
+                {% for producto in pedido.productos %}
+                  <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <div class="d-flex flex-column align-items-center">
+                      <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" class="d-block rounded mb-2"
+                          style="width:220px;height:220px;object-fit:cover;border:3px solid #4CAF50;">
+                      <h6>{{ producto.nombre }}</h6>
+                      <p class="mb-0">Cantidad: {{ producto.cantidad }}</p>
+                      <p class="mb-0 text-muted">Precio: ${{ "{:,.0f}".format(producto.precio) }}</p>
+                    </div>
+                  </div>
+                {% endfor %}
               </div>
-              {% endfor %}
-            </div>
 
-            <!-- Controles del carrusel -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Siguiente</span>
-            </button>
+              <!-- Controles del carrusel -->
+              <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+              </button>
+            </div>
           </div>
-        </div>
-        {% endfor %}
+        
       </div>
       
       <!-- SECCIÓN: CALENDARIO -->
