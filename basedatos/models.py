@@ -135,6 +135,29 @@ class Calendario(db.Model):
                            nullable=False)
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'))
 
+    def to_dict(self):
+        """Convierte el evento en un formato compatible con FullCalendar."""
+        return {
+            "id": self.ID_Calendario,
+            "title": f"{self.Tipo} - Pedido {self.ID_Pedido}",
+            "start": f"{self.Fecha}T{self.Hora}",
+            "color": self.get_color(),
+            "extendedProps": {
+                "ubicacion": self.Ubicacion,
+                "id_usuario": self.ID_Usuario,
+                "id_pedido": self.ID_Pedido,
+                "tipo": self.Tipo
+            }
+        }
+
+    def get_color(self):
+        colores = {
+            "Entrega": "#28a745",
+            "Reunión": "#dc3545",
+            "Instalación": "#007bff"
+        }
+        return colores.get(self.Tipo, "#6c757d")
+
 
 # ------------------ Notificaciones ------------------
 class Notificaciones(db.Model):
