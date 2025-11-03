@@ -130,9 +130,7 @@ def ver_notificaciones():
 def envios():
     return render_template(
         "administrador/envios.html",
-        pedidos=obtener_todos_los_pedidos(),
-        detalles=detalle(),
-        empleados=obtener_empleados(),
+
     )
 
 
@@ -300,7 +298,10 @@ def actualizacion_datos():
         usuario=usuario,
         direcciones=direcciones,
         notificaciones=notificaciones,
-        calendario=calendario
+        calendario=calendario,
+        pedidos=obtener_todos_los_pedidos(),
+        detalles=detalle(),
+        empleados=obtener_empleados(),
     )
 
 
