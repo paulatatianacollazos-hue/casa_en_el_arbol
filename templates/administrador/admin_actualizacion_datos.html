@@ -328,7 +328,7 @@
         <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
         <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
         <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
-        <a><i class="bi bi-heart me-2"></i>calendario</a>
+        <a id="menu-calendario"><i class="bi bi-calendar me-2"></i>Calendario</a>
         <a href="{{ url_for('admin.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
     </div>
@@ -414,6 +414,71 @@
           {% endfor %}
         </div>
       </div>
+
+      <!-- NUEVA SECCIÓN: REGISTRAR ÓRDEN DE ENVÍO -->
+<div id="seccion-pedidos" class="card shadow-sm p-4" style="display:none;">
+  <div class="profile-header mb-4">
+    <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
+  </div>
+  <div class="control">
+    <button id="ocultarInputsBtn" style="display:none; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));" >x</button>
+    <button class="btn btn-primary mt-3"
+        id="abrirModalAsignacionBtn"
+        style="display:none; border-radius: 10px; border: 0; position: relative; bottom: 17px; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
+      Confirmar Asignación
+    </button>
+    <button class="btn btn-success" 
+            id="mostrarAsignacionBtn"
+            style="border-radius: 10px; border: 0; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
+      Asignar pedidos
+    </button>
+    <a href="/admin/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
+  </div>
+  {% for pedido in pedidos %}
+    <div class="name"><p><strong>Usuario:</strong> {{ pedido.usuario }}</p></div>
+    
+  <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" data-empleado="{{ pedido.id_empleado if pedido.id_empleado else '' }}"  style="display: none; position: relative; right: 45%; top: 150px; border: none;" />
+
+    <div class="pedido1">
+      <h5>ID Pedido: {{ pedido.id }}</h5>
+      <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+
+      <div class="productos">
+        {% for producto in pedido.productos %}
+          <div class="producto">
+            {% if producto.imagen %}
+              <img src="{{ producto.imagen }}" alt="Imagen del producto" width="150" style="margin-top: 10px;">
+            {% else %}
+              <p><em>Sin imagen</em></p>
+            {% endif %}
+            <p><strong>{{ producto.nombre }}</strong></p>
+            <p>Cantidad: {{ producto.cantidad }}</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="boton"><button id="miboton" style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button></div>
+      <p><strong>Total del Pedido:</strong> ${{ pedido.total }}</p>
+    </div>
+
+
+      <!-- SECCIÓN: CALENDARIO -->
+<div id="seccion-calendario" class="card shadow-sm p-4" style="display:none;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">📅 Calendario de Asignaciones</h5>
+
+    <div class="d-flex align-items-center gap-2">
+      <button id="prevMonthBtn" class="btn btn-sm btn-outline-success">&lt;</button>
+      <span id="monthYearDisplay" class="fw-bold"></span>
+      <button id="nextMonthBtn" class="btn btn-sm btn-outline-success">&gt;</button>
+
+      <select id="yearSelect" class="form-select form-select-sm w-auto ms-2"></select>
+    </div>
+  </div>
+
+  <div id="calendar" class="calendar-grid"></div>
+</div>
+
     </div>
   </div>
 </div>
@@ -539,51 +604,6 @@
 </div>
 
 
-<!-- NUEVA SECCIÓN: REGISTRAR ÓRDEN DE ENVÍO -->
-<div id="seccion-pedidos" class="card shadow-sm p-4" style="display:none;">
-  <div class="profile-header mb-4">
-    <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
-  </div>
-  <div class="control">
-    <button id="ocultarInputsBtn" style="display:none; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));" >x</button>
-    <button class="btn btn-primary mt-3"
-        id="abrirModalAsignacionBtn"
-        style="display:none; border-radius: 10px; border: 0; position: relative; bottom: 17px; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
-      Confirmar Asignación
-    </button>
-    <button class="btn btn-success" 
-            id="mostrarAsignacionBtn"
-            style="border-radius: 10px; border: 0; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
-      Asignar pedidos
-    </button>
-    <a href="/admin/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
-  </div>
-  {% for pedido in pedidos %}
-    <div class="name"><p><strong>Usuario:</strong> {{ pedido.usuario }}</p></div>
-    
-  <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" data-empleado="{{ pedido.id_empleado if pedido.id_empleado else '' }}"  style="display: none; position: relative; right: 45%; top: 150px; border: none;" />
-
-    <div class="pedido1">
-      <h5>ID Pedido: {{ pedido.id }}</h5>
-      <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
-
-      <div class="productos">
-        {% for producto in pedido.productos %}
-          <div class="producto">
-            {% if producto.imagen %}
-              <img src="{{ producto.imagen }}" alt="Imagen del producto" width="150" style="margin-top: 10px;">
-            {% else %}
-              <p><em>Sin imagen</em></p>
-            {% endif %}
-            <p><strong>{{ producto.nombre }}</strong></p>
-            <p>Cantidad: {{ producto.cantidad }}</p>
-          </div>
-        {% endfor %}
-      </div>
-
-      <div class="boton"><button id="miboton" style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button></div>
-      <p><strong>Total del Pedido:</strong> ${{ pedido.total }}</p>
-    </div>
 
     <!-- Modal -->
     <!-- Modal -->
@@ -877,5 +897,85 @@ ocultarInputsBtn.addEventListener('click', () => {
 
 
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const calendar = document.getElementById("calendar");
+  const monthYearDisplay = document.getElementById("monthYearDisplay");
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+  const yearSelect = document.getElementById("yearSelect");
+
+  let currentDate = new Date();
+
+  // Llenar selector de años (5 antes y 5 después del actual)
+  const currentYear = currentDate.getFullYear();
+  for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    if (y === currentYear) opt.selected = true;
+    yearSelect.appendChild(opt);
+  }
+
+  function renderCalendar() {
+    calendar.innerHTML = "";
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    monthYearDisplay.textContent = firstDay.toLocaleString("es-ES", {
+      month: "long",
+      year: "numeric"
+    });
+
+    // Días vacíos antes del primer día del mes
+    for (let i = 0; i < firstDay.getDay(); i++) {
+      const empty = document.createElement("div");
+      calendar.appendChild(empty);
+    }
+
+    // Días del mes
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const day = document.createElement("div");
+      day.classList.add("calendar-day");
+      day.textContent = d;
+
+      const today = new Date();
+      if (
+        d === today.getDate() &&
+        month === today.getMonth() &&
+        year === today.getFullYear()
+      ) {
+        day.classList.add("today");
+      }
+
+      calendar.appendChild(day);
+    }
+  }
+
+  // Navegar entre meses
+  prevMonthBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  nextMonthBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  // Cambiar año (manteniendo el mes actual)
+  yearSelect.addEventListener("change", (e) => {
+    const selectedYear = parseInt(e.target.value);
+    currentDate.setFullYear(selectedYear);
+    renderCalendar();
+  });
+
+  renderCalendar();
+});
+</script>
+
 </body>
 </html>
