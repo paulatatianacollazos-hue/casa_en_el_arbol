@@ -123,6 +123,9 @@ def ver_notificaciones():
                            notificaciones=notificaciones)
 
 
+
+
+
 # ---------- CONTROL_PEDIDOS ----------
 @admin.route("/control_pedidos")
 @login_required
