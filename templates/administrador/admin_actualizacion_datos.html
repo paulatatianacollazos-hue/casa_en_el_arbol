@@ -418,48 +418,39 @@
         <div class="profile-header mb-4">
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
-        <div class="control">
-          <button id="ocultarInputsBtn" style="display:none; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));" >x</button>
-          <button class="btn btn-primary mt-3"
-              id="abrirModalAsignacionBtn"
-              style="display:none; border-radius: 10px; border: 0; position: relative; bottom: 17px; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
-            Confirmar Asignación
-          </button>
-          <button class="btn btn-success" 
-                  id="mostrarAsignacionBtn"
-                  style="border-radius: 10px; border: 0; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
-            Asignar pedidos
-          </button>
-          <a href="/admin/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
-        </div>
         {% for pedido in pedidos %}
-          <div class="name"><p><strong>Usuario:</strong> {{ pedido.usuario }}</p></div>
-            <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" data-empleado="{{ pedido.id_empleado if pedido.id_empleado else '' }}"  style="display: none; position: relative; right: 45%; top: 150px; border: none;" />
+        <div class="card mb-4 p-4 shadow-sm rounded-3">
+          <h5 class="text-success mb-2">🧾 Pedido #{{ pedido.id_pedido }}</h5>
+          <p class="mb-1"><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+          <p class="mb-3"><strong>Total:</strong> ${{ "{:,.0f}".format(pedido.total) }}</p>
 
-            <div class="pedido1">
-              <h5>ID Pedido: {{ pedido.id }}</h5>
-              <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
-
-              <div class="productos">
-                {% for producto in pedido.productos %}
-                  <div class="producto">
-                    {% if producto.imagen %}
-                      <img src="{{ producto.imagen }}" alt="Imagen del producto" width="150" style="margin-top: 10px;">
-                    {% else %}
-                      <p><em>Sin imagen</em></p>
-                    {% endif %}
-                    <p><strong>{{ producto.nombre }}</strong></p>
-                    <p>Cantidad: {{ producto.cantidad }}</p>
-                  </div>
+          <div id="carouselPedido{{ pedido.id_pedido }}" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              {% for producto in pedido.productos %}
+              <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <div class="d-flex flex-column align-items-center">
+                  <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" class="d-block rounded mb-2"
+                      style="width:220px;height:220px;object-fit:cover;border:3px solid #4CAF50;">
+                  <h6>{{ producto.nombre }}</h6>
+                  <p class="mb-0">Cantidad: {{ producto.cantidad }}</p>
+                  <p class="mb-0 text-muted">Precio: ${{ "{:,.0f}".format(producto.precio) }}</p>
+                </div>
               </div>
-        
-              <div class="boton"><button id="miboton" style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button></div>
-                <p><strong>Total del Pedido:</strong> ${{ pedido.total }}</p>
-              </div>
+              {% endfor %}
             </div>
+
+            <!-- Controles del carrusel -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Siguiente</span>
+            </button>
           </div>
-        {%endfor%}
-        </div>  
+        </div>
+        {% endfor %}
       </div>
       
       <!-- SECCIÓN: CALENDARIO -->

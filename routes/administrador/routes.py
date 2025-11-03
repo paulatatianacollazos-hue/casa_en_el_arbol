@@ -123,9 +123,6 @@ def ver_notificaciones():
                            notificaciones=notificaciones)
 
 
-
-
-
 # ---------- CONTROL_PEDIDOS ----------
 @admin.route("/control_pedidos")
 @login_required
@@ -262,14 +259,16 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
+                  "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.", "danger")
+                flash("El correo ya está registrado por otro usuario.",
+                      "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -280,9 +279,38 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="Tus datos personales se han actualizado correctamente."
+                    mensaje="""Tus datos personales se han actualizado
+                    correctamente."""
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
+
+    pedidos = obtener_todos_los_pedidos()
+    detalles = detalle()
+
+    # 🔹 Agrupar detalles por pedido
+    pedidos_con_detalles = []
+    for pedido in pedidos:
+        productos = [
+            d for d in detalles if d.ID_Pedido == pedido.ID_Pedido
+        ]
+        pedidos_con_detalles.append({
+            "id_pedido": pedido.ID_Pedido,
+            "fecha": pedido.Fecha,
+            "total": pedido.Total,
+            "usuario": pedido.usuario.Nombre if hasattr(pedido, "usuario")
+            else None,
+            "productos": [
+                {
+                    "nombre": p.producto.Nombre,
+                    "imagen": p.producto.Imagen_URL if hasattr(p.producto,
+                                                               "Imagen_URL")
+                    else "/static/img/default.png",
+                    "cantidad": p.Cantidad,
+                    "precio": p.Precio
+                }
+                for p in productos
+            ]
+        })
 
     # 🔹 Renderizar plantilla unificada
     return render_template(
@@ -291,7 +319,7 @@ def actualizacion_datos():
         direcciones=direcciones,
         notificaciones=notificaciones,
         calendario=calendario,
-        pedidos=obtener_todos_los_pedidos(),
+        pedidos=pedidos_con_detalles(),
         detalles=detalle(),
         empleados=obtener_empleados(),
     )
