@@ -7,7 +7,6 @@ from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.queries import (
     obtener_todos_los_pedidos,
-    detalle,
     obtener_empleados,
     todos_los_pedidos,
     obtener_comentarios_agrupados,
@@ -292,7 +291,6 @@ def actualizacion_datos():
         notificaciones=notificaciones,
         calendario=calendario,
         pedidos=obtener_todos_los_pedidos(),
-        detalles=detalle(),
         empleados=obtener_empleados(),
     )
 

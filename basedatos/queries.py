@@ -50,11 +50,16 @@ def obtener_todos_los_pedidos():
         id_pedido = row[0]
         id_producto = row[4]
 
+        # 🔹 Limpiar ruta completa de imagen
+        imagen_ruta = row[8] or ''
+        if imagen_ruta:
+            imagen_ruta = os.path.basename(imagen_ruta)  # se queda solo con 'silla.jpg'
+
         producto = {
             'id': id_producto,
             'nombre': row[5],
             'cantidad': row[6],
-            'imagen': row[8] or '',
+            'imagen': imagen_ruta,
             'precio': float(row[9])
         }
 
@@ -78,13 +83,12 @@ def obtener_todos_los_pedidos():
         else:
             productos[id_producto] = producto
 
+    # 🔹 Calcular totales
     for pedido in pedidos_dict.values():
         pedido['productos'] = list(pedido['productos'].values())
-        total = sum(prod['cantidad'] * prod['precio']
-                    for prod in pedido['productos'])
-        pedido['total'] = round(total, 2)
-    return list(pedidos_dict.values())
+        pedido['total'] = round(sum(prod['cantidad'] * prod['precio'] for prod in pedido['productos']), 2)
 
+    return list(pedidos_dict.values())
 # --------- TODOS_LOS_PEDIDOS ---------
 
 
