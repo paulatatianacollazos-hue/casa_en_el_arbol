@@ -130,3 +130,20 @@ def obtener_programaciones(fecha):
     except Exception as e:
         print("Error:", e)
         return jsonify([]), 500
+
+
+@empleado.route('/programaciones_todas')
+@login_required
+def programaciones_todas():
+    eventos = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    return jsonify([
+        {
+            "ID_Calendario": e.ID_Calendario,
+            "Fecha": e.Fecha.strftime("%Y-%m-%d"),
+            "Hora": str(e.Hora),
+            "Ubicacion": e.Ubicacion,
+            "ID_Pedido": e.ID_Pedido,
+            "Tipo": e.Tipo
+        }
+        for e in eventos
+    ])
