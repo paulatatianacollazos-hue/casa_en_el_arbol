@@ -206,7 +206,7 @@
         </div>
 
         <!-- Carrito -->
-        <a href="#" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
+        <a href="{{ url_for('cliente.carrito') }}" class="nav-icon position-relative" onclick="toggleCart()" aria-label="Carrito de compras">
           <i class="bi bi-cart fs-4"></i>
           <span class="cart-badge" id="cart-count">0</span>
         </a>
