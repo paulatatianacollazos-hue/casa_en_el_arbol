@@ -40,7 +40,7 @@ function renderCartPage() {
     itemsContainer.innerHTML = `
       <div class="alert alert-info text-center">
         Tu carrito está vacío. 
-        <a href="/catalogo" class="alert-link">Ir al catálogo</a>
+        <a href="/cliente/catalogo" class="alert-link">Ir al catálogo</a>
       </div>`;
     totalEl.textContent = "$0.00";
     return;
