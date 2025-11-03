@@ -412,51 +412,11 @@
     <h5 class="mb-0">MIS PEDIDOS</h5>
   </div>
 
-  {% for item in pedidos_con_detalles %}
-  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide pedido-container mb-5" data-bs-interval="false">
-    <div class="carousel-inner">
+  
+</div>
 
-      {% for grupo in item.detalles | batch(3, None) %}
-      <div class="carousel-item {% if loop.first %}active{% endif %}">
-        <div class="d-flex justify-content-center align-items-stretch">
-          {% for producto in grupo %}
-          {% if producto %}
-          <div class="card producto-card mx-2">
-            <img src="{{ url_for('static', filename=producto.Imagen) }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
-            <div class="card-body text-center">
-              <h6 class="card-title">{{ producto.NombreProducto }}</h6>
-              <p class="mb-1">Cantidad: {{ producto.cantidad }}</p>
-              <p class="precio mb-0">${{ producto.PrecioUnidad }}</p>
-            </div>
-          </div>
-          {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
 
-    <!-- Controles -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#pedidoCarousel{{ item.id_pedido }}" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#pedidoCarousel{{ item.id_pedido }}" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Siguiente</span>
-    </button>
 
-    <div class="text-center mt-3">
-      <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
-      {% if item.Estado == 'entregado' %}
-      <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
-        Confirmación de entrega
-      </a>
-      {% endif %}
-    </div>
-  </div>
-  {% else %}
-  <p class="text-muted">No tienes pedidos registrados.</p>
   
 </div> <!-- ✅ aquí sí se cierra correctamente -->
 
