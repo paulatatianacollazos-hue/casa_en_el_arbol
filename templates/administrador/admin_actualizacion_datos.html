@@ -196,7 +196,7 @@
 
             <li><a class="dropdown-item" href="{{ url_for('cliente.actualizacion_datos') }}">Perfil</a></li>
             <li><a class="dropdown-item" href="">Historial</a></li>
-            <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
+            <li><a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
             <li>
           <a class="dropdown-item" 
           {% if current_user.Rol == 'admin' %}
