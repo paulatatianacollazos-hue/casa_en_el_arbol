@@ -674,7 +674,7 @@
     <div class="modal-content" >
       <div class="modal-header bg-success text-white" style="background-color: #7db243;">
         <h5 class="modal-title" id="modalPedidosDiaLabel" style="color: white;">Pedidos programados</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close btn-close-white" onclick="cerrarMiModal()" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <div id="contenidoPedidosDia" class="p-3 text-center text-muted">
@@ -991,6 +991,41 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 <script src="{{ url_for('static', filename='js/calendario.js') }}"></script>
+<script>
+  function abrirMiModal() {
+    const modal = document.getElementById('modalPedidosDia');
+    modal.classList.add('show');
+    modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+
+    // Crear fondo oscuro (backdrop)
+    let backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.id = 'customBackdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  function cerrarMiModal() {
+  const modal = document.getElementById('modalPedidosDia');
+
+  // Ocultar el modal
+  modal.classList.remove('show');
+  modal.style.display = 'none';
+
+  // Quitar bloqueo del scroll
+  document.body.classList.remove('modal-open');
+  document.body.style.removeProperty('overflow');
+  document.body.style.removeProperty('padding-right');
+
+  // Eliminar backdrop manual (por si quedó alguno)
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach(b => b.remove());
+
+  // Asegurar que no quede sombreado
+  document.body.style.backgroundColor = '';
+}
+
+</script>
 
 </body>
 </html>
