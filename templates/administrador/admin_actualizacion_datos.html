@@ -419,31 +419,24 @@
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
 {% for pedido in pedidos %}
-  {% set pid = pedido.ID_Pedido|string %}
   <div class="pedido-card">
-    <h3>Pedido #{{ pedido.ID_Pedido }}</h3>
-    <div id="carouselPedido{{ pedido.ID_Pedido }}" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        {% for detalle in detalles.get(pid, {}).get('Productos', []) %}
-          <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <img src="{{ url_for('static', filename='imagenes/' + detalle.Imagen) }}" class="d-block w-100" alt="{{ detalle.Producto }}">
-            <div class="carousel-caption d-none d-md-block">
-              <h5>{{ detalle.Producto }}</h5>
-              <p>Cantidad: {{ detalle.Cantidad }}</p>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.ID_Pedido }}" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.ID_Pedido }}" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Siguiente</span>
-      </button>
+    <h3>Pedido #{{ pedido.id }}</h3>
+    <p><strong>Cliente:</strong> {{ pedido.usuario }}</p>
+    <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
+    <p><strong>Dirección:</strong> {{ pedido.direccion }}</p>
+    <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+    <p><strong>Total:</strong> ${{ pedido.total }}</p>
+
+    <div class="productos">
+      {% for producto in pedido.productos %}
+        <div class="producto-item">
+          <img src="{{ url_for('static', filename='imagenes/' + producto.imagen) }}" alt="{{ producto.nombre }}">
+          <p>{{ producto.nombre }} (x{{ producto.cantidad }})</p>
+          <p>Precio: ${{ producto.precio }}</p>
+        </div>
+      {% endfor %}
     </div>
-    <p>Total: ${{ pedido.Total }}</p>
+  
     <div class="boton">
       <button style="background-color: transparent;" onclick="abrirModal('{{ pid }}')">Ver Detalles</button>
     </div>
