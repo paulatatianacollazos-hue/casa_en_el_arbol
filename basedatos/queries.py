@@ -127,11 +127,13 @@ def detalle():
             u.Telefono,
             u.Direccion,
             pr.NombreProducto AS Producto,
+            im.ruta AS ruta,
             dp.Cantidad
         FROM Pedido p
         JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
         JOIN Detalle_Pedido dp ON p.ID_Pedido = dp.ID_Pedido
         JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        join imagenproducto im on im.ID_Producto = pr.ID_Producto
     """)
     resultados = cursor.fetchall()
     cursor.close()
@@ -139,7 +141,7 @@ def detalle():
 
     agrupado = {}
     for row in resultados:
-        pid = row['ID_Pedido']
+        pid = str(row['ID_Pedido'])  # <-- convertir a string
         if pid not in agrupado:
             agrupado[pid] = {
                 'Nombre_Cliente': row['Nombre_Cliente'],
@@ -149,7 +151,8 @@ def detalle():
             }
         agrupado[pid]['Productos'].append({
             'Producto': row['Producto'],
-            'Cantidad': row['Cantidad']
+            'Cantidad': row['Cantidad'],
+            'ruta': row['ruta']
         })
 
     return agrupado

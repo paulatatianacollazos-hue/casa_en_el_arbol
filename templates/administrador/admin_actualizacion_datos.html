@@ -419,38 +419,59 @@
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
 {% for pedido in pedidos %}
-<div class="pedido-card">
-    <h3>Pedido #{{ pedido.id_pedido }}</h3>
-
-    <div id="carouselPedido{{ pedido.id_pedido }}" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            {% for detalle in detalles[pedido.id_pedido]['Productos'] %}
-            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                <img src="{{ url_for('static', filename='imagenes/' + detalle.Producto + '.jpg') }}" class="d-block w-100" alt="{{ detalle.Producto }}">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>{{ detalle.Producto }}</h5>
-                    <p>Cantidad: {{ detalle.Cantidad }}</p>
-                </div>
+  {% set pid = pedido.ID_Pedido|string %}
+  <div class="pedido-card">
+    <h3>Pedido #{{ pedido.ID_Pedido }}</h3>
+    <div id="carouselPedido{{ pedido.ID_Pedido }}" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        {% for detalle in detalles.get(pid, {}).get('Productos', []) %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename='imagenes/' + detalle.Imagen) }}" class="d-block w-100" alt="{{ detalle.Producto }}">
+            <div class="carousel-caption d-none d-md-block">
+              <h5>{{ detalle.Producto }}</h5>
+              <p>Cantidad: {{ detalle.Cantidad }}</p>
             </div>
-            {% endfor %}
-        </div>
-
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-        </button>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.ID_Pedido }}" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.ID_Pedido }}" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+      </button>
     </div>
-
-    <p>Total: ${{ pedido.total }}</p>
+    <p>Total: ${{ pedido.Total }}</p>
     <div class="boton">
-        <button style="background-color: transparent;" onclick="abrirModal('{{ pedido.id_pedido }}')">Ver Detalles</button>
+      <button style="background-color: transparent;" onclick="abrirModal('{{ pid }}')">Ver Detalles</button>
     </div>
+  </div>
+  <div id="modal-{{ pedido.id }}" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal('{{ pedido.id }}')">&times;</span>
+
+    {% set info = detalles[pedido.id] if pedido.id in detalles else None %}
+    {% if info %}
+      <p><strong>Nombre:</strong> {{ info.Nombre_Cliente }}</p>
+      <p><strong>Teléfono:</strong> {{ info.Telefono }}</p>
+      <p><strong>Dirección:</strong> {{ info.Direccion }}</p>
+
+      <hr>
+      <h6>Productos:</h6>
+      <ul>
+        {% for p in info.Productos %}
+          <li>{{ p.Producto }} - Cantidad: {{ p.Cantidad }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No hay detalles para este pedido.</p>
+    {% endif %}
+  </div>
 </div>
 {% endfor %}
+
  
       </div>
       
@@ -624,28 +645,7 @@
     <!-- Modal -->
     <!-- Modal -->
 <!-- Modal -->
-<div id="modal-{{ pedido.id }}" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="cerrarModal('{{ pedido.id }}')">&times;</span>
 
-    {% set info = detalles[pedido.id] if pedido.id in detalles else None %}
-    {% if info %}
-      <p><strong>Nombre:</strong> {{ info.Nombre_Cliente }}</p>
-      <p><strong>Teléfono:</strong> {{ info.Telefono }}</p>
-      <p><strong>Dirección:</strong> {{ info.Direccion }}</p>
-
-      <hr>
-      <h6>Productos:</h6>
-      <ul>
-        {% for p in info.Productos %}
-          <li>{{ p.Producto }} - Cantidad: {{ p.Cantidad }}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No hay detalles para este pedido.</p>
-    {% endif %}
-  </div>
-</div>
 
 
 
