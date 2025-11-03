@@ -1,3 +1,14 @@
+ :root {
+      --primary-green: #5f8f3f;
+      --secondary-green: #4e7b33;
+      --light-green: #6c9a50;
+      --accent-green: #7cb342;
+      --bg-cream: #f8f6f0;
+      --text-dark: #2c3e50;
+      --shadow-light: rgba(0, 0, 0, 0.08);
+      --shadow-medium: rgba(0, 0, 0, 0.15);
+    }
+
 .day.hoy {
   border: 2px solid #28a745;
   border-radius: 10px;
@@ -101,7 +112,14 @@
 
 .botones{
   border: 1px solid #7db243;
-  color: #7db243;
-  background-color: transparent;
+  color: white;
+  background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
   padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.botones:hover{
+  color: black;
+  border: 1px solid #7db243;
+  
 }
