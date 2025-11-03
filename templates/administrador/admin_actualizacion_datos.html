@@ -429,7 +429,7 @@
 
     <div class="productos">
       {% for producto in pedido.productos %}
-        <div class="producto-item">
+        <div class="producto-item producto">
           <img src="{{ url_for('static', filename='imagenes/' + producto.imagen) }}" alt="{{ producto.nombre }}">
           <p>{{ producto.nombre }} (x{{ producto.cantidad }})</p>
           <p>Precio: ${{ producto.precio }}</p>
