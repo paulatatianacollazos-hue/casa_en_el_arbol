@@ -104,3 +104,29 @@ def pedidos_por_dia(fecha):
     except Exception as e:
         print("Error en /calendario/pedidos:", e)
         return jsonify([]), 500
+
+
+@empleado.route('/programaciones/<fecha>')
+@login_required
+def obtener_programaciones(fecha):
+    try:
+        resultados = Calendario.query.filter_by(
+            ID_Usuario=current_user.id,
+            Fecha=fecha
+        ).all()
+
+        return jsonify([
+            {
+                "ID_Calendario": c.ID_Calendario,
+                "ID_Pedido": c.ID_Pedido,
+                "Fecha": str(c.Fecha),
+                "Hora": str(c.Hora),
+                "Ubicacion": c.Ubicacion,
+                "Tipo": c.Tipo,
+                "Descripcion": getattr(c, "Descripcion", "")
+            }
+            for c in resultados
+        ])
+    except Exception as e:
+        print("Error:", e)
+        return jsonify([]), 500
