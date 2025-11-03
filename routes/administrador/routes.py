@@ -382,53 +382,71 @@ def detalle_producto(id_producto):
                            producto=producto)
 
 
-@admin.route('/calendario/eventos', methods=['GET'])
-def listar_eventos():
+@admin.route("/calendario/pedidos/<fecha>")
+@login_required
+def pedidos_por_dia(fecha):
     try:
-        return jsonify(obtener_eventos())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        pedidos = (
+            Calendario.query
+            .filter_by(ID_Usuario=current_user.id, Fecha=fecha)
+            .all()
+        )
+        if not pedidos:
+            return jsonify([])
 
-
-# 🔹 Obtener evento por ID
-@admin.route('/calendario/eventos/<int:id>', methods=['GET'])
-def obtener_evento(id):
-    try:
-        evento = obtener_evento_por_id(id)
-        if not evento:
-            return jsonify({"error": "Evento no encontrado"}), 404
-        return jsonify(evento.to_dict())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# 🔹 Crear evento
-@admin.route('/calendario/eventos', methods=['POST'])
-def agregar_evento():
-    data = request.get_json()
-    try:
-        resultado = crear_evento(data)
-        return jsonify(resultado), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-
-# 🔹 Editar evento
-@admin.route('/calendario/eventos/<int:id>', methods=['PUT'])
-def actualizar_evento(id):
-    data = request.get_json()
-    try:
-        resultado = editar_evento(id, data)
+        resultado = [
+            {
+                "ID_Pedido": p.ID_Pedido,
+                "Ubicacion": p.Ubicacion,
+                "Hora": p.Hora.strftime("%H:%M"),
+                "Tipo": p.Tipo,
+            }
+            for p in pedidos
+        ]
         return jsonify(resultado)
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        print("Error en /calendario/pedidos:", e)
+        return jsonify([]), 500
 
 
-# 🔹 Eliminar evento
-@admin.route('/calendario/eventos/<int:id>', methods=['DELETE'])
-def borrar_evento(id):
+@admin.route('/programaciones/<fecha>')
+@login_required
+def obtener_programaciones(fecha):
     try:
-        resultado = eliminar_evento(id)
-        return jsonify(resultado)
+        resultados = Calendario.query.filter_by(
+            ID_Usuario=current_user.id,
+            Fecha=fecha
+        ).all()
+
+        return jsonify([
+            {
+                "ID_Calendario": c.ID_Calendario,
+                "ID_Pedido": c.ID_Pedido,
+                "Fecha": str(c.Fecha),
+                "Hora": str(c.Hora),
+                "Ubicacion": c.Ubicacion,
+                "Tipo": c.Tipo,
+                "Descripcion": getattr(c, "Descripcion", "")
+            }
+            for c in resultados
+        ])
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        print("Error:", e)
+        return jsonify([]), 500
+
+
+@admin.route('/programaciones_todas')
+@login_required
+def programaciones_todas():
+    eventos = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    return jsonify([
+        {
+            "ID_Calendario": e.ID_Calendario,
+            "Fecha": e.Fecha.strftime("%Y-%m-%d"),
+            "Hora": str(e.Hora),
+            "Ubicacion": e.Ubicacion,
+            "ID_Pedido": e.ID_Pedido,
+            "Tipo": e.Tipo
+        }
+        for e in eventos
+    ])

@@ -430,7 +430,10 @@
     <div class="productos">
       {% for producto in pedido.productos %}
         <div class="producto-item producto">
-          <img src="{{ url_for('static', filename='imagenes/' + producto.imagen) }}" alt="{{ producto.nombre }}">
+          <img src="{{ url_for('static', filename='img/' + producto.imagen) }}"
+            class="d-block rounded shadow"
+            style="max-height: 300px; object-fit: cover;"
+            alt="{{ producto.nombre }}">
           <p>{{ producto.nombre }} (x{{ producto.cantidad }})</p>
           <p>Precio: ${{ producto.precio }}</p>
         </div>
@@ -469,47 +472,28 @@
       </div>
       
       <!-- SECCIÓN: CALENDARIO -->
-      <div id="seccion-calendario" class="card shadow-sm p-4" style="display:none;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">📅 Calendario de Asignaciones</h5>
+      <!-- SECCIÓN: CALENDARIO -->
+<div id="seccion-calendario" class="card shadow-sm p-4" style="display:none;">
+  <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">CALENDARIO</h5>
+  </div>
 
-          <div class="d-flex align-items-center gap-2">
-            <button id="prevMonthBtn" class="btn btn-sm btn-outline-success">&lt;</button>
-              <span id="monthYearDisplay" class="fw-bold"></span>
-            <button id="nextMonthBtn" class="btn btn-sm btn-outline-success">&gt;</button>
+   <div class="d-flex justify-content-center mb-3 gap-2">
+  <button id="btn-hoy" class="btn btn-success botones">Hoy</button>
+  <button id="btn-mes" class="btn btn-primary botones">Mes</button>
+  <button id="btn-año" class="btn btn-warning botones">Año</button>
+</div>
+<h4 id="titulo-mes" class="text-center text-capitalize"></h4>
+<div id="calendar-grid" class="calendar-grid"></div>
+    <!-- Se genera dinámicamente con JS -->
+  </div>
+</div>
 
-            <select id="yearSelect" class="form-select form-select-sm w-auto ms-2"></select>
-            <div class="container mt-4">
+<div class="info-panel">
+  <button class="btn btn-success mb-3" id="btn-subir">Subir tarea</button>
 
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <button id="btn-hoy" class="btn btn-outline-primary me-2">Hoy</button>
-                  <button id="btn-mes" class="btn btn-outline-secondary me-2">Mes</button>
-                  <button id="btn-año" class="btn btn-outline-secondary">Año</button>
-                </div>
-
-                <h4 id="titulo-mes" class="text-capitalize m-0"></h4>
-
-                <div class="d-flex align-items-center">
-                  <select id="select-usuario" class="form-select me-2" style="width:200px">
-                    <option value="admin">Mi calendario</option>
-                  </select>
-                  <button id="btn-nuevo-evento" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Crear evento
-                  </button>
-                </div>
-              </div>
-
-              <div id="calendar-grid" class="d-grid" 
-                  style="grid-template-columns: repeat(7, 1fr); gap: 8px;"></div>
-              </div>
-            </div>
-          </div>
-          <div id="calendar" class="calendar-grid"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  
+</div>
   </div>
 </div>
 
@@ -683,7 +667,23 @@
   </div>
 </div>
 </div>
-<!-- FIN SECCIÓN: REGISTRAR ÓRDEN DE ENVÍO -->
+
+<div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-labelledby="modalPedidosDiaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" >
+      <div class="modal-header bg-success text-white" style="background-color: #7db243;">
+        <h5 class="modal-title" id="modalPedidosDiaLabel" style="color: white;">Pedidos programados</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="contenidoPedidosDia" class="p-3 text-center text-muted">
+          Cargando...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 
