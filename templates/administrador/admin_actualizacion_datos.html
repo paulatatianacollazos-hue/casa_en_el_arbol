@@ -418,40 +418,32 @@
         <div class="profile-header mb-4">
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
-        {% for pedido in pedidos %}
-  <div class="pedido">
+{% for pedido in pedidos %}
+  <div class="pedido-card">
     <h3>Pedido #{{ pedido.id_pedido }}</h3>
-
-    <!-- Carousel de productos -->
     <div id="carouselPedido{{ pedido.id_pedido }}" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner">
-        {% for detalle in detalles %}
-          {% if detalle.id_pedido == pedido.id_pedido %}
-            <div class="carousel-item {% if loop.first %}active{% endif %}">
-              <img src="{{ url_for('static', filename='imagenes/' + detalle.producto.imagen) }}" class="d-block w-100" alt="{{ detalle.producto.nombre }}">
-              <div class="carousel-caption d-none d-md-block">
-                <h5>{{ detalle.producto.nombre }}</h5>
-                <p>Cantidad: {{ detalle.cantidad }} | Precio: {{ detalle.precio }}</p>
-              </div>
+        {% for detalle in detalles if detalle.id_pedido == pedido.id_pedido %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename='imagenes/' + detalle.producto.imagen) }}" class="d-block w-100" alt="{{ detalle.producto.nombre }}">
+            <div class="carousel-caption d-none d-md-block">
+              <h5>{{ detalle.producto.nombre }}</h5>
+              <p>Cantidad: {{ detalle.cantidad }}</p>
             </div>
-          {% endif %}
+          </div>
         {% endfor %}
       </div>
       <button class="carousel-control-prev" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
       </button>
       <button class="carousel-control-next" type="button" data-bs-target="#carouselPedido{{ pedido.id_pedido }}" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
       </button>
     </div>
-
-    <p>Total: {{ pedido.total }}</p>
+    <p>Total: ${{ pedido.total }}</p>
     <div class="boton"><button id="miboton" style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button></div>
-
-    <!-- Modal -->
-    <div id="modal-{{ pedido.id_pedido }}" class="modal">
-      <!-- contenido del modal -->
-    </div>
   </div>
 {% endfor %}
 
