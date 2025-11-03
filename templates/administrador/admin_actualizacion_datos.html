@@ -418,7 +418,49 @@
         <div class="profile-header mb-4">
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
-        
+        <div class="control">
+          <button id="ocultarInputsBtn" style="display:none; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));" >x</button>
+          <button class="btn btn-primary mt-3"
+              id="abrirModalAsignacionBtn"
+              style="display:none; border-radius: 10px; border: 0; position: relative; bottom: 17px; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
+            Confirmar Asignación
+          </button>
+          <button class="btn btn-success" 
+                  id="mostrarAsignacionBtn"
+                  style="border-radius: 10px; border: 0; background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">
+            Asignar pedidos
+          </button>
+          <a href="/admin/control_pedidos" style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));">control de pedidos</a>
+        </div>
+        {% for pedido in pedidos %}
+          <div class="name"><p><strong>Usuario:</strong> {{ pedido.usuario }}</p></div>
+          
+            <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" data-empleado="{{ pedido.id_empleado if pedido.id_empleado else '' }}"  style="display: none; position: relative; right: 45%; top: 150px; border: none;" />
+
+            <div class="pedido1">
+              <h5>ID Pedido: {{ pedido.id }}</h5>
+              <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+
+              <div class="productos">
+                {% for producto in pedido.productos %}
+                  <div class="producto">
+                    {% if producto.imagen %}
+                      <img src="{{ producto.imagen }}" alt="Imagen del producto" width="150" style="margin-top: 10px;">
+                    {% else %}
+                      <p><em>Sin imagen</em></p>
+                    {% endif %}
+                    <p><strong>{{ producto.nombre }}</strong></p>
+                    <p>Cantidad: {{ producto.cantidad }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="boton"><button id="miboton" style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button></div>
+                <p><strong>Total del Pedido:</strong> ${{ pedido.total }}</p>
+              </div>
+            </div>
+          </div>
+        {%endfor}
+        </div>
       </div>
 
               <!-- Controles del carrusel -->
