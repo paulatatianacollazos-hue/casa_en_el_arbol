@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify
 from flask_login import login_required, current_user
-from basedatos.models import db, Usuario, Notificaciones, Direccion
+from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -251,12 +251,20 @@ def estadisticas():
 @role_required("admin")
 def actualizacion_datos():
     usuario = current_user
+
+    # 🔹 Direcciones del usuario admin
     direcciones = Direccion.query.filter_by(
         ID_Usuario=usuario.ID_Usuario).all()
-    notificaciones = Notificaciones.query.filter_by(
-        ID_Usuario=usuario.ID_Usuario).order_by(
-            Notificaciones.Fecha.desc()).all()
 
+    # 🔹 Notificaciones del usuario admin
+    notificaciones = Notificaciones.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario
+    ).order_by(Notificaciones.Fecha.desc()).all()
+
+    # 🔹 Calendario: cargar todas las actividades (propias o generales)
+    calendario = Calendario.query.order_by(Calendario.Fecha.asc()).all()
+
+    # 🔹 Actualización de perfil
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         apellido = request.form.get("apellido", "").strip()
@@ -264,16 +272,14 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
-                  "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.",
-                      "danger")
+                flash("El correo ya está registrado por otro usuario.", "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -284,16 +290,17 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="""Tus datos personales se han actualizado
-                    correctamente."""
+                    mensaje="Tus datos personales se han actualizado correctamente."
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
+    # 🔹 Renderizar plantilla unificada
     return render_template(
         "administrador/admin_actualizacion_datos.html",
         usuario=usuario,
         direcciones=direcciones,
-        notificaciones=notificaciones
+        notificaciones=notificaciones,
+        calendario=calendario
     )
 
 
