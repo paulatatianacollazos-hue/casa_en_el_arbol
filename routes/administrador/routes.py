@@ -123,17 +123,6 @@ def ver_notificaciones():
                            notificaciones=notificaciones)
 
 
-# ---------- ENVIOS ----------
-@admin.route("/envios")
-@login_required
-@role_required("admin")
-def envios():
-    return render_template(
-        "administrador/envios.html",
-
-    )
-
-
 # ---------- CONTROL_PEDIDOS ----------
 @admin.route("/control_pedidos")
 @login_required
