@@ -27,22 +27,19 @@ def dashboard():
     return render_template('empleado/dashboard.html')
 
 
-@empleado.route('/calendario')
-@role_required("transportista")
-def calendario():
-    return render_template('empleado/calendario.html')
-
-
 @empleado.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("cliente", "admin")
+@role_required("transportista")
 def actualizacion_datos():
-
     usuario = current_user
     notificaciones = Notificaciones.query.filter_by(
-        ID_Usuario=usuario.ID_Usuario).order_by(
-            Notificaciones.Fecha.desc()).all()
+        ID_Usuario=usuario.ID_Usuario
+    ).order_by(Notificaciones.Fecha.desc()).all()
 
+    # 📅 Obtener calendario del usuario
+    eventos = Calendario.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
+
+    # ✅ Si el usuario actualiza sus datos
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         apellido = request.form.get("apellido", "").strip()
@@ -70,13 +67,13 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="""Tus datos personales se han actualizado
-                    correctamente."""
+                    mensaje="Tus datos personales se han actualizado correctamente."
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
     return render_template(
-        "cliente/actualizacion_datos.html",
+        "empleado/actualizacion_datos.html",
         usuario=usuario,
         notificaciones=notificaciones,
+        eventos=eventos
     )
