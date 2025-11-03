@@ -40,6 +40,17 @@ function renderCalendario(fecha) {
     celda.classList.add("day");
     celda.dataset.fecha = fechaDia.toISOString().split("T")[0];
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
+
+    // 🔸 Resaltar día actual
+    const hoy = new Date();
+    if (
+      fechaDia.getDate() === hoy.getDate() &&
+      fechaDia.getMonth() === hoy.getMonth() &&
+      fechaDia.getFullYear() === hoy.getFullYear()
+    ) {
+      celda.classList.add("hoy");
+    }
+
     grid.appendChild(celda);
   }
 }
@@ -50,6 +61,14 @@ function renderCalendario(fecha) {
 btnHoy.addEventListener("click", () => {
   fechaActual = new Date();
   renderCalendario(fechaActual);
+
+  // Marcar el día actual con borde animado
+  const hoyCelda = document.querySelector(".day.hoy");
+  if (hoyCelda) {
+    hoyCelda.scrollIntoView({ behavior: "smooth", block: "center" });
+    hoyCelda.classList.add("highlight-today");
+    setTimeout(() => hoyCelda.classList.remove("highlight-today"), 2000);
+  }
 });
 
 btnMes.addEventListener("click", () => {

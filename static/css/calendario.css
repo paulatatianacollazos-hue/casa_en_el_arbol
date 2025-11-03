@@ -1,0 +1,101 @@
+.day.hoy {
+  border: 2px solid #28a745; /* Verde */
+  border-radius: 10px;
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.highlight-today {
+  animation: parpadeo 0.8s ease-in-out 3;
+}
+
+@keyframes parpadeo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(40,167,69,0.8); }
+  50% { box-shadow: 0 0 10px 3px rgba(40,167,69,0.8); }
+}
+
+/* === ESTILOS DE CALENDARIO === */
+.calendar-container {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-header h2 {
+  font-weight: 600;
+  color: #333;
+}
+
+/* 🟩 Cuadrícula principal del calendario */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7 columnas, una por día */
+  gap: 8px;
+  margin-top: 15px;
+}
+
+/* 🟦 Cada día */
+.day {
+  background: #f8f9fa;
+  border-radius: 8px;
+  min-height: 100px;
+  position: relative;
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: background 0.2s;
+}
+
+.day:hover {
+  background: #e9f7ef;
+}
+
+/* 🔢 Número del día */
+.day-header {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+/* 🔸 Estilos para eventos dentro del día */
+.event {
+  font-size: 0.85rem;
+  color: white;
+  padding: 3px 6px;
+  border-radius: 6px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+/* 🔴 Colores según tipo */
+.event.entrega {
+  background-color: #28a745; /* verde */
+}
+.event.reunion {
+  background-color: #ffc107; /* amarillo */
+}
+.event.instalacion {
+  background-color: #007bff; /* azul */
+}
+
+/* 📱 Responsivo */
+@media (max-width: 768px) {
+  .calendar-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
