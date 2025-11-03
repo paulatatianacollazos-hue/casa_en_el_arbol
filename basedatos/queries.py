@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
 from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
-from basedatos.models import Producto
+from basedatos.models import Producto, Calendario
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
@@ -823,3 +823,65 @@ def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total, destino):
     finally:
         cursor.close()
         db.close()
+
+
+def obtener_eventos():
+    """Devuelve todos los eventos registrados en la base de datos."""
+    return [evento.to_dict() for evento in Calendario.query.all()]
+
+
+def obtener_evento_por_id(id_calendario):
+    """Obtiene un evento específico por su ID."""
+    return Calendario.query.get(id_calendario)
+
+
+def crear_evento(data):
+    """Crea un nuevo registro en el calendario."""
+    try:
+        nuevo = Calendario(
+            Fecha=datetime.strptime(data['Fecha'], '%Y-%m-%d').date(),
+            Hora=datetime.strptime(data['Hora'], '%H:%M').time(),
+            Ubicacion=data.get('Ubicacion', ''),
+            Tipo=data.get('Tipo', 'Instalación'),
+            ID_Usuario=data.get('ID_Usuario'),
+            ID_Pedido=data.get('ID_Pedido')
+        )
+        db.session.add(nuevo)
+        db.session.commit()
+        return {"mensaje": "Evento agregado correctamente", "id": nuevo.ID_Calendario}
+    except Exception as e:
+        db.session.rollback()
+        raise Exception(f"Error al crear el evento: {e}")
+
+
+def editar_evento(id_calendario, data):
+    """Actualiza un evento existente."""
+    evento = Calendario.query.get(id_calendario)
+    if not evento:
+        raise Exception("Evento no encontrado")
+
+    try:
+        evento.Fecha = datetime.strptime(data['Fecha'], '%Y-%m-%d').date()
+        evento.Hora = datetime.strptime(data['Hora'], '%H:%M').time()
+        evento.Ubicacion = data.get('Ubicacion', evento.Ubicacion)
+        evento.Tipo = data.get('Tipo', evento.Tipo)
+        db.session.commit()
+        return {"mensaje": "Evento actualizado correctamente"}
+    except Exception as e:
+        db.session.rollback()
+        raise Exception(f"Error al actualizar el evento: {e}")
+
+
+def eliminar_evento(id_calendario):
+    """Elimina un evento del calendario."""
+    evento = Calendario.query.get(id_calendario)
+    if not evento:
+        raise Exception("Evento no encontrado")
+
+    try:
+        db.session.delete(evento)
+        db.session.commit()
+        return {"mensaje": "Evento eliminado correctamente"}
+    except Exception as e:
+        db.session.rollback()
+        raise Exception(f"Error al eliminar el evento: {e}")

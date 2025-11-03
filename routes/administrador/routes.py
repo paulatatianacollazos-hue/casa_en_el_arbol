@@ -1,12 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify
 from flask_login import login_required, current_user
-from basedatos.queries import guardar_producto, get_productos
 from basedatos.models import db, Usuario, Notificaciones, Direccion
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from basedatos.queries import registrar_pedido, get_producto_by_id
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     detalle,
@@ -16,8 +14,14 @@ from basedatos.queries import (
     buscar_pedidos,
     asignar_empleado as asignar_empleado_query,
     actualizar_pedido as actualizar_pedido_query,
-    asignar_calendario as asignar_calendario_query
+    asignar_calendario as asignar_calendario_query,
+    obtener_eventos, crear_evento, editar_evento,
+    eliminar_evento, obtener_evento_por_id,
+    get_producto_by_id,
+    guardar_producto,
+    get_productos
 )
+
 
 reviews = []
 
@@ -380,14 +384,53 @@ def detalle_producto(id_producto):
                            producto=producto)
 
 
-@admin.route('/registrar-envio', methods=['POST'])
-def registrar_envio():
-    numero = request.form['numero_pedido']
-    cliente = request.form['cliente']
-    direccion = request.form['direccion_envio']
-    ciudad = request.form['ciudad']
-    fecha = request.form['fecha_envio']
-    estado = request.form['estado']
-    # Aquí podrías guardar los datos en la base
-    flash('Orden de envío registrada correctamente', 'success')
-    return redirect(url_for('admin.dashboard'))
+@admin.route('/calendario/eventos', methods=['GET'])
+def listar_eventos():
+    try:
+        return jsonify(obtener_eventos())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# 🔹 Obtener evento por ID
+@admin.route('/calendario/eventos/<int:id>', methods=['GET'])
+def obtener_evento(id):
+    try:
+        evento = obtener_evento_por_id(id)
+        if not evento:
+            return jsonify({"error": "Evento no encontrado"}), 404
+        return jsonify(evento.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# 🔹 Crear evento
+@admin.route('/calendario/eventos', methods=['POST'])
+def agregar_evento():
+    data = request.get_json()
+    try:
+        resultado = crear_evento(data)
+        return jsonify(resultado), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+# 🔹 Editar evento
+@admin.route('/calendario/eventos/<int:id>', methods=['PUT'])
+def actualizar_evento(id):
+    data = request.get_json()
+    try:
+        resultado = editar_evento(id, data)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+# 🔹 Eliminar evento
+@admin.route('/calendario/eventos/<int:id>', methods=['DELETE'])
+def borrar_evento(id):
+    try:
+        resultado = eliminar_evento(id)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
