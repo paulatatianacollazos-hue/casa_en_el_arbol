@@ -473,6 +473,30 @@
       <button id="nextMonthBtn" class="btn btn-sm btn-outline-success">&gt;</button>
 
       <select id="yearSelect" class="form-select form-select-sm w-auto ms-2"></select>
+      <div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <button id="btn-hoy" class="btn btn-outline-primary me-2">Hoy</button>
+      <button id="btn-mes" class="btn btn-outline-secondary me-2">Mes</button>
+      <button id="btn-año" class="btn btn-outline-secondary">Año</button>
+    </div>
+
+    <h4 id="titulo-mes" class="text-capitalize m-0"></h4>
+
+    <div class="d-flex align-items-center">
+      <select id="select-usuario" class="form-select me-2" style="width:200px">
+        <option value="admin">Mi calendario</option>
+      </select>
+      <button id="btn-nuevo-evento" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Crear evento
+      </button>
+    </div>
+  </div>
+
+  <div id="calendar-grid" class="d-grid" 
+       style="grid-template-columns: repeat(7, 1fr); gap: 8px;"></div>
+</div>
     </div>
   </div>
 
@@ -746,6 +770,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const menuPerfil = document.getElementById('menu-perfil');
   const menuDirecciones = document.getElementById('menu-direcciones');
   const menuPedidos = document.getElementById('menu-pedidos');
+  const calendario = document.getElementById('seccion-calendario');
+  const menuCalendario = document.getElementById('menu-calendario');
 
   function mostrarSeccion(seccion) {
     perfil.style.display = 'none';
@@ -757,6 +783,8 @@ document.addEventListener('DOMContentLoaded', function () {
   menuPerfil.addEventListener('click', () => mostrarSeccion(perfil));
   menuDirecciones.addEventListener('click', () => mostrarSeccion(direcciones));
   menuPedidos.addEventListener('click', () => mostrarSeccion(pedidos));
+  menuCalendario.addEventListener('click', () => mostrarSeccion(calendario));
+
 });
 </script>
 
