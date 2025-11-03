@@ -143,3 +143,17 @@
     border-radius: 10px;
     position: relative;
 }
+
+.modal-content {
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #7db243 !important;
+}
+
+.modal-title {
+  color: white !important;
+}
