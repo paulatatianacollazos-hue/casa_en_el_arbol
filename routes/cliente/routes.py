@@ -147,16 +147,21 @@ def escribir_resena():   # <- sin ñ
 @login_required
 @role_required("cliente", "admin")
 def actualizacion_datos():
-
     usuario = current_user
     user_id = usuario.ID_Usuario
-    direcciones = Direccion.query.filter_by(
-        ID_Usuario=usuario.ID_Usuario).all()
-    notificaciones = Notificaciones.query.filter_by(
-        ID_Usuario=usuario.ID_Usuario).order_by(
-            Notificaciones.Fecha.desc()).all()
 
+    # Traer direcciones y notificaciones
+    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(
+        Notificaciones.Fecha.desc()
+    ).all()
+
+    # Traer pedidos
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
+
+    # 🔹 Traer productos favoritos
+    productos = Producto.query.join(Favorito, Producto.id == Favorito.ID_Producto)\
+        .filter(Favorito.ID_Usuario == user_id).all()
 
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
@@ -165,16 +170,14 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
-                  "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.",
-                      "danger")
+                flash("El correo ya está registrado por otro usuario.", "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -183,10 +186,9 @@ def actualizacion_datos():
                     usuario.Contraseña = generate_password_hash(password)
                 db.session.commit()
                 crear_notificacion(
-                    user_id=usuario.ID_Usuario,
+                    user_id=user_id,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="""Tus datos personales se han actualizado
-                    correctamente."""
+                    mensaje="Tus datos personales se han actualizado correctamente."
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
@@ -195,7 +197,8 @@ def actualizacion_datos():
         usuario=usuario,
         direcciones=direcciones,
         notificaciones=notificaciones,
-        pedidos_con_detalles=pedidos_con_detalles
+        pedidos_con_detalles=pedidos_con_detalles,
+        productos=productos  # ⚡ Pasamos los favoritos al template
     )
 
 
