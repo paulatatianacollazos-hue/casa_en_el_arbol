@@ -181,22 +181,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-  document.querySelectorAll('.btn-favorito').forEach(btn => {
+document.querySelectorAll('.btn-favorito').forEach(btn => {
     btn.addEventListener('click', async () => {
         const productoId = btn.dataset.productoId;
         const icon = btn.querySelector('i');
-        
-        const res = await fetch(`/favorito/${productoId}`, { method: 'POST' });
-        const data = await res.json();
-        
-        if(data.status === 'removed'){
-            icon.classList.remove('text-danger');
-        } else {
-            icon.classList.add('text-danger');
+
+        try {
+            const res = await fetch(`/favorito/${productoId}`, { method: 'POST' });
+            const data = await res.json();
+
+            if(data.status === 'removed'){
+                icon.classList.remove('text-danger');
+                // Opcional: eliminar el producto de la sección favoritos
+                const card = btn.closest('.col-md-3');
+                if(card) card.remove();
+            } else {
+                icon.classList.add('text-danger');
+            }
+        } catch(err) {
+            console.error('Error al actualizar favoritos:', err);
         }
     });
 });
-
-
 </script>
+
 {% endblock %}
