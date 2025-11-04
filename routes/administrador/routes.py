@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify
 from flask_login import login_required, current_user
-from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario
+from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario, Pedido
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -18,7 +18,6 @@ from basedatos.queries import (
     guardar_producto,
     get_productos
 )
-
 
 reviews = []
 
@@ -218,7 +217,38 @@ def reporte_pedidos():
 @login_required
 @role_required("admin")
 def asignar_calendario_route():
-    return asignar_calendario_query()
+
+    data = request.get_json()
+
+    empleado_id = data.get("empleadoId")
+    pedidos_ids = data.get("pedidos", [])
+
+    if not empleado_id or not pedidos_ids:
+        return jsonify({"success": False, "message": "Datos incompletos"}), 400
+
+    # 🔍 Validar que ninguno de los pedidos ya tenga un empleado asignado
+    pedidos_con_empleado = (
+        db.session.query(Pedido)
+        .filter(Pedido.ID_Pedido.in_(pedidos_ids))
+        .filter(Pedido.ID_Empleado.isnot(None))
+        .all()
+    )
+
+    if pedidos_con_empleado:
+        nombres = [f"#{p.ID_Pedido}" for p in pedidos_con_empleado]
+        return jsonify({
+            "success": False,
+            "message": f"No se puede asignar. Los pedidos {', '.join(nombres)} ya tienen un empleado asignado."
+        }), 400
+
+    # Si pasa la validación, continúa con la asignación
+    try:
+        resultado = asignar_calendario_query()  # tu función actual
+        return resultado
+    except Exception as e:
+        print("❌ Error en asignar_calendario_route:", e)
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 # ---------- ESTADISTICAS ----------
