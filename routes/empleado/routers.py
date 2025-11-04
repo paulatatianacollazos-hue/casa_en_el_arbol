@@ -1,16 +1,12 @@
-from flask import render_template, request, Blueprint, url_for, flash, session
-from flask import jsonify, redirect
+from flask import render_template, request, Blueprint, flash, session
+from flask import jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import Usuario, Producto, Calendario, Notificaciones
+from basedatos.models import Usuario, Calendario, Notificaciones
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from datetime import datetime
-from basedatos.queries import obtener_pedidos_por_cliente
-from basedatos.queries import get_productos, get_producto_by_id
-from basedatos.models import db, Comentarios, Direccion
-import base64
-import os
+from basedatos.models import db
+
 
 
 empleado = Blueprint(

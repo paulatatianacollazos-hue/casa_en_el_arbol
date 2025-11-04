@@ -5,6 +5,10 @@ from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario,
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
+from flask import request, jsonify
+from flask_login import login_required
+from datetime import datetime  # Ajusta según tu modelo
+from basedatos.decoradores import role_required
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     obtener_empleados,
@@ -217,16 +221,27 @@ def reporte_pedidos():
 @login_required
 @role_required("admin")
 def asignar_calendario_route():
-
+    """
+    Asigna un empleado a los pedidos seleccionados y programa un evento
+    en la tabla Calendario.
+    Validaciones:
+      - Pedidos no deben tener empleado asignado
+      - Empleado no debe tener otro evento en la misma fecha/hora
+    """
     data = request.get_json()
 
     empleado_id = data.get("empleadoId")
     pedidos_ids = data.get("pedidos", [])
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+    ubicacion = data.get("ubicacion", "")
+    tipo = data.get("tipo", "Entrega")  # Puedes cambiar el valor por defecto
 
-    if not empleado_id or not pedidos_ids:
+    # Validación de datos completos
+    if not empleado_id or not pedidos_ids or not fecha or not hora:
         return jsonify({"success": False, "message": "Datos incompletos"}), 400
 
-    # 🔍 Validar que ninguno de los pedidos ya tenga un empleado asignado
+    # Validar que los pedidos seleccionados no tengan empleado asignado
     pedidos_con_empleado = (
         db.session.query(Pedido)
         .filter(Pedido.ID_Pedido.in_(pedidos_ids))
@@ -238,17 +253,57 @@ def asignar_calendario_route():
         nombres = [f"#{p.ID_Pedido}" for p in pedidos_con_empleado]
         return jsonify({
             "success": False,
-            "message": f"No se puede asignar. Los pedidos {', '.join(nombres)} ya tienen un empleado asignado."
+            "message": f"No se puede asignar. Los pedidos {', '.join(
+                nombres)} ya tienen un empleado asignado."
         }), 400
 
-    # Si pasa la validación, continúa con la asignación
+    # Validar formato de fecha y hora
     try:
-        resultado = asignar_calendario_query()  # tu función actual
-        return resultado
+        fecha_dt = datetime.strptime(fecha, "%Y-%m-%d").date()
+        hora_dt = datetime.strptime(hora, "%H:%M").time()
+    except ValueError:
+        return jsonify({"success": False, "message":
+            "Formato de fecha u hora inválido"}), 400
+
+    # Validar que el empleado no tenga otro evento en la misma fecha/hora
+    evento_existente = (
+        db.session.query(Calendario)
+        .filter_by(ID_Usuario=empleado_id, Fecha=fecha_dt, Hora=hora_dt)
+        .first()
+    )
+
+    if evento_existente:
+        return jsonify({"success": False, "message":
+                        "El empleado ya tiene un evento en esa fecha y hora"}
+                       ), 400
+
+    # Asignar empleado y crear registros en Calendario
+    try:
+        for pedido_id in pedidos_ids:
+            pedido = Pedido.query.get(pedido_id)
+            if not pedido:
+                continue  # evitar errores si algún ID no existe
+            pedido.ID_Empleado = empleado_id
+
+            calendario = Calendario(
+                ID_Usuario=empleado_id,
+                ID_Pedido=pedido_id,
+                Fecha=fecha_dt,
+                Hora=hora_dt,
+                Ubicacion=ubicacion,
+                Tipo=tipo
+            )
+            db.session.add(calendario)
+
+        db.session.commit()
+        return jsonify({"success": True, "message":
+                        "Pedidos asignados correctamente"})
+
     except Exception as e:
-        print("❌ Error en asignar_calendario_route:", e)
         db.session.rollback()
-        return jsonify({"success": False, "message": str(e)}), 500
+        print("❌ Error en asignar_calendario_route:", e)
+        return jsonify({"success": False, "message":
+                        "Ocurrió un error al asignar los pedidos"}), 500
 
 
 # ---------- ESTADISTICAS ----------
@@ -523,7 +578,7 @@ def crear_evento_calendario():
         # ────────────────────────────────────────────────
         # 📥 Datos recibidos desde el frontend
         # ────────────────────────────────────────────────
-        tipo_evento = data.get("Tipo")           # Ej: "Evento", "Reunión interna"
+        tipo_evento = data.get("Tipo")    # Ej: "Evento", "Reunión interna"
         visibilidad = data.get("Visibilidad")    # "Personal" o "Global"
         fecha = datetime.strptime(data.get("Fecha"), "%Y-%m-%d").date()
         hora = datetime.strptime(data.get("Hora"), "%H:%M").time()
@@ -553,7 +608,9 @@ def crear_evento_calendario():
         if conflicto:
             return jsonify({
                 "ok": False,
-                "error": f"Ya existe un evento cerca de esa hora ({conflicto.Tipo} a las {conflicto.Hora.strftime('%H:%M')})."
+                "error": f"""Ya existe un evento cerca de esa hora (
+                    {conflicto.Tipo} a las {conflicto.Hora.strftime(
+                        '%H:%M')})."""
             }), 400
 
         # ────────────────────────────────────────────────
@@ -576,7 +633,8 @@ def crear_evento_calendario():
         # ────────────────────────────────────────────────
         return jsonify({
             "ok": True,
-            "mensaje": f"{tipo_evento} creado exitosamente como '{visibilidad}'."
+            "mensaje": f"{tipo_evento} creado exitosamente como '{
+                visibilidad}'."
         })
 
     except Exception as e:
