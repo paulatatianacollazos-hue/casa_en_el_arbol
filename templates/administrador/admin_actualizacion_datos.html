@@ -692,14 +692,14 @@
 
 <!-- Modal para crear evento -->
 <!-- Modal para crear evento o reunión -->
+<!-- ✅ Modal para crear evento -->
 <div class="modal fade" id="modalNuevoEvento" tabindex="-1" aria-labelledby="modalNuevoEventoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width: 1000px;">
-    <div class="modal-content">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="max-width: 500px; margin: auto;">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="modalNuevoEventoLabel">Nuevo evento o reunión</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-
       <div class="modal-body">
         <form id="formNuevoEvento">
           <div class="mb-3">
@@ -723,8 +723,7 @@
 
           <div class="mb-3">
             <label for="Ubicacion" class="form-label">Ubicación</label>
-            <input type="text" class="form-control" id="Ubicacion" name="Ubicacion"
-                   placeholder="Ej: Sala 3, Oficina, etc." required>
+            <input type="text" class="form-control" id="Ubicacion" name="Ubicacion" placeholder="Ej: Sala 3, Oficina, etc." required>
           </div>
 
           <div class="text-end">
