@@ -5,9 +5,11 @@ from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario,
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from basedatos.db import get_connection
-from datetime import datetime, timedelta
-from basedatos.models import Transportista, RutaPlanificada
+from flask import request, jsonify
+from flask_login import login_required
+from datetime import datetime  # Ajusta según tu modelo
+from basedatos.decoradores import role_required
+from basedatos.models import Transportista, Pedido, RutaPlanificada
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     obtener_empleados,
@@ -217,87 +219,92 @@ def reporte_pedidos():
 
 # ---------- ASIGNAR_CALENDARIO ----------
 @admin.route("/asignar_calendario", methods=["POST"])
-def asignar_calendario():
-    print("📩 Datos recibidos:", request.form.to_dict())
-    pedidos_ids = request.form.get("pedidosSeleccionados").split(",")
-    empleado_id = request.form["empleado_id"]
-    fecha = request.form["fecha"]
-    hora_inicio = request.form["hora"]
+@login_required
+@role_required("admin")
+def asignar_calendario_route():
+    """
+    Asigna un empleado a los pedidos seleccionados y programa un evento
+    en la tabla Calendario.
+    Validaciones:
+      - Pedidos no deben tener empleado asignado
+      - Empleado no debe tener otro evento en la misma fecha/hora
+    """
+    data = request.get_json()
 
-    # Convertir fecha y hora a datetime inicial
-    start_datetime = datetime.strptime(f"{fecha} {hora_inicio}",
-                                       "%Y-%m-%d %H:%M")
+    empleado_id = data.get("empleadoId")
+    pedidos_ids = data.get("pedidos", [])
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+    ubicacion = data.get("ubicacion", "")
+    tipo = data.get("tipo", "Entrega")  # Puedes cambiar el valor por defecto
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    # Validación de datos completos
+    if not empleado_id or not pedidos_ids or not fecha or not hora:
+        return jsonify({"success": False, "message": "Datos incompletos"}), 400
 
+    # Validar que los pedidos seleccionados no tengan empleado asignado
+    pedidos_con_empleado = (
+        db.session.query(Pedido)
+        .filter(Pedido.ID_Pedido.in_(pedidos_ids))
+        .filter(Pedido.ID_Empleado.isnot(None))
+        .all()
+    )
+
+    if pedidos_con_empleado:
+        nombres = [f"#{p.ID_Pedido}" for p in pedidos_con_empleado]
+        return jsonify({
+            "success": False,
+            "message": f"No se puede asignar. Los pedidos {', '.join(
+                nombres)} ya tienen un empleado asignado."
+        }), 400
+
+    # Validar formato de fecha y hora
+    try:
+        fecha_dt = datetime.strptime(fecha, "%Y-%m-%d").date()
+        hora_dt = datetime.strptime(hora, "%H:%M").time()
+    except ValueError:
+        return jsonify({"success": False, "message":
+                        "Formato de fecha u hora inválido"}), 400
+
+    # Validar que el empleado no tenga otro evento en la misma fecha/hora
+    evento_existente = (
+        db.session.query(Calendario)
+        .filter_by(ID_Usuario=empleado_id, Fecha=fecha_dt, Hora=hora_dt)
+        .first()
+    )
+
+    if evento_existente:
+        return jsonify({"success": False, "message":
+                        "El empleado ya tiene un evento en esa fecha y hora"}
+                       ), 400
+
+    # Asignar empleado y crear registros en Calendario
     try:
         for pedido_id in pedidos_ids:
-            # Ver si el pedido es instalación
-            cursor.execute(
-                "SELECT Instalacion FROM Pedido WHERE ID_Pedido = %s",
-                (pedido_id,))
-            instalacion = cursor.fetchone()[0]
+            pedido = Pedido.query.get(pedido_id)
+            if not pedido:
+                continue  # evitar errores si algún ID no existe
+            pedido.ID_Empleado = empleado_id
 
-            intervalo = timedelta(
-                minutes=60) if instalacion == "si" else timedelta(minutes=30)
+            calendario = Calendario(
+                ID_Usuario=empleado_id,
+                ID_Pedido=pedido_id,
+                Fecha=fecha_dt,
+                Hora=hora_dt,
+                Ubicacion=ubicacion,
+                Tipo=tipo
+            )
+            db.session.add(calendario)
 
-            # 🔹 Validar si ya existe una cita en ese día, hora y empleado
-            cursor.execute("""
-                SELECT COUNT(*)
-                FROM Calendario
-                WHERE Fecha = %s AND Hora = %s AND ID_Usuario = %s
-            """, (fecha, start_datetime.strftime("%H:%M:%S"), empleado_id))
-
-            existe = cursor.fetchone()[0]
-
-            if existe > 0:
-                conn.rollback()
-                cursor.close()
-                conn.close()
-                return jsonify({
-                    "success": False,
-                    "message": f""" El empleado ya tiene una cita el {fecha}
-                    a las {start_datetime.strftime('%H:%M')}."""
-                })
-
-            # 🟢 Guardamos en la tabla Pedido
-            cursor.execute("""
-                UPDATE Pedido
-                SET ID_Empleado = %s,
-                    FechaEntrega = %s,
-                    HoraEntrega = %s
-                WHERE ID_Pedido = %s
-            """, (empleado_id, fecha, start_datetime.strftime("%H:%M:%S"),
-                  pedido_id))
-
-            # 🟢 Insertar también en la tabla Calendario
-            cursor.execute("""
-                INSERT INTO Calendario (Fecha, Hora, Ubicacion, ID_Usuario,
-                ID_Pedido, Tipo)
-                SELECT %s, %s, u.Direccion, %s, p.ID_Pedido, p.Instalacion
-                FROM Pedido p
-                JOIN Usuario u ON p.ID_Usuario = u.ID_Usuario
-                WHERE p.ID_Pedido = %s
-            """, (fecha, start_datetime.strftime("%H:%M:%S"), empleado_id,
-                  pedido_id))
-
-            # Avanzar a la siguiente hora según instalación o normal
-            start_datetime += intervalo
-
-        conn.commit()
-        return jsonify({
-            "success": True,
-            "message": "✅ Pedidos asignados y calendario actualizado"
-        })
+        db.session.commit()
+        return jsonify({"success": True, "message":
+                        "Pedidos asignados correctamente"})
 
     except Exception as e:
-        conn.rollback()
-        return jsonify({"success": False, "message": f"❌ Error: {str(e)}"})
-
-    finally:
-        cursor.close()
-        conn.close()
+        db.session.rollback()
+        print("❌ Error en asignar_calendario_route:", e)
+        return jsonify({"success": False, "message":
+                        "Ocurrió un error al asignar los pedidos"}), 500
 
 
 # ---------- ESTADISTICAS ----------
@@ -377,7 +384,7 @@ def envios():
     pedidos = obtener_todos_los_pedidos()
     detalles = detalle()
     empleados = obtener_empleados()
-    return render_template('administrador/envios.html', pedidos=pedidos, detalles=detalles,
+    return render_template('envios.html', pedidos=pedidos, detalles=detalles,
                            empleados=empleados)
 
 @admin.route("/direccion/agregar", methods=["POST"])
