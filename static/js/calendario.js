@@ -77,13 +77,11 @@ function renderCalendario(fecha) {
     grid.appendChild(celdaVacia);
   }
 
-  // Filtrar por usuario seleccionado
   let eventosFiltrados = [...programaciones];
   if (usuarioSeleccionado !== "mi") {
     eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
   }
 
-  // Renderizar días
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
@@ -123,9 +121,59 @@ function renderCalendario(fecha) {
       celda.classList.add("hoy");
     }
 
+    // Abrir modal al hacer click en la celda
+    celda.addEventListener("click", () => {
+      abrirMiModalConFecha(fechaStr);
+    });
+
     grid.appendChild(celda);
   }
 }
+
+// Función para abrir modal con eventos del día
+function abrirMiModalConFecha(fecha) {
+  const modal = document.getElementById('modalPedidosDia');
+  const contenido = document.getElementById('contenidoPedidosDia');
+
+  const eventosDelDia = programaciones.filter(ev => ev.Fecha === fecha);
+  
+  if (eventosDelDia.length === 0) {
+    contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
+  } else {
+    contenido.innerHTML = eventosDelDia.map(ev => 
+      `<div>
+         <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
+         Ubicación: ${ev.Ubicacion}<br>
+         Hora: ${ev.Hora}
+       </div><hr>`).join("");
+  }
+
+  abrirMiModal();
+}
+
+// Modal base
+function abrirMiModal() {
+  const modal = document.getElementById('modalPedidosDia');
+  modal.classList.add('show');
+  modal.style.display = 'block';
+  document.body.classList.add('modal-open');
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop fade show';
+  backdrop.id = 'customBackdrop';
+  document.body.appendChild(backdrop);
+}
+
+function cerrarMiModal() {
+  const modal = document.getElementById('modalPedidosDia');
+  modal.classList.remove('show');
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach(b => b.remove());
+}
+
 
 // =============================================================
 // 🔹 Botones de control
@@ -248,5 +296,7 @@ function abrirMiModalConFecha(fecha) {
     // Abrir modal
     abrirMiModal();
 }
+
+
 
 });
