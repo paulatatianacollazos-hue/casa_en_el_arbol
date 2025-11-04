@@ -755,31 +755,44 @@
 <!-- 🔹 Script para alternar secciones -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const perfil = document.getElementById('seccion-perfil');
-  const direcciones = document.getElementById('seccion-direcciones');
-  const pedidos = document.getElementById('seccion-pedidos');
+  // Secciones
+  const seccionPerfil = document.getElementById('seccion-perfil');
+  const seccionDirecciones = document.getElementById('seccion-direcciones');
+  const seccionPedidos = document.getElementById('seccion-pedidos');
+  const seccionCalendario = document.getElementById('seccion-calendario');
 
+  // Menús
   const menuPerfil = document.getElementById('menu-perfil');
   const menuDirecciones = document.getElementById('menu-direcciones');
   const menuPedidos = document.getElementById('menu-pedidos');
-  const calendario = document.getElementById('seccion-calendario');
   const menuCalendario = document.getElementById('menu-calendario');
 
-  function mostrarSeccion(seccion) {
-    perfil.style.display = 'none';
-    direcciones.style.display = 'none';
-    pedidos.style.display = 'none';
-    calendario.style.display = 'none';
-    seccion.style.display = 'block';
+  // Guardar en array para iterar fácilmente
+  const secciones = [seccionPerfil, seccionDirecciones, seccionPedidos, seccionCalendario];
+  const menus = [menuPerfil, menuDirecciones, menuPedidos, menuCalendario];
+
+  function mostrarSolo(seccionMostrar, menuActivo) {
+    // Ocultar todas las secciones
+    secciones.forEach(sec => sec.style.display = 'none');
+    // Quitar clase activa de todos los menús
+    menus.forEach(m => m.classList.remove('active'));
+    // Mostrar la sección actual
+    seccionMostrar.style.display = 'block';
+    // Activar el menú actual
+    menuActivo.classList.add('active');
   }
 
-  menuPerfil.addEventListener('click', () => mostrarSeccion(perfil));
-  menuDirecciones.addEventListener('click', () => mostrarSeccion(direcciones));
-  menuPedidos.addEventListener('click', () => mostrarSeccion(pedidos));
-  menuCalendario.addEventListener('click', () => mostrarSeccion(calendario));
+  // Asignar eventos
+  menuPerfil.addEventListener('click', () => mostrarSolo(seccionPerfil, menuPerfil));
+  menuDirecciones.addEventListener('click', () => mostrarSolo(seccionDirecciones, menuDirecciones));
+  menuPedidos.addEventListener('click', () => mostrarSolo(seccionPedidos, menuPedidos));
+  menuCalendario.addEventListener('click', () => mostrarSolo(seccionCalendario, menuCalendario));
 
+  // Mostrar perfil por defecto al cargar
+  mostrarSolo(seccionPerfil, menuPerfil);
 });
 </script>
+
 
  <script>
     function abrirModal(id) {
