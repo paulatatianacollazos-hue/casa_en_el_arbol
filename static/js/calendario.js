@@ -77,9 +77,19 @@ function renderCalendario(fecha) {
     grid.appendChild(celdaVacia);
   }
 
+  // Filtrar eventos según usuario
   let eventosFiltrados = [...programaciones];
   if (usuarioSeleccionado !== "mi") {
-    eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
+    const usuario = usuarios.find(u => u.id == usuarioSeleccionado);
+
+    if (usuario && usuario.rol === "empleado") {
+      eventosFiltrados = eventosFiltrados.filter(ev =>
+        ev.Empleado_ID == usuarioSeleccionado || ev.Tipo === "Global"
+      );
+    } else {
+      // Otros roles ven solo sus eventos
+      eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
+    }
   }
 
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
@@ -123,20 +133,29 @@ function renderCalendario(fecha) {
 
     // Abrir modal al hacer click en la celda
     celda.addEventListener("click", () => {
-      abrirMiModalConFecha(fechaStr);
+      abrirMiModalConFecha(fechaStr, usuarioSeleccionado);
     });
 
     grid.appendChild(celda);
   }
 }
 
-// Función para abrir modal con eventos del día
-function abrirMiModalConFecha(fecha) {
+// =============================================================
+// 🔹 Modal con eventos del día
+// =============================================================
+function abrirMiModalConFecha(fecha, usuarioId) {
   const modal = document.getElementById('modalPedidosDia');
   const contenido = document.getElementById('contenidoPedidosDia');
 
-  const eventosDelDia = programaciones.filter(ev => ev.Fecha === fecha);
-  
+  let eventosDelDia = programaciones.filter(ev => ev.Fecha === fecha);
+  const usuario = usuarios.find(u => u.id == usuarioId);
+
+  if (usuario && usuario.rol === "empleado") {
+    eventosDelDia = eventosDelDia.filter(ev =>
+      ev.Empleado_ID == usuarioId || ev.Tipo === "Global"
+    );
+  }
+
   if (eventosDelDia.length === 0) {
     contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
   } else {
@@ -151,7 +170,6 @@ function abrirMiModalConFecha(fecha) {
   abrirMiModal();
 }
 
-// Modal base
 function abrirMiModal() {
   const modal = document.getElementById('modalPedidosDia');
   modal.classList.add('show');
@@ -173,7 +191,6 @@ function cerrarMiModal() {
   const backdrops = document.querySelectorAll('.modal-backdrop');
   backdrops.forEach(b => b.remove());
 }
-
 
 // =============================================================
 // 🔹 Botones de control
@@ -242,7 +259,7 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
     Fecha: form.Fecha.value,
     Hora: form.Hora.value,
     Ubicacion: form.Ubicacion.value,
-    Visibilidad: form.Visibilidad.value // Nuevo campo
+    Visibilidad: form.Visibilidad.value
   };
 
   try {
@@ -268,35 +285,4 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
     console.error("❌ Error al enviar evento:", err);
     alert("Error al crear el evento");
   }
-
-  celda.addEventListener("click", () => {
-    const fecha = celda.dataset.fecha;
-    abrirMiModalConFecha(fecha); // Creamos una función que cargue los eventos de ese día
-});
-
-
-function abrirMiModalConFecha(fecha) {
-    const modal = document.getElementById('modalPedidosDia');
-    const contenido = document.getElementById('contenidoPedidosDia');
-
-    // Filtrar eventos del día
-    const eventosDelDia = programaciones.filter(ev => ev.Fecha === fecha);
-    
-    if (eventosDelDia.length === 0) {
-        contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
-    } else {
-        contenido.innerHTML = eventosDelDia.map(ev => 
-            `<div>
-                <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
-                Ubicación: ${ev.Ubicacion}<br>
-                Hora: ${ev.Hora}
-            </div><hr>`).join("");
-    }
-
-    // Abrir modal
-    abrirMiModal();
-}
-
-
-
 });
