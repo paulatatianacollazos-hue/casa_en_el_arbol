@@ -385,6 +385,13 @@
   <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
     <h5 class="mb-0">calendario</h5>
   </div>
+  <div class="d-flex align-items-center gap-2" style="display: none;">
+    <label for="selectorUsuario" class="fw-bold mb-0" style="display: none;">Ver calendario de:</label>
+    <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;" style="display: none;">
+      <option value="mi" style="display: none;">🗓️ Mi calendario</option>
+      <!-- Las demás opciones se cargarán dinámicamente desde Flask -->
+    </select>
+  </div>
 
   <div class="d-flex justify-content-center mb-3 gap-2">
   <button id="btn-hoy" class="btn btn-success botones">Hoy</button>
