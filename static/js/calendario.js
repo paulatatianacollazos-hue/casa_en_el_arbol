@@ -71,11 +71,12 @@ function filtrarEventosParaUsuario(eventos, usuarioId) {
   // Caso empleado: mostrar propios eventos + globales
   if (usuarioId === "mi" || (usuario && usuario.rol.toLowerCase() === "empleado")) {
     const id = usuarioId === "mi" ? usuarioActualId : usuario.id;
-    return eventos.filter(ev => ev.Empleado_ID == id || ev.Tipo.toLowerCase() === "global");
+    return eventos.filter(ev => ev.ID_Usuario == id || ev.Tipo.toLowerCase() === "Global");
+    
   }
 
   // Otros roles: solo sus eventos
-  if(usuario) return eventos.filter(ev => ev.Empleado_ID == usuario.id);
+  if(usuario) return eventos.filter(ev => ev.ID_Usuario == usuario.id);
 
   return [];
 }
