@@ -12,30 +12,31 @@ mail = Mail()
 def role_required(*roles):
     """
     Decorador para restringir acceso según roles.
-    
+
     Uso:
         @role_required('empleado', 'admin')
     """
-    # Convertimos todos los roles a minúsculas para comparación
+    # Convertimos todos los roles permitidos a minúsculas
     valid_roles = [r.strip().lower() for r in roles]
 
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            # Si no está autenticado
+            # Verificar si el usuario está autenticado
             if not current_user.is_authenticated:
                 flash("⚠️ Debes iniciar sesión primero", "warning")
                 return redirect(url_for('auth.login'))
 
-            # Obtener el rol del usuario
+            # Obtener el rol del usuario, manejar None o cadena vacía
             user_role = getattr(current_user, 'Rol', None)
-            if not user_role:
+            if not user_role or not user_role.strip():
                 flash("❌ Tu cuenta no tiene un rol válido", "danger")
                 return redirect(url_for('auth.login'))
 
+            # Normalizar el rol a minúsculas
             user_role = user_role.strip().lower()
 
-            # Verificar si el rol coincide con los permitidos
+            # Verificar si el rol del usuario está entre los permitidos
             if user_role not in valid_roles:
                 flash("❌ No tienes permisos para acceder a esta página", "danger")
                 return redirect(url_for('auth.login'))
