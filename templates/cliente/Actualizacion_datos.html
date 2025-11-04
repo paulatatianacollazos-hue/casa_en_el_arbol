@@ -418,7 +418,7 @@
   {% for item in pedidos_con_detalles %}
   <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide pedido-container mb-5" data-bs-interval="false">
     <div class="carousel-inner">
-
+          <li>Pedido #{{p.id}} - {{p.nombre_comprador}} - Estado: {{p.estado}} - <a href="{{ url_for('client.seguimiento', pedido_id=p.id) }}">Ver seguimiento</a></li>
       {% for grupo in item.detalles | batch(3, None) %}
       <div class="carousel-item {% if loop.first %}active{% endif %}">
         <div class="d-flex justify-content-center align-items-stretch">
@@ -457,7 +457,7 @@
       </a>
       {% endif %}
     </div>
-    <li>Pedido #{{p.id}} - {{p.nombre_comprador}} - Estado: {{p.estado}} - <a href="{{ url_for('client.seguimiento', pedido_id=p.id) }}">Ver seguimiento</a></li>
+
   </div>
   {% else %}
   <p class="text-muted">No tienes pedidos registrados.</p>
