@@ -57,7 +57,7 @@
     <p><b>stock:</b>{{ producto.Stock}}</p>
     
     <button class="btn-favorito" data-producto-id="{{ producto.id }}">
-    <i class="bi bi-heart {% if producto.id in session.get('favoritos', {}).get(str(current_user.id), []) %}text-danger{% endif %}"></i>
+    <i class="bi bi-heart {% if producto.id in session.get('favoritos', {}).get(current_user.id|string, []) %}text-danger{% endif %}"></i>
 </button>
 
     <div class="botones mt-3">
