@@ -220,4 +220,33 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
     console.error("❌ Error al enviar evento:", err);
     alert("Error al crear el evento");
   }
+
+  celda.addEventListener("click", () => {
+    const fecha = celda.dataset.fecha;
+    abrirMiModalConFecha(fecha); // Creamos una función que cargue los eventos de ese día
+});
+
+
+function abrirMiModalConFecha(fecha) {
+    const modal = document.getElementById('modalPedidosDia');
+    const contenido = document.getElementById('contenidoPedidosDia');
+
+    // Filtrar eventos del día
+    const eventosDelDia = programaciones.filter(ev => ev.Fecha === fecha);
+    
+    if (eventosDelDia.length === 0) {
+        contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
+    } else {
+        contenido.innerHTML = eventosDelDia.map(ev => 
+            `<div>
+                <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
+                Ubicación: ${ev.Ubicacion}<br>
+                Hora: ${ev.Hora}
+            </div><hr>`).join("");
+    }
+
+    // Abrir modal
+    abrirMiModal();
+}
+
 });
