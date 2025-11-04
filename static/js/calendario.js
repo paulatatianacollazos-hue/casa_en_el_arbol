@@ -1,5 +1,5 @@
 // =============================================================
-// 📅 CALENDARIO DINÁMICO - EMPLEADO (Pedidos + otros eventos)
+// 📅 CALENDARIO DINÁMICO CON SELECCIÓN DE USUARIO
 // =============================================================
 
 const grid = document.getElementById("calendar-grid");
@@ -7,11 +7,32 @@ const mesTitulo = document.getElementById("titulo-mes");
 const btnHoy = document.getElementById("btn-hoy");
 const btnMes = document.getElementById("btn-mes");
 const btnAño = document.getElementById("btn-año");
-const selectorTipo = document.getElementById("selectorTipo"); // 👈 nuevo selector de tipo
+const selectorUsuario = document.getElementById("selectorUsuario");
 
 let fechaActual = new Date();
-let programaciones = []; // Guardará todos los eventos obtenidos desde Flask
-let tipoSeleccionado = "todos"; // Estado actual del filtro
+let programaciones = [];
+let usuarios = [];
+let usuarioSeleccionado = "mi"; // por defecto "Mi calendario"
+
+// =============================================================
+// 🔹 Cargar usuarios (transportistas e instaladores)
+// =============================================================
+async function cargarUsuarios() {
+  try {
+    const resp = await fetch("/empleado/usuarios_calendario");
+    usuarios = await resp.json();
+
+    // Insertar opciones dinámicamente
+    usuarios.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = `${u.nombre} (${u.rol})`;
+      selectorUsuario.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("❌ Error al cargar usuarios:", err);
+  }
+}
 
 // =============================================================
 // 🔹 Cargar programaciones desde el servidor
@@ -50,32 +71,31 @@ function renderCalendario(fecha) {
     grid.appendChild(celdaVacia);
   }
 
+  // 🔹 Filtrar eventos por usuario seleccionado
+  let eventosFiltrados = [...programaciones];
+  if (usuarioSeleccionado !== "mi") {
+    eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
+  }
+
   // Días del mes
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
+    const fechaStr = fechaDia.toISOString().split("T")[0];
+
     const celda = document.createElement("div");
     celda.classList.add("day");
-    celda.dataset.fecha = fechaDia.toISOString().split("T")[0];
+    celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    // 🔹 Filtrar eventos por fecha y tipo seleccionado
-    let eventosDelDia = programaciones.filter(ev => ev.Fecha === celda.dataset.fecha);
-    if (tipoSeleccionado !== "todos") {
-      eventosDelDia = eventosDelDia.filter(ev =>
-        tipoSeleccionado === "transportista"
-          ? ev.Tipo === "Entregas"
-          : ev.Tipo === "Instalaciones"
-      );
-    }
+    // Filtrar eventos de ese día
+    const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fechaStr);
 
-    // 🔹 Etiquetas de colores según el tipo
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
       const colores = {
         "Entregas": "bg-success",
         "Instalaciones": "bg-primary",
-        "Reunion": "bg-danger",
-        "Eventos": "bg-danger"
+        "Reunion": "bg-warning",
       };
 
       const etiquetas = tipos.map(t => {
@@ -83,8 +103,7 @@ function renderCalendario(fecha) {
         return `<span class="badge ${color} me-1">${t}</span>`;
       }).join("");
 
-      // Mostrar nombre del responsable si lo hay
-      const nombres = eventosDelDia.map(ev => ev.Empleado || "").filter(Boolean);
+      const nombres = [...new Set(eventosDelDia.map(ev => ev.Empleado))];
       const listaNombres = nombres.length > 0 ? `<small>${nombres.join(", ")}</small>` : "";
 
       celda.innerHTML += `
@@ -93,7 +112,7 @@ function renderCalendario(fecha) {
       `;
     }
 
-    // 🔸 Resaltar día actual
+    // Día actual
     const hoy = new Date();
     if (
       fechaDia.getDate() === hoy.getDate() &&
@@ -108,29 +127,24 @@ function renderCalendario(fecha) {
 }
 
 // =============================================================
-// 🔹 Botón "Hoy"
+// 🔹 Eventos de control
 // =============================================================
+
+selectorUsuario.addEventListener("change", (e) => {
+  usuarioSeleccionado = e.target.value;
+  renderCalendario(fechaActual);
+});
+
 btnHoy.addEventListener("click", () => {
   fechaActual = new Date();
   renderCalendario(fechaActual);
-
-  const hoyCelda = document.querySelector(".day.hoy");
-  if (hoyCelda) {
-    hoyCelda.scrollIntoView({ behavior: "smooth", block: "center" });
-    hoyCelda.classList.add("highlight-today");
-    setTimeout(() => hoyCelda.classList.remove("highlight-today"), 2000);
-  }
 });
 
-// =============================================================
-// 🔹 Botón "Mes" → Selector de mes/año
-// =============================================================
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
   selectorMes.type = "month";
   selectorMes.style.position = "absolute";
   selectorMes.style.opacity = "0";
-  selectorMes.style.pointerEvents = "none";
   document.body.appendChild(selectorMes);
 
   const año = fechaActual.getFullYear();
@@ -148,89 +162,19 @@ btnMes.addEventListener("click", () => {
   selectorMes.click();
 });
 
-// =============================================================
-// 🔹 Botón "Año"
-// =============================================================
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
   const nuevoAño = prompt("Ingrese un año:", añoActual);
-
   if (nuevoAño && !isNaN(nuevoAño)) {
-    const mes = fechaActual.getMonth();
-    fechaActual = new Date(parseInt(nuevoAño), mes, 1);
+    fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
     renderCalendario(fechaActual);
   }
 });
 
 // =============================================================
-// 🔹 Clic en un día → Mostrar modal con programaciones
+// 🔹 Inicialización
 // =============================================================
-grid.addEventListener("click", (e) => {
-  const celda = e.target.closest(".day");
-  if (!celda || celda.classList.contains("empty")) return;
-
-  const fechaSeleccionada = celda.dataset.fecha;
-  const modal = new bootstrap.Modal(document.getElementById("modalPedidosDia"));
-  const contenido = document.getElementById("contenidoPedidosDia");
-  document.getElementById("modalPedidosDiaLabel").textContent =
-    "Programaciones del " + new Date(fechaSeleccionada).toLocaleDateString("es-ES");
-
-  let eventos = programaciones.filter(ev => ev.Fecha === fechaSeleccionada);
-  if (tipoSeleccionado !== "todos") {
-    eventos = eventos.filter(ev =>
-      tipoSeleccionado === "transportistas"
-        ? ev.Tipo === "Entregas"
-        : ev.Tipo === "Instalaciones"
-    );
-  }
-
-  if (eventos.length === 0) {
-    contenido.innerHTML = `
-      <div class="d-flex flex-column align-items-center justify-content-center py-4">
-        <i class="bi bi-calendar-x text-secondary" style="font-size: 3rem;"></i>
-        <p class="mt-3 mb-0 fs-5 text-muted">No tienes nada programado hoy.</p>
-      </div>`;
-  } else {
-    const grupos = {};
-    eventos.forEach(ev => {
-      if (!grupos[ev.Tipo]) grupos[ev.Tipo] = [];
-      grupos[ev.Tipo].push(ev);
-    });
-
-    contenido.innerHTML = Object.entries(grupos)
-      .map(([tipo, lista]) => `
-        <div class="mb-4">
-          <h6 class="fw-bold text-success text-uppercase border-bottom pb-1 mb-2">${tipo}</h6>
-          ${lista.map(ev => `
-            <div class="card mb-2 border-success">
-              <div class="card-body text-start">
-                <h6 class="card-title mb-1 fw-bold">#${ev.ID_Pedido || ev.ID_Calendario}</h6>
-                <p class="mb-0"><strong>Empleado:</strong> ${ev.Empleado || "N/A"}</p>
-                <p class="mb-0"><strong>Ubicación:</strong> ${ev.Ubicacion || "Sin especificar"}</p>
-                <p class="mb-0"><strong>Hora:</strong> ${ev.Hora || "No definida"}</p>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `).join("");
-  }
-
-  modal.show();
-});
-
-// =============================================================
-// 🔹 Cambio en el selector de tipo
-// =============================================================
-if (selectorTipo) {
-  selectorTipo.addEventListener("change", (e) => {
-    tipoSeleccionado = e.target.value;
-    renderCalendario(fechaActual);
-  });
-}
-
-// =============================================================
-// 🔹 Inicializar
-// =============================================================
-document.addEventListener("DOMContentLoaded", () => {
-  cargarProgramaciones();
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarUsuarios();
+  await cargarProgramaciones();
 });
