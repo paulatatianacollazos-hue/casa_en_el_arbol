@@ -65,7 +65,7 @@ function renderCalendario(fecha) {
       const colores = {
         "Entregas": "bg-success",
         "Instalaciones": "bg-primary",
-        "Reuniones internas": "bg-danger",
+        "Reunion": "bg-danger",
         "Eventos": "bg-danger"
       };
 
