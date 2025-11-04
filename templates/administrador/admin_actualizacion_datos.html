@@ -427,7 +427,7 @@
           <button id="btnCancelarAsignacion" class="btn btn-outline-secondary">X</button>
         </div>
         {% for pedido in pedidos %}
-          <div class="pedido-card" data-id="{{ pedido.id }}">
+          <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
             <h3>Pedido #{{ pedido.id }}</h3>
             <p><strong>Cliente:</strong> {{ pedido.usuario }}</p>
             <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
@@ -488,7 +488,8 @@
                 {% endif %}
               </div>
             </div>
-          {% endfor %}  
+          {% endfor %} 
+        </div> 
       </div>
       
       <!-- SECCIÓN: CALENDARIO -->
@@ -1217,6 +1218,11 @@ checkboxes.forEach(cb => {
   } else {
     cb.style.display = 'none'; // ocultar checkboxes de pedidos ya asignados
   }
+});
+
+document.querySelectorAll('.pedido-card').forEach(cb => {
+    const pedidoAsignado = cb.dataset.empleado;
+    console.log(pedidoAsignado);
 });
 
 </script>
