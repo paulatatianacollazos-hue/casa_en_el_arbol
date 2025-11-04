@@ -5,11 +5,9 @@ from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario,
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from flask import request, jsonify
-from flask_login import login_required
-from datetime import datetime  # Ajusta según tu modelo
-from basedatos.decoradores import role_required
-from basedatos.models import Transportista, Pedido, RutaPlanificada
+from basedatos.db import get_connection
+from datetime import datetime, timedelta
+from basedatos.models import Transportista, RutaPlanificada
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     obtener_empleados,
@@ -218,7 +216,7 @@ def reporte_pedidos():
 
 
 # ---------- ASIGNAR_CALENDARIO ----------
-@app.route("/asignar_calendario", methods=["POST"])
+@admin.route("/asignar_calendario", methods=["POST"])
 def asignar_calendario():
     print("📩 Datos recibidos:", request.form.to_dict())
     pedidos_ids = request.form.get("pedidosSeleccionados").split(",")
@@ -300,6 +298,7 @@ def asignar_calendario():
     finally:
         cursor.close()
         conn.close()
+
 
 # ---------- ESTADISTICAS ----------
 @admin.route("/estadisticas")
