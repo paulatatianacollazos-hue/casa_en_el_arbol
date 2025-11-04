@@ -38,7 +38,8 @@ def role_required(*roles):
 
             # Verificar si el rol del usuario está entre los permitidos
             if user_role not in valid_roles:
-                flash("❌ No tienes permisos para acceder a esta página", "danger")
+                flash("❌ No tienes permisos para acceder a esta página",
+                      "danger")
                 return redirect(url_for('auth.login'))
 
             # Todo correcto, ejecutar la función original
