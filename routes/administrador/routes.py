@@ -477,28 +477,55 @@ def obtener_usuarios_calendario():
         return jsonify({"error": "No se pudieron obtener los usuarios"}), 500
 
 
-@admin.route("/empleado/crear_evento", methods=["POST"])
+@admin.route("/admin/calendario/nuevo_evento", methods=["POST"])
 @login_required
-def crear_evento():
-    """Permite a transportistas o instaladores crear eventos o reuniones."""
-    from flask import request, jsonify
+def nuevo_evento():
+    """Guarda un nuevo evento o reunión (visible para todos)."""
+    from datetime import datetime, timedelta
+    data = request.get_json()
+
     try:
-        data = request.get_json()
+        tipo = data.get("Tipo")
+        fecha_str = data.get("Fecha")
+        hora_str = data.get("Hora")
+        ubicacion = data.get("Ubicacion", "")
+        usuario_id = current_user.ID_Usuario  # quien lo crea
 
-        nuevo_evento = Calendario(
-            Fecha=data.get("Fecha"),
-            Hora=data.get("Hora"),
-            Ubicacion=data.get("Ubicacion"),
-            ID_Usuario=current_user.id,
-            ID_Pedido=None,  # No aplica para reuniones/eventos
-            Tipo=data.get("Tipo")
+        # Validar campos
+        if not fecha_str or not tipo:
+            return jsonify({"error": "Debe especificar tipo y fecha"}), 400
+
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+        hora = datetime.strptime(hora_str, "%H:%M").time() if hora_str else None
+
+        # 🔹 Verificar conflictos (±60 minutos)
+        if hora:
+            hora_inicio = (datetime.combine(fecha, hora) - timedelta(minutes=60)).time()
+            hora_fin = (datetime.combine(fecha, hora) + timedelta(minutes=60)).time()
+
+            conflicto = (
+                db.session.query(Calendario)
+                .filter(Calendario.Fecha == fecha)
+                .filter(Calendario.Hora.between(hora_inicio, hora_fin))
+                .first()
+            )
+
+            if conflicto:
+                return jsonify({"error": "Ya existe un evento en ese horario (±60 min)"}), 409
+
+        # 🔹 Crear registro
+        nuevo = Calendario(
+            Fecha=fecha,
+            Hora=hora,
+            Ubicacion=ubicacion,
+            ID_Usuario=usuario_id,
+            Tipo=tipo
         )
-
-        db.session.add(nuevo_evento)
+        db.session.add(nuevo)
         db.session.commit()
 
-        return jsonify({"ok": True, "mensaje": "Evento creado con éxito"})
+        return jsonify({"success": True, "mensaje": "Evento registrado correctamente"})
 
     except Exception as e:
-        print("❌ Error al crear evento:", e)
-        return jsonify({"ok": False, "error": str(e)}), 500
+        print("❌ Error al registrar evento:", e)
+        return jsonify({"error": "Error interno al guardar el evento"}), 500

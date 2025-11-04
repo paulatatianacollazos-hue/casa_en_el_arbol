@@ -148,3 +148,20 @@ def programaciones_todas():
         for e in eventos
     ])
 
+@empleado.route("/empleado/programaciones_todas")
+@login_required
+def programaciones_todas():
+    """Devuelve todas las programaciones (entregas, instalaciones, eventos, reuniones)."""
+    registros = Calendario.query.all()
+    data = [
+        {
+            "ID_Calendario": c.ID_Calendario,
+            "Fecha": c.Fecha.strftime("%Y-%m-%d"),
+            "Hora": c.Hora.strftime("%H:%M") if c.Hora else None,
+            "Ubicacion": c.Ubicacion,
+            "Tipo": c.Tipo,
+            "Empleado_ID": c.ID_Usuario,
+        }
+        for c in registros
+    ]
+    return jsonify(data)

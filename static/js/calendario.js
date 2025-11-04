@@ -258,43 +258,46 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // =============================================================
-// 🔹 Crear evento o reunión
+// 🔹 Enviar formulario de nuevo evento o reunión
 // =============================================================
-document.getElementById("btn-nuevo-evento").addEventListener("click", () => {
-  const modal = new bootstrap.Modal(document.getElementById("modalNuevoEvento"));
-  modal.show();
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("formNuevoEvento");
+  if (!form) return;
 
-document.getElementById("formNuevoEvento").addEventListener("submit", async (e) => {
-  e.preventDefault();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const form = e.target;
-  const data = {
-    Tipo: form.Tipo.value,
-    Fecha: form.Fecha.value,
-    Hora: form.Hora.value,
-    Ubicacion: form.Ubicacion.value
-  };
+    const datos = {
+      Tipo: form.Tipo.value,
+      Fecha: form.Fecha.value,
+      Hora: form.Hora.value,
+      Ubicacion: form.Ubicacion.value
+    };
 
-  try {
-    const resp = await fetch("/admin/empleado/crear_evento", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+    try {
+      const resp = await fetch("/admin/calendario/nuevo_evento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datos)
+      });
 
-    const result = await resp.json();
+      const result = await resp.json();
 
-    if (result.ok) {
-      alert("✅ Evento creado con éxito");
+      if (!resp.ok) {
+        alert(result.error || "Error al registrar evento");
+        return;
+      }
+
+      alert(result.mensaje || "Evento registrado correctamente ✅");
+
+      // Cerrar modal y refrescar calendario
       const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
       modal.hide();
-      await cargarProgramaciones(); // 🔄 recarga los datos
-    } else {
-      alert("⚠️ Error: " + (result.error || "No se pudo crear el evento"));
+      await cargarProgramaciones(); // vuelve a cargar el calendario
+
+    } catch (err) {
+      console.error("❌ Error al enviar evento:", err);
+      alert("No se pudo registrar el evento");
     }
-  } catch (err) {
-    console.error("❌ Error al enviar evento:", err);
-    alert("Ocurrió un error inesperado");
-  }
+  });
 });
