@@ -393,3 +393,15 @@ def favorito(producto_id):
     session['favoritos'] = favoritos
 
     return jsonify({'status': status})
+
+
+@cliente.route('/favoritos')
+@login_required
+def ver_favoritos():
+    # Obtener los IDs de favoritos del usuario desde la sesión
+    favoritos = session.get('favoritos', {}).get(str(current_user.id), [])
+
+    # Traer los productos correspondientes de la base de datos
+    productos = Producto.query.filter(Producto.id.in_(favoritos)).all()
+
+    return render_template("cliente/actualizacion_datos.html", productos=productos)
