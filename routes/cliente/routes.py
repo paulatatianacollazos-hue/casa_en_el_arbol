@@ -412,21 +412,21 @@ def api_posicion(pedido_id):
 
 
 @cliente.route('/favorito/<int:producto_id>', methods=['POST'])
-def toggle_favorito(producto_id):
-    user_id = str(current_user.id)
+@login_required
+def favorito(producto_id):
+    favoritos = session.get('favoritos', {})
 
-    if 'favoritos' not in session:
-        session['favoritos'] = {}
+    user_id_str = str(current_user.id)
+    user_favs = favoritos.get(user_id_str, [])
 
-    favoritos = session['favoritos'].get(user_id, [])
-
-    if producto_id in favoritos:
-        favoritos.remove(producto_id)
+    if producto_id in user_favs:
+        user_favs.remove(producto_id)
         status = 'removed'
     else:
-        favoritos.append(producto_id)
+        user_favs.append(producto_id)
         status = 'added'
 
-    session['favoritos'][user_id] = favoritos
-    session.modified = True
-    return jsonify({"status": status, "favoritos": favoritos})
+    favoritos[user_id_str] = user_favs
+    session['favoritos'] = favoritos
+
+    return jsonify({'status': status})
