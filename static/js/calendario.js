@@ -1,5 +1,5 @@
 // =============================================================
-// 📅 CALENDARIO ADMINISTRADOR
+// 📅 CALENDARIO ADMINISTRADOR (Gestiona reuniones y eventos)
 // =============================================================
 
 const grid = document.getElementById("calendar-grid");
@@ -12,35 +12,43 @@ const selectorUsuario = document.getElementById("selectorUsuario");
 let fechaActual = new Date();
 let programaciones = [];
 let usuarios = [];
-let usuarioSeleccionado = "mi";
+let usuarioSeleccionado = "mi"; // Valor por defecto: Mi calendario
+let usuarioActualId = null; // ID real del usuario logueado
 
 // =============================================================
-// 🔹 Cargar usuarios
+// 🔹 Cargar empleados desde el backend
 // =============================================================
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
     usuarios = await resp.json();
 
-    // Mi calendario
+    // Opción “Mi calendario”
     const optMi = document.createElement("option");
     optMi.value = "mi";
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
+    // Agregar empleados
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
       opt.textContent = `${u.nombre} (${u.rol})`;
       selectorUsuario.appendChild(opt);
     });
+
+    // Guardar ID del usuario logueado si es necesario
+    // Por ejemplo, si hay un input hidden en el HTML: <input id="usuarioId" value="123">
+    const inputUsuario = document.getElementById("usuarioId");
+    if(inputUsuario) usuarioActualId = inputUsuario.value;
+
   } catch (err) {
     console.error("❌ Error al cargar usuarios:", err);
   }
 }
 
 // =============================================================
-// 🔹 Cargar programaciones
+// 🔹 Cargar programaciones desde el servidor
 // =============================================================
 async function cargarProgramaciones() {
   try {
@@ -53,29 +61,23 @@ async function cargarProgramaciones() {
 }
 
 // =============================================================
-// 🔹 Filtrar eventos según usuario
+// 🔹 Filtrar eventos para un usuario
 // =============================================================
-function filtrarEventosParaUsuario(eventos) {
-  if (usuarioSeleccionado === "mi") {
-    // Mostrar todos los eventos globales + mis eventos
-    // Supongamos que tienes un ID de usuario real en `usuarioActualId`
-    const usuarioActualId = "mi"; // O reemplazar por el ID real del empleado
-    return eventos.filter(ev =>
-      ev.Empleado_ID == usuarioActualId || ev.Tipo.toLowerCase() === "global"
-    );
-  } else {
-    const usuario = usuarios.find(u => u.id == usuarioSeleccionado);
-    if (!usuario) return []; // Si no se encuentra, no mostrar nada
-    const rol = usuario.rol.toLowerCase();
-    if (rol === "empleado") {
-      return eventos.filter(ev =>
-        ev.Empleado_ID == usuario.id || ev.Tipo.toLowerCase() === "global"
-      );
-    } else {
-      // Otros roles solo ven sus eventos
-      return eventos.filter(ev => ev.Empleado_ID == usuario.id);
-    }
+function filtrarEventosParaUsuario(eventos, usuarioId) {
+  const usuario = usuarios.find(u => u.id == usuarioId);
+
+  if (!usuario && usuarioId !== "mi") return [];
+
+  // Caso empleado: mostrar propios eventos + globales
+  if (usuarioId === "mi" || (usuario && usuario.rol.toLowerCase() === "empleado")) {
+    const id = usuarioId === "mi" ? usuarioActualId : usuario.id;
+    return eventos.filter(ev => ev.Empleado_ID == id || ev.Tipo.toLowerCase() === "global");
   }
+
+  // Otros roles: solo sus eventos
+  if(usuario) return eventos.filter(ev => ev.Empleado_ID == usuario.id);
+
+  return [];
 }
 
 // =============================================================
@@ -90,7 +92,10 @@ function renderCalendario(fecha) {
   const ultimoDia = new Date(año, mes + 1, 0);
   const primerDiaSemana = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
 
-  mesTitulo.textContent = fecha.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+  mesTitulo.textContent = fecha.toLocaleDateString("es-ES", {
+    month: "long",
+    year: "numeric"
+  });
 
   // Celdas vacías
   for (let i = 0; i < primerDiaSemana; i++) {
@@ -99,32 +104,33 @@ function renderCalendario(fecha) {
     grid.appendChild(celdaVacia);
   }
 
-  const eventosFiltrados = filtrarEventosParaUsuario(programaciones);
-
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
     const celda = document.createElement("div");
-
     celda.classList.add("day");
     celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fechaStr);
+    // Filtrar eventos solo para esa celda
+    const eventosDelDia = filtrarEventosParaUsuario(
+      programaciones.filter(ev => ev.Fecha === fechaStr),
+      usuarioSeleccionado
+    );
 
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
       const colores = {
-        "entrega": "bg-success",
-        "instalación": "bg-primary",
-        "reunión interna": "bg-danger",
-        "evento": "bg-warning",
-        "global": "bg-success",
-        "personal": "bg-secondary"
+        "Entrega": "bg-success",
+        "Instalación": "bg-primary",
+        "Reunión interna": "bg-danger",
+        "Evento": "bg-warning",
+        "Global": "bg-success",
+        "Personal": "bg-secondary"
       };
 
       const etiquetas = tipos.map(t => {
-        const color = colores[t.toLowerCase()] || "bg-secondary";
+        const color = colores[t] || "bg-secondary";
         return `<span class="badge ${color} me-1">${t}</span>`;
       }).join("");
 
@@ -132,24 +138,31 @@ function renderCalendario(fecha) {
     }
 
     const hoy = new Date();
-    if (fechaDia.toDateString() === hoy.toDateString()) {
+    if (
+      fechaDia.getDate() === hoy.getDate() &&
+      fechaDia.getMonth() === hoy.getMonth() &&
+      fechaDia.getFullYear() === hoy.getFullYear()
+    ) {
       celda.classList.add("hoy");
     }
 
-    celda.addEventListener("click", () => abrirMiModalConFecha(fechaStr));
+    celda.addEventListener("click", () => abrirMiModalConFecha(fechaStr, usuarioSeleccionado));
+
     grid.appendChild(celda);
   }
 }
 
 // =============================================================
-// 🔹 Modal eventos día
+// 🔹 Modal con eventos del día
 // =============================================================
-function abrirMiModalConFecha(fecha) {
-  const modalEl = document.getElementById('modalPedidosDia');
+function abrirMiModalConFecha(fecha, usuarioId) {
+  const modal = document.getElementById('modalPedidosDia');
   const contenido = document.getElementById('contenidoPedidosDia');
 
-  const eventosFiltrados = filtrarEventosParaUsuario(programaciones);
-  const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fecha);
+  const eventosDelDia = filtrarEventosParaUsuario(
+    programaciones.filter(ev => ev.Fecha === fecha),
+    usuarioId
+  );
 
   if (eventosDelDia.length === 0) {
     contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
@@ -162,14 +175,40 @@ function abrirMiModalConFecha(fecha) {
        </div><hr>`).join("");
   }
 
-  const modal = new bootstrap.Modal(modalEl);
-  modal.show();
+  abrirMiModal();
+}
+
+function abrirMiModal() {
+  const modal = document.getElementById('modalPedidosDia');
+  modal.classList.add('show');
+  modal.style.display = 'block';
+  document.body.classList.add('modal-open');
+
+  if (!document.getElementById('customBackdrop')) {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.id = 'customBackdrop';
+    document.body.appendChild(backdrop);
+  }
+}
+
+function cerrarMiModal() {
+  const modal = document.getElementById('modalPedidosDia');
+  modal.classList.remove('show');
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+
+  const backdrop = document.getElementById('customBackdrop');
+  if (backdrop) backdrop.remove();
 }
 
 // =============================================================
-// 🔹 Botones y controles
+// 🔹 Botones de control
 // =============================================================
-btnHoy.addEventListener("click", () => { fechaActual = new Date(); renderCalendario(fechaActual); });
+btnHoy.addEventListener("click", () => {
+  fechaActual = new Date();
+  renderCalendario(fechaActual);
+});
 
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
@@ -177,27 +216,34 @@ btnMes.addEventListener("click", () => {
   selectorMes.style.position = "absolute";
   selectorMes.style.opacity = "0";
   document.body.appendChild(selectorMes);
+
   const año = fechaActual.getFullYear();
   const mes = String(fechaActual.getMonth() + 1).padStart(2, "0");
   selectorMes.value = `${año}-${mes}`;
+
   selectorMes.addEventListener("change", (e) => {
     const [nuevoAño, nuevoMes] = e.target.value.split("-");
     fechaActual = new Date(parseInt(nuevoAño), parseInt(nuevoMes) - 1, 1);
     renderCalendario(fechaActual);
     document.body.removeChild(selectorMes);
   });
+
   selectorMes.showPicker?.();
   selectorMes.click();
 });
 
 btnAño.addEventListener("click", () => {
-  const nuevoAño = prompt("Ingrese un año:", fechaActual.getFullYear());
+  const añoActual = fechaActual.getFullYear();
+  const nuevoAño = prompt("Ingrese un año:", añoActual);
   if (nuevoAño && !isNaN(nuevoAño)) {
     fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
     renderCalendario(fechaActual);
   }
 });
 
+// =============================================================
+// 🔹 Cambio de usuario
+// =============================================================
 selectorUsuario.addEventListener("change", (e) => {
   usuarioSeleccionado = e.target.value;
   renderCalendario(fechaActual);
@@ -212,10 +258,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // =============================================================
-// 🔹 Crear nuevo evento
+// 🔹 Crear evento o reunión
 // =============================================================
 document.getElementById("formNuevoEvento").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const form = e.target;
   const data = {
     Tipo: form.Tipo.value,
@@ -224,21 +271,25 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
     Ubicacion: form.Ubicacion.value,
     Visibilidad: form.Visibilidad.value
   };
+
   try {
     const resp = await fetch("/admin/admin/calendario/nuevo_evento", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
+
     const result = await resp.json();
     if (!resp.ok || !result.ok) {
       alert(result.error || "Error al crear evento");
       return;
     }
+
     alert("✅ Evento creado correctamente");
     const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
     modal.hide();
     await cargarProgramaciones();
+
   } catch (err) {
     console.error("❌ Error al enviar evento:", err);
     alert("Error al crear el evento");
