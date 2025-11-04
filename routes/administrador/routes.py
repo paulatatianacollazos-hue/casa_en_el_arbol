@@ -14,8 +14,6 @@ from basedatos.queries import (
     asignar_empleado as asignar_empleado_query,
     actualizar_pedido as actualizar_pedido_query,
     asignar_calendario as asignar_calendario_query,
-    obtener_eventos, crear_evento, editar_evento,
-    eliminar_evento, obtener_evento_por_id,
     get_producto_by_id,
     guardar_producto,
     get_productos
@@ -438,7 +436,8 @@ def obtener_programaciones(fecha):
 @admin.route('/programaciones_todas')
 @login_required
 def programaciones_todas():
-    eventos = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    eventos = Calendario.query.filter_by(
+        ID_Usuario=current_user.ID_Usuario).all()
     return jsonify([
         {
             "ID_Calendario": e.ID_Calendario,
@@ -476,3 +475,30 @@ def obtener_usuarios_calendario():
     except Exception as e:
         print("❌ Error al obtener usuarios del calendario:", e)
         return jsonify({"error": "No se pudieron obtener los usuarios"}), 500
+
+
+@admin.route("/empleado/crear_evento", methods=["POST"])
+@login_required
+def crear_evento():
+    """Permite a transportistas o instaladores crear eventos o reuniones."""
+    from flask import request, jsonify
+    try:
+        data = request.get_json()
+
+        nuevo_evento = Calendario(
+            Fecha=data.get("Fecha"),
+            Hora=data.get("Hora"),
+            Ubicacion=data.get("Ubicacion"),
+            ID_Usuario=current_user.id,
+            ID_Pedido=None,  # No aplica para reuniones/eventos
+            Tipo=data.get("Tipo")
+        )
+
+        db.session.add(nuevo_evento)
+        db.session.commit()
+
+        return jsonify({"ok": True, "mensaje": "Evento creado con éxito"})
+
+    except Exception as e:
+        print("❌ Error al crear evento:", e)
+        return jsonify({"ok": False, "error": str(e)}), 500

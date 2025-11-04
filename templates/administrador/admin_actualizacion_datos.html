@@ -474,33 +474,32 @@
       
       <!-- SECCIÓN: CALENDARIO -->
       <!-- SECCIÓN: CALENDARIO -->
-<div id="seccion-calendario" class="card shadow-sm p-4" style="display:none;">
-  <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">CALENDARIO</h5>
-  </div>
-  <div class="d-flex align-items-center gap-2">
-    <label for="selectorUsuario" class="fw-bold mb-0">Ver calendario de:</label>
-    <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;">
-      <option value="mi">🗓️ Mi calendario</option>
-      <!-- Las demás opciones se cargarán dinámicamente desde Flask -->
-    </select>
-  </div>
-   <div class="d-flex justify-content-center mb-3 gap-2">
-  <button id="btn-hoy" class="btn btn-success botones">Hoy</button>
-  <button id="btn-mes" class="btn btn-primary botones">Mes</button>
-  <button id="btn-año" class="btn btn-warning botones">Año</button>
-</div>
-<h4 id="titulo-mes" class="text-center text-capitalize"></h4>
-<div id="calendar-grid" class="calendar-grid"></div>
-    <!-- Se genera dinámicamente con JS -->
-  </div>
-</div>
-
-<div class="info-panel">
-  <button class="btn btn-success mb-3" id="btn-subir">Subir tarea</button>
-
-  
-</div>
+      <div id="seccion-calendario" class="card shadow-sm p-4" style="display:none;">
+        <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">CALENDARIO</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <label for="selectorUsuario" class="fw-bold mb-0">Ver calendario de:</label>
+          <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;">
+            <option value="mi">🗓️ Mi calendario</option>
+            <!-- Las demás opciones se cargarán dinámicamente desde Flask -->
+          </select>
+        </div>
+        <div class="d-flex justify-content-center mb-3 gap-2">
+        <button id="btn-hoy" class="btn btn-success botones">Hoy</button>
+        <button id="btn-mes" class="btn btn-primary botones">Mes</button>
+        <button id="btn-año" class="btn btn-warning botones">Año</button>
+      </div>
+      <h4 id="titulo-mes" class="text-center text-capitalize"></h4>
+      <div id="calendar-grid" class="calendar-grid"></div>
+          <!-- Se genera dinámicamente con JS -->
+        </div>
+        <div class="text-end mb-3">
+        <button id="btn-nuevo-evento" class="btn btn-outline-success">
+          <i class="bi bi-plus-circle me-1"></i> Crear evento/reunión
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -691,6 +690,44 @@
   </div>
 </div>
 
+<!-- Modal para crear evento -->
+<div class="modal fade" id="modalNuevoEvento" tabindex="-1" aria-labelledby="modalNuevoEventoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalNuevoEventoLabel">Nuevo evento o reunión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formNuevoEvento">
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" name="Tipo" required>
+              <option value="">Seleccione...</option>
+              <option value="Reuniones internas">Reunión interna</option>
+              <option value="Eventos">Evento</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-control" name="Fecha" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Hora</label>
+            <input type="time" class="form-control" name="Hora">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ubicación</label>
+            <input type="text" class="form-control" name="Ubicacion" placeholder="Ej: Sala 3, Oficina, etc.">
+          </div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-success">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 

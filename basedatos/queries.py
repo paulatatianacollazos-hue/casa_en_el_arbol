@@ -796,7 +796,7 @@ def crear_pedido_y_pago(id_usuario, carrito, metodo_pago, monto_total, destino):
             INSERT INTO pedido (Estado, FechaPedido, Destino, ID_Usuario)
             VALUES (%s, NOW(), %s, %s);
         """, ('pendiente', destino, id_usuario))
-        
+
         # Obtener el ID del pedido recién insertado
         pedido_id = cursor.lastrowid
 
