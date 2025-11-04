@@ -384,32 +384,36 @@ def api_posicion(pedido_id):
 @cliente.route('/favorito/<int:producto_id>', methods=['POST'])
 @login_required
 def favorito(producto_id):
-    favoritos = session.get('favoritos', {})
+    user_id = current_user.ID_Usuario
+    producto = Producto.query.get_or_404(producto_id)
 
-    user_id_str = str(current_user.id)
-    user_favs = favoritos.get(user_id_str, [])
+    favorito_existente = Favorito.query.filter_by(
+        ID_Usuario=user_id,
+        ID_Producto=producto_id
+    ).first()
 
-    if producto_id in user_favs:
-        user_favs.remove(producto_id)
+    if favorito_existente:
+        # Quitar de favoritos
+        db.session.delete(favorito_existente)
+        db.session.commit()
         status = 'removed'
     else:
-        user_favs.append(producto_id)
+        # Agregar a favoritos
+        nuevo_favorito = Favorito(ID_Usuario=user_id, ID_Producto=producto_id)
+        db.session.add(nuevo_favorito)
+        db.session.commit()
         status = 'added'
 
-    favoritos[user_id_str] = user_favs
-    session['favoritos'] = favoritos
+    # Actualizar sesión
+    favoritos_sesion = session.get('favoritos', {})
+    user_favs = set(favoritos_sesion.get(str(user_id), []))
+
+    if status == 'added':
+        user_favs.add(producto_id)
+    else:
+        user_favs.discard(producto_id)
+
+    favoritos_sesion[str(user_id)] = list(user_favs)
+    session['favoritos'] = favoritos_sesion
 
     return jsonify({'status': status})
-
-
-@cliente.route('/favoritos')
-@login_required
-def ver_favoritos():
-    # Obtener los IDs de favoritos del usuario desde la sesión
-    favoritos = session.get('favoritos', {}).get(str(current_user.id), [])
-
-    # Traer los productos correspondientes de la base de datos
-    productos = Producto.query.filter(Producto.id.in_(favoritos)).all()
-
-    return render_template("cliente/actualizacion_datos.html",
-                           productos=productos)
