@@ -198,7 +198,7 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
   };
 
   try {
-    const resp = await fetch("/admin/calendario/nuevo_evento", {
+    const resp = await fetch("/admin/admin/calendario/nuevo_evento", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
