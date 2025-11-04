@@ -685,7 +685,7 @@
       <select id="empleado_id" required>
         <option value="">-- Selecciona un empleado --</option>
           {% for emp in empleados %}
-              {% if emp.Rol in ['transportista', 'instalador'] %}
+              {% if emp.Rol in ['empleado'] %}
                   <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
               {% endif %}
           {% endfor %}

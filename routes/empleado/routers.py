@@ -17,14 +17,12 @@ empleado = Blueprint(
 
 
 @empleado.route('/dashboard')
-@role_required('empleado')
 def dashboard():
     return render_template('empleado/dashboard.html')
 
 
 @empleado.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("transportista")
 def actualizacion_datos():
     usuario = current_user
     notificaciones = Notificaciones.query.filter_by(
