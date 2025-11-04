@@ -1,6 +1,7 @@
 # basedatos/notificaciones.py
 from basedatos.models import db, Notificaciones
 
+
 def crear_notificacion(user_id, titulo, mensaje):
     """Crea y guarda una notificación para un usuario."""
     noti = Notificaciones(
