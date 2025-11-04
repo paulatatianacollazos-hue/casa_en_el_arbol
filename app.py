@@ -2,7 +2,9 @@ import os
 from flask import Flask, render_template, flash, redirect, url_for
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
-
+from datetime import datetime, timedelta
+from flask import request, jsonify
+from app import app, mysql
 # ------------------ MODELOS ------------------ #
 from basedatos.models import db, Usuario
 
@@ -108,6 +110,48 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
     return render_template("common/detalles.html", producto=producto)
+
+
+@app.route('/crear_evento', methods=['POST'])
+def crear_evento():
+    try:
+        tipo = request.form['Tipo']
+        fecha = request.form['Fecha']
+        hora = request.form['Hora']
+        ubicacion = request.form['Ubicacion']
+        id_usuario = session.get('user_id')
+
+        # Combinar fecha y hora
+        evento_dt = datetime.strptime(f"{fecha} {hora}", "%Y-%m-%d %H:%M:%S")
+        inicio_intervalo = evento_dt - timedelta(minutes=60)
+        fin_intervalo = evento_dt + timedelta(minutes=60)
+
+        conn = mysql.connection
+        cur = conn.cursor()
+
+        # Validar si ya hay un evento dentro del intervalo de 60 minutos
+        cur.execute("""
+            SELECT * FROM calendario 
+            WHERE Fecha = %s 
+            AND (Hora BETWEEN %s AND %s)
+        """, (fecha, (inicio_intervalo.time()), (fin_intervalo.time())))
+
+        existente = cur.fetchone()
+        if existente:
+            return jsonify(success=False, message="Ya existe un evento/reunión en ese horario o en el intervalo de 60 minutos."), 400
+
+        # Insertar nuevo evento
+        cur.execute("""
+            INSERT INTO calendario (Fecha, Hora, Ubicacion, ID_Usuario, Tipo)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (fecha, hora, ubicacion, id_usuario, tipo))
+        conn.commit()
+
+        return jsonify(success=True, message="Evento registrado correctamente.")
+    
+    except Exception as e:
+        print("⚠️ Error al crear evento:", str(e))
+        return jsonify(success=False, message=f"Error inesperado: {str(e)}"), 500
 
 
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
