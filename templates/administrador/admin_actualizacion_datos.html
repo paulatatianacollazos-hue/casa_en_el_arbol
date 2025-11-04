@@ -436,11 +436,16 @@
             <p><strong>Total:</strong> ${{ pedido.total }}</p>
 
             <div class="estado-pedido">
-              {% if pedido.ID_Empleado %}
-                <span>✅ Asignado</span>
-              {% else %}
-                <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" style="width: 50px; height: 50px;">
-              {% endif %}
+              <td>{{ pedido.ID_Pedido }}</td>
+              <tr>
+                <td>
+                  {% if pedido.ID_Empleado %}
+                    <span>✅ Asignado</span>
+                  {% else %}
+                    <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}" style="width: 50px; height: 50px;">
+                  {% endif %}
+                </td>
+              </tr>
             </div>
 
             <div class="productos">

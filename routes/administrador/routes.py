@@ -263,7 +263,7 @@ def asignar_calendario_route():
         hora_dt = datetime.strptime(hora, "%H:%M").time()
     except ValueError:
         return jsonify({"success": False, "message":
-            "Formato de fecha u hora inválido"}), 400
+                        "Formato de fecha u hora inválido"}), 400
 
     # Validar que el empleado no tenga otro evento en la misma fecha/hora
     evento_existente = (
