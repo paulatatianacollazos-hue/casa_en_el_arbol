@@ -1198,6 +1198,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+checkboxes.forEach(cb => {
+  const pedidoAsignado = cb.dataset.empleado; // Agregar en el HTML: data-empleado="{{ pedido.ID_Empleado }}"
+  if (!pedidoAsignado) {
+    cb.style.display = 'inline-block';
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        cb.parentElement.style.border = "2px solid #28a745";
+      } else {
+        cb.parentElement.style.border = "none";
+      }
+    });
+  } else {
+    cb.style.display = 'none'; // ocultar checkboxes de pedidos ya asignados
+  }
+});
+
 </script>
 
 
