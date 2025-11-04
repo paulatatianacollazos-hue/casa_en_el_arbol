@@ -1134,82 +1134,81 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-  const btnAsignarEmpleado = document.getElementById("btnAsignarEmpleado");
-  const asignacionControls = document.getElementById("asignacionControls");
-  const btnConfirmarAsignacion = document.getElementById("btnConfirmarAsignacion");
-  const btnCancelarAsignacion = document.getElementById("btnCancelarAsignacion");
-  const checkboxes = document.querySelectorAll(".seleccion-pedido");
+document.addEventListener("DOMContentLoaded", () => {
+    const btnAsignarEmpleado = document.getElementById("btnAsignarEmpleado");
+    const asignacionControls = document.getElementById("asignacionControls");
+    const btnConfirmarAsignacion = document.getElementById("btnConfirmarAsignacion");
+    const selectEmpleado = document.getElementById("selectEmpleado");
+    const checkboxes = document.querySelectorAll(".seleccion-pedido");
 
-  // 1️⃣ Mostrar checkboxes y botones al presionar "Asignar empleado"
-  btnAsignarEmpleado.addEventListener("click", () => {
+    // 🔹 Inicializar los checkboxes: deshabilitar pedidos con empleado asignado
     checkboxes.forEach(cb => {
-      if (!cb.dataset.empleado) cb.style.display = "inline-block"; // No permitir pedidos con empleado
-      cb.checked = false;
+        if (cb.dataset.empleado && cb.dataset.empleado.trim() !== "") {
+            cb.disabled = true;
+            cb.parentElement.style.opacity = "0.5";
+            cb.parentElement.title = "Este pedido ya tiene un empleado asignado";
+        } else {
+            cb.disabled = false;
+            cb.parentElement.style.opacity = "1";
+            cb.parentElement.title = "";
+        }
+        cb.checked = false; // limpiar selección inicial
     });
-    btnAsignarEmpleado.style.display = "none";
-    asignacionControls.style.display = "block";
-  });
 
-  // 2️⃣ Cancelar asignación (X)
-  btnCancelarAsignacion.addEventListener("click", () => {
-    checkboxes.forEach(cb => cb.style.display = "none");
-    btnAsignarEmpleado.style.display = "inline-block";
-    asignacionControls.style.display = "none";
-  });
+    // 🔹 Mostrar controles de asignación al hacer click en "Asignar Empleado"
+    btnAsignarEmpleado.addEventListener("click", () => {
+        btnAsignarEmpleado.style.display = "none";
+        asignacionControls.style.display = "block";
+    });
 
-  // 3️⃣ Confirmar selección → abrir modal
-  btnConfirmarAsignacion.addEventListener("click", () => {
-    const seleccionados = Array.from(checkboxes)
-      .filter(cb => cb.checked && !cb.dataset.empleado)
-      .map(cb => cb.value);
+    // 🔹 Confirmar asignación de pedidos a empleado
+    btnConfirmarAsignacion.addEventListener("click", async () => {
+        const empleadoId = selectEmpleado.value;
+        const pedidosSeleccionados = Array.from(checkboxes)
+            .filter(cb => cb.checked && !cb.disabled)
+            .map(cb => cb.value);
 
-    if (seleccionados.length === 0) {
-      alert("Selecciona al menos un pedido válido.");
-      return;
-    }
+        if (!empleadoId) {
+            alert("❌ Selecciona un empleado.");
+            return;
+        }
 
-    // Guardar IDs seleccionados en hidden input
-    document.getElementById("pedidosSeleccionados").value = seleccionados.join(",");
+        if (pedidosSeleccionados.length === 0) {
+            alert("❌ Selecciona al menos un pedido.");
+            return;
+        }
 
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById("modalAsignarEmpleado"));
-    modal.show();
-  });
+        try {
+            const response = await fetch("/admin/asignar_calendario", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify({
+                    empleadoId: empleadoId,
+                    pedidos: pedidosSeleccionados
+                })
+            });
 
-  // 4️⃣ Guardar asignación
-  document.getElementById("btnGuardarAsignacion").addEventListener("click", async () => {
-    const empleadoId = document.getElementById("selectEmpleado").value;
-    if (!empleadoId) {
-      alert("Selecciona un empleado.");
-      return;
-    }
+            const result = await response.json();
 
-    const pedidosSeleccionados = document.getElementById("pedidosSeleccionados").value.split(",");
+            if (result.success) {
+                alert("✅ Pedidos asignados correctamente.");
+                // 🔄 Actualizar la página o los checkboxes
+                window.location.reload();
+            } else {
+                alert("❌ " + result.message);
+            }
 
-    // Enviar fetch al servidor para validar horarios y guardar asignación
-    try {
-      const response = await fetch("/admin/asignar_calendario", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ empleadoId, pedidos: pedidosSeleccionados })
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        alert("Asignación exitosa 🎉");
-        location.reload();
-      } else {
-        alert("Error: " + data.message);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error al asignar empleado.");
-    }
-  });
+        } catch (error) {
+            console.error("Error al asignar empleado:", error);
+            alert("❌ Error al asignar empleado. Revisa la consola.");
+        }
+    });
 });
-
 </script>
+
 
 </body>
 </html>
