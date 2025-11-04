@@ -158,11 +158,16 @@
   color: white !important;
 }
 
+/* ✅ Asegura que el modal se muestre sobre todo */
 .modal {
   z-index: 2000 !important;
-  height: 500px;
 }
-
 .modal-backdrop {
   z-index: 1999 !important;
 }
+
+/* ✅ Fuerza ancho mínimo del contenido */
+#modalNuevoEvento .modal-dialog {
+  min-width: 1000px !important;
+}
+
