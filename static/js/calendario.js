@@ -15,7 +15,7 @@ let usuarios = [];
 let usuarioSeleccionado = "mi"; // Valor por defecto: Mi calendario
 
 // =============================================================
-// 🔹 Cargar empleados desde el backend (solo transportistas e instaladores)
+// 🔹 Cargar empleados desde el backend
 // =============================================================
 async function cargarUsuarios() {
   try {
@@ -70,7 +70,6 @@ function renderCalendario(fecha) {
     year: "numeric"
   });
 
-  // Celdas vacías
   for (let i = 0; i < primerDiaSemana; i++) {
     const celdaVacia = document.createElement("div");
     celdaVacia.classList.add("day", "empty");
@@ -79,15 +78,14 @@ function renderCalendario(fecha) {
 
   // Filtrar eventos según usuario
   let eventosFiltrados = [...programaciones];
+
   if (usuarioSeleccionado !== "mi") {
     const usuario = usuarios.find(u => u.id == usuarioSeleccionado);
-
     if (usuario && usuario.rol === "empleado") {
       eventosFiltrados = eventosFiltrados.filter(ev =>
-        ev.Empleado_ID == usuarioSeleccionado || ev.Tipo === "Global"
+        ev.Empleado_ID == usuarioSeleccionado || ev.Tipo.toLowerCase() === "global"
       );
     } else {
-      // Otros roles ven solo sus eventos
       eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
     }
   }
@@ -131,9 +129,8 @@ function renderCalendario(fecha) {
       celda.classList.add("hoy");
     }
 
-    // Abrir modal al hacer click en la celda
     celda.addEventListener("click", () => {
-      abrirMiModalConFecha(fechaStr, usuarioSeleccionado);
+      abrirMiModalConFecha(fechaStr);
     });
 
     grid.appendChild(celda);
@@ -141,25 +138,29 @@ function renderCalendario(fecha) {
 }
 
 // =============================================================
-// 🔹 Modal con eventos del día
+// 🔹 Modal con eventos del día (empleados ven Global también)
 // =============================================================
-function abrirMiModalConFecha(fecha, usuarioId) {
-  const modal = document.getElementById('modalPedidosDia');
+function abrirMiModalConFecha(fecha) {
+  const modalEl = document.getElementById('modalPedidosDia');
   const contenido = document.getElementById('contenidoPedidosDia');
 
   let eventosDelDia = programaciones.filter(ev => ev.Fecha === fecha);
-  const usuario = usuarios.find(u => u.id == usuarioId);
 
-  if (usuario && usuario.rol === "empleado") {
-    eventosDelDia = eventosDelDia.filter(ev =>
-      ev.Empleado_ID == usuarioId || ev.Tipo === "Global"
-    );
+  if (usuarioSeleccionado !== "mi") {
+    const usuario = usuarios.find(u => u.id == usuarioSeleccionado);
+    if (usuario && usuario.rol === "empleado") {
+      eventosDelDia = eventosDelDia.filter(ev =>
+        ev.Empleado_ID == usuarioSeleccionado || ev.Tipo.toLowerCase() === "global"
+      );
+    } else {
+      eventosDelDia = eventosDelDia.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
+    }
   }
 
   if (eventosDelDia.length === 0) {
     contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
   } else {
-    contenido.innerHTML = eventosDelDia.map(ev => 
+    contenido.innerHTML = eventosDelDia.map(ev =>
       `<div>
          <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
          Ubicación: ${ev.Ubicacion}<br>
@@ -167,29 +168,8 @@ function abrirMiModalConFecha(fecha, usuarioId) {
        </div><hr>`).join("");
   }
 
-  abrirMiModal();
-}
-
-function abrirMiModal() {
-  const modal = document.getElementById('modalPedidosDia');
-  modal.classList.add('show');
-  modal.style.display = 'block';
-  document.body.classList.add('modal-open');
-
-  const backdrop = document.createElement('div');
-  backdrop.className = 'modal-backdrop fade show';
-  backdrop.id = 'customBackdrop';
-  document.body.appendChild(backdrop);
-}
-
-function cerrarMiModal() {
-  const modal = document.getElementById('modalPedidosDia');
-  modal.classList.remove('show');
-  modal.style.display = 'none';
-  document.body.classList.remove('modal-open');
-
-  const backdrops = document.querySelectorAll('.modal-backdrop');
-  backdrops.forEach(b => b.remove());
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
 }
 
 // =============================================================
@@ -248,7 +228,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // =============================================================
-// 🔹 Crear evento o reunión (Personal o Global)
+// 🔹 Crear evento o reunión
 // =============================================================
 document.getElementById("formNuevoEvento").addEventListener("submit", async (e) => {
   e.preventDefault();
