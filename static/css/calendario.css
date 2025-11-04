@@ -160,6 +160,7 @@
 
 .modal {
   z-index: 2000 !important;
+  height: 500px;
 }
 
 .modal-backdrop {
