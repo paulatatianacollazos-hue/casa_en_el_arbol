@@ -455,11 +455,11 @@ def programaciones_todas():
 @admin.route("/empleado/usuarios_calendario")
 @login_required
 def obtener_usuarios_calendario():
-    """Devuelve los usuarios activos con rol 'empleado'."""
+    """Devuelve los usuarios activos con rol 'transportista' o 'instalador'."""
     try:
         empleados = (
             db.session.query(Usuario)
-            .filter(Usuario.Rol == "empleado")
+            .filter(Usuario.Rol.in_(["transportista", "instalador"]))
             .filter(Usuario.Activo == True)
             .all()
         )

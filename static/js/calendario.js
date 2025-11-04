@@ -1,5 +1,5 @@
 // =============================================================
-// 📅 CALENDARIO DINÁMICO DE EMPLEADOS
+// 📅 CALENDARIO DINÁMICO DE EMPLEADOS (Transportistas e Instaladores)
 // =============================================================
 
 const grid = document.getElementById("calendar-grid");
@@ -12,25 +12,31 @@ const selectorUsuario = document.getElementById("selectorUsuario");
 let fechaActual = new Date();
 let programaciones = [];
 let usuarios = [];
-let usuarioSeleccionado = "mi"; // valor por defecto = Mi calendario
+let usuarioSeleccionado = "mi"; // Valor por defecto: Mi calendario
 
 // =============================================================
-// 🔹 Cargar empleados desde el backend (rol = empleado)
+// 🔹 Cargar empleados desde el backend (solo transportistas e instaladores)
 // =============================================================
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/empleado/usuarios_calendario");
     usuarios = await resp.json();
 
-    // Agregar las opciones dinámicamente al selector
+    // Agregar opción "Mi calendario" al inicio
+    const optMi = document.createElement("option");
+    optMi.value = "mi";
+    optMi.textContent = "Mi calendario";
+    selectorUsuario.appendChild(optMi);
+
+    // Agregar usuarios obtenidos del backend
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
-      opt.textContent = `${u.nombre}`;
+      opt.textContent = `${u.nombre} (${u.rol})`;
       selectorUsuario.appendChild(opt);
     });
   } catch (err) {
-    console.error("❌ Error al cargar empleados:", err);
+    console.error("❌ Error al cargar usuarios:", err);
   }
 }
 
@@ -39,7 +45,7 @@ async function cargarUsuarios() {
 // =============================================================
 async function cargarProgramaciones() {
   try {
-    const resp = await fetch("/empleado/programaciones_todas"); // tu ruta actual de programaciones
+    const resp = await fetch("/empleado/programaciones_todas");
     programaciones = await resp.json();
     renderCalendario(fechaActual);
   } catch (err) {
@@ -64,20 +70,20 @@ function renderCalendario(fecha) {
     year: "numeric"
   });
 
-  // 🕳️ Celdas vacías al inicio del mes
+  // Celdas vacías al inicio
   for (let i = 0; i < primerDiaSemana; i++) {
     const celdaVacia = document.createElement("div");
     celdaVacia.classList.add("day", "empty");
     grid.appendChild(celdaVacia);
   }
 
-  // 🔹 Filtrar eventos por usuario seleccionado
+  // Filtrar eventos por usuario seleccionado
   let eventosFiltrados = [...programaciones];
   if (usuarioSeleccionado !== "mi") {
     eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
   }
 
-  // 📅 Renderizar días del mes
+  // Renderizar días del mes
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
@@ -87,17 +93,16 @@ function renderCalendario(fecha) {
     celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    // 🔸 Buscar programaciones de ese día
     const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fechaStr);
 
-    // 🎨 Asignar colores según tipo
+    // 🎨 Colores por tipo
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
       const colores = {
-        "Entregas": "bg-success",            // 🟩 Verde
-        "Instalaciones": "bg-primary",       // 🟦 Azul
-        "Reuniones internas": "bg-danger",   // 🔴 Rojo
-        "Eventos": "bg-danger"               // 🔴 Rojo
+        "Entregas": "bg-success",           // 🟩 Verde
+        "Instalaciones": "bg-primary",      // 🟦 Azul
+        "Reuniones internas": "bg-danger",  // 🔴 Rojo
+        "Eventos": "bg-danger"              // 🔴 Rojo
       };
 
       const etiquetas = tipos.map(t => {
@@ -114,7 +119,7 @@ function renderCalendario(fecha) {
       `;
     }
 
-    // 🟢 Resaltar día actual
+    // 🟢 Día actual resaltado
     const hoy = new Date();
     if (
       fechaDia.getDate() === hoy.getDate() &&
@@ -144,7 +149,7 @@ btnHoy.addEventListener("click", () => {
 });
 
 // =============================================================
-// 🔹 Botón "Mes" → selector de mes
+// 🔹 Botón "Mes" → Selector de mes
 // =============================================================
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
@@ -169,7 +174,7 @@ btnMes.addEventListener("click", () => {
 });
 
 // =============================================================
-// 🔹 Botón "Año" → cambiar año manteniendo mes
+// 🔹 Botón "Año" → Cambiar año
 // =============================================================
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
@@ -182,7 +187,7 @@ btnAño.addEventListener("click", () => {
 });
 
 // =============================================================
-// 🔹 Selección de usuario
+// 🔹 Cambio de usuario
 // =============================================================
 selectorUsuario.addEventListener("change", (e) => {
   usuarioSeleccionado = e.target.value;
@@ -190,7 +195,7 @@ selectorUsuario.addEventListener("change", (e) => {
 });
 
 // =============================================================
-// 🔹 Clic en un día → abrir modal con los eventos
+// 🔹 Clic en día → Mostrar modal con eventos
 // =============================================================
 grid.addEventListener("click", (e) => {
   const celda = e.target.closest(".day");
