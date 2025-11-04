@@ -377,7 +377,7 @@ def envios():
     pedidos = obtener_todos_los_pedidos()
     detalles = detalle()
     empleados = obtener_empleados()
-    return render_template('envios.html', pedidos=pedidos, detalles=detalles,
+    return render_template('administrador/envios.html', pedidos=pedidos, detalles=detalles,
                            empleados=empleados)
 
 @admin.route("/direccion/agregar", methods=["POST"])
