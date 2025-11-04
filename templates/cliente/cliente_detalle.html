@@ -56,7 +56,9 @@
     <p><b>Color:</b> {{ producto.Color }}</p>
     <p><b>stock:</b>{{ producto.Stock}}</p>
     
-    <a href=""><i class="bi bi-heart fs-4"></i></a>
+    <button class="btn-favorito" data-producto-id="{{ producto.id }}">
+    <i class="bi bi-heart {% if producto.id in session.get('favoritos', {}).get(str(current_user.id), []) %}text-danger{% endif %}"></i>
+</button>
 
     <div class="botones mt-3">
       <button class="btn btn-primary">Garantía</button>
@@ -177,5 +179,23 @@ document.addEventListener("DOMContentLoaded", () => {
     principalCarousel.to(0);
   });
 });
+</script>
+<script>
+  document.querySelectorAll('.btn-favorito').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const productoId = btn.dataset.productoId;
+        const icon = btn.querySelector('i');
+        
+        const res = await fetch(`/favorito/${productoId}`, { method: 'POST' });
+        const data = await res.json();
+        
+        if(data.status === 'removed'){
+            icon.classList.remove('text-danger');
+        } else {
+            icon.classList.add('text-danger');
+        }
+    });
+});
+
 </script>
 {% endblock %}
