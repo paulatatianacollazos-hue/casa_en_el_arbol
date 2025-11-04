@@ -29,7 +29,7 @@ def dashboard():
 
 @empleado.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("transportista")
+@role_required("empleado")
 def actualizacion_datos():
     usuario = current_user
     notificaciones = Notificaciones.query.filter_by(
