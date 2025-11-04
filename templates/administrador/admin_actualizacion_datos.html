@@ -421,11 +421,6 @@
         </div>
         <button id="btnAsignarEmpleado" class="btn btn-success">Asignar empleado</button>
 
-        <!-- Botones y X ocultos al inicio -->
-        <div id="asignacionControls" style="display:none; margin-top:10px;">
-          <button id="btnConfirmarAsignacion" class="btn btn-primary">Confirmar asignación</button>
-          <button id="btnCancelarAsignacion" class="btn btn-outline-secondary">X</button>
-        </div>
         {% for pedido in pedidos %}
           <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
             <h3>Pedido #{{ pedido.id }}</h3>
@@ -687,32 +682,24 @@
 <!-- Modal para asignar empleado -->
 <div id="modal-asignar" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="cerrarModalAsignar()">&times;</span>
-    <h5>Asignar empleado a pedidos</h5>
-
+    <span class="close">&times;</span>
     <form id="formAsignarEmpleado">
       <label for="empleado_id">Empleado:</label>
       <select name="empleado_id" id="empleado_id" required>
-    <option value="">-- Selecciona empleado --</option>
-    {% for emp in empleados %}
-      <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }}</option>
-    {% endfor %}
-  </select>
-
+        <option value="">-- Selecciona empleado --</option>
+        {% for emp in empleados %}
+        <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }}</option>
+        {% endfor %}
+      </select><br>
       <label for="fecha">Fecha:</label>
-      <input type="date" id="fecha" required>
-
+      <input type="date" id="fecha" required><br>
       <label for="hora">Hora:</label>
-      <input type="time" id="hora" required>
-
+      <input type="time" id="hora" required><br>
       <input type="hidden" id="pedidosSeleccionados">
-      <button type="button" id="btnConfirmarModal">Asignar</button>
+      <button type="submit">Asignar</button>
     </form>
-
-    <div id="mensaje-error" style="color:red; margin-top:10px;"></div>
   </div>
 </div>
-
 
 
 <div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-labelledby="modalPedidosDiaLabel" aria-hidden="true" >
@@ -929,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const mostrarAsignacionBtn = document.getElementById('mostrarAsignacionBtn');
 const ocultarInputsBtn = document.getElementById('ocultarInputsBtn');
 const abrirModalAsignacionBtn = document.getElementById('abrirModalAsignacionBtn');
-const btnEnviarAsignacion = document.getElementById("btnEnviarAsignacion");
+const btnEnviarAsignacion = document.getElementById("btnConfirmarModal");
 const inputs = document.querySelectorAll('input.seleccion-pedido');
 
 // Mostrar checkboxes
@@ -1140,64 +1127,27 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------------------------
-  // VARIABLES PRINCIPALES
-  // ---------------------------
   const modal = document.getElementById("modal-asignar");
-  const btnAsignarEmpleado = document.getElementById("btnAsignarEmpleado");
-  const btnCerrarModal = modal.querySelector(".close");
+  const btnAsignar = document.getElementById("btnAsignarEmpleado");
+  const closeBtn = modal.querySelector(".close");
+  const form = document.getElementById("formAsignarEmpleado");
   const pedidosSeleccionadosInput = document.getElementById("pedidosSeleccionados");
-  const formularioAsignar = document.getElementById("formAsignarEmpleado");
 
-  const checkboxesPedidos = document.querySelectorAll(".seleccion-pedido");
-
-  // Mostrar solo pedidos no asignados y agregar efecto al seleccionar
-  checkboxesPedidos.forEach(cb => {
-    if (!cb.dataset.empleado || cb.dataset.empleado === "") {
-      cb.style.display = "inline-block";
-      cb.addEventListener("change", () => {
-        cb.parentElement.style.border = cb.checked ? "2px solid #28a745" : "1px solid #e6e6e6";
-      });
-    } else {
-      cb.style.display = "none";
-    }
-  });
-
-  // ---------------------------
-  // ABRIR MODAL
-  // ---------------------------
-  btnAsignarEmpleado.addEventListener("click", () => {
-    const seleccionados = Array.from(document.querySelectorAll(".seleccion-pedido:checked"))
-      .map(cb => cb.value);
-
+  btnAsignar.addEventListener("click", () => {
+    const seleccionados = Array.from(document.querySelectorAll(".seleccion-pedido:checked")).map(cb => cb.value);
     if (seleccionados.length === 0) {
-      alert("Selecciona al menos un pedido para asignar");
+      alert("Selecciona al menos un pedido");
       return;
     }
-
     pedidosSeleccionadosInput.value = seleccionados.join(",");
     modal.style.display = "block";
   });
 
-  // ---------------------------
-  // CERRAR MODAL
-  // ---------------------------
-  btnCerrarModal.addEventListener("click", () => {
-    modal.style.display = "none";
-  });
+  closeBtn.addEventListener("click", () => modal.style.display = "none");
+  window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
 
-  window.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      modal.style.display = "none";
-    }
-  });
-
-  // ---------------------------
-  // ENVIAR ASIGNACIÓN (AJAX)
-  // ---------------------------
-  formularioAsignar.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     const empleadoId = document.getElementById("empleado_id").value;
     const pedidos = pedidosSeleccionadosInput.value.split(",");
     const fecha = document.getElementById("fecha").value;
@@ -1209,27 +1159,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch("/admin/asignar_calendario", {
+      const res = await fetch("/admin/asignar_calendario", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type":"application/json"},
         body: JSON.stringify({ pedidos, empleadoId, fecha, hora })
       });
-
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
         alert("Asignación realizada correctamente 🎉");
         modal.style.display = "none";
         location.reload();
-      } else {
-        alert("Error al asignar: " + data.message);
-      }
-    } catch (error) {
-      console.error("Error al asignar:", error);
-      alert("Ocurrió un error al asignar los pedidos");
+      } else alert("Error: " + data.message);
+    } catch(err) {
+      console.error(err);
+      alert("Ocurrió un error al asignar");
     }
   });
 });
+
 </script>
 
 </body>
