@@ -452,7 +452,7 @@ def programaciones_todas():
     ])
 
 
-@admin.route("/empleado/usuarios_calendario")
+@admin.route("/admin/usuarios_calendario")
 @login_required
 def obtener_usuarios_calendario():
     """Devuelve los usuarios activos con rol 'transportista' o 'instalador'."""
@@ -472,9 +472,7 @@ def obtener_usuarios_calendario():
             }
             for emp in empleados
         ]
-
         return jsonify(resultado)
-
     except Exception as e:
-        print("❌ Error al obtener empleados:", e)
-        return jsonify({"error": "No se pudieron obtener los empleados"}), 500
+        print("❌ Error al obtener usuarios del calendario:", e)
+        return jsonify({"error": "No se pudieron obtener los usuarios"}), 500

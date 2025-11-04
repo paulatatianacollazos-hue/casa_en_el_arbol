@@ -19,16 +19,17 @@ let usuarioSeleccionado = "mi"; // Valor por defecto: Mi calendario
 // =============================================================
 async function cargarUsuarios() {
   try {
-    const resp = await fetch("/admin/empleado/usuarios_calendario");
+    // 🔸 Ruta corregida (sin /empleado/)
+    const resp = await fetch("/admin/usuarios_calendario");
     usuarios = await resp.json();
 
-    // Agregar opción "Mi calendario" al inicio
+    // Agregar opción "Mi calendario"
     const optMi = document.createElement("option");
     optMi.value = "mi";
-    optMi.textContent = "Mi calendario";
+    optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Agregar usuarios obtenidos del backend
+    // Agregar transportistas e instaladores
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
@@ -45,7 +46,7 @@ async function cargarUsuarios() {
 // =============================================================
 async function cargarProgramaciones() {
   try {
-    const resp = await fetch("/empleado/programaciones_todas");
+    const resp = await fetch("/empleado/programaciones_todas"); // ruta de tus eventos
     programaciones = await resp.json();
     renderCalendario(fechaActual);
   } catch (err) {
@@ -70,20 +71,20 @@ function renderCalendario(fecha) {
     year: "numeric"
   });
 
-  // Celdas vacías al inicio
+  // Celdas vacías
   for (let i = 0; i < primerDiaSemana; i++) {
     const celdaVacia = document.createElement("div");
     celdaVacia.classList.add("day", "empty");
     grid.appendChild(celdaVacia);
   }
 
-  // Filtrar eventos por usuario seleccionado
+  // 🔹 Filtrar eventos por usuario seleccionado
   let eventosFiltrados = [...programaciones];
   if (usuarioSeleccionado !== "mi") {
     eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
   }
 
-  // Renderizar días del mes
+  // 📅 Renderizar días
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
@@ -93,16 +94,21 @@ function renderCalendario(fecha) {
     celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
+    // Eventos de ese día
     const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fechaStr);
 
     // 🎨 Colores por tipo
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
       const colores = {
-        "Entregas": "bg-success",           // 🟩 Verde
-        "Instalaciones": "bg-primary",      // 🟦 Azul
-        "Reuniones internas": "bg-danger",  // 🔴 Rojo
-        "Eventos": "bg-danger"              // 🔴 Rojo
+        "Entrega": "bg-success",           // 🟩 Verde
+        "Entregas": "bg-success",
+        "Instalación": "bg-primary",       // 🟦 Azul
+        "Instalaciones": "bg-primary",
+        "Reunión interna": "bg-danger",    // 🔴 Rojo
+        "Reuniones internas": "bg-danger",
+        "Evento": "bg-danger",
+        "Eventos": "bg-danger"
       };
 
       const etiquetas = tipos.map(t => {
@@ -119,7 +125,7 @@ function renderCalendario(fecha) {
       `;
     }
 
-    // 🟢 Día actual resaltado
+    // 🟢 Día actual
     const hoy = new Date();
     if (
       fechaDia.getDate() === hoy.getDate() &&
@@ -149,7 +155,7 @@ btnHoy.addEventListener("click", () => {
 });
 
 // =============================================================
-// 🔹 Botón "Mes" → Selector de mes
+// 🔹 Botón "Mes"
 // =============================================================
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
@@ -174,7 +180,7 @@ btnMes.addEventListener("click", () => {
 });
 
 // =============================================================
-// 🔹 Botón "Año" → Cambiar año
+// 🔹 Botón "Año"
 // =============================================================
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
@@ -195,7 +201,7 @@ selectorUsuario.addEventListener("change", (e) => {
 });
 
 // =============================================================
-// 🔹 Clic en día → Mostrar modal con eventos
+// 🔹 Click en día → Modal
 // =============================================================
 grid.addEventListener("click", (e) => {
   const celda = e.target.closest(".day");
