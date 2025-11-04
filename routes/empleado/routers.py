@@ -1,4 +1,4 @@
-from flask import render_template, request, Blueprint, flash, session
+from flask import render_template, request, Blueprint, flash
 from flask import jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
@@ -6,7 +6,9 @@ from basedatos.models import Usuario, Calendario, Notificaciones
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.models import db
-
+from basedatos.queries import (
+    actualizar_pedido as actualizar_pedido_query,
+)
 
 empleado = Blueprint(
     'empleado',
@@ -201,9 +203,17 @@ def obtener_programaciones_todas():
 
 @empleado.route("/estado", methods=["GET", "POST"])
 @login_required
-@role_required("admin")
+@role_required("empleado")
 def estado_pedido():
     if request.method == "POST":
         pedido_id = request.form["pedido_id"]
         return redirect(url_for("admin.control_pedidos", pedido_id=pedido_id))
-    return render_template("administrador/estado.html")
+    return render_template("empleado/actualizacion_datos.html")
+
+
+@empleado.route("/actualizar_pedido", methods=["POST"])
+@login_required
+@role_required("empleado")
+def actualizar_pedido_route():
+    actualizar_pedido_query(request.form)
+    return redirect(url_for("empleado.actualizacion_datos"))

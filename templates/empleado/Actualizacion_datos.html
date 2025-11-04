@@ -465,13 +465,13 @@
           <h5 class="mb-0">Actualizar estado de pedidos</h5>
         </div>
         <div class="estado">
-        <form method="POST" action="{{ url_for('admin.actualizar_pedido_route') }}">
+        <form method="POST" action="{{ url_for('empleado.actualizar_pedido_route') }}">
           <div class="content">
               <input type="number" name="pedido_id" required placeholder="ID del pedido:" style="color:black;">
 
               <label for="estado" style="color:#628D46;">Nuevo estado:</label>
               <select name="estado" required>
-                  <option value="pendiente">Pendiente</option>
+                  <option value="pendiente">pendiente</option>
                   <option value="en proseso">en proceso</option>
                   <option value="en reparto">en reparto</option>
                   <option value="entregado">entregado</option>
