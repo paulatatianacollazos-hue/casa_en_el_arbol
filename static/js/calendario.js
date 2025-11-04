@@ -1,5 +1,5 @@
 // =============================================================
-// 📅 CALENDARIO DINÁMICO DE EMPLEADOS (Transportistas e Instaladores)
+// 📅 CALENDARIO ADMINISTRADOR (Gestiona reuniones y eventos)
 // =============================================================
 
 const grid = document.getElementById("calendar-grid");
@@ -19,17 +19,16 @@ let usuarioSeleccionado = "mi"; // Valor por defecto: Mi calendario
 // =============================================================
 async function cargarUsuarios() {
   try {
-    // 🔸 Ruta corregida (sin /empleado/)
     const resp = await fetch("/admin/usuarios_calendario");
     usuarios = await resp.json();
 
-    // Agregar opción "Mi calendario"
+    // Opción “Mi calendario”
     const optMi = document.createElement("option");
     optMi.value = "mi";
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Agregar transportistas e instaladores
+    // Agregar empleados
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
@@ -46,7 +45,7 @@ async function cargarUsuarios() {
 // =============================================================
 async function cargarProgramaciones() {
   try {
-    const resp = await fetch("/empleado/programaciones_todas"); // ruta de tus eventos
+    const resp = await fetch("/empleado/programaciones_todas");
     programaciones = await resp.json();
     renderCalendario(fechaActual);
   } catch (err) {
@@ -78,13 +77,13 @@ function renderCalendario(fecha) {
     grid.appendChild(celdaVacia);
   }
 
-  // 🔹 Filtrar eventos por usuario seleccionado
+  // Filtrar por usuario seleccionado
   let eventosFiltrados = [...programaciones];
   if (usuarioSeleccionado !== "mi") {
     eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
   }
 
-  // 📅 Renderizar días
+  // Renderizar días
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
@@ -94,21 +93,17 @@ function renderCalendario(fecha) {
     celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    // Eventos de ese día
     const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fechaStr);
 
-    // 🎨 Colores por tipo
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
       const colores = {
-        "Entrega": "bg-success",           // 🟩 Verde
-        "Entregas": "bg-success",
-        "Instalación": "bg-primary",       // 🟦 Azul
-        "Instalaciones": "bg-primary",
-        "Reunión interna": "bg-danger",    // 🔴 Rojo
-        "Reuniones internas": "bg-danger",
-        "Evento": "bg-danger",
-        "Eventos": "bg-danger"
+        "Entrega": "bg-success",
+        "Instalación": "bg-primary",
+        "Reunión interna": "bg-danger",
+        "Evento": "bg-warning",
+        "Global": "bg-success",
+        "Personal": "bg-secondary"
       };
 
       const etiquetas = tipos.map(t => {
@@ -116,16 +111,9 @@ function renderCalendario(fecha) {
         return `<span class="badge ${color} me-1">${t}</span>`;
       }).join("");
 
-      const nombres = [...new Set(eventosDelDia.map(ev => ev.Empleado))];
-      const listaNombres = nombres.length > 0 ? `<small>${nombres.join(", ")}</small>` : "";
-
-      celda.innerHTML += `
-        <div class="event-tags mt-1">${etiquetas}</div>
-        ${listaNombres}
-      `;
+      celda.innerHTML += `<div class="event-tags mt-1">${etiquetas}</div>`;
     }
 
-    // 🟢 Día actual
     const hoy = new Date();
     if (
       fechaDia.getDate() === hoy.getDate() &&
@@ -140,23 +128,13 @@ function renderCalendario(fecha) {
 }
 
 // =============================================================
-// 🔹 Botón "Hoy"
+// 🔹 Botones de control
 // =============================================================
 btnHoy.addEventListener("click", () => {
   fechaActual = new Date();
   renderCalendario(fechaActual);
-
-  const hoyCelda = document.querySelector(".day.hoy");
-  if (hoyCelda) {
-    hoyCelda.scrollIntoView({ behavior: "smooth", block: "center" });
-    hoyCelda.classList.add("highlight-today");
-    setTimeout(() => hoyCelda.classList.remove("highlight-today"), 2000);
-  }
 });
 
-// =============================================================
-// 🔹 Botón "Mes"
-// =============================================================
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
   selectorMes.type = "month";
@@ -179,13 +157,9 @@ btnMes.addEventListener("click", () => {
   selectorMes.click();
 });
 
-// =============================================================
-// 🔹 Botón "Año"
-// =============================================================
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
   const nuevoAño = prompt("Ingrese un año:", añoActual);
-
   if (nuevoAño && !isNaN(nuevoAño)) {
     fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
     renderCalendario(fechaActual);
@@ -201,55 +175,6 @@ selectorUsuario.addEventListener("change", (e) => {
 });
 
 // =============================================================
-// 🔹 Click en día → Modal
-// =============================================================
-grid.addEventListener("click", (e) => {
-  const celda = e.target.closest(".day");
-  if (!celda || celda.classList.contains("empty")) return;
-
-  const fechaSeleccionada = celda.dataset.fecha;
-  const modal = new bootstrap.Modal(document.getElementById("modalPedidosDia"));
-  const contenido = document.getElementById("contenidoPedidosDia");
-  document.getElementById("modalPedidosDiaLabel").textContent =
-    "Programaciones del " + new Date(fechaSeleccionada).toLocaleDateString("es-ES");
-
-  const eventos = programaciones.filter(ev => ev.Fecha === fechaSeleccionada);
-
-  if (eventos.length === 0) {
-    contenido.innerHTML = `
-      <div class="d-flex flex-column align-items-center justify-content-center py-4">
-        <i class="bi bi-calendar-x text-secondary" style="font-size: 3rem;"></i>
-        <p class="mt-3 mb-0 fs-5 text-muted">No hay eventos programados.</p>
-      </div>`;
-  } else {
-    const grupos = {};
-    eventos.forEach(ev => {
-      if (!grupos[ev.Tipo]) grupos[ev.Tipo] = [];
-      grupos[ev.Tipo].push(ev);
-    });
-
-    contenido.innerHTML = Object.entries(grupos)
-      .map(([tipo, lista]) => `
-        <div class="mb-4">
-          <h6 class="fw-bold text-success text-uppercase border-bottom pb-1 mb-2">${tipo}</h6>
-          ${lista.map(ev => `
-            <div class="card mb-2 border-success">
-              <div class="card-body text-start">
-                <h6 class="card-title mb-1 fw-bold">#${ev.ID_Pedido || ev.ID_Calendario}</h6>
-                <p class="mb-0"><strong>Ubicación:</strong> ${ev.Ubicacion || "Sin especificar"}</p>
-                <p class="mb-0"><strong>Hora:</strong> ${ev.Hora || "No definida"}</p>
-                <p class="mb-0"><strong>Empleado:</strong> ${ev.Empleado || "Sin asignar"}</p>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `).join("");
-  }
-
-  modal.show();
-});
-
-// =============================================================
 // 🔹 Inicialización
 // =============================================================
 document.addEventListener("DOMContentLoaded", async () => {
@@ -258,28 +183,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // =============================================================
-// 🔹 Crear evento o reunión
+// 🔹 Crear evento o reunión (Personal o Global)
 // =============================================================
-document.getElementById("btn-nuevo-evento").addEventListener("click", () => {
-  const modal = new bootstrap.Modal(document.getElementById("modalNuevoEvento"));
-  modal.show();
-});
-
 document.getElementById("formNuevoEvento").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const form = e.target;
   const data = {
-  Tipo: form.Tipo.value,
-  Fecha: form.Fecha.value,
-  Hora: form.Hora.value,
-  Ubicacion: form.Ubicacion.value,
-  Visibilidad: form.Visibilidad.value // nuevo campo
-};
-
+    Tipo: form.Tipo.value,
+    Fecha: form.Fecha.value,
+    Hora: form.Hora.value,
+    Ubicacion: form.Ubicacion.value,
+    Visibilidad: form.Visibilidad.value // Nuevo campo
+  };
 
   try {
-    const resp = await fetch("/admin/empleado/crear_evento", {
+    const resp = await fetch("/admin/calendario/nuevo_evento", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -287,61 +206,18 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
 
     const result = await resp.json();
 
-    if (result.ok) {
-      alert("✅ Evento creado con éxito");
-      const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
-      modal.hide();
-      await cargarProgramaciones(); // 🔄 recarga los datos
-    } else {
-      alert("⚠️ Error: " + (result.error || "No se pudo crear el evento"));
+    if (!resp.ok || !result.ok) {
+      alert(result.error || "Error al crear evento");
+      return;
     }
+
+    alert("✅ Evento creado correctamente");
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
+    modal.hide();
+    await cargarProgramaciones();
+
   } catch (err) {
     console.error("❌ Error al enviar evento:", err);
-    alert("Ocurrió un error inesperado");
+    alert("Error al crear el evento");
   }
-});
-
-// =============================================================
-// 🔹 Enviar formulario de nuevo evento o reunión
-// =============================================================
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("formNuevoEvento");
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const datos = {
-      Tipo: form.Tipo.value,
-      Fecha: form.Fecha.value,
-      Hora: form.Hora.value,
-      Ubicacion: form.Ubicacion.value
-    };
-
-    try {
-      const resp = await fetch("/admin/calendario/nuevo_evento", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datos)
-      });
-
-      const result = await resp.json();
-
-      if (!resp.ok) {
-        alert(result.error || "Error al registrar evento");
-        return;
-      }
-
-      alert(result.mensaje || "Evento registrado correctamente ✅");
-
-      // Cerrar modal y refrescar calendario
-      const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
-      modal.hide();
-      await cargarProgramaciones(); // vuelve a cargar el calendario
-
-    } catch (err) {
-      console.error("❌ Error al enviar evento:", err);
-      alert("No se pudo registrar el evento");
-    }
-  });
 });
