@@ -8,7 +8,6 @@ from basedatos.notificaciones import crear_notificacion
 from basedatos.models import db
 
 
-
 empleado = Blueprint(
     'empleado',
     __name__,
@@ -18,7 +17,7 @@ empleado = Blueprint(
 
 
 @empleado.route('/dashboard')
-@role_required("transportista")
+@role_required('empleado')
 def dashboard():
     return render_template('empleado/dashboard.html')
 
