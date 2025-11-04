@@ -487,6 +487,9 @@
           </div>
         </div>
         {% endfor %}
+        {% if productos|length == 0 %}
+        <p class="text-muted">No tienes productos favoritos.</p>
+        {% endif %}
       </div>
     </div>
   </div>
