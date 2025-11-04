@@ -148,10 +148,10 @@ def programaciones_todas():
         for e in eventos
     ])
 
-@empleado.route("/empleado/programaciones_todas")
+
+@empleado.route("/empleado/programaciones_globales")
 @login_required
-def programaciones_todas():
-    """Devuelve todas las programaciones (entregas, instalaciones, eventos, reuniones)."""
+def programaciones_globales():
     registros = Calendario.query.all()
     data = [
         {

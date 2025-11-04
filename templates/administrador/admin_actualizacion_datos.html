@@ -691,37 +691,44 @@
 </div>
 
 <!-- Modal para crear evento -->
+<!-- Modal para crear evento o reunión -->
 <div class="modal fade" id="modalNuevoEvento" tabindex="-1" aria-labelledby="modalNuevoEventoLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width: 1000px;">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 1000px;">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="modalNuevoEventoLabel">Nuevo evento o reunión</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
         <form id="formNuevoEvento">
           <div class="mb-3">
-            <label class="form-label">Tipo</label>
-            <select class="form-select" name="Tipo" required>
+            <label for="Tipo" class="form-label">Tipo</label>
+            <select class="form-select" id="Tipo" name="Tipo" required>
               <option value="">Seleccione...</option>
-              <option value="Reuniones internas">Reunión interna</option>
-              <option value="Eventos">Evento</option>
+              <option value="Evento">Evento</option>
+              <option value="Reunión interna">Reunión interna</option>
             </select>
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Fecha</label>
-            <input type="date" class="form-control" name="Fecha" required>
+            <label for="Fecha" class="form-label">Fecha</label>
+            <input type="date" class="form-control" id="Fecha" name="Fecha" required>
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Hora</label>
-            <input type="time" class="form-control" name="Hora">
+            <label for="Hora" class="form-label">Hora</label>
+            <input type="time" class="form-control" id="Hora" name="Hora" required>
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Ubicación</label>
-            <input type="text" class="form-control" name="Ubicacion" placeholder="Ej: Sala 3, Oficina, etc.">
+            <label for="Ubicacion" class="form-label">Ubicación</label>
+            <input type="text" class="form-control" id="Ubicacion" name="Ubicacion"
+                   placeholder="Ej: Sala 3, Oficina, etc." required>
           </div>
+
           <div class="text-end">
-            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="submit" class="btn btn-success">Guardar evento</button>
           </div>
         </form>
       </div>

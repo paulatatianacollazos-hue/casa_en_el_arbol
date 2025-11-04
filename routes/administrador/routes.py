@@ -479,53 +479,62 @@ def obtener_usuarios_calendario():
 
 @admin.route("/admin/calendario/nuevo_evento", methods=["POST"])
 @login_required
-def nuevo_evento():
-    """Guarda un nuevo evento o reunión (visible para todos)."""
+def crear_evento_calendario():
+    """
+    Crea un nuevo evento o reunión global.
+    Si ya existe otro evento dentro de ±60 min en la misma fecha → no permite registrar.
+    """
     from datetime import datetime, timedelta
     data = request.get_json()
 
     try:
         tipo = data.get("Tipo")
-        fecha_str = data.get("Fecha")
-        hora_str = data.get("Hora")
-        ubicacion = data.get("Ubicacion", "")
-        usuario_id = current_user.ID_Usuario  # quien lo crea
+        fecha = datetime.strptime(data.get("Fecha"), "%Y-%m-%d").date()
+        hora = datetime.strptime(data.get("Hora"), "%H:%M").time()
+        ubicacion = data.get("Ubicacion")
 
-        # Validar campos
-        if not fecha_str or not tipo:
-            return jsonify({"error": "Debe especificar tipo y fecha"}), 400
+        # Convertir a datetime para comparar intervalos
+        hora_dt = datetime.combine(fecha, hora)
+        intervalo_inicio = hora_dt - timedelta(minutes=60)
+        intervalo_fin = hora_dt + timedelta(minutes=60)
 
-        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
-        hora = datetime.strptime(hora_str, "%H:%M").time() if hora_str else None
+        # Buscar eventos en la misma fecha dentro del intervalo
+        conflicto = (
+            db.session.query(Calendario)
+            .filter(Calendario.Fecha == fecha)
+            .filter(Calendario.Hora >= intervalo_inicio.time())
+            .filter(Calendario.Hora <= intervalo_fin.time())
+            .first()
+        )
 
-        # 🔹 Verificar conflictos (±60 minutos)
-        if hora:
-            hora_inicio = (datetime.combine(fecha, hora) - timedelta(minutes=60)).time()
-            hora_fin = (datetime.combine(fecha, hora) + timedelta(minutes=60)).time()
+        if conflicto:
+            return jsonify({
+                "ok": False,
+                "error": f"Ya existe un evento cerca de esa hora ({conflicto.Tipo} a las {conflicto.Hora.strftime('%H:%M')})."
+            }), 400
 
-            conflicto = (
-                db.session.query(Calendario)
-                .filter(Calendario.Fecha == fecha)
-                .filter(Calendario.Hora.between(hora_inicio, hora_fin))
-                .first()
-            )
-
-            if conflicto:
-                return jsonify({"error": "Ya existe un evento en ese horario (±60 min)"}), 409
-
-        # 🔹 Crear registro
-        nuevo = Calendario(
+        # Crear evento global (visible para todos)
+        nuevo_evento = Calendario(
             Fecha=fecha,
             Hora=hora,
             Ubicacion=ubicacion,
-            ID_Usuario=usuario_id,
-            Tipo=tipo
+            ID_Usuario=current_user.ID_Usuario,  # quien lo crea
+            Tipo=tipo,
+            ID_Pedido=None
         )
-        db.session.add(nuevo)
+
+        db.session.add(nuevo_evento)
         db.session.commit()
 
-        return jsonify({"success": True, "mensaje": "Evento registrado correctamente"})
+        return jsonify({
+            "ok": True,
+            "mensaje": "Evento creado exitosamente."
+        })
 
     except Exception as e:
-        print("❌ Error al registrar evento:", e)
-        return jsonify({"error": "Error interno al guardar el evento"}), 500
+        print("❌ Error al crear evento:", e)
+        db.session.rollback()
+        return jsonify({
+            "ok": False,
+            "error": "Error interno al crear el evento."
+        }), 500

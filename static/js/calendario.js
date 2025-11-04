@@ -258,6 +258,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // =============================================================
+// 🔹 Crear evento o reunión
+// =============================================================
+document.getElementById("btn-nuevo-evento").addEventListener("click", () => {
+  const modal = new bootstrap.Modal(document.getElementById("modalNuevoEvento"));
+  modal.show();
+});
+
+document.getElementById("formNuevoEvento").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const form = e.target;
+  const data = {
+    Tipo: form.Tipo.value,
+    Fecha: form.Fecha.value,
+    Hora: form.Hora.value,
+    Ubicacion: form.Ubicacion.value
+  };
+
+  try {
+    const resp = await fetch("/admin/empleado/crear_evento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await resp.json();
+
+    if (result.ok) {
+      alert("✅ Evento creado con éxito");
+      const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
+      modal.hide();
+      await cargarProgramaciones(); // 🔄 recarga los datos
+    } else {
+      alert("⚠️ Error: " + (result.error || "No se pudo crear el evento"));
+    }
+  } catch (err) {
+    console.error("❌ Error al enviar evento:", err);
+    alert("Ocurrió un error inesperado");
+  }
+});
+
+// =============================================================
 // 🔹 Enviar formulario de nuevo evento o reunión
 // =============================================================
 document.addEventListener("DOMContentLoaded", () => {
