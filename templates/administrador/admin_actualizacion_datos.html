@@ -420,7 +420,7 @@
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
         <button id="btnAsignarEmpleado" class="btn btn-success">Asignar empleado</button>
-        <a href="{{ url_for('cliente.control_pedidos') }}">control de pedidos</a>
+        <a href="{{ url_for('admin.control_pedidos') }}">control de pedidos</a>
         {% for pedido in pedidos %}
           <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
             <h3>Pedido #{{ pedido.id }}</h3>
