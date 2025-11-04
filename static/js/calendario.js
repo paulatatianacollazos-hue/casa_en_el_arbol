@@ -57,14 +57,15 @@ async function cargarProgramaciones() {
 // =============================================================
 function filtrarEventosParaUsuario(eventos) {
   if (usuarioSeleccionado === "mi") {
-    // Mi calendario: incluir mis eventos + globales si soy empleado
-    const usuario = usuarios.find(u => u.id == "mi") || { rol: "empleado" };
+    // Mostrar todos los eventos globales + mis eventos
+    // Supongamos que tienes un ID de usuario real en `usuarioActualId`
+    const usuarioActualId = "mi"; // O reemplazar por el ID real del empleado
     return eventos.filter(ev =>
-      ev.Empleado_ID == "mi" || ev.Tipo.toLowerCase() === "global"
+      ev.Empleado_ID == usuarioActualId || ev.Tipo.toLowerCase() === "global"
     );
   } else {
     const usuario = usuarios.find(u => u.id == usuarioSeleccionado);
-    if (!usuario) return [];
+    if (!usuario) return []; // Si no se encuentra, no mostrar nada
     const rol = usuario.rol.toLowerCase();
     if (rol === "empleado") {
       return eventos.filter(ev =>
