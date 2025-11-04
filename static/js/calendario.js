@@ -270,11 +270,13 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
 
   const form = e.target;
   const data = {
-    Tipo: form.Tipo.value,
-    Fecha: form.Fecha.value,
-    Hora: form.Hora.value,
-    Ubicacion: form.Ubicacion.value
-  };
+  Tipo: form.Tipo.value,
+  Fecha: form.Fecha.value,
+  Hora: form.Hora.value,
+  Ubicacion: form.Ubicacion.value,
+  Visibilidad: form.Visibilidad.value // nuevo campo
+};
+
 
   try {
     const resp = await fetch("/admin/empleado/crear_evento", {

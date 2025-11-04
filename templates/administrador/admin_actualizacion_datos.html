@@ -700,8 +700,11 @@
         <h5 class="modal-title" id="modalNuevoEventoLabel">Nuevo evento o reunión</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
         <form id="formNuevoEvento">
+          
+          <!-- Tipo de evento -->
           <div class="mb-3">
             <label for="Tipo" class="form-label">Tipo</label>
             <select class="form-select" id="Tipo" name="Tipo" required>
@@ -711,19 +714,32 @@
             </select>
           </div>
 
+          <!-- Fecha -->
           <div class="mb-3">
             <label for="Fecha" class="form-label">Fecha</label>
             <input type="date" class="form-control" id="Fecha" name="Fecha" required>
           </div>
 
+          <!-- Hora -->
           <div class="mb-3">
             <label for="Hora" class="form-label">Hora</label>
             <input type="time" class="form-control" id="Hora" name="Hora" required>
           </div>
 
+          <!-- Ubicación -->
           <div class="mb-3">
             <label for="Ubicacion" class="form-label">Ubicación</label>
             <input type="text" class="form-control" id="Ubicacion" name="Ubicacion" placeholder="Ej: Sala 3, Oficina, etc." required>
+          </div>
+
+          <!-- 🔹 Nuevo campo: visibilidad -->
+          <div class="mb-3">
+            <label for="Visibilidad" class="form-label">Visibilidad del evento</label>
+            <select class="form-select" id="Visibilidad" name="Visibilidad" required>
+              <option value="">Seleccione...</option>
+              <option value="Personal">🔒 Personal (solo tú lo ves)</option>
+              <option value="Global">🌍 Global (todos los empleados lo ven)</option>
+            </select>
           </div>
 
           <div class="text-end">
@@ -734,7 +750,6 @@
     </div>
   </div>
 </div>
-
 
 
 
