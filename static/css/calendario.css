@@ -157,3 +157,11 @@
 .modal-title {
   color: white !important;
 }
+
+.modal {
+  z-index: 2000 !important;
+}
+
+.modal-backdrop {
+  z-index: 1999 !important;
+}
