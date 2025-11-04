@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Seguimiento del pedido #{{pedido.id}}</h2>
+<div class="track-grid">
+  <div id="map" style="height:400px;"></div>
+  <div class="detalle">
+    <p><strong>Cliente:</strong> {{pedido.nombre_comprador}}</p>
+    <p><strong>Estado:</strong> {{pedido.estado}}</p>
+    <p><strong>Destino:</strong> {{pedido.destino}}</p>
+    <p><strong>Última actualización:</strong> {{seguimiento.timestamp if seguimiento else 'Sin datos'}}</p>
+    <button id="refreshBtn">Refrescar posición</button>
+  </div>
+</div>
+
+<script>
+var map = L.map('map').setView([4.7110, -74.0721], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+var marker = null;
+
+async function fetchPos(){
+  const res = await fetch('/api/posicion/{{pedido.id}}');
+  if(res.ok){
+    const j = await res.json();
+    if(j.ok){
+      const lat = parseFloat(j.lat), lng = parseFloat(j.lng);
+      if(!isNaN(lat) && !isNaN(lng)){
+        if(marker) marker.setLatLng([lat,lng]);
+        else marker = L.marker([lat,lng]).addTo(map);
+        map.setView([lat,lng],13);
+      }
+    }
+  }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', fetchPos);
+</script>
+{% endblock %}

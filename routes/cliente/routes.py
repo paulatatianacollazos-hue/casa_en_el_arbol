@@ -9,6 +9,7 @@ from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id
 from basedatos.models import db, Comentarios, Direccion
+from basedatos.models import Pedido, Seguimiento
 import base64
 import os
 from basedatos.queries import crear_pedido_y_pago
@@ -390,3 +391,20 @@ def confirmar_pago():
     except Exception as e:
         print("💥 Error en confirmar_pago:", e)
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@cliente.route('/seguimiento/<int:pedido_id>')
+def seguimiento(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    seg = Seguimiento.query.filter_by(pedido_id=pedido_id).order_by(
+        Seguimiento.timestamp.desc()).first()
+    return render_template('seguimiento.html', pedido=pedido, seguimiento=seg)
+
+@cliente.route('/api/posicion/<int:pedido_id>')
+def api_posicion(pedido_id):
+    seg = Seguimiento.query.filter_by(pedido_id=pedido_id).order_by(
+        Seguimiento.timestamp.desc()).first()
+    if not seg:
+        return jsonify({'ok': False, 'message': 'No hay seguimiento'}), 404
+    return jsonify({'ok': True, 'lat': seg.lat, 'lng': seg.lng, 'estado':
+                    seg.estado, 'timestamp': seg.timestamp.isoformat()})

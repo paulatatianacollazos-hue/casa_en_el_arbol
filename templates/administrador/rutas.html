@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Rutas planificadas</h2>
+<table class="tabla">
+  <tr><th>ID</th><th>Pedido</th><th>Transportista</th><th>Origen</th><th>Destino</th><th>Fecha</th><th>Creada</th></tr>
+  {% for r in rutas %}
+    <tr>
+      <td>{{r.id}}</td>
+      <td>{{r.pedido_id}}</td>
+      <td>{{r.transportista_id}}</td>
+      <td>{{r.origen or '-'}}</td>
+      <td>{{r.destino or '-'}}</td>
+      <td>{{r.fecha}}</td>
+      <td>{{r.creada_en}}</td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

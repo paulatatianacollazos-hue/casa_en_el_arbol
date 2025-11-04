@@ -9,6 +9,7 @@ from flask import request, jsonify
 from flask_login import login_required
 from datetime import datetime  # Ajusta según tu modelo
 from basedatos.decoradores import role_required
+from basedatos.models import Transportista, Pedido, RutaPlanificada
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     obtener_empleados,
@@ -644,3 +645,38 @@ def crear_evento_calendario():
             "ok": False,
             "error": "Error interno al crear el evento."
         }), 500
+
+
+@admin.route('/planificar', methods=['GET','POST'])
+def planificar():
+    transportistas = Transportista.query.all()
+    pedidos = Pedido.query.all()
+    if request.method == 'POST':
+        pedido_id = request.form.get('pedido')
+        transportista_id = request.form.get('transportista')
+        origen = request.form.get('origen')
+        destino = request.form.get('destino')
+        fecha = request.form.get('fecha')
+        if not pedido_id or not transportista_id or not fecha:
+            flash('Pedido, transportista y fecha son obligatorios', 'error')
+            return redirect(url_for('planner.planificar'))
+        try:
+            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        except Exception:
+            flash('Formato de fecha inválido (YYYY-MM-DD)', 'error')
+            return redirect(url_for('planner.planificar'))
+        ruta = RutaPlanificada(pedido_id=int(pedido_id), transportista_id=int(
+            transportista_id), origen=origen, destino=destino, fecha=fecha_obj)
+        db.session.add(ruta)
+        db.session.commit()
+        flash('Ruta planificada correctamente', 'success')
+        return redirect(url_for('planner.ver_rutas'))
+    return render_template('planificar.html', transportistas=transportistas,
+                           pedidos=pedidos)
+
+
+@admin.route('/rutas')
+def ver_rutas():
+    rutas = RutaPlanificada.query.order_by(RutaPlanificada.creada_en.desc(
+        )).all()
+    return render_template('rutas.html', rutas=rutas)

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Planificar ruta</h2>
+<form method="post" class="form">
+  <label>Pedido</label>
+  <select name="pedido">
+    <option value="">--Seleccione pedido--</option>
+    {% for p in pedidos %}
+      <option value="{{p.id}}">#{{p.id}} - {{p.nombre_comprador}} ({{p.estado}})</option>
+    {% endfor %}
+  </select>
+
+  <label>Transportista</label>
+  <select name="transportista">
+    <option value="">--Seleccione transportista--</option>
+    {% for t in transportistas %}
+      <option value="{{t.id}}">{{t.nombre}} {% if not t.disponible %}(No disponible){% endif %}</option>
+    {% endfor %}
+  </select>
+
+  <label>Origen</label>
+  <input name="origen" placeholder="Dirección origen"/>
+
+  <label>Destino</label>
+  <input name="destino" placeholder="Dirección destino"/>
+
+  <label>Fecha</label>
+  <input type="date" name="fecha" required/>
+
+  <button type="submit">Generar ruta</button>
+</form>
+{% endblock %}
