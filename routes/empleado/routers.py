@@ -21,6 +21,7 @@ def dashboard():
 
 
 @empleado.route("/actualizacion_datos", methods=["GET", "POST"])
+@login_required
 def actualizacion_datos():
     usuario = current_user
     notificaciones = Notificaciones.query.filter_by(
@@ -71,6 +72,7 @@ def actualizacion_datos():
 
 
 @empleado.route("/calendario/pedidos/<fecha>")
+@login_required
 def pedidos_por_dia(fecha):
     try:
         pedidos = (
@@ -97,6 +99,7 @@ def pedidos_por_dia(fecha):
 
 
 @empleado.route('/programaciones/<fecha>')
+@login_required
 def obtener_programaciones(fecha):
     try:
         resultados = Calendario.query.filter_by(
@@ -139,6 +142,7 @@ def programaciones_todas():
 
 
 @empleado.route("/empleado/programaciones_globales")
+@login_required
 def programaciones_globales():
     registros = Calendario.query.all()
     data = [
@@ -156,6 +160,7 @@ def programaciones_globales():
 
 
 @empleado.route("/empleado/programaciones_todas")
+@login_required
 def obtener_programaciones_todas():
     """Devuelve todos los eventos visibles para el usuario actual."""
     try:
