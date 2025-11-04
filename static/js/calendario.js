@@ -7,9 +7,11 @@ const mesTitulo = document.getElementById("titulo-mes");
 const btnHoy = document.getElementById("btn-hoy");
 const btnMes = document.getElementById("btn-mes");
 const btnAño = document.getElementById("btn-año");
+const selectorTipo = document.getElementById("selectorTipo"); // 👈 nuevo selector de tipo
 
 let fechaActual = new Date();
 let programaciones = []; // Guardará todos los eventos obtenidos desde Flask
+let tipoSeleccionado = "todos"; // Estado actual del filtro
 
 // =============================================================
 // 🔹 Cargar programaciones desde el servidor
@@ -56,8 +58,15 @@ function renderCalendario(fecha) {
     celda.dataset.fecha = fechaDia.toISOString().split("T")[0];
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    // 🔸 Buscar programaciones de ese día
-    const eventosDelDia = programaciones.filter(ev => ev.Fecha === celda.dataset.fecha);
+    // 🔹 Filtrar eventos por fecha y tipo seleccionado
+    let eventosDelDia = programaciones.filter(ev => ev.Fecha === celda.dataset.fecha);
+    if (tipoSeleccionado !== "todos") {
+      eventosDelDia = eventosDelDia.filter(ev =>
+        tipoSeleccionado === "transportista"
+          ? ev.Tipo === "Entregas"
+          : ev.Tipo === "Instalaciones"
+      );
+    }
 
     // 🔹 Etiquetas de colores según el tipo
     if (eventosDelDia.length > 0) {
@@ -74,7 +83,14 @@ function renderCalendario(fecha) {
         return `<span class="badge ${color} me-1">${t}</span>`;
       }).join("");
 
-      celda.innerHTML += `<div class="event-tags mt-1">${etiquetas}</div>`;
+      // Mostrar nombre del responsable si lo hay
+      const nombres = eventosDelDia.map(ev => ev.Empleado || "").filter(Boolean);
+      const listaNombres = nombres.length > 0 ? `<small>${nombres.join(", ")}</small>` : "";
+
+      celda.innerHTML += `
+        <div class="event-tags mt-1">${etiquetas}</div>
+        ${listaNombres}
+      `;
     }
 
     // 🔸 Resaltar día actual
@@ -133,7 +149,7 @@ btnMes.addEventListener("click", () => {
 });
 
 // =============================================================
-// 🔹 Botón "Año" → Cambiar año manteniendo el mes actual
+// 🔹 Botón "Año"
 // =============================================================
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
@@ -159,7 +175,14 @@ grid.addEventListener("click", (e) => {
   document.getElementById("modalPedidosDiaLabel").textContent =
     "Programaciones del " + new Date(fechaSeleccionada).toLocaleDateString("es-ES");
 
-  const eventos = programaciones.filter(ev => ev.Fecha === fechaSeleccionada);
+  let eventos = programaciones.filter(ev => ev.Fecha === fechaSeleccionada);
+  if (tipoSeleccionado !== "todos") {
+    eventos = eventos.filter(ev =>
+      tipoSeleccionado === "transportistas"
+        ? ev.Tipo === "Entregas"
+        : ev.Tipo === "Instalaciones"
+    );
+  }
 
   if (eventos.length === 0) {
     contenido.innerHTML = `
@@ -182,6 +205,7 @@ grid.addEventListener("click", (e) => {
             <div class="card mb-2 border-success">
               <div class="card-body text-start">
                 <h6 class="card-title mb-1 fw-bold">#${ev.ID_Pedido || ev.ID_Calendario}</h6>
+                <p class="mb-0"><strong>Empleado:</strong> ${ev.Empleado || "N/A"}</p>
                 <p class="mb-0"><strong>Ubicación:</strong> ${ev.Ubicacion || "Sin especificar"}</p>
                 <p class="mb-0"><strong>Hora:</strong> ${ev.Hora || "No definida"}</p>
               </div>
@@ -193,6 +217,16 @@ grid.addEventListener("click", (e) => {
 
   modal.show();
 });
+
+// =============================================================
+// 🔹 Cambio en el selector de tipo
+// =============================================================
+if (selectorTipo) {
+  selectorTipo.addEventListener("change", (e) => {
+    tipoSeleccionado = e.target.value;
+    renderCalendario(fechaActual);
+  });
+}
 
 // =============================================================
 // 🔹 Inicializar
