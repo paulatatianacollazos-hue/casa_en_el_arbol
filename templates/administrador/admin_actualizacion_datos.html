@@ -675,42 +675,37 @@
 <!-- Modal para asignar empleado -->
 <!-- Modal para asignar empleado -->
 <!-- Modal para asignar empleado -->
-<div id="modal-empleado" class="modal">
+<div id="modal-asignar" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="cerrarModalEmpleado()">&times;</span>
-    <h5>Asignar empleado y programar envío</h5>
-    <div id="mensajesAsignacion"></div>
+    <span class="close" onclick="cerrarModalAsignar()">&times;</span>
+    <h5>Asignar empleado a pedidos</h5>
 
-    <!-- Único formulario -->
-    <form id="formAsignacion">
-  <input type="hidden" name="pedidosSeleccionados" id="pedidosSeleccionados">
-  <select name="empleado_id" id="empleado_id" required>
-    <option value="">-- Selecciona empleado --</option>
-    {% for emp in empleados %}
-      <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }}</option>
-    {% endfor %}
-  </select>
+    <form id="formAsignarEmpleado">
+      <label for="empleado_id">Empleado:</label>
+      <select id="empleado_id" required>
+        <option value="">-- Selecciona un empleado --</option>
+        {% for emp in empleados %}
+          {% if emp.Rol in ['transportista', 'instalador'] %}
+            <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
+          {% endif %}
+        {% endfor %}
+      </select>
 
-  <input type="date" name="fecha" id="fecha" required>
-  <input type="time" name="hora" id="hora" required>
+      <label for="fecha">Fecha:</label>
+      <input type="date" id="fecha" required>
 
-  <button id="btnEnviarAsignacion" type="button">Asignar</button>
+      <label for="hora">Hora:</label>
+      <input type="time" id="hora" required>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+      <input type="hidden" id="pedidosSeleccionados">
+      <button type="button" id="btnConfirmarModal">Asignar</button>
+    </form>
 
-</form>
-
+    <div id="mensaje-error" style="color:red; margin-top:10px;"></div>
   </div>
 </div>
-</div>
+
+
 
 <div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-labelledby="modalPedidosDiaLabel" aria-hidden="true" >
   <div class="modal-dialog modal-dialog-centered modal-lg" style="width: 1000px;">
@@ -1137,33 +1132,44 @@ document.addEventListener("DOMContentLoaded", function() {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const btnAsignarEmpleado = document.getElementById("btnAsignarEmpleado");
-  const asignacionControls = document.getElementById("asignacionControls");
-  const btnConfirmarAsignacion = document.getElementById("btnConfirmarAsignacion");
-  const selectEmpleado = document.getElementById("selectEmpleado");
+  const modal = document.getElementById("modal-asignar");
+  const cerrar = document.querySelector("#modal-asignar .close");
+  const btnConfirmarModal = document.getElementById("btnConfirmarModal");
 
   btnAsignarEmpleado.addEventListener("click", () => {
-    btnAsignarEmpleado.style.display = "none";
-    asignacionControls.style.display = "block";
-
-    // Resaltar checkboxes habilitados
-    document.querySelectorAll(".seleccion-pedido").forEach(cb => {
-      cb.style.display = "inline-block"; // mostrar checkbox
-      cb.parentElement.style.border = "1px solid #e6e6e6";
-    });
-  });
-
-  btnConfirmarAsignacion.addEventListener("click", async () => {
-    const empleadoId = selectEmpleado.value;
-    const pedidosSeleccionados = Array.from(document.querySelectorAll(".seleccion-pedido:checked"))
+    const seleccionados = Array.from(document.querySelectorAll(".seleccion-pedido:checked"))
       .map(cb => cb.value);
 
-    if (!empleadoId) {
-      alert("Selecciona un empleado");
+    if (seleccionados.length === 0) {
+      alert("Selecciona al menos un pedido");
       return;
     }
 
-    if (pedidosSeleccionados.length === 0) {
-      alert("Selecciona al menos un pedido");
+    document.getElementById("pedidosSeleccionados").value = seleccionados.join(",");
+    modal.style.display = "block";
+  });
+
+  cerrar.addEventListener("click", () => {
+    modal.style.display = "none";
+    document.getElementById("mensaje-error").innerText = "";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target == modal) {
+      modal.style.display = "none";
+      document.getElementById("mensaje-error").innerText = "";
+    }
+  });
+
+  // Confirmar asignación
+  btnConfirmarModal.addEventListener("click", async () => {
+    const empleadoId = document.getElementById("empleado_id").value;
+    const fecha = document.getElementById("fecha").value;
+    const hora = document.getElementById("hora").value;
+    const pedidos = document.getElementById("pedidosSeleccionados").value.split(",");
+
+    if (!empleadoId || !fecha || !hora) {
+      document.getElementById("mensaje-error").innerText = "Todos los campos son obligatorios.";
       return;
     }
 
@@ -1174,23 +1180,20 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json",
           "X-CSRFToken": document.querySelector('input[name="csrf_token"]').value
         },
-        body: JSON.stringify({
-          empleadoId: empleadoId,
-          pedidos: pedidosSeleccionados
-        })
+        body: JSON.stringify({ empleadoId, fecha, hora, pedidos })
       });
 
       const result = await response.json();
+
       if (result.success) {
         alert("✅ Pedidos asignados correctamente");
         window.location.reload();
       } else {
-        alert("❌ " + result.message);
+        document.getElementById("mensaje-error").innerText = result.message;
       }
-
-    } catch (error) {
-      console.error(error);
-      alert("❌ Error al asignar empleado");
+    } catch (err) {
+      console.error(err);
+      document.getElementById("mensaje-error").innerText = "Error de conexión";
     }
   });
 });
