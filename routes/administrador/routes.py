@@ -60,7 +60,7 @@ def gestion_roles():
         return redirect(url_for("admin.gestion_roles"))
 
     usuarios = Usuario.query.all()
-    roles_disponibles = ["admin", "cliente", "instalador", "transportista"]
+    roles_disponibles = ["admin", "cliente", "empleado",]
     return render_template("administrador/gestion_roles.html",
                            usuarios=usuarios, roles=roles_disponibles)
 

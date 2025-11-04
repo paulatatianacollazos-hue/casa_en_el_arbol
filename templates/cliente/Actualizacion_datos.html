@@ -416,8 +416,8 @@
   </div>
 
   {% for item in pedidos_con_detalles %}
-  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide pedido-container mb-5" data-bs-interval="false">
-    <div class="carousel-inner">
+  <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide pedido-container mb-5" data-bs-interval="false" >
+    <div class="carousel-inner" style="border: #000000; margin-bottom: 20px;">
           
       {% for grupo in item.detalles | batch(3, None) %}
       <div class="carousel-item {% if loop.first %}active{% endif %}">
