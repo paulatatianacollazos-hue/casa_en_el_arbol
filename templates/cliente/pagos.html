@@ -182,7 +182,7 @@
         if (result.success) {
           alert("✅ Pedido registrado correctamente.");
           localStorage.removeItem(getCartKey());
-          window.location.href = "/catalogo";
+          window.location.href = "/cliente/catalogo";
         } else {
           alert("❌ Error al registrar el pedido: " + (result.error || 'Desconocido'));
         }
