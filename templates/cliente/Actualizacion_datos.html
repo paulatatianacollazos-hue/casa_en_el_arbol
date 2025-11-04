@@ -319,7 +319,7 @@
         <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
         <a id="menu-direcciones"><i class="bi bi-geo-alt me-2"></i>Direcciones</a>
         <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>Pedidos</a>
-        <a><i class="bi bi-heart me-2"></i>Favoritos</a>
+        <a id="menu-favoritos"><i class="bi bi-heart me-2"></i>Favoritos</a>
         <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
     </div>
@@ -466,24 +466,28 @@
 </div> <!-- ✅ aquí sí se cierra correctamente -->
 {%endfor%}
 
-<div class="container my-4">
-  <div class="row g-3">
-    {% for producto in productos %}
-    <div class="col-md-3 col-sm-6">
-      <div class="card producto-card">
-        <a href="{{ url_for('detalle_producto', producto_id=producto.id) }}">
-          <img src="{{ url_for('static', filename=producto.Imagen) }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
-        </a>
-        <div class="card-body text-center">
-          <h6 class="card-title">{{ producto.NombreProducto }}</h6>
-          <p class="precio">${{ producto.PrecioUnidad }}</p>
-          <button class="btn-favorito" data-producto-id="{{ producto.id }}">
-            <i class="bi bi-heart text-danger"></i>
-          </button>
+    <div id="seccion-favoritos" class="card shadow-sm p-4 mt-4" style="display:none; ">
+      <div class="profile-header mb-4">
+        <h5 class="mb-0">Favoritos</h5>
+    <div class="container my-4">
+      <div class="row g-3">
+        {% for producto in productos %}
+        <div class="col-md-3 col-sm-6">
+          <div class="card producto-card">
+            <a href="{{ url_for('detalle_producto', producto_id=producto.id) }}">
+              <img src="{{ url_for('static', filename=producto.Imagen) }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
+            </a>
+            <div class="card-body text-center">
+              <h6 class="card-title">{{ producto.NombreProducto }}</h6>
+              <p class="precio">${{ producto.PrecioUnidad }}</p>
+              <button class="btn-favorito" data-producto-id="{{ producto.id }}">
+                <i class="bi bi-heart text-danger"></i>
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
+        </div>
   </div>
 </div>
 
@@ -685,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const seccionPerfil = document.getElementById("seccion-perfil");
   const seccionDirecciones = document.getElementById("seccion-direcciones");
   const seccionPedidos = document.getElementById("seccion-pedidos");
+  const seccionFavoritos = document.getElementById("seccion-favoritos");
   const menuLinks = document.querySelectorAll(".sidebar a");
 
   function mostrarSeccion(activa) {
@@ -692,6 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
     seccionPerfil.style.display = "none";
     seccionDirecciones.style.display = "none";
     seccionPedidos.style.display = "none";
+    seccionFavoritos.style.display = "none";
 
     // Quita "active" de todos los enlaces
     menuLinks.forEach(link => link.classList.remove("active"));
@@ -706,6 +712,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (activa === "pedidos") {
       seccionPedidos.style.display = "block";
       document.getElementById("menu-pedidos").classList.add("active");
+    } else if (activa === "favoritos") {
+      seccionFavoritos.style.display = "block";
+      document.getElementById("menu-favoritos").classList.add("active");
 
       // 🧩 Asegurar que los carruseles se re-inicialicen correctamente
       setTimeout(() => {
@@ -731,6 +740,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("menu-perfil").addEventListener("click", () => mostrarSeccion("perfil"));
   document.getElementById("menu-direcciones").addEventListener("click", () => mostrarSeccion("direcciones"));
   document.getElementById("menu-pedidos").addEventListener("click", () => mostrarSeccion("pedidos"));
+  document.getElementById("menu-favoritos").addEventListener("click", () => mostrarSeccion("favoritos"));
 
   // Mostrar perfil por defecto
   mostrarSeccion("perfil");

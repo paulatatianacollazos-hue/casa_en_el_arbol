@@ -409,3 +409,24 @@ def api_posicion(pedido_id):
         return jsonify({'ok': False, 'message': 'No hay seguimiento'}), 404
     return jsonify({'ok': True, 'lat': seg.lat, 'lng': seg.lng, 'estado':
                     seg.estado, 'timestamp': seg.timestamp.isoformat()})
+
+
+@cliente.route('/favorito/<int:producto_id>', methods=['POST'])
+def toggle_favorito(producto_id):
+    user_id = str(current_user.id)
+
+    if 'favoritos' not in session:
+        session['favoritos'] = {}
+
+    favoritos = session['favoritos'].get(user_id, [])
+
+    if producto_id in favoritos:
+        favoritos.remove(producto_id)
+        status = 'removed'
+    else:
+        favoritos.append(producto_id)
+        status = 'added'
+
+    session['favoritos'][user_id] = favoritos
+    session.modified = True
+    return jsonify({"status": status, "favoritos": favoritos})
