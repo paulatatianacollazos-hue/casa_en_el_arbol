@@ -3,6 +3,7 @@ from flask import jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import Usuario, Calendario, Notificaciones
+from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.models import db
 
@@ -16,6 +17,7 @@ empleado = Blueprint(
 
 
 @empleado.route('/dashboard')
+@login_required
 def dashboard():
     return render_template('empleado/dashboard.html')
 
