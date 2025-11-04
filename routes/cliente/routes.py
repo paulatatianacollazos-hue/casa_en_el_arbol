@@ -8,7 +8,7 @@ from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id
-from basedatos.models import db, Comentarios, Direccion
+from basedatos.models import db, Comentarios, Direccion, Favorito
 from basedatos.models import Pedido, Seguimiento
 import base64
 import os
@@ -152,7 +152,8 @@ def actualizacion_datos():
 
     # Traer direcciones y notificaciones
     direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
-    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(
+    notificaciones = Notificaciones.query.filter_by(
+        ID_Usuario=user_id).order_by(
         Notificaciones.Fecha.desc()
     ).all()
 
@@ -160,7 +161,8 @@ def actualizacion_datos():
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
 
     # 🔹 Traer productos favoritos
-    productos = Producto.query.join(Favorito, Producto.id == Favorito.ID_Producto)\
+    productos = Producto.query.join(
+        Favorito, Producto.id == Favorito.ID_Producto)\
         .filter(Favorito.ID_Usuario == user_id).all()
 
     if request.method == "POST":
@@ -170,14 +172,16 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
+                  "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.", "danger")
+                flash("El correo ya está registrado por otro usuario.",
+                      "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -407,4 +411,5 @@ def ver_favoritos():
     # Traer los productos correspondientes de la base de datos
     productos = Producto.query.filter(Producto.id.in_(favoritos)).all()
 
-    return render_template("cliente/actualizacion_datos.html", productos=productos)
+    return render_template("cliente/actualizacion_datos.html",
+                           productos=productos)

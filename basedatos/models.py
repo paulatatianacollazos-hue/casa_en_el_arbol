@@ -283,3 +283,10 @@ class Seguimiento(db.Model):
     lng = db.Column(db.Float, nullable=True)
     estado = db.Column(db.String(100), default='en reparto')
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Favorito(db.Model):
+    __tablename__ = "favoritos"
+    id = db.Column(db.Integer, primary_key=True)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"))
+    ID_Producto = db.Column(db.Integer, db.ForeignKey("producto.id"))
