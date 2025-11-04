@@ -25,44 +25,6 @@ def dashboard():
     return render_template('cliente/dashboard.html', user_id=user_id)
 
 
-# ---------- FAVORITOS ----------
-@cliente.route("/favoritos")
-@login_required
-def ver_favoritos():
-    ids = [int(i) for i in session.get("favorites", []) if str(i).isdigit()]
-    productos = Producto.query.filter(Producto.ID_Producto.in_(ids)).all(
-        ) if ids else []
-    return render_template("cliente/favoritos.html", productos=productos)
-
-
-@cliente.route("/favoritos/add", methods=["POST"])
-@login_required
-def add_to_favorites():
-    data = request.get_json() or {}
-    try:
-        product_id = int(data.get("id"))
-    except (TypeError, ValueError):
-        return jsonify({"success": False, "message": "ID inválido"}), 400
-
-    session.setdefault("favorites", [])
-    if product_id not in session["favorites"]:
-        session["favorites"].append(product_id)
-    session.modified = True
-    return jsonify({"success": True, "fav_count": len(session["favorites"])})
-
-
-@cliente.route("/favoritos/remove/<int:product_id>", methods=["POST"])
-@login_required
-def remove_from_favorites(product_id):
-    favs = [int(i) for i in session.get("favorites", []) if str(i).isdigit()]
-    if product_id in favs:
-        favs.remove(product_id)
-        session["favorites"] = favs
-        session.modified = True
-        flash("Producto eliminado de favoritos", "success")
-    return redirect(url_for("cliente.ver_favoritos"))
-
-
 # ---------- INSTALACIONES ----------
 @cliente.route("/instalaciones", methods=["GET", "POST"])
 @login_required
@@ -411,6 +373,7 @@ def api_posicion(pedido_id):
                     seg.estado, 'timestamp': seg.timestamp.isoformat()})
 
 
+# ---------- FAVORITOS ----------
 @cliente.route('/favorito/<int:producto_id>', methods=['POST'])
 @login_required
 def favorito(producto_id):
