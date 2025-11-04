@@ -457,6 +457,7 @@
       </a>
       {% endif %}
     </div>
+    <li>Pedido #{{p.id}} - {{p.nombre_comprador}} - Estado: {{p.estado}} - <a href="{{ url_for('client.seguimiento', pedido_id=p.id) }}">Ver seguimiento</a></li>
   </div>
   {% else %}
   <p class="text-muted">No tienes pedidos registrados.</p>

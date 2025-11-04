@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -258,3 +258,28 @@ class Comentarios(db.Model):
                                                     ondelete="CASCADE"))
     texto = db.Column(db.Text)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+
+class Transportista(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(120), nullable=False)
+    disponible = db.Column(db.Boolean, default=True)
+
+
+class RutaPlanificada(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pedido_id = db.Column(db.Integer, db.ForeignKey('pedido.id'), nullable=False)
+    transportista_id = db.Column(db.Integer, db.ForeignKey('transportista.id'), nullable=False)
+    origen = db.Column(db.String(200))
+    destino = db.Column(db.String(200))
+    fecha = db.Column(db.Date, nullable=False)
+    creada_en = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Seguimiento(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pedido_id = db.Column(db.Integer, db.ForeignKey('pedido.id'), nullable=False)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
+    estado = db.Column(db.String(100), default='en reparto')
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
