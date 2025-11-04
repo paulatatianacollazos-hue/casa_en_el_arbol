@@ -1,5 +1,5 @@
 // =============================================================
-// 📅 CALENDARIO DINÁMICO CON SELECCIÓN DE USUARIO
+// 📅 CALENDARIO DINÁMICO DE EMPLEADOS
 // =============================================================
 
 const grid = document.getElementById("calendar-grid");
@@ -12,25 +12,25 @@ const selectorUsuario = document.getElementById("selectorUsuario");
 let fechaActual = new Date();
 let programaciones = [];
 let usuarios = [];
-let usuarioSeleccionado = "mi"; // por defecto "Mi calendario"
+let usuarioSeleccionado = "mi"; // valor por defecto = Mi calendario
 
 // =============================================================
-// 🔹 Cargar usuarios (transportistas e instaladores)
+// 🔹 Cargar empleados desde el backend (rol = empleado)
 // =============================================================
 async function cargarUsuarios() {
   try {
-    const resp = await fetch("/empleado/usuarios_calendario");
+    const resp = await fetch("/admin/empleado/usuarios_calendario");
     usuarios = await resp.json();
 
-    // Insertar opciones dinámicamente
+    // Agregar las opciones dinámicamente al selector
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
-      opt.textContent = `${u.nombre} (${u.rol})`;
+      opt.textContent = `${u.nombre}`;
       selectorUsuario.appendChild(opt);
     });
   } catch (err) {
-    console.error("❌ Error al cargar usuarios:", err);
+    console.error("❌ Error al cargar empleados:", err);
   }
 }
 
@@ -39,7 +39,7 @@ async function cargarUsuarios() {
 // =============================================================
 async function cargarProgramaciones() {
   try {
-    const resp = await fetch("/empleado/programaciones_todas");
+    const resp = await fetch("/empleado/programaciones_todas"); // tu ruta actual de programaciones
     programaciones = await resp.json();
     renderCalendario(fechaActual);
   } catch (err) {
@@ -64,7 +64,7 @@ function renderCalendario(fecha) {
     year: "numeric"
   });
 
-  // Celdas vacías al inicio
+  // 🕳️ Celdas vacías al inicio del mes
   for (let i = 0; i < primerDiaSemana; i++) {
     const celdaVacia = document.createElement("div");
     celdaVacia.classList.add("day", "empty");
@@ -77,25 +77,27 @@ function renderCalendario(fecha) {
     eventosFiltrados = eventosFiltrados.filter(ev => ev.Empleado_ID == usuarioSeleccionado);
   }
 
-  // Días del mes
+  // 📅 Renderizar días del mes
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
-
     const celda = document.createElement("div");
+
     celda.classList.add("day");
     celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    // Filtrar eventos de ese día
+    // 🔸 Buscar programaciones de ese día
     const eventosDelDia = eventosFiltrados.filter(ev => ev.Fecha === fechaStr);
 
+    // 🎨 Asignar colores según tipo
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
       const colores = {
-        "Entregas": "bg-success",
-        "Instalaciones": "bg-primary",
-        "Reunion": "bg-warning",
+        "Entregas": "bg-success",            // 🟩 Verde
+        "Instalaciones": "bg-primary",       // 🟦 Azul
+        "Reuniones internas": "bg-danger",   // 🔴 Rojo
+        "Eventos": "bg-danger"               // 🔴 Rojo
       };
 
       const etiquetas = tipos.map(t => {
@@ -112,7 +114,7 @@ function renderCalendario(fecha) {
       `;
     }
 
-    // Día actual
+    // 🟢 Resaltar día actual
     const hoy = new Date();
     if (
       fechaDia.getDate() === hoy.getDate() &&
@@ -127,19 +129,23 @@ function renderCalendario(fecha) {
 }
 
 // =============================================================
-// 🔹 Eventos de control
+// 🔹 Botón "Hoy"
 // =============================================================
-
-selectorUsuario.addEventListener("change", (e) => {
-  usuarioSeleccionado = e.target.value;
-  renderCalendario(fechaActual);
-});
-
 btnHoy.addEventListener("click", () => {
   fechaActual = new Date();
   renderCalendario(fechaActual);
+
+  const hoyCelda = document.querySelector(".day.hoy");
+  if (hoyCelda) {
+    hoyCelda.scrollIntoView({ behavior: "smooth", block: "center" });
+    hoyCelda.classList.add("highlight-today");
+    setTimeout(() => hoyCelda.classList.remove("highlight-today"), 2000);
+  }
 });
 
+// =============================================================
+// 🔹 Botón "Mes" → selector de mes
+// =============================================================
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
   selectorMes.type = "month";
@@ -162,31 +168,75 @@ btnMes.addEventListener("click", () => {
   selectorMes.click();
 });
 
+// =============================================================
+// 🔹 Botón "Año" → cambiar año manteniendo mes
+// =============================================================
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
   const nuevoAño = prompt("Ingrese un año:", añoActual);
+
   if (nuevoAño && !isNaN(nuevoAño)) {
     fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
     renderCalendario(fechaActual);
   }
 });
 
-async function cargarUsuarios() {
-  try {
-    const resp = await fetch("/empleado/usuarios_calendario");
-    usuarios = await resp.json();
+// =============================================================
+// 🔹 Selección de usuario
+// =============================================================
+selectorUsuario.addEventListener("change", (e) => {
+  usuarioSeleccionado = e.target.value;
+  renderCalendario(fechaActual);
+});
 
-    usuarios.forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u.id;
-      opt.textContent = `${u.nombre} (${u.rol})`;
-      selectorUsuario.appendChild(opt);
+// =============================================================
+// 🔹 Clic en un día → abrir modal con los eventos
+// =============================================================
+grid.addEventListener("click", (e) => {
+  const celda = e.target.closest(".day");
+  if (!celda || celda.classList.contains("empty")) return;
+
+  const fechaSeleccionada = celda.dataset.fecha;
+  const modal = new bootstrap.Modal(document.getElementById("modalPedidosDia"));
+  const contenido = document.getElementById("contenidoPedidosDia");
+  document.getElementById("modalPedidosDiaLabel").textContent =
+    "Programaciones del " + new Date(fechaSeleccionada).toLocaleDateString("es-ES");
+
+  const eventos = programaciones.filter(ev => ev.Fecha === fechaSeleccionada);
+
+  if (eventos.length === 0) {
+    contenido.innerHTML = `
+      <div class="d-flex flex-column align-items-center justify-content-center py-4">
+        <i class="bi bi-calendar-x text-secondary" style="font-size: 3rem;"></i>
+        <p class="mt-3 mb-0 fs-5 text-muted">No hay eventos programados.</p>
+      </div>`;
+  } else {
+    const grupos = {};
+    eventos.forEach(ev => {
+      if (!grupos[ev.Tipo]) grupos[ev.Tipo] = [];
+      grupos[ev.Tipo].push(ev);
     });
-  } catch (err) {
-    console.error("❌ Error al cargar usuarios:", err);
-  }
-}
 
+    contenido.innerHTML = Object.entries(grupos)
+      .map(([tipo, lista]) => `
+        <div class="mb-4">
+          <h6 class="fw-bold text-success text-uppercase border-bottom pb-1 mb-2">${tipo}</h6>
+          ${lista.map(ev => `
+            <div class="card mb-2 border-success">
+              <div class="card-body text-start">
+                <h6 class="card-title mb-1 fw-bold">#${ev.ID_Pedido || ev.ID_Calendario}</h6>
+                <p class="mb-0"><strong>Ubicación:</strong> ${ev.Ubicacion || "Sin especificar"}</p>
+                <p class="mb-0"><strong>Hora:</strong> ${ev.Hora || "No definida"}</p>
+                <p class="mb-0"><strong>Empleado:</strong> ${ev.Empleado || "Sin asignar"}</p>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `).join("");
+  }
+
+  modal.show();
+});
 
 // =============================================================
 // 🔹 Inicialización
