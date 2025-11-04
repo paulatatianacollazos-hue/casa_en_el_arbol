@@ -128,6 +128,60 @@
   .producto-card { width: 90%; }
 }
 
+.estado{
+            color: black;
+            background-color: #fff;
+            width: 80%;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+
+        .estado input{
+            width: 50%;
+            text-align: left;
+            margin-right: 20px;
+            border-radius: 20px;
+        }
+
+        select{
+            height: 40px;
+            width: 150px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+
+         
+        .estado h2{
+            color: #628D46;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            margin-left: 30%;
+        }
+
+        .estado h1{
+            padding: 20px;
+        }
+
+        textarea{
+            width: 80%;
+            border-radius: 20px;
+        }
+
+        .estado button{
+            background-color: #7db243;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10pxn 30px;
+            width: 250px;
+            height: 50px;
+        }
+
+        .estado button:hover{
+            background-color: transparent;
+            color: #7db243;
+            border: 1px solid #7db243;
+        }
 
   </style>
 </head>
@@ -380,44 +434,56 @@
 
 
       <!-- CALENDARIO -->
-<div id="seccion-direcciones" class="card shadow-sm p-4" style="display:none;">
-  <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">calendario</h5>
-  </div>
-  <div class="d-flex align-items-center gap-2" style="display: none;">
-    <label for="selectorUsuario" class="fw-bold mb-0" style="display: none;">Ver calendario de:</label>
-    <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;" style="display: none;">
-      <option value="mi" style="display: none;">🗓️ Mi calendario</option>
-      <!-- Las demás opciones se cargarán dinámicamente desde Flask -->
-    </select>
-  </div>
+      <div id="seccion-direcciones" class="card shadow-sm p-4" style="display:none;">
+        <div class="profile-header mb-4 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">calendario</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2" style="display: none;">
+          <label for="selectorUsuario" class="fw-bold mb-0" style="display: none;">Ver calendario de:</label>
+          <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;" style="display: none;">
+            <option value="mi" style="display: none;">🗓️ Mi calendario</option>
+            <!-- Las demás opciones se cargarán dinámicamente desde Flask -->
+          </select>
+        </div>
 
-  <div class="d-flex justify-content-center mb-3 gap-2">
-  <button id="btn-hoy" class="btn btn-success botones">Hoy</button>
-  <button id="btn-mes" class="btn btn-primary botones">Mes</button>
-  <button id="btn-año" class="btn btn-warning botones">Año</button>
-</div>
-<h4 id="titulo-mes" class="text-center text-capitalize"></h4>
-<div id="calendar-grid" class="calendar-grid"></div>
-    <!-- Se genera dinámicamente con JS -->
-  </div>
-</div>
-
-<div class="info-panel">
-  <button class="btn btn-success mb-3" id="btn-subir">Subir tarea</button>
-
-  
-</div>
+        <div class="d-flex justify-content-center mb-3 gap-2">
+        <button id="btn-hoy" class="btn btn-success botones">Hoy</button>
+        <button id="btn-mes" class="btn btn-primary botones">Mes</button>
+        <button id="btn-año" class="btn btn-warning botones">Año</button>
+      </div>
+      <h4 id="titulo-mes" class="text-center text-capitalize"></h4>
+      <div id="calendar-grid" class="calendar-grid"></div>
+          <!-- Se genera dinámicamente con JS -->
+        </div>
 
 
-<!-- ✅ MIS PEDIDOS -->
-<div id="seccion-pedidos" class="card shadow-sm p-4 mt-4" style="display:none; ">
-  <div class="profile-header mb-4">
-    <h5 class="mb-0"></h5>
-  </div>
 
-  
-</div>
+
+      <!-- ✅ MIS PEDIDOS -->
+      <div id="seccion-pedidos" class="card shadow-sm p-4 mt-4" style="display:none; ">
+        <div class="profile-header mb-4">
+          <h5 class="mb-0">Actualizar estado de pedidos</h5>
+        </div>
+        <div class="estado">
+        <form method="POST" action="{{ url_for('admin.actualizar_pedido_route') }}">
+          <div class="content">
+              <input type="number" name="pedido_id" required placeholder="ID del pedido:" style="color:black;">
+
+              <label for="estado" style="color:#628D46;">Nuevo estado:</label>
+              <select name="estado" required>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en proseso">en proceso</option>
+                  <option value="en reparto">en reparto</option>
+                  <option value="entregado">entregado</option>
+              </select><br><br>
+
+              <textarea name="comentario" rows="3" placeholder="Comentario:"></textarea><br><br>
+
+              <button type="submit">Actualizar Pedido</button>
+          </div>
+      </form>
+      </div>
+      </div>
 
 
 

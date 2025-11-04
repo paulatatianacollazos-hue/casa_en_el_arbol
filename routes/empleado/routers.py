@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, session
-from flask import jsonify
+from flask import jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import Usuario, Calendario, Notificaciones
@@ -197,3 +197,13 @@ def obtener_programaciones_todas():
         print("❌ Error al obtener programaciones:", e)
         return jsonify({
             "error": "No se pudieron obtener las programaciones"}), 500
+
+
+@empleado.route("/estado", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def estado_pedido():
+    if request.method == "POST":
+        pedido_id = request.form["pedido_id"]
+        return redirect(url_for("admin.control_pedidos", pedido_id=pedido_id))
+    return render_template("administrador/estado.html")
