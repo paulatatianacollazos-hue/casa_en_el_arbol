@@ -685,36 +685,6 @@
 <!-- Modal para asignar empleado -->
 <!-- Modal para asignar empleado -->
 <!-- Modal para asignar empleado -->
-<div id="modal-asignar" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="cerrarModalAsignar()">&times;</span>
-    <h5>Asignar empleado a pedidos</h5>
-
-    <form id="formAsignarEmpleado">
-      <label for="empleado_id">Empleado:</label>
-      <select id="empleado_id" required>
-        <option value="">-- Selecciona un empleado --</option>
-          {% for emp in empleados %}
-              {% if emp.Rol in ['empleado'] %}
-                  <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
-              {% endif %}
-          {% endfor %}
-      </select>
-
-      <label for="fecha">Fecha:</label>
-      <input type="date" id="fecha" required>
-
-      <label for="hora">Hora:</label>
-      <input type="time" id="hora" required>
-
-      <input type="hidden" id="pedidosSeleccionados">
-      <button type="button" id="btnConfirmarModal">Asignar</button>
-    </form>
-
-    <div id="mensaje-error" style="color:red; margin-top:10px;"></div>
-  </div>
-</div>
-
 
 
 <div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-labelledby="modalPedidosDiaLabel" aria-hidden="true" >
@@ -786,6 +756,41 @@
   </div>
 </div>
 
+<div id="modal-asignar" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalEmpleado()">&times;</span>
+    <h5>Asignar empleado y programar envío</h5>
+    <div id="mensajesAsignacion"></div>
+
+    <!-- Único formulario -->
+    <form id="formAsignacion">
+  <input type="hidden" name="pedidosSeleccionados" id="pedidosSeleccionados">
+  <select name="empleado_id" id="empleado_id" required>
+    <option value="">-- Selecciona empleado --</option>
+    {% for emp in empleados %}
+      <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }}</option>
+    {% endfor %}
+  </select>
+
+  <input type="date" name="fecha" id="fecha" required>
+  <input type="time" name="hora" id="hora" required>
+
+  <button id="btnEnviarAsignacion" type="button">Asignar</button>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+</form>
+
+  </div>
+</div>
 
 
 <div class="carousel-container">
