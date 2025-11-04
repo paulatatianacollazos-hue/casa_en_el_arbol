@@ -18,6 +18,7 @@ empleado = Blueprint(
 
 @empleado.route('/dashboard')
 @login_required
+@role_required('empleado')
 def dashboard():
     return render_template('empleado/dashboard.html')
 
