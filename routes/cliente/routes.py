@@ -8,7 +8,7 @@ from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id
-from basedatos.models import db, Comentarios, Direccion, Favorito
+from basedatos.models import db, Comentarios, Direccion
 from basedatos.models import Pedido, Seguimiento
 import base64
 import os
@@ -145,25 +145,18 @@ def escribir_resena():   # <- sin ñ
 # ---------- PERFIL Y DIRECCIONES ----------
 @cliente.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
-@role_required("cliente")
+@role_required("cliente", "admin")
 def actualizacion_datos():
+
     usuario = current_user
     user_id = usuario.ID_Usuario
-
-    # Traer direcciones y notificaciones
-    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    direcciones = Direccion.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario).all()
     notificaciones = Notificaciones.query.filter_by(
-        ID_Usuario=user_id).order_by(
-        Notificaciones.Fecha.desc()
-    ).all()
+        ID_Usuario=usuario.ID_Usuario).order_by(
+            Notificaciones.Fecha.desc()).all()
 
-    # Traer pedidos
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
-
-    # 🔹 Traer productos favoritos
-    productos = Producto.query.join(
-        Favorito, Producto.id == Favorito.ID_Producto)\
-        .filter(Favorito.ID_Usuario == user_id).all()
 
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
@@ -190,9 +183,10 @@ def actualizacion_datos():
                     usuario.Contraseña = generate_password_hash(password)
                 db.session.commit()
                 crear_notificacion(
-                    user_id=user_id,
+                    user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="Tus datos personales se han actualizado correctamente."
+                    mensaje="""Tus datos personales se han actualizado
+                    correctamente."""
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
@@ -201,8 +195,7 @@ def actualizacion_datos():
         usuario=usuario,
         direcciones=direcciones,
         notificaciones=notificaciones,
-        pedidos_con_detalles=pedidos_con_detalles,
-        productos=productos  # ⚡ Pasamos los favoritos al template
+        pedidos_con_detalles=pedidos_con_detalles
     )
 
 
@@ -384,36 +377,21 @@ def api_posicion(pedido_id):
 @cliente.route('/favorito/<int:producto_id>', methods=['POST'])
 @login_required
 def favorito(producto_id):
-    user_id = current_user.ID_Usuario
-    producto = Producto.query.get_or_404(producto_id)
+    favoritos = session.get('favoritos', {})
 
-    favorito_existente = Favorito.query.filter_by(
-        ID_Usuario=user_id,
-        ID_Producto=producto_id
-    ).first()
+    user_id_str = str(current_user.id)
+    user_favs = favoritos.get(user_id_str, [])
 
-    if favorito_existente:
-        # Quitar de favoritos
-        db.session.delete(favorito_existente)
-        db.session.commit()
+    if producto_id in user_favs:
+        user_favs.remove(producto_id)
         status = 'removed'
     else:
-        # Agregar a favoritos
-        nuevo_favorito = Favorito(ID_Usuario=user_id, ID_Producto=producto_id)
-        db.session.add(nuevo_favorito)
-        db.session.commit()
+        user_favs.append(producto_id)
         status = 'added'
 
-    # Actualizar sesión
-    favoritos_sesion = session.get('favoritos', {})
-    user_favs = set(favoritos_sesion.get(str(user_id), []))
-
-    if status == 'added':
-        user_favs.add(producto_id)
-    else:
-        user_favs.discard(producto_id)
-
-    favoritos_sesion[str(user_id)] = list(user_favs)
-    session['favoritos'] = favoritos_sesion
+    favoritos[user_id_str] = user_favs
+    session['favoritos'] = favoritos
 
     return jsonify({'status': status})
+
+
