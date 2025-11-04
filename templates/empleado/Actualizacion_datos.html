@@ -575,6 +575,20 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 {% endif %}
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if ("{{ current_user.Rol }}" === "empleado") {
+    const selector = document.getElementById("selectorUsuario");
+    const label = document.querySelector('label[for="selectorUsuario"]');
+    if (selector) {
+      selector.disabled = true;
+      selector.style.display = "none";
+    }
+    if (label) label.style.display = "none";
+  }
+});
+</script>
+
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="{{ url_for('static', filename='js/calendario.js') }}"></script>
