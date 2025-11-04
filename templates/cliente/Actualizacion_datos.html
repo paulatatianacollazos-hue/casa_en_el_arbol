@@ -189,7 +189,7 @@
             <li>
           <a class="dropdown-item" 
           {% if current_user.Rol == 'admin' %}
-            href="{{ url_for('admin.envios') }}"
+            href="{{ url_for('admin.actualizacion_datos') }}"
           {% else %}
             href="{{ url_for('cliente.resenas') }}"
           {% endif %}>

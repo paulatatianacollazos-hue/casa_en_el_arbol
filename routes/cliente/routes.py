@@ -400,6 +400,7 @@ def seguimiento(pedido_id):
         Seguimiento.timestamp.desc()).first()
     return render_template('seguimiento.html', pedido=pedido, seguimiento=seg)
 
+
 @cliente.route('/api/posicion/<int:pedido_id>')
 def api_posicion(pedido_id):
     seg = Seguimiento.query.filter_by(pedido_id=pedido_id).order_by(
