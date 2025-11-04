@@ -481,24 +481,37 @@ def obtener_usuarios_calendario():
 @login_required
 def crear_evento_calendario():
     """
-    Crea un nuevo evento o reunión global.
-    Si ya existe otro evento dentro de ±60 min en la misma fecha → no permite registrar.
+    Crea un nuevo evento o reunión.
+    Si el evento es 'Global', será visible para todos los empleados.
+    Si el evento es 'Personal', solo lo verá el usuario creador.
+    Evita registrar eventos que se solapen ±60 minutos en la misma fecha.
     """
     from datetime import datetime, timedelta
     data = request.get_json()
 
     try:
-        tipo = data.get("Tipo")
+        # ────────────────────────────────────────────────
+        # 📥 Datos recibidos desde el frontend
+        # ────────────────────────────────────────────────
+        tipo_evento = data.get("Tipo")           # Ej: "Evento", "Reunión interna"
+        visibilidad = data.get("Visibilidad")    # "Personal" o "Global"
         fecha = datetime.strptime(data.get("Fecha"), "%Y-%m-%d").date()
         hora = datetime.strptime(data.get("Hora"), "%H:%M").time()
         ubicacion = data.get("Ubicacion")
 
-        # Convertir a datetime para comparar intervalos
+        if not all([tipo_evento, visibilidad, fecha, hora]):
+            return jsonify({
+                "ok": False,
+                "error": "Faltan datos obligatorios."
+            }), 400
+
+        # ────────────────────────────────────────────────
+        # ⏱️ Verificar conflictos en la misma fecha ±60 min
+        # ────────────────────────────────────────────────
         hora_dt = datetime.combine(fecha, hora)
         intervalo_inicio = hora_dt - timedelta(minutes=60)
         intervalo_fin = hora_dt + timedelta(minutes=60)
 
-        # Buscar eventos en la misma fecha dentro del intervalo
         conflicto = (
             db.session.query(Calendario)
             .filter(Calendario.Fecha == fecha)
@@ -513,22 +526,27 @@ def crear_evento_calendario():
                 "error": f"Ya existe un evento cerca de esa hora ({conflicto.Tipo} a las {conflicto.Hora.strftime('%H:%M')})."
             }), 400
 
-        # Crear evento global (visible para todos)
+        # ────────────────────────────────────────────────
+        # 🗓️ Crear nuevo evento
+        # ────────────────────────────────────────────────
         nuevo_evento = Calendario(
             Fecha=fecha,
             Hora=hora,
             Ubicacion=ubicacion,
-            ID_Usuario=current_user.ID_Usuario,  # quien lo crea
-            Tipo=tipo,
+            ID_Usuario=current_user.ID_Usuario,  # usuario creador
+            Tipo=visibilidad,                    # 'Personal' o 'Global'
             ID_Pedido=None
         )
 
         db.session.add(nuevo_evento)
         db.session.commit()
 
+        # ────────────────────────────────────────────────
+        # ✅ Respuesta
+        # ────────────────────────────────────────────────
         return jsonify({
             "ok": True,
-            "mensaje": "Evento creado exitosamente."
+            "mensaje": f"{tipo_evento} creado exitosamente como '{visibilidad}'."
         })
 
     except Exception as e:

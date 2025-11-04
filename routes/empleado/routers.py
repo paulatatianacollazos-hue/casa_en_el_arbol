@@ -165,3 +165,40 @@ def programaciones_globales():
         for c in registros
     ]
     return jsonify(data)
+
+
+@empleado.route("/empleado/programaciones_todas")
+@login_required
+def obtener_programaciones_todas():
+    """Devuelve todos los eventos visibles para el usuario actual."""
+    try:
+        eventos = (
+            db.session.query(Calendario)
+            .filter(
+                (Calendario.Tipo == "Global") |
+                (Calendario.ID_Usuario == current_user.ID_Usuario)
+            )
+            .all()
+        )
+
+        resultado = [
+            {
+                "ID_Calendario": ev.ID_Calendario,
+                "Fecha": ev.Fecha.strftime("%Y-%m-%d"),
+                "Hora": ev.Hora.strftime("%H:%M"),
+                "Ubicacion": ev.Ubicacion,
+                "Tipo": ev.Tipo,  # Personal o Global
+                "Empleado_ID": ev.ID_Usuario,
+                "Empleado": f"{ev.usuario.Nombre} {
+                    ev.usuario.Apellido}" if hasattr(ev, "usuario") else "N/A",
+                "ID_Pedido": ev.ID_Pedido
+            }
+            for ev in eventos
+        ]
+
+        return jsonify(resultado)
+
+    except Exception as e:
+        print("❌ Error al obtener programaciones:", e)
+        return jsonify({
+            "error": "No se pudieron obtener las programaciones"}), 500
