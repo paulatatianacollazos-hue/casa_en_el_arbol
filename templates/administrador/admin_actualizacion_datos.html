@@ -419,8 +419,20 @@
         <div class="profile-header mb-4">
           <h5 class="mb-0">REGISTRAR ÓRDEN DE ENVÍO</h5>
         </div>
+        <button id="btnAsignarEmpleado" class="btn btn-success">Asignar empleado</button>
+
+        <!-- Botones y X ocultos al inicio -->
+        <div id="asignacionControls" style="display:none; margin-top:10px;">
+          <button id="btnConfirmarAsignacion" class="btn btn-primary">Confirmar asignación</button>
+          <button id="btnCancelarAsignacion" class="btn btn-outline-secondary">X</button>
+        </div>
 {% for pedido in pedidos %}
   <div class="pedido-card">
+    <div class="pedido-card" data-id="{{ pedido.id }}" data-tipo="{{ pedido.tipo }}">
+    <input type="checkbox" class="seleccion-pedido" value="{{ pedido.id }}"
+          data-empleado="{{ pedido.ID_Empleado or '' }}" style="display:none;">
+    <!-- Info del pedido aquí -->
+  </div>
     <h3>Pedido #{{ pedido.id }}</h3>
     <p><strong>Cliente:</strong> {{ pedido.usuario }}</p>
     <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
@@ -634,6 +646,25 @@
     <!-- Modal -->
     <!-- Modal -->
 <!-- Modal -->
+<div class="modal fade" id="modalAsignarEmpleado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Asignar empleado a pedidos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <select id="selectEmpleado" class="form-select">
+          <option value="">-- Selecciona empleado --</option>
+          {% for emp in empleados %}
+            <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
+          {% endfor %}
+        </select>
+        <button id="btnGuardarAsignacion" class="btn btn-success mt-3">Guardar asignación</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -1100,6 +1131,83 @@ document.addEventListener("DOMContentLoaded", function() {
   // Asegurar que no quede sombreado
   document.body.style.backgroundColor = '';
 }
+
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const btnAsignarEmpleado = document.getElementById("btnAsignarEmpleado");
+  const asignacionControls = document.getElementById("asignacionControls");
+  const btnConfirmarAsignacion = document.getElementById("btnConfirmarAsignacion");
+  const btnCancelarAsignacion = document.getElementById("btnCancelarAsignacion");
+  const checkboxes = document.querySelectorAll(".seleccion-pedido");
+
+  // 1️⃣ Mostrar checkboxes y botones al presionar "Asignar empleado"
+  btnAsignarEmpleado.addEventListener("click", () => {
+    checkboxes.forEach(cb => {
+      if (!cb.dataset.empleado) cb.style.display = "inline-block"; // No permitir pedidos con empleado
+      cb.checked = false;
+    });
+    btnAsignarEmpleado.style.display = "none";
+    asignacionControls.style.display = "block";
+  });
+
+  // 2️⃣ Cancelar asignación (X)
+  btnCancelarAsignacion.addEventListener("click", () => {
+    checkboxes.forEach(cb => cb.style.display = "none");
+    btnAsignarEmpleado.style.display = "inline-block";
+    asignacionControls.style.display = "none";
+  });
+
+  // 3️⃣ Confirmar selección → abrir modal
+  btnConfirmarAsignacion.addEventListener("click", () => {
+    const seleccionados = Array.from(checkboxes)
+      .filter(cb => cb.checked && !cb.dataset.empleado)
+      .map(cb => cb.value);
+
+    if (seleccionados.length === 0) {
+      alert("Selecciona al menos un pedido válido.");
+      return;
+    }
+
+    // Guardar IDs seleccionados en hidden input
+    document.getElementById("pedidosSeleccionados").value = seleccionados.join(",");
+
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById("modalAsignarEmpleado"));
+    modal.show();
+  });
+
+  // 4️⃣ Guardar asignación
+  document.getElementById("btnGuardarAsignacion").addEventListener("click", async () => {
+    const empleadoId = document.getElementById("selectEmpleado").value;
+    if (!empleadoId) {
+      alert("Selecciona un empleado.");
+      return;
+    }
+
+    const pedidosSeleccionados = document.getElementById("pedidosSeleccionados").value.split(",");
+
+    // Enviar fetch al servidor para validar horarios y guardar asignación
+    try {
+      const response = await fetch("/admin/asignar_calendario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ empleadoId, pedidos: pedidosSeleccionados })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Asignación exitosa 🎉");
+        location.reload();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error al asignar empleado.");
+    }
+  });
+});
 
 </script>
 
