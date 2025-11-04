@@ -147,3 +147,4 @@ def programaciones_todas():
         }
         for e in eventos
     ])
+

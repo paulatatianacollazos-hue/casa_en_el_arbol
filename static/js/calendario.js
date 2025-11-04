@@ -171,6 +171,23 @@ btnAño.addEventListener("click", () => {
   }
 });
 
+async function cargarUsuarios() {
+  try {
+    const resp = await fetch("/empleado/usuarios_calendario");
+    usuarios = await resp.json();
+
+    usuarios.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = `${u.nombre} (${u.rol})`;
+      selectorUsuario.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("❌ Error al cargar usuarios:", err);
+  }
+}
+
+
 // =============================================================
 // 🔹 Inicialización
 // =============================================================

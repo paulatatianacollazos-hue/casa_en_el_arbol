@@ -450,3 +450,30 @@ def programaciones_todas():
         }
         for e in eventos
     ])
+
+
+@admin.route("/empleado/usuarios_calendario")
+def obtener_usuarios_calendario():
+    """Devuelve los usuarios que sean transportistas o instaladores."""
+    try:
+        empleados = (
+            db.session.query(Usuario)
+            .filter(Usuario.Rol.in_(["transportista", "instalador"]))
+            .filter(Usuario.Activo == True)
+            .all()
+        )
+
+        resultado = [
+            {
+                "id": emp.ID_Usuario,
+                "nombre": f"{emp.Nombre} {emp.Apellido or ''}".strip(),
+                "rol": emp.Rol.capitalize()
+            }
+            for emp in empleados
+        ]
+
+        return jsonify(resultado)
+
+    except Exception as e:
+        print("❌ Error al obtener usuarios calendario:", e)
+        return jsonify({"error": "No se pudieron obtener los empleados"}), 500
