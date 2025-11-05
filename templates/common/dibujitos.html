@@ -41,7 +41,7 @@
             position: absolute;
             height: 100%;
             width: 100%;
-            background-image: conic-gradient(from var(--angle), #ff4545, #00ff99, #006aff, #ff0095, #ff4545);
+            background-image: conic-gradient(from var(--angle), transparent 50%, #ff4545, #00ff99, #006aff, #ff0095, #ff4545);
             translate: -1.5% -1.5%;
             z-index: -1;
             padding: 5px;
@@ -49,6 +49,7 @@
             animation: 3s spin linear infinite;
         }
 
+        
         .caja1::before{
             filter: blur(1.5rem);
             opacity: 0.5;
