@@ -395,8 +395,15 @@ def favorito(producto_id):
     return jsonify({'status': status})
 
 
-@cliente.route('/favorito/<int:producto_id>', methods=['POST'])
+@cliente.route('/factura/<int:pedido_id>', methods=['GET'])
 @login_required
-def factura():
-    factura=recivo()
-    return render_template(factura=factura)
+def factura(pedido_id):
+    """
+    Devuelve los datos de la factura en formato JSON
+    """
+    try:
+        datos = recivo(pedido_id)  # función de basedatos.queries
+        return jsonify(datos)
+    except Exception as e:
+        print("💥 Error al obtener factura:", e)
+        return jsonify({"error": str(e)}), 500
