@@ -420,7 +420,7 @@
   <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide pedido-container mb-5" data-bs-interval="false" >
     <div class="carousel-inner" style="border: #000000; margin-bottom: 20px;">
           
-      {% for grupo in item.detalles | batch(3, None) %}
+      {% for grupo in item.detalles | batch(4, None) %}
       <div class="carousel-item {% if loop.first %}active{% endif %}">
         <div class="d-flex justify-content-center align-items-stretch">
           
