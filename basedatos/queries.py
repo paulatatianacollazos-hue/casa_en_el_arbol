@@ -899,7 +899,7 @@ def recivo():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
        SELECT
-            pe.ID_Pedido,
+            pe.,
             MAX(pe.FechaPedido) AS FechaPedido,
             MAX(pe.FechaEntrega) AS FechaEntrega,
             MAX(u.Nombre) AS cliente,
