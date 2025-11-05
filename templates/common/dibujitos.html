@@ -17,12 +17,57 @@
             width: 300px;
             height: 100px;
             border: solid 7px rgb(224, 101, 255);
-            border-color:  rgb(224, 101, 255) rgb(224, 101, 255) transparent transparent;
+            border-color:  rgb(224, 101, 255) transparent transparent transparent;
             border-radius: 50%/100px 100px 0px 0px;
         }
+
+        .caja1{
+            height: 300px;
+            width: 300px;
+            background-color: black;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        @property --angle{
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+            
+        }
+
+        .caja1::after, .caja1::before{
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-image: conic-gradient(from var(--angle), #ff4545, #00ff99, #006aff, #ff0095, #ff4545);
+            translate: -1.5% -1.5%;
+            z-index: -1;
+            padding: 5px;
+            border-radius: 20px;
+            animation: 3s spin linear infinite;
+        }
+
+        .caja1::before{
+            filter: blur(1.5rem);
+            opacity: 0.5;
+        }
+
+        @keyframes spin{
+            from{
+                --angle:0deg;
+            }
+            to{
+                --angle:360deg;
+            }
+        }
+
     </style>
 </head>
 <body>
     <div class="linea"></div>
+
+    <div class="caja1"></div>
 </body>
 </html>
