@@ -7,7 +7,7 @@ from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
-from basedatos.queries import get_productos, get_producto_by_id
+from basedatos.queries import get_productos, get_producto_by_id, recivo
 from basedatos.models import db, Comentarios, Direccion
 from basedatos.models import Pedido, Seguimiento
 import base64
@@ -395,3 +395,8 @@ def favorito(producto_id):
     return jsonify({'status': status})
 
 
+@cliente.route('/favorito/<int:producto_id>', methods=['POST'])
+@login_required
+def factura():
+    factura=recivo()
+    return render_template(factura=factura)
