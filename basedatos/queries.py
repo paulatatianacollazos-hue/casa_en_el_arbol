@@ -892,3 +892,32 @@ def eliminar_evento(id_calendario):
     except Exception as e:
         db.session.rollback()
         raise Exception(f"Error al eliminar el evento: {e}")
+
+
+def recivo():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+       SELECT
+            pe.ID_Pedido,
+            MAX(pe.FechaPedido) AS FechaPedido,
+            MAX(pe.FechaEntrega) AS FechaEntrega,
+            MAX(u.Nombre) AS cliente,
+            MAX(u.Direccion) AS direccion,
+            GROUP_CONCAT(CONCAT(pr.NombreProducto, ' x', dp.Cantidad)
+            SEPARATOR '<br>') AS productos,
+            MAX(pe.Estado) AS Estado,
+            MAX(emp.Nombre) AS empleado
+        FROM Pedido pe
+        JOIN Usuario u ON pe.ID_Usuario = u.ID_Usuario
+        LEFT JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+        LEFT JOIN Producto pr ON dp.ID_Producto = pr.ID_Producto
+        LEFT JOIN Usuario emp ON pe.ID_Empleado = emp.ID_Usuario
+        GROUP BY pe.ID_Pedido
+        ORDER BY pe.ID_Pedido DESC;
+
+    """)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return resultados
