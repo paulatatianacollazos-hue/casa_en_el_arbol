@@ -710,3 +710,22 @@ def factura_pdf(pedido_id):
     except Exception as e:
         print("❌ Error generando PDF:", e)
         return jsonify({"error": str(e)}), 500
+
+
+@admin.route("/admin/empleados_calendario")
+@login_required
+def empleados_calendario():
+    if current_user.Rol != "admin":
+        return jsonify({"error": "No autorizado"}), 403
+
+    empleados = (
+        db.session.query(Usuario.ID_Usuario, Usuario.Nombre, Usuario.Apellido)
+        .filter(Usuario.Rol == "empleado")
+        .all()
+    )
+
+    data = [
+        {"id": e.ID_Usuario, "nombre": f"{e.Nombre} {e.Apellido}"}
+        for e in empleados
+    ]
+    return jsonify(data)

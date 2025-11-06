@@ -1254,6 +1254,47 @@ document.addEventListener('click', async function(e) {
 });
 
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const selector = document.getElementById("selectorUsuario");
+
+  try {
+    const res = await fetch("/admin/empleados_calendario");
+    if (!res.ok) throw new Error("Error al cargar empleados");
+
+    const empleados = await res.json();
+
+    empleados.forEach(emp => {
+      const opt = document.createElement("option");
+      opt.value = emp.id;
+      opt.textContent = `👷 ${emp.nombre}`;
+      selector.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("❌ Error cargando empleados:", err);
+  }
+
+  // Evento para cambiar de usuario en el calendario
+  selector.addEventListener("change", async (e) => {
+    const id = e.target.value;
+
+    let url;
+    if (id === "mi") {
+      url = "/empleado/eventos"; // tu ruta actual
+    } else {
+      url = `/admin/eventos_empleado/${id}`; // nueva ruta para ver otro calendario
+    }
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      renderizarCalendario(data); // función que ya tienes en calendario.js
+    } catch (err) {
+      console.error("Error al cargar calendario:", err);
+    }
+  });
+});
+</script>
 
 
 </body>
