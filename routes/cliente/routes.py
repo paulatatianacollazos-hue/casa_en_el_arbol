@@ -416,66 +416,54 @@ def factura(pedido_id):
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
 @login_required
 def factura_pdf(pedido_id):
-    """
-    Genera la factura del pedido en formato PDF y la descarga.
-    """
     try:
         datos = recivo(pedido_id)
-        if not datos:
-            return "No hay datos para este pedido.", 404
+        usuario = current_user
 
+        # 🧾 Creamos PDF en memoria
         buffer = BytesIO()
         pdf = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
+        pdf.setTitle(f"Factura_{pedido_id}")
 
-        # Encabezado
-        pdf.setFont("Helvetica-Bold", 16)
-        pdf.drawString(200, 750, "Factura de Compra")
-        pdf.setFont("Helvetica", 12)
-        pdf.drawString(50, 720, f"Pedido N°: {pedido_id}")
-        pdf.drawString(50, 705, f"Cliente: {current_user.nombre}")  # si tienes el campo
-        pdf.drawString(50, 690, f"Fecha: {datos[0]['FechaPago']}")
+        # 🔹 Encabezado
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(200, 750, "CASA EN EL ÁRBOL - FACTURA")
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(50, 730, f"Cliente: {usuario.Nombre} {usuario.Apellido}")
+        pdf.drawString(50, 715, f"Correo: {usuario.Correo}")
+        pdf.drawString(50, 700, f"ID Pedido: {pedido_id}")
 
-        # Tabla de productos
-        y = 650
-        pdf.setFont("Helvetica-Bold", 12)
+        # 🔹 Cabecera de tabla
+        y = 670
+        pdf.setFont("Helvetica-Bold", 10)
         pdf.drawString(50, y, "Producto")
-        pdf.drawString(250, y, "Cant.")
-        pdf.drawString(310, y, "Precio Unit.")
-        pdf.drawString(410, y, "Subtotal")
+        pdf.drawString(200, y, "Cant.")
+        pdf.drawString(250, y, "Precio")
+        pdf.drawString(320, y, "Método")
+        pdf.drawString(400, y, "Monto")
+        pdf.drawString(470, y, "Fecha")
         y -= 20
 
-        total = 0
-        pdf.setFont("Helvetica", 11)
-        for item in datos:
-            nombre = item["NombreProducto"]
-            cantidad = item["cantidad"]
-            precio = item["PrecioUnidad"]
-            subtotal = cantidad * precio
-            total += subtotal
-
-            pdf.drawString(50, y, nombre[:30])
-            pdf.drawString(250, y, str(cantidad))
-            pdf.drawString(310, y, f"${precio:.2f}")
-            pdf.drawString(410, y, f"${subtotal:.2f}")
-            y -= 18
-
-            if y < 100:  # Salto de página
+        # 🔹 Contenido
+        pdf.setFont("Helvetica", 9)
+        for f in datos:
+            pdf.drawString(50, y, f["NombreProducto"])
+            pdf.drawString(200, y, str(f["cantidad"]))
+            pdf.drawString(250, y, f"${f['preciounidad']}")
+            pdf.drawString(320, y, f["MetodoPago"])
+            pdf.drawString(400, y, f"${f['Monto']}")
+            pdf.drawString(470, y, str(f["FechaPago"]))
+            y -= 15
+            if y < 100:  # Nueva página si se acaba el espacio
                 pdf.showPage()
                 y = 750
 
-        pdf.setFont("Helvetica-Bold", 12)
-        pdf.drawString(50, y - 20, f"Total: ${total:.2f}")
-        pdf.drawString(50, y - 40, f"Método de pago: {datos[0]['MetodoPago']}")
-        pdf.drawString(50, y - 60, f"ID Pago: {datos[0]['ID_Pagos']}")
-
-        pdf.showPage()
         pdf.save()
-
         buffer.seek(0)
-        response = make_response(buffer.read())
+
+        response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=factura_{pedido_id}.pdf'
+        response.headers['Content-Disposition'] = f'inline; filename=factura_{pedido_id}.pdf'
         return response
 
     except Exception as e:
