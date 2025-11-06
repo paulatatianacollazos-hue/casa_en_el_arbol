@@ -179,29 +179,21 @@ function abrirMiModalConFecha(fecha, usuarioId) {
   abrirMiModal();
 }
 
-function abrirMiModal() {
-  const modal = document.getElementById('modalPedidosDia');
-  modal.classList.add('show');
-  modal.style.display = 'block';
-  document.body.classList.add('modal-open');
+// ✅ Usar la API oficial de Bootstrap
+let modalPedidosInstance;
 
-  if (!document.getElementById('customBackdrop')) {
-    const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop fade show';
-    backdrop.id = 'customBackdrop';
-    document.body.appendChild(backdrop);
-  }
+function abrirMiModal() {
+  const modalEl = document.getElementById('modalPedidosDia');
+  modalPedidosInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modalPedidosInstance.show();
 }
 
 function cerrarMiModal() {
-  const modal = document.getElementById('modalPedidosDia');
-  modal.classList.remove('show');
-  modal.style.display = 'none';
-  document.body.classList.remove('modal-open');
-
-  const backdrop = document.getElementById('customBackdrop');
-  if (backdrop) backdrop.remove();
+  if (modalPedidosInstance) {
+    modalPedidosInstance.hide();
+  }
 }
+
 
 // =============================================================
 // 🔹 Botones de control
