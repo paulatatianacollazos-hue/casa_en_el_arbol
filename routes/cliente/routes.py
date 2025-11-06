@@ -13,6 +13,10 @@ from basedatos.models import Pedido, Seguimiento
 import base64
 import os
 from basedatos.queries import crear_pedido_y_pago
+from flask import make_response
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 from . import cliente
 reviews = []
@@ -406,4 +410,74 @@ def factura(pedido_id):
         return jsonify(datos)
     except Exception as e:
         print("💥 Error al obtener factura:", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
+@login_required
+def factura_pdf(pedido_id):
+    """
+    Genera la factura del pedido en formato PDF y la descarga.
+    """
+    try:
+        datos = recivo(pedido_id)
+        if not datos:
+            return "No hay datos para este pedido.", 404
+
+        buffer = BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+
+        # Encabezado
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(200, 750, "Factura de Compra")
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(50, 720, f"Pedido N°: {pedido_id}")
+        pdf.drawString(50, 705, f"Cliente: {current_user.nombre}")  # si tienes el campo
+        pdf.drawString(50, 690, f"Fecha: {datos[0]['FechaPago']}")
+
+        # Tabla de productos
+        y = 650
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(50, y, "Producto")
+        pdf.drawString(250, y, "Cant.")
+        pdf.drawString(310, y, "Precio Unit.")
+        pdf.drawString(410, y, "Subtotal")
+        y -= 20
+
+        total = 0
+        pdf.setFont("Helvetica", 11)
+        for item in datos:
+            nombre = item["NombreProducto"]
+            cantidad = item["cantidad"]
+            precio = item["PrecioUnidad"]
+            subtotal = cantidad * precio
+            total += subtotal
+
+            pdf.drawString(50, y, nombre[:30])
+            pdf.drawString(250, y, str(cantidad))
+            pdf.drawString(310, y, f"${precio:.2f}")
+            pdf.drawString(410, y, f"${subtotal:.2f}")
+            y -= 18
+
+            if y < 100:  # Salto de página
+                pdf.showPage()
+                y = 750
+
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(50, y - 20, f"Total: ${total:.2f}")
+        pdf.drawString(50, y - 40, f"Método de pago: {datos[0]['MetodoPago']}")
+        pdf.drawString(50, y - 60, f"ID Pago: {datos[0]['ID_Pagos']}")
+
+        pdf.showPage()
+        pdf.save()
+
+        buffer.seek(0)
+        response = make_response(buffer.read())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=factura_{pedido_id}.pdf'
+        return response
+
+    except Exception as e:
+        print("❌ Error generando PDF:", e)
         return jsonify({"error": str(e)}), 500
