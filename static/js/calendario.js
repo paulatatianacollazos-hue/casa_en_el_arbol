@@ -181,7 +181,7 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
   contenido.innerHTML = `<p class='text-muted text-center'>Cargando detalles de los pedidos...</p>`;
   modal.show();
 
-  // Filtrar solo los eventos con pedido asociado
+  // Filtrar solo eventos con pedido asociado
   const pedidosDelDia = eventosDelDia.filter(ev => ev.ID_Pedido);
 
   if (!pedidosDelDia.length) {
@@ -201,6 +201,15 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
         }
 
         const info = data[0];
+
+        // Calcular monto total del pedido
+        const total = data.reduce((sum, p) => {
+          const cantidad = parseFloat(p.Cantidad || p.cantidad || 0);
+          const precio = parseFloat(p.PrecioUnidad || p.preciounidad || 0);
+          return sum + cantidad * precio;
+        }, 0);
+
+        // Renderizar lista de productos
         const productos = data.map(p => `
           <tr>
             <td>${p.NombreProducto}</td>
@@ -210,7 +219,7 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
         `).join("");
 
         return `
-          <div class='card mb-3 shadow-sm'>
+          <div class='card mb-3 shadow-sm border-0'>
             <div class='card-header ${info.TipoPedido === 'Instalación' ? 'bg-primary' : 'bg-success'} text-white'>
               <strong>${info.TipoPedido === 'Instalación' ? '🧰 Instalación' : '🚚 Entrega'} #${info.ID_Pedido}</strong>
             </div>
@@ -226,6 +235,10 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
                 </thead>
                 <tbody>${productos}</tbody>
               </table>
+
+              <p class='fw-bold text-end fs-6'>
+                Total del pedido: <span class='text-success'>$${total.toFixed(2)}</span>
+              </p>
 
               <div class='text-end'>
                 <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger btn-sm'>
@@ -244,6 +257,7 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
 
   // Mostrar todos los pedidos
   contenido.innerHTML = resultados.join("");
+  
 } else {
     contenido.innerHTML = eventosDelDia.map(ev => `
       <div>
