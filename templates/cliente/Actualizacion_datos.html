@@ -419,8 +419,8 @@
   {% for item in pedidos_con_detalles %}
   <div id="pedidoCarousel{{ item.id_pedido }}" class="carousel slide pedido-container mb-5" data-bs-interval="false" >
     <div class="carousel-inner" style="border: #000000; margin-bottom: 20px;">
-          
-      {% for grupo in item.detalles | batch(4, None) %}
+          <h6 class="card-title">{{ pedidos_con_detalles.ID_pedido }}</h6>
+      {% for grupo in item.detalles | batch(3, None) %}
       <div class="carousel-item {% if loop.first %}active{% endif %}">
         <div class="d-flex justify-content-center align-items-stretch">
           
@@ -819,7 +819,7 @@ document.addEventListener('click', async function(e) {
     const pedidoId = btn.dataset.pedidoId;
 
     try {
-      const res = await fetch(`/factura/${pedidoId}`);
+      const res = await fetch(`/cliente/cliente/factura/${pedidoId}`);
       const data = await res.json();
 
       if (data.error) throw new Error(data.error);
