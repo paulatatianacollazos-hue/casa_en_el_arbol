@@ -244,7 +244,9 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
                 <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger btn-sm'>
                   <i class='bi bi-file-earmark-pdf'></i> Descargar factura
                 </a>
+                
               </div>
+              
             </div>
           </div>
         `;
@@ -257,7 +259,7 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
 
   // Mostrar todos los pedidos
   contenido.innerHTML = resultados.join("");
-  
+
 } else {
     contenido.innerHTML = eventosDelDia.map(ev => `
       <div>
