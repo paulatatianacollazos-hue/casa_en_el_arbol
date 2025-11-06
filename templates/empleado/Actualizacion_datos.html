@@ -657,14 +657,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
-<script>
-  eventClick: function(info) {
-  const pedidoId = info.event.extendedProps.pedido_id; // depende de cómo guardas tus datos
-  const tipo = info.event.title.toLowerCase().includes('entrega') ? 'entrega' : 'instalacion';
-  mostrarDetallesPedido(pedidoId, tipo);
-}
-
-</script>
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="{{ url_for('static', filename='js/calendario.js') }}"></script>

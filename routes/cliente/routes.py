@@ -429,7 +429,8 @@ def factura_pdf(pedido_id):
         pdf.setFont("Helvetica-Bold", 14)
         pdf.drawString(200, 750, "CASA EN EL ÁRBOL - FACTURA")
         pdf.setFont("Helvetica", 10)
-        pdf.drawString(50, 730, f"Cliente: {usuario.Nombre} {usuario.Apellido}")
+        pdf.drawString(50, 730,
+                       f"Cliente: {usuario.Nombre} {usuario.Apellido}")
         pdf.drawString(50, 715, f"Correo: {usuario.Correo}")
         pdf.drawString(50, 700, f"ID Pedido: {pedido_id}")
 
@@ -460,7 +461,8 @@ def factura_pdf(pedido_id):
 
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'inline; filename=factura_{pedido_id}.pdf'
+        response.headers['Content-Disposition'
+                         ] = f'inline; filename=factura_{pedido_id}.pdf'
         return response
 
     except Exception as e:

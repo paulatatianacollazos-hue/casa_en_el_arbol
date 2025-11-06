@@ -65,7 +65,8 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="Tus datos personales se han actualizado correctamente."
+                    mensaje="""Tus datos personales se han actualizado
+                    correctamente."""
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
@@ -133,7 +134,8 @@ def obtener_programaciones(fecha):
 @empleado.route('/programaciones_todas')
 @login_required
 def programaciones_todas():
-    eventos = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario).all()
+    eventos = Calendario.query.filter_by(ID_Usuario=current_user.ID_Usuario
+                                         ).all()
     return jsonify([
         {
             "ID_Calendario": e.ID_Calendario,
@@ -229,7 +231,8 @@ def detalle_pedido(pedido_id):
     cursor.execute("""
         SELECT
             p.ID_Pedido, p.FechaPedido, p.Destino,
-            u.Nombre AS ClienteNombre, u.Apellido AS ClienteApellido, u.Correo AS ClienteCorreo,
+            u.Nombre AS ClienteNombre, u.Apellido AS ClienteApellido,
+            u.Correo AS ClienteCorreo,
             dp.Cantidad, dp.PrecioUnidad, pr.NombreProducto
         FROM pedido p
         INNER JOIN usuario u ON u.ID_Usuario = p.ID_Usuario

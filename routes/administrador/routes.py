@@ -502,6 +502,49 @@ def pedidos_por_dia(fecha):
         return jsonify([]), 500
 
 
+@admin.route("/calendario/detalles/<fecha>")
+@login_required
+def detalles_pedidos_por_dia(fecha):
+    try:
+        # Obtiene todos los eventos (entregas o instalaciones) del día
+        eventos = (
+            Calendario.query
+            .filter_by(ID_Usuario=current_user.ID_Usuario, Fecha=fecha)
+            .filter(Calendario.Tipo.in_(["Entrega", "Instalacion"]))
+            .all()
+        )
+
+        if not eventos:
+            return jsonify([])
+
+        resultado = []
+        for evento in eventos:
+            pedido = Pedido.query.get(evento.ID_Pedido)
+            if not pedido:
+                continue
+
+            # Se obtienen detalles desde tu función 'detalle()' o 'recivo()'
+            detalles_pedido = recivo(pedido.ID_Pedido)
+
+            monto_total = sum(float(item.get("Monto", 0)
+                                    ) for item in detalles_pedido)
+
+            resultado.append({
+                "ID_Pedido": pedido.ID_Pedido,
+                "Ubicacion": evento.Ubicacion,
+                "Hora": evento.Hora.strftime("%H:%M"),
+                "Tipo": evento.Tipo,
+                "Detalles": detalles_pedido,
+                "MontoTotal": monto_total
+            })
+
+        return jsonify(resultado)
+
+    except Exception as e:
+        print("❌ Error obteniendo detalles del día:", e)
+        return jsonify({"error": str(e)}), 500
+
+
 @admin.route('/programaciones/<fecha>')
 @login_required
 def obtener_programaciones(fecha):
@@ -544,32 +587,6 @@ def programaciones_todas():
         }
         for e in eventos
     ])
-
-
-@admin.route("/admin/usuarios_calendario")
-@login_required
-def obtener_usuarios_calendario():
-    """Devuelve los usuarios activos con rol 'transportista' o 'instalador'."""
-    try:
-        empleados = (
-            db.session.query(Usuario)
-            .filter(Usuario.Rol.in_(["transportista", "instalador"]))
-            .filter(Usuario.Activo == True)
-            .all()
-        )
-
-        resultado = [
-            {
-                "id": emp.ID_Usuario,
-                "nombre": f"{emp.Nombre} {emp.Apellido or ''}".strip(),
-                "rol": emp.Rol.capitalize()
-            }
-            for emp in empleados
-        ]
-        return jsonify(resultado)
-    except Exception as e:
-        print("❌ Error al obtener usuarios del calendario:", e)
-        return jsonify({"error": "No se pudieron obtener los usuarios"}), 500
 
 
 @admin.route("/admin/calendario/nuevo_evento", methods=["POST"])
