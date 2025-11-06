@@ -227,6 +227,14 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
               <p><strong>Cliente:</strong> ${info.ClienteNombre} ${info.ClienteApellido}</p>
               <p><strong>Dirección:</strong> ${info.DireccionEntrega}</p>
               <p><strong>Fecha:</strong> ${info.FechaPedido}</p>
+              <p><strong>Estado:</strong> 
+                ${info.Estado === 'entregado'
+                  ? "<span class='badge bg-success'>Entregado</span>"
+                  : info.Estado === 'pendiente'
+                  ? "<span class='badge bg-warning text-dark'>Pendiente</span>"
+                  : `<span class='badge bg-secondary'>${info.Estado || 'Sin estado'}</span>`
+                }
+              </p>
 
               <h6 class='mt-3'>Productos:</h6>
               <table class='table table-bordered table-sm'>
