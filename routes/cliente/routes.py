@@ -449,14 +449,11 @@ def factura_pdf(pedido_id):
         for f in datos:
             pdf.drawString(50, y, f["NombreProducto"])
             pdf.drawString(200, y, str(f["cantidad"]))
-            pdf.drawString(250, y, f"${f['preciounidad']}")
+            pdf.drawString(250, y, f"${f['PrecioUnidad']}")
             pdf.drawString(320, y, f["MetodoPago"])
             pdf.drawString(400, y, f"${f['Monto']}")
             pdf.drawString(470, y, str(f["FechaPago"]))
             y -= 15
-            if y < 100:  # Nueva página si se acaba el espacio
-                pdf.showPage()
-                y = 750
 
         pdf.save()
         buffer.seek(0)
