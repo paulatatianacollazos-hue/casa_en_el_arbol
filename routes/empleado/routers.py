@@ -257,43 +257,48 @@ def detalle_pedido(pedido_id):
     return jsonify(pedido)
 
 
-@empleado.route("/registro_entrega/<int:pedido_id>", methods=["POST"])
+@empleado.route("/registro_entrega/<int:pedido_id>", methods=["GET", "POST"])
 @login_required
 def registro_entrega(pedido_id):
+    if request.method == "GET":
+        # Mostrar el formulario HTML
+        return render_template("empleado/registro_entrega.html",
+                               pedido_id=pedido_id)
+
+    # Si es POST → guardar el registro
     try:
         comentario = request.form.get("comentario", "")
-        fotos = request.files.getlist("fotos")  # ✅ Corregido aquí
+        fotos = request.files.getlist("fotos")
 
         rutas_fotos = []
         for foto in fotos:
             if foto and foto.filename:
                 nombre_seguro = secure_filename(f"{pedido_id}_{foto.filename}")
-                ruta_guardado = os.path.join(UPLOAD_FOLDER_ENTREGAS, nombre_seguro)
+                ruta_guardado = os.path.join(UPLOAD_FOLDER_ENTREGAS,
+                                             nombre_seguro)
+                os.makedirs(UPLOAD_FOLDER_ENTREGAS, exist_ok=True)
                 foto.save(ruta_guardado)
                 rutas_fotos.append(f"/{ruta_guardado}")
 
+        # Ejemplo: guardar en tabla RegistroEntrega
         registro = RegistroEntrega(
             ID_Pedido=pedido_id,
             ID_Empleado=current_user.ID_Usuario,
             Comentario=comentario,
             Fotos=",".join(rutas_fotos)
         )
-
         db.session.add(registro)
         db.session.commit()
 
-        crear_notificacion(
-            user_id=current_user.ID_Usuario,
-            titulo="Entrega registrada 📦",
-            mensaje=f"Has registrado la entrega del pedido #{pedido_id}."
-        )
-
-        return jsonify({
-            "success": True,
-            "message": "Registro de entrega guardado correctamente."
-        })
+        return redirect(url_for("empleado.exito_entrega", pedido_id=pedido_id))
 
     except Exception as e:
-        print("❌ Error guardando registro de entrega:", e)
+        print("❌ Error registrando entrega:", e)
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+@empleado.route("/registro_entrega/exito/<int:pedido_id>")
+@login_required
+def exito_entrega(pedido_id):
+    return render_template("empleado/exito_entrega.html", pedido_id=pedido_id)
