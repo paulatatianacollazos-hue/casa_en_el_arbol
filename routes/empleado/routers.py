@@ -262,14 +262,13 @@ def detalle_pedido(pedido_id):
 def registro_entrega(pedido_id):
     try:
         comentario = request.form.get("comentario", "")
-        fotos = request.files.getlist("fotos[]")
+        fotos = request.files.getlist("fotos")  # ✅ Corregido aquí
 
         rutas_fotos = []
         for foto in fotos:
             if foto and foto.filename:
                 nombre_seguro = secure_filename(f"{pedido_id}_{foto.filename}")
-                ruta_guardado = os.path.join(UPLOAD_FOLDER_ENTREGAS,
-                                             nombre_seguro)
+                ruta_guardado = os.path.join(UPLOAD_FOLDER_ENTREGAS, nombre_seguro)
                 foto.save(ruta_guardado)
                 rutas_fotos.append(f"/{ruta_guardado}")
 
@@ -289,8 +288,11 @@ def registro_entrega(pedido_id):
             mensaje=f"Has registrado la entrega del pedido #{pedido_id}."
         )
 
-        return jsonify({"success": True, "message":
-                        "Registro de entrega guardado correctamente."})
+        return jsonify({
+            "success": True,
+            "message": "Registro de entrega guardado correctamente."
+        })
+
     except Exception as e:
         print("❌ Error guardando registro de entrega:", e)
         db.session.rollback()

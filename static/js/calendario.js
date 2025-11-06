@@ -241,8 +241,7 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
               </p>
 
               <div class='text-end'>
-                <button class='btn btn-outline-success btn-sm' 
-                        onclick='abrirModalEntrega(${info.ID_Pedido})'>
+                <button class='btn btn-outline-success btn-sm' onclick='abrirModalEntrega(${info.ID_Pedido})'>
                   <i class="bi bi-journal-text"></i> Registro de Entrega
                 </button>
                 <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger btn-sm'>
@@ -372,7 +371,13 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
 // =============================================================
 window.abrirModalEntrega = function (pedidoId) {
   console.log("🟢 Abriendo modal para pedido:", pedidoId);
-  document.getElementById("pedidoEntregaId").value = pedidoId;
+  const input = document.getElementById("pedidoEntregaId");
+  if (!input) {
+    alert("⚠️ No se encontró el campo oculto del pedido en el modal.");
+    return;
+  }
+
+  input.value = pedidoId;
 
   const modal = new bootstrap.Modal(document.getElementById("modalRegistroEntrega"));
   modal.show();
