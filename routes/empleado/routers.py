@@ -257,48 +257,60 @@ def detalle_pedido(pedido_id):
     return jsonify(pedido)
 
 
-@empleado.route("/registro_entrega/<int:pedido_id>", methods=["GET", "POST"])
+@empleado.route('/registro_entrega/<int:pedido_id>', methods=['GET', 'POST'])
 @login_required
 def registro_entrega(pedido_id):
-    if request.method == "GET":
-        # Mostrar el formulario HTML
-        return render_template("empleado/registro_entrega.html",
-                               pedido_id=pedido_id)
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
 
-    # Si es POST → guardar el registro
-    try:
-        comentario = request.form.get("comentario", "")
-        fotos = request.files.getlist("fotos")
+    if request.method == 'POST':
+        comentario = request.form.get('comentario')
+        fotos = request.files.getlist('fotos')
 
-        rutas_fotos = []
+        # Guardar fotos en la carpeta correspondiente
+        fotos_guardadas = []
         for foto in fotos:
-            if foto and foto.filename:
-                nombre_seguro = secure_filename(f"{pedido_id}_{foto.filename}")
-                ruta_guardado = os.path.join(UPLOAD_FOLDER_ENTREGAS,
-                                             nombre_seguro)
-                os.makedirs(UPLOAD_FOLDER_ENTREGAS, exist_ok=True)
-                foto.save(ruta_guardado)
-                rutas_fotos.append(f"/{ruta_guardado}")
+            if foto and foto.filename != '':
+                nombre_archivo = secure_filename(foto.filename)
+                ruta = os.path.join('static/uploads/entregas', nombre_archivo)
+                foto.save(ruta)
+                fotos_guardadas.append(nombre_archivo)
 
-        # Ejemplo: guardar en tabla RegistroEntrega
-        registro = RegistroEntrega(
-            ID_Pedido=pedido_id,
-            ID_Empleado=current_user.ID_Usuario,
-            Comentario=comentario,
-            Fotos=",".join(rutas_fotos)
-        )
-        db.session.add(registro)
-        db.session.commit()
+        # Guardar registro en la base de datos
+        cursor.execute("""
+            INSERT INTO registros_entrega (ID_Pedido, Comentario, Fotos)
+            VALUES (%s, %s, %s)
+        """, (pedido_id, comentario, ','.join(fotos_guardadas)))
 
-        return redirect(url_for("empleado.exito_entrega", pedido_id=pedido_id))
+        # 🔥 Aquí actualizamos el estado del pedido a ENTREGADO
+        cursor.execute("""
+            UPDATE pedido
+            SET Estado = 'entregado'
+            WHERE ID_Pedido = %s
+        """, (pedido_id,))
 
-    except Exception as e:
-        print("❌ Error registrando entrega:", e)
-        db.session.rollback()
-        return jsonify({"success": False, "message": str(e)}), 500
+        conn.commit()
+        cursor.close()
+        conn.close()
 
+        flash(
+            "✅ Registro de entrega guardado y pedido marcado como entregado.",
+            "success")
+        return redirect(url_for('empleado.dashboard'))
 
-@empleado.route("/registro_entrega/exito/<int:pedido_id>")
-@login_required
-def exito_entrega(pedido_id):
-    return render_template("empleado/exito_entrega.html", pedido_id=pedido_id)
+    # Si es GET, mostramos el formulario
+    cursor.execute("""
+        SELECT p.*, c.Nombre AS ClienteNombre, c.Apellido AS ClienteApellido
+        FROM pedido p
+        JOIN usuario c ON p.ID_usuario = c.ID_usuario
+        WHERE p.ID_Pedido = %s
+    """, (pedido_id,))
+    pedido = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not pedido:
+        flash("❌ Pedido no encontrado.", "danger")
+        return redirect(url_for('empleado.dashboard'))
+
+    return render_template("empleado/registro_entrega.html", pedido=pedido)
