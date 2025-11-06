@@ -497,17 +497,15 @@
 
  <!-- Modal para mostrar pedidos del día -->
 <!-- Modal Detalle Pedido -->
-<div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-labelledby="modalPedidosDiaLabel" aria-hidden="true">
+<div class="modal fade" id="modalPedidosDia" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="modalPedidosDiaLabel">Detalles del Pedido</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title">Eventos del día</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div id="detallesPedido">
-          <p class="text-muted text-center">Cargando detalles...</p>
-        </div>
+      <div class="modal-body" id="contenidoPedidosDia">
+        <p class="text-muted text-center">Selecciona un día para ver los eventos.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -515,6 +513,7 @@
     </div>
   </div>
 </div>
+
 
       
  
@@ -658,7 +657,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+<script>
+  eventClick: function(info) {
+  const pedidoId = info.event.extendedProps.pedido_id; // depende de cómo guardas tus datos
+  const tipo = info.event.title.toLowerCase().includes('entrega') ? 'entrega' : 'instalacion';
+  mostrarDetallesPedido(pedidoId, tipo);
+}
 
+</script>
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="{{ url_for('static', filename='js/calendario.js') }}"></script>
