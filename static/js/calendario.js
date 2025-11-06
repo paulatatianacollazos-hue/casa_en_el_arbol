@@ -365,3 +365,51 @@ document.getElementById("formNuevoEvento").addEventListener("submit", async (e) 
     alert("Error al crear el evento");
   }
 });
+
+
+// =============================================================
+// 🔹 ABRIR MODAL DE REGISTRO DE ENTREGA
+// =============================================================
+window.abrirModalEntrega = function (pedidoId) {
+  console.log("🟢 Abriendo modal para pedido:", pedidoId);
+  document.getElementById("pedidoEntregaId").value = pedidoId;
+
+  const modal = new bootstrap.Modal(document.getElementById("modalRegistroEntrega"));
+  modal.show();
+};
+
+// =============================================================
+// 🔹 ENVIAR FORMULARIO DE REGISTRO DE ENTREGA
+// =============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const formEntrega = document.getElementById("formRegistroEntrega");
+  if (!formEntrega) return;
+
+  formEntrega.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const pedidoId = document.getElementById("pedidoEntregaId").value;
+    const formData = new FormData(formEntrega);
+
+    console.log("🚀 Enviando registro de entrega para pedido:", pedidoId);
+
+    try {
+      const response = await fetch(`/empleado/registro_entrega/${pedidoId}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert("✅ Registro de entrega guardado correctamente.");
+        formEntrega.reset();
+        bootstrap.Modal.getInstance(document.getElementById("modalRegistroEntrega")).hide();
+      } else {
+        alert("❌ Error: " + (result.message || "No se pudo guardar el registro."));
+      }
+    } catch (err) {
+      console.error("❌ Error al enviar formulario:", err);
+      alert("Error al enviar los datos al servidor.");
+    }
+  });
+});
