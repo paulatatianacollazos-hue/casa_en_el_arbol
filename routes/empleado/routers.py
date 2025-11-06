@@ -269,20 +269,26 @@ def registro_entrega(pedido_id):
 
         # Guardar fotos en la carpeta correspondiente
         fotos_guardadas = []
-        for foto in fotos:
+        for foto in fotos[:3]:  # máximo 3 fotos
             if foto and foto.filename != '':
                 nombre_archivo = secure_filename(foto.filename)
                 ruta = os.path.join('static/uploads/entregas', nombre_archivo)
                 foto.save(ruta)
                 fotos_guardadas.append(nombre_archivo)
 
+        # Rellenar con None las que falten
+        while len(fotos_guardadas) < 3:
+            fotos_guardadas.append(None)
+
         # Guardar registro en la base de datos
         cursor.execute("""
-            INSERT INTO registros_entrega (ID_Pedido, Comentario, Fotos)
-            VALUES (%s, %s, %s)
-        """, (pedido_id, comentario, ','.join(fotos_guardadas)))
+            INSERT INTO registros_entrega (ID_Pedido, ID_Empleado, Comentario,
+            Foto1, Foto2, Foto3)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (pedido_id, current_user.id, comentario, fotos_guardadas[0],
+              fotos_guardadas[1], fotos_guardadas[2]))
 
-        # 🔥 Aquí actualizamos el estado del pedido a ENTREGADO
+        # 🔥 Actualizar el estado del pedido a ENTREGADO
         cursor.execute("""
             UPDATE pedido
             SET Estado = 'entregado'
@@ -298,7 +304,7 @@ def registro_entrega(pedido_id):
             "success")
         return redirect(url_for('empleado.dashboard'))
 
-    # Si es GET, mostramos el formulario
+    # Si es GET, mostrar formulario
     cursor.execute("""
         SELECT p.*, c.Nombre AS ClienteNombre, c.Apellido AS ClienteApellido
         FROM pedido p
