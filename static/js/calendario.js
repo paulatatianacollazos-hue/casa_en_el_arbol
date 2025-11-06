@@ -155,29 +155,30 @@ function renderCalendario(fecha) {
 // 🔹 Modal con eventos del día
 // =============================================================
 window.abrirMiModalConFecha = async function(fecha, usuarioId) {
-  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPedidosDia'));
+  const modalEl = document.getElementById('modalPedidosDia');
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
   const contenido = document.getElementById('contenidoPedidosDia');
 
-  console.log("Programaciones:", programaciones);
+  console.log("🗓️ Día seleccionado:", fecha);
+  console.log("📦 Programaciones:", programaciones);
+
   const eventosDelDia = filtrarEventosParaUsuario(
-    
     programaciones.filter(ev => ev.Fecha === fecha),
     usuarioId
   );
 
-  if (eventosDelDia.length === 0) {
-    contenido.innerHTML = "<p>No hay eventos programados para este día.</p>";
+  if (!eventosDelDia || eventosDelDia.length === 0) {
+    contenido.innerHTML = "<p class='text-center text-muted'>No hay eventos programados para este día.</p>";
     modal.show();
     return;
   }
 
-  // Si el evento es una entrega o instalación, cargar detalles del pedido
   const esEntregaOInstalacion = eventosDelDia.some(ev =>
-    ev.Tipo.toLowerCase().includes("entrega") || ev.Tipo.toLowerCase().includes("instalacion")
+    ev.Tipo?.toLowerCase().includes("entrega") || ev.Tipo?.toLowerCase().includes("instalacion")
   );
 
   if (esEntregaOInstalacion) {
-    contenido.innerHTML = `<p class="text-muted text-center">Cargando detalles del pedido...</p>`;
+    contenido.innerHTML = `<p class='text-muted text-center'>Cargando detalles del pedido...</p>`;
     modal.show();
 
     const evento = eventosDelDia.find(ev => ev.ID_Pedido);
@@ -187,11 +188,11 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
     }
 
     try {
-      const res = await fetch(`/cliente/detalle_pedido/${evento.ID_Pedido}`);
+      const res = await fetch(`/empleado/detalle_pedido/${evento.ID_Pedido}`);
       const data = await res.json();
 
       if (data.error) {
-        contenido.innerHTML = `<p class="text-danger text-center">${data.error}</p>`;
+        contenido.innerHTML = `<p class='text-danger text-center'>${data.error}</p>`;
         return;
       }
 
@@ -200,49 +201,48 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
         <tr>
           <td>${p.NombreProducto}</td>
           <td>${p.Cantidad}</td>
-          <td>$${p.PrecioUnidad.toFixed(2)}</td>
+          <td>$${parseFloat(p.PrecioUnidad || 0).toFixed(2)}</td>
         </tr>
       `).join("");
 
       contenido.innerHTML = `
-        <h5 class="fw-bold text-center text-primary mb-3">
+        <h5 class='fw-bold text-center text-primary mb-3'>
           ${info.TipoPedido === 'Instalación' ? '🧰 Instalación' : '🚚 Entrega'}
         </h5>
         <p><strong>Cliente:</strong> ${info.ClienteNombre} ${info.ClienteApellido}</p>
         <p><strong>Dirección:</strong> ${info.DireccionEntrega}</p>
         <p><strong>Fecha:</strong> ${info.FechaPedido}</p>
 
-        <h6 class="mt-3">Productos:</h6>
-        <table class="table table-bordered table-sm">
-          <thead class="table-light">
+        <h6 class='mt-3'>Productos:</h6>
+        <table class='table table-bordered table-sm'>
+          <thead class='table-light'>
             <tr><th>Producto</th><th>Cantidad</th><th>Precio</th></tr>
           </thead>
           <tbody>${productos}</tbody>
         </table>
 
-        <div class="text-end">
-          <a href="/cliente/factura/pdf/${info.ID_Pedido}" target="_blank" class="btn btn-danger">
-            <i class="bi bi-file-earmark-pdf"></i> Descargar factura PDF
+        <div class='text-end'>
+          <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger'>
+            <i class='bi bi-file-earmark-pdf'></i> Descargar factura PDF
           </a>
         </div>
       `;
     } catch (err) {
-      contenido.innerHTML = `<p class="text-danger text-center">Error al cargar detalles del pedido.</p>`;
+      contenido.innerHTML = "<p class='text-danger text-center'>Error al cargar detalles del pedido.</p>";
       console.error(err);
     }
 
   } else {
-    // Otros tipos de evento
-    contenido.innerHTML = eventosDelDia.map(ev =>
-      `<div>
-         <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
-         Ubicación: ${ev.Ubicacion}<br>
-         Hora: ${ev.Hora}
-       </div><hr>`
-    ).join("");
+    contenido.innerHTML = eventosDelDia.map(ev => `
+      <div>
+        <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
+        <strong>Ubicación:</strong> ${ev.Ubicacion}<br>
+        <strong>Hora:</strong> ${ev.Hora}
+      </div><hr>
+    `).join("");
     modal.show();
   }
-}
+};
 
 // =============================================================
 // 🔹 Controles del calendario
