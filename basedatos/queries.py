@@ -894,17 +894,19 @@ def eliminar_evento(id_calendario):
         raise Exception(f"Error al eliminar el evento: {e}")
 
 
-def recivo():
+def recivo(pedido_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT
-            select ID_Pagos, MetodoPago, FechaPago, Monto, pg.ID_Pedido,
-            dp.cantidad, dp.preciounidad, pr.NombreProducto
-            from pagos pg inner join pedido p on pg.id_pedido = p.id_pedido
-            inner join detalle_pedido dp on dp.id_pedido = p.id_pedido
-            inner join producto pr on pr.ID_Producto = dp.ID_Producto;
-    """)
+        SELECT 
+            pg.ID_Pagos, pg.MetodoPago, pg.FechaPago, pg.Monto, 
+            dp.cantidad, dp.PrecioUnidad, pr.NombreProducto
+        FROM pagos pg
+        INNER JOIN pedido p ON pg.ID_Pedido = p.ID_Pedido
+        INNER JOIN detalle_pedido dp ON dp.ID_Pedido = p.ID_Pedido
+        INNER JOIN producto pr ON pr.ID_Producto = dp.ID_Producto
+        WHERE p.ID_Pedido = %s
+    """, (pedido_id,))
     resultados = cursor.fetchall()
     cursor.close()
     conn.close()
