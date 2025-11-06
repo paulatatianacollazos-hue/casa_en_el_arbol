@@ -178,61 +178,73 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
   );
 
   if (esEntregaOInstalacion) {
-    contenido.innerHTML = `<p class='text-muted text-center'>Cargando detalles del pedido...</p>`;
-    modal.show();
+  contenido.innerHTML = `<p class='text-muted text-center'>Cargando detalles de los pedidos...</p>`;
+  modal.show();
 
-    const evento = eventosDelDia.find(ev => ev.ID_Pedido);
-    if (!evento) {
-      contenido.innerHTML = "<p>No se encontró información del pedido asociado.</p>";
-      return;
-    }
+  // Filtrar solo los eventos con pedido asociado
+  const pedidosDelDia = eventosDelDia.filter(ev => ev.ID_Pedido);
 
-    try {
-      const res = await fetch(`/empleado/detalle_pedido/${evento.ID_Pedido}`);
-      const data = await res.json();
+  if (!pedidosDelDia.length) {
+    contenido.innerHTML = "<p class='text-center text-danger'>No se encontraron pedidos asociados para este día.</p>";
+    return;
+  }
 
-      if (data.error) {
-        contenido.innerHTML = `<p class='text-danger text-center'>${data.error}</p>`;
-        return;
+  // Cargar todos los pedidos en paralelo
+  const resultados = await Promise.all(
+    pedidosDelDia.map(async (evento) => {
+      try {
+        const res = await fetch(`/empleado/detalle_pedido/${evento.ID_Pedido}`);
+        const data = await res.json();
+
+        if (data.error) {
+          return `<div class='alert alert-danger'>Error en pedido #${evento.ID_Pedido}: ${data.error}</div>`;
+        }
+
+        const info = data[0];
+        const productos = data.map(p => `
+          <tr>
+            <td>${p.NombreProducto}</td>
+            <td>${p.Cantidad}</td>
+            <td>$${parseFloat(p.PrecioUnidad || 0).toFixed(2)}</td>
+          </tr>
+        `).join("");
+
+        return `
+          <div class='card mb-3 shadow-sm'>
+            <div class='card-header ${info.TipoPedido === 'Instalación' ? 'bg-primary' : 'bg-success'} text-white'>
+              <strong>${info.TipoPedido === 'Instalación' ? '🧰 Instalación' : '🚚 Entrega'} #${info.ID_Pedido}</strong>
+            </div>
+            <div class='card-body'>
+              <p><strong>Cliente:</strong> ${info.ClienteNombre} ${info.ClienteApellido}</p>
+              <p><strong>Dirección:</strong> ${info.DireccionEntrega}</p>
+              <p><strong>Fecha:</strong> ${info.FechaPedido}</p>
+
+              <h6 class='mt-3'>Productos:</h6>
+              <table class='table table-bordered table-sm'>
+                <thead class='table-light'>
+                  <tr><th>Producto</th><th>Cantidad</th><th>Precio</th></tr>
+                </thead>
+                <tbody>${productos}</tbody>
+              </table>
+
+              <div class='text-end'>
+                <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger btn-sm'>
+                  <i class='bi bi-file-earmark-pdf'></i> Descargar factura
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        console.error("❌ Error cargando pedido:", err);
+        return `<div class='alert alert-danger'>Error cargando el pedido #${evento.ID_Pedido}</div>`;
       }
+    })
+  );
 
-      const info = data[0];
-      const productos = data.map(p => `
-        <tr>
-          <td>${p.NombreProducto}</td>
-          <td>${p.Cantidad}</td>
-          <td>$${parseFloat(p.PrecioUnidad || 0).toFixed(2)}</td>
-        </tr>
-      `).join("");
-
-      contenido.innerHTML = `
-        <h5 class='fw-bold text-center text-primary mb-3'>
-          ${info.TipoPedido === 'Instalación' ? '🧰 Instalación' : '🚚 Entrega'}
-        </h5>
-        <p><strong>Cliente:</strong> ${info.ClienteNombre} ${info.ClienteApellido}</p>
-        <p><strong>Dirección:</strong> ${info.DireccionEntrega}</p>
-        <p><strong>Fecha:</strong> ${info.FechaPedido}</p>
-
-        <h6 class='mt-3'>Productos:</h6>
-        <table class='table table-bordered table-sm'>
-          <thead class='table-light'>
-            <tr><th>Producto</th><th>Cantidad</th><th>Precio</th></tr>
-          </thead>
-          <tbody>${productos}</tbody>
-        </table>
-
-        <div class='text-end'>
-          <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger'>
-            <i class='bi bi-file-earmark-pdf'></i> Descargar factura PDF
-          </a>
-        </div>
-      `;
-    } catch (err) {
-      contenido.innerHTML = "<p class='text-danger text-center'>Error al cargar detalles del pedido.</p>";
-      console.error(err);
-    }
-
-  } else {
+  // Mostrar todos los pedidos
+  contenido.innerHTML = resultados.join("");
+} else {
     contenido.innerHTML = eventosDelDia.map(ev => `
       <div>
         <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
