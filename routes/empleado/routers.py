@@ -2,14 +2,20 @@ from flask import render_template, request, Blueprint, flash
 from flask import jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import Usuario, Calendario, Notificaciones
+from basedatos.models import (
+    Usuario, Calendario, Notificaciones, RegistroEntrega, db
+    )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from basedatos.models import db
 from basedatos.db import get_connection
 from basedatos.queries import (
     actualizar_pedido as actualizar_pedido_query,
 )
+import os
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER_ENTREGAS = "static/uploads/entregas"
+os.makedirs(UPLOAD_FOLDER_ENTREGAS, exist_ok=True)
 
 empleado = Blueprint(
     'empleado',
@@ -249,3 +255,43 @@ def detalle_pedido(pedido_id):
         return jsonify({"error": "Pedido no encontrado"}), 404
 
     return jsonify(pedido)
+
+
+@empleado.route("/registro_entrega/<int:pedido_id>", methods=["POST"])
+@login_required
+def registro_entrega(pedido_id):
+    try:
+        comentario = request.form.get("comentario", "")
+        fotos = request.files.getlist("fotos[]")
+
+        rutas_fotos = []
+        for foto in fotos:
+            if foto and foto.filename:
+                nombre_seguro = secure_filename(f"{pedido_id}_{foto.filename}")
+                ruta_guardado = os.path.join(UPLOAD_FOLDER_ENTREGAS,
+                                             nombre_seguro)
+                foto.save(ruta_guardado)
+                rutas_fotos.append(f"/{ruta_guardado}")
+
+        registro = RegistroEntrega(
+            ID_Pedido=pedido_id,
+            ID_Empleado=current_user.ID_Usuario,
+            Comentario=comentario,
+            Fotos=",".join(rutas_fotos)
+        )
+
+        db.session.add(registro)
+        db.session.commit()
+
+        crear_notificacion(
+            user_id=current_user.ID_Usuario,
+            titulo="Entrega registrada 📦",
+            mensaje=f"Has registrado la entrega del pedido #{pedido_id}."
+        )
+
+        return jsonify({"success": True, "message":
+                        "Registro de entrega guardado correctamente."})
+    except Exception as e:
+        print("❌ Error guardando registro de entrega:", e)
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500

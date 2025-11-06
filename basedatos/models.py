@@ -290,3 +290,19 @@ class Favorito(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"))
     ID_Producto = db.Column(db.Integer, db.ForeignKey("producto.id"))
+
+
+class RegistroEntrega(db.Model):
+    __tablename__ = 'RegistroEntrega'
+
+    ID_Registro = db.Column(db.Integer, primary_key=True)
+    ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'),
+                          nullable=False)
+    ID_Empleado = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+                            nullable=False)
+    Comentario = db.Column(db.Text, nullable=True)
+    Fotos = db.Column(db.Text, nullable=True)
+    FechaRegistro = db.Column(db.DateTime, default=datetime.utcnow)
+
+    pedido = db.relationship('Pedido', backref='registros_entrega')
+    empleado = db.relationship('Usuario', backref='registros_realizados')

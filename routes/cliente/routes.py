@@ -468,3 +468,6 @@ def factura_pdf(pedido_id):
     except Exception as e:
         print("❌ Error generando PDF:", e)
         return jsonify({"error": str(e)}), 500
+
+
+
