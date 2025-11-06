@@ -227,8 +227,8 @@ def detalle_pedido(pedido_id):
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT 
-            p.ID_Pedido, p.TipoPedido, p.FechaPedido, p.DireccionEntrega,
+        SELECT
+            p.ID_Pedido, p.FechaPedido, p.Destino,
             u.Nombre AS ClienteNombre, u.Apellido AS ClienteApellido, u.Correo AS ClienteCorreo,
             dp.Cantidad, dp.PrecioUnidad, pr.NombreProducto
         FROM pedido p
