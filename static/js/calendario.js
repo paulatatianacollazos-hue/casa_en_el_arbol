@@ -154,11 +154,13 @@ function renderCalendario(fecha) {
 // =============================================================
 // 🔹 Modal con eventos del día
 // =============================================================
-async function abrirMiModalConFecha(fecha, usuarioId) {
+window.abrirMiModalConFecha = async function(fecha, usuarioId) {
   const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPedidosDia'));
   const contenido = document.getElementById('contenidoPedidosDia');
 
+  console.log("Programaciones:", programaciones);
   const eventosDelDia = filtrarEventosParaUsuario(
+    
     programaciones.filter(ev => ev.Fecha === fecha),
     usuarioId
   );
