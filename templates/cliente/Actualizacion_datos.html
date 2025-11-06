@@ -712,6 +712,9 @@
             <!-- Se llena dinámicamente -->
           </tbody>
         </table>
+        <a id="btnDescargarPDF" href="#" class="btn btn-danger" target="_blank">
+          <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+        </a>
       </div>
     </div>
   </div>
@@ -820,7 +823,6 @@ document.addEventListener('click', async function(e) {
     const pedidoId = btn.dataset.pedidoId;
 
     try {
-      // ✅ RUTA CORRECTA
       const res = await fetch(`/cliente/factura/${pedidoId}`);
       const data = await res.json();
 
@@ -840,6 +842,10 @@ document.addEventListener('click', async function(e) {
       });
 
       document.getElementById('factura-body').innerHTML = html;
+
+      // 🔗 actualizar link del botón PDF
+      document.getElementById('btnDescargarPDF').href = `/cliente/factura/pdf/${pedidoId}`;
+
       new bootstrap.Modal(document.getElementById('modalFactura')).show();
 
     } catch (err) {
@@ -848,6 +854,7 @@ document.addEventListener('click', async function(e) {
     }
   }
 });
+
 </script>
 
 
