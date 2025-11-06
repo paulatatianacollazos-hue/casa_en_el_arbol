@@ -6,6 +6,7 @@ from basedatos.models import Usuario, Calendario, Notificaciones
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.models import db
+from basedatos.db import get_connection
 from basedatos.queries import (
     actualizar_pedido as actualizar_pedido_query,
 )
@@ -217,3 +218,31 @@ def estado_pedido():
 def actualizar_pedido_route():
     actualizar_pedido_query(request.form)
     return redirect(url_for("empleado.actualizacion_datos"))
+
+
+@empleado.route('/detalle_pedido/<int:pedido_id>', methods=['GET'])
+@login_required
+def detalle_pedido(pedido_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT 
+            p.ID_Pedido, p.TipoPedido, p.FechaPedido, p.DireccionEntrega,
+            u.Nombre AS ClienteNombre, u.Apellido AS ClienteApellido, u.Correo AS ClienteCorreo,
+            dp.Cantidad, dp.PrecioUnidad, pr.NombreProducto
+        FROM pedido p
+        INNER JOIN usuario u ON u.ID_Usuario = p.ID_Usuario
+        INNER JOIN detalle_pedido dp ON dp.ID_Pedido = p.ID_Pedido
+        INNER JOIN producto pr ON pr.ID_Producto = dp.ID_Producto
+        WHERE p.ID_Pedido = %s
+    """, (pedido_id,))
+
+    pedido = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not pedido:
+        return jsonify({"error": "Pedido no encontrado"}), 404
+
+    return jsonify(pedido)
