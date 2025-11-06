@@ -507,10 +507,7 @@
       <div class="modal-body" id="contenidoPedidosDia">
         <p class="text-muted text-center">Selecciona un día para ver los eventos.</p>
       </div>
-      <button class="btn btn-outline-success btn-sm mt-2"
-              onclick="abrirModalEntrega(${p.ID_Pedido})">
-        Registro de Entrega
-      </button>
+      
       <div class="modal-footer">
         
       </div>
@@ -519,6 +516,35 @@
 </div>
 
 
+<div class="modal fade" id="modalRegistroEntrega" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Registro de Entrega</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formRegistroEntrega" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="pedido_id" id="pedidoEntregaId" />
+
+          <div class="mb-3">
+            <label class="form-label">Comentario del instalador</label>
+            <textarea name="comentario" class="form-control" rows="3" required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Fotos de la entrega</label>
+            <input type="file" name="fotos" class="form-control" accept="image/*" multiple required />
+            <small class="text-muted">Puedes subir varias imágenes (JPG, PNG, etc.)</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar registro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
       
  
 

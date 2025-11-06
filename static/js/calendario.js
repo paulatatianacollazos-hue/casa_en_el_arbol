@@ -241,10 +241,13 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
               </p>
 
               <div class='text-end'>
+                <button class='btn btn-outline-success btn-sm' 
+                        onclick='abrirModalEntrega(${info.ID_Pedido})'>
+                  <i class="bi bi-journal-text"></i> Registro de Entrega
+                </button>
                 <a href='/cliente/factura/pdf/${info.ID_Pedido}' target='_blank' class='btn btn-danger btn-sm'>
                   <i class='bi bi-file-earmark-pdf'></i> Descargar factura
                 </a>
-                
               </div>
               
             </div>
