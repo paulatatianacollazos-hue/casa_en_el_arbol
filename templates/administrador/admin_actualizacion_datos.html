@@ -459,6 +459,10 @@
                 </div>
               {% endfor %}
             </div>
+            <button class="btn btn-outline-primary ver-factura-btn"
+              data-pedido-id="{{ pedido.id }}">
+              <i class="bi bi-receipt"></i> Ver factura
+            </button>
           
             <div class="boton">
               <button style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button>
@@ -766,6 +770,38 @@
             <button type="submit" class="btn btn-success">Guardar evento</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modalFactura" tabindex="-1" aria-labelledby="modalFacturaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="width: 1000px;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Factura del pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio unidad</th>
+              <th>Método de pago</th>
+              <th>Monto total</th>
+              <th>Fecha de pago</th>
+            </tr>
+          </thead>
+          <tbody id="factura-body">
+            <!-- Se llena dinámicamente -->
+          </tbody>
+        </table>
+        <a id="btnDescargarPDF" href="#" class="btn btn-danger" target="_blank">
+          <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+        </a>
       </div>
     </div>
   </div>
@@ -1178,6 +1214,47 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+<script>
+document.addEventListener('click', async function(e) {
+  if (e.target.closest('.ver-factura-btn')) {
+    const btn = e.target.closest('.ver-factura-btn');
+    const pedidoId = btn.dataset.pedidoId;
+
+    try {
+      const res = await fetch(`/cliente/factura/${pedidoId}`);
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      let html = '';
+      data.forEach(f => {
+        html += `
+          <tr>
+            <td>${f.NombreProducto}</td>
+            <td>${f.cantidad}</td>
+            <td>$${f.PrecioUnidad}</td>
+            <td>${f.MetodoPago}</td>
+            <td>$${f.Monto}</td>
+            <td>${f.FechaPago}</td>
+          </tr>`;
+      });
+
+      document.getElementById('factura-body').innerHTML = html;
+
+      // 🔗 actualizar link del botón PDF
+      document.getElementById('btnDescargarPDF').href = `/cliente/factura/pdf/${pedidoId}`;
+
+      new bootstrap.Modal(document.getElementById('modalFactura')).show();
+
+    } catch (err) {
+      console.error('Error al cargar factura:', err);
+      alert('No se pudo cargar la factura. Intenta más tarde.');
+    }
+  }
+});
+
+</script>
+
 
 </body>
 </html>

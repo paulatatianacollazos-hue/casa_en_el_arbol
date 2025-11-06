@@ -5,11 +5,11 @@ from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario,
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from flask import request, jsonify
-from flask_login import login_required
 from datetime import datetime  # Ajusta según tu modelo
-from basedatos.decoradores import role_required
-from basedatos.models import Transportista, Pedido, RutaPlanificada
+from flask import make_response
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     obtener_empleados,
@@ -21,7 +21,8 @@ from basedatos.queries import (
     asignar_calendario as asignar_calendario_query,
     get_producto_by_id,
     guardar_producto,
-    get_productos, detalle
+    get_productos, detalle, recivo
+    
 )
 
 reviews = []
@@ -655,36 +656,57 @@ def crear_evento_calendario():
         }), 500
 
 
-@admin.route('/planificar', methods=['GET','POST'])
-def planificar():
-    transportistas = Transportista.query.all()
-    pedidos = Pedido.query.all()
-    if request.method == 'POST':
-        pedido_id = request.form.get('pedido')
-        transportista_id = request.form.get('transportista')
-        origen = request.form.get('origen')
-        destino = request.form.get('destino')
-        fecha = request.form.get('fecha')
-        if not pedido_id or not transportista_id or not fecha:
-            flash('Pedido, transportista y fecha son obligatorios', 'error')
-            return redirect(url_for('planner.planificar'))
-        try:
-            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
-        except Exception:
-            flash('Formato de fecha inválido (YYYY-MM-DD)', 'error')
-            return redirect(url_for('planner.planificar'))
-        ruta = RutaPlanificada(pedido_id=int(pedido_id), transportista_id=int(
-            transportista_id), origen=origen, destino=destino, fecha=fecha_obj)
-        db.session.add(ruta)
-        db.session.commit()
-        flash('Ruta planificada correctamente', 'success')
-        return redirect(url_for('planner.ver_rutas'))
-    return render_template('planificar.html', transportistas=transportistas,
-                           pedidos=pedidos)
+@admin.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
+@login_required
+def factura_pdf(pedido_id):
+    try:
+        datos = recivo(pedido_id)
+        usuario = current_user
 
+        # 🧾 Creamos PDF en memoria
+        buffer = BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=letter)
+        pdf.setTitle(f"Factura_{pedido_id}")
 
-@admin.route('/rutas')
-def ver_rutas():
-    rutas = RutaPlanificada.query.order_by(RutaPlanificada.creada_en.desc(
-        )).all()
-    return render_template('rutas.html', rutas=rutas)
+        # 🔹 Encabezado
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(200, 750, "CASA EN EL ÁRBOL - FACTURA")
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(50, 730, f"Cliente: {usuario.Nombre} {usuario.Apellido}")
+        pdf.drawString(50, 715, f"Correo: {usuario.Correo}")
+        pdf.drawString(50, 700, f"ID Pedido: {pedido_id}")
+
+        # 🔹 Cabecera de tabla
+        y = 670
+        pdf.setFont("Helvetica-Bold", 10)
+        pdf.drawString(50, y, "Producto")
+        pdf.drawString(200, y, "Cant.")
+        pdf.drawString(250, y, "Precio")
+        pdf.drawString(320, y, "Método")
+        pdf.drawString(400, y, "Monto")
+        pdf.drawString(470, y, "Fecha")
+        y -= 20
+
+        # 🔹 Contenido
+        pdf.setFont("Helvetica", 9)
+        for f in datos:
+            pdf.drawString(50, y, f["NombreProducto"])
+            pdf.drawString(200, y, str(f["cantidad"]))
+            pdf.drawString(250, y, f"${f['PrecioUnidad']}")
+            pdf.drawString(320, y, f["MetodoPago"])
+            pdf.drawString(400, y, f"${f['Monto']}")
+            pdf.drawString(470, y, str(f["FechaPago"]))
+            y -= 15
+
+        pdf.save()
+        buffer.seek(0)
+
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'
+                         ] = f'inline; filename=factura_{pedido_id}.pdf'
+        return response
+
+    except Exception as e:
+        print("❌ Error generando PDF:", e)
+        return jsonify({"error": str(e)}), 500
