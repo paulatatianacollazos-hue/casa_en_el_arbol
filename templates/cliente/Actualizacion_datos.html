@@ -453,10 +453,11 @@
 
     <div class="text-center mt-3">
       <p class="fw-bold mt-2">Total: ${{ item.total }}</p>
-      <button class="btn btn-outline-primary ver-factura-btn"
-          data-pedido-id="{{ item.id_pedido }}">
-    <i class="bi bi-receipt"></i> Ver factura
-  </button>
+     <button class="btn btn-outline-primary ver-factura-btn"
+              data-pedido-id="{{ item.ID_Pedido }}">
+        <i class="bi bi-receipt"></i> Ver factura
+      </button>
+
       {% if item.Estado == 'entregado' %}
       <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
         Confirmación de entrega
@@ -819,7 +820,8 @@ document.addEventListener('click', async function(e) {
     const pedidoId = btn.dataset.pedidoId;
 
     try {
-      const res = await fetch(`/cliente/cliente/factura/${pedidoId}`);
+      // ✅ RUTA CORRECTA
+      const res = await fetch(`/cliente/factura/${pedidoId}`);
       const data = await res.json();
 
       if (data.error) throw new Error(data.error);
@@ -847,6 +849,7 @@ document.addEventListener('click', async function(e) {
   }
 });
 </script>
+
 
 </body>
 </html>
