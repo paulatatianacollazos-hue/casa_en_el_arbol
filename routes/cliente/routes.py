@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from flask import jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import Usuario, Producto, Calendario, Notificaciones
+from basedatos.models import Usuario, Calendario, Notificaciones
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
@@ -34,7 +34,8 @@ def dashboard():
 @cliente.route('/instalaciones', methods=['GET'])
 def instalaciones():
     calendarios = Calendario.query.all()  # O filtra por usuario
-    return render_template('cliente/instalaciones.html', calendarios=calendarios)
+    return render_template('cliente/instalaciones.html',
+                           calendarios=calendarios)
 
 
 # Actualizar instalación
@@ -43,7 +44,7 @@ def actualizar_instalacion():
     # Obtener datos del formulario
     id_pedido = request.form.get('id_pedido')
     nueva_fecha = request.form.get('fecha_entrega')
-    nueva_hora = request.form.get('hora_entrega')  # opcional si agregas campo hora
+    nueva_hora = request.form.get('hora_entrega')  # opcional
 
     if not id_pedido or not nueva_fecha:
         flash("Debes ingresar todos los datos obligatorios", "danger")
@@ -56,11 +57,13 @@ def actualizar_instalacion():
         flash("No se encontró un calendario para este pedido", "warning")
         return redirect(url_for('cliente.instalaciones'))
 
-    # Actualizar fecha y hora
+    # Actualizar fecha, hora y tipo
     calendario.Fecha = datetime.strptime(nueva_fecha, "%Y-%m-%d").date()
-    
+
     if nueva_hora:
         calendario.Hora = datetime.strptime(nueva_hora, "%H:%M").time()
+
+    calendario.Tipo = "Instalación"  # Aquí se asigna el tipo
 
     db.session.commit()
     flash("Calendario actualizado correctamente", "success")
