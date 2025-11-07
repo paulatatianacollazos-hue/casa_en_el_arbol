@@ -321,7 +321,7 @@
             </div>
         </div>
     </section>
-
+    {%endblock%}
     <!-- Footer suscripción -->
     <section class="footer-suscripcion mt-5 bg-dark text-light py-4">
         <div class="container">
@@ -358,9 +358,10 @@
             </div>
         </div>
     </section>
-    {%endblock%}
 
+    {% block extra_footer %}{%endblock%}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
 </body>
 </html>

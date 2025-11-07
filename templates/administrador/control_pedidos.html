@@ -1,6 +1,6 @@
 {% extends "administrador/admin_dashboard.html" %}
 {% block title %}control_pedidos | Casa en el Árbol{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index2.css') }}">
+    
   
 {% block extra_css %}
     <style>
@@ -165,27 +165,28 @@
     </div>
 
     <div class="pedidos">
-      <div class="datos-pedido">
-      <p><strong>ID Pedido:</strong> {{ pedido.ID_Pedido }}</p>
-      <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
-      <p><strong>Empleado:</strong> {{ pedido.empleado }}</p>
-      <p><strong>Fecha Pedido:</strong> {{ pedido.FechaPedido }}</p>
-      <p><strong>Productos:</strong> {{ pedido.productos | safe }}</p>
-      <p><strong>Estado:</strong> {{ pedido.Estado }}</p>
-      <p><strong>Fecha Entrega:</strong> {{ pedido.FechaEntrega or 'No definida' }}</p><br><br>
+      <div class="contenido">
+        <div class="datos-pedido">
+          <p><strong>ID Pedido:</strong> {{ pedido.ID_Pedido }}</p>
+          <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+          <p><strong>Empleado:</strong> {{ pedido.empleado }}</p>
+          <p><strong>Fecha Pedido:</strong> {{ pedido.FechaPedido }}</p>
+          <p><strong>Productos:</strong> {{ pedido.productos | safe }}</p>
+          <p><strong>Estado:</strong> {{ pedido.Estado }}</p>
+          <p><strong>Fecha Entrega:</strong> {{ pedido.FechaEntrega or 'No definida' }}</p><br><br>
+        </div>
+        <!-- 🧾 Botones de acción -->
+        <div class="ms-auto">
+          <button class="btn btn-outline-primary ver-factura-btn"
+                  data-pedido-id="{{ pedido.ID_Pedido }}">
+            <i class="bi bi-receipt"></i> Ver factura
+          </button>
+          <button class="btn btn-outline-success ver-registros-btn"
+                  data-pedido-id="{{ pedido.ID_Pedido }}">
+            <i class="bi bi-truck"></i> Ver entrega
+          </button>
+        </div>
       </div>
-      <!-- 🧾 Botones de acción -->
-      <div class="ms-auto">
-        <button class="btn btn-outline-primary ver-factura-btn"
-                data-pedido-id="{{ pedido.ID_Pedido }}">
-          <i class="bi bi-receipt"></i> Ver factura
-        </button>
-        <button class="btn btn-outline-success ver-registros-btn"
-                data-pedido-id="{{ pedido.ID_Pedido }}">
-          <i class="bi bi-truck"></i> Ver entrega
-        </button>
-      </div>
-
     </div>
   {%endfor%}
 
@@ -260,59 +261,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-<script>
-  // Agregar fila de detalle
-  document.getElementById("btnAgregarDetalle").addEventListener("click", () => {
-    const tbody = document.querySelector("#tablaDetalles tbody");
 
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td><input type="text" class="form-control" name="producto[]" required></td>
-      <td><input type="number" class="form-control" name="cantidad[]" min="1" required></td>
-      <td><input type="number" class="form-control" name="precio[]" min="0" required></td>
-      <td><input type="text" class="form-control total" readonly></td>
-      <td><button type="button" class="btn btn-danger btn-sm btnEliminar">X</button></td>
-    `;
-
-    tbody.appendChild(fila);
-
-    // Evento para eliminar fila
-    fila.querySelector(".btnEliminar").addEventListener("click", () => fila.remove());
-
-    // Evento para calcular total
-    fila.querySelectorAll("input").forEach(input => {
-      input.addEventListener("input", () => {
-        const cantidad = fila.querySelector('[name="cantidad[]"]').value || 0;
-        const precio = fila.querySelector('[name="precio[]"]').value || 0;
-        fila.querySelector(".total").value = (cantidad * precio).toFixed(2);
-      });
-    });
-  });
-
-  // Enviar formulario
-  document.getElementById("formPedido").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  console.log("Formulario enviado");
-
-  const formData = new FormData(e.target);
-
-  const response = await fetch("/registrar_pedido", {
-    method: "POST",
-    body: formData
-  });
-
-  const result = await response.json();
-  if (result.success) {
-    alert("Pedido registrado correctamente");
-    e.target.reset();
-    document.querySelector("#tablaDetalles tbody").innerHTML = "";
-    bootstrap.Modal.getInstance(document.getElementById("modalPedido")).hide();
-  } else {
-    alert("Error: " + result.message);
-  }
-});
-
-</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
