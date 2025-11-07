@@ -1,7 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify
 from flask_login import login_required, current_user
-from basedatos.models import db, Usuario, Notificaciones, Direccion, Calendario, Pedido
+from basedatos.models import (
+    db, Usuario, Notificaciones,
+    Direccion, Calendario, Pedido
+    )
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -22,7 +25,7 @@ from basedatos.queries import (
     get_producto_by_id,
     guardar_producto,
     get_productos, detalle, recivo
-    
+
 )
 
 reviews = []
@@ -689,7 +692,8 @@ def factura_pdf(pedido_id):
         pdf.setFont("Helvetica-Bold", 14)
         pdf.drawString(200, 750, "CASA EN EL ÁRBOL - FACTURA")
         pdf.setFont("Helvetica", 10)
-        pdf.drawString(50, 730, f"Cliente: {usuario.Nombre} {usuario.Apellido}")
+        pdf.drawString(50, 730,
+                       f"Cliente: {usuario.Nombre} {usuario.Apellido}")
         pdf.drawString(50, 715, f"Correo: {usuario.Correo}")
         pdf.drawString(50, 700, f"ID Pedido: {pedido_id}")
 
@@ -760,10 +764,38 @@ def factura_json(pedido_id):
 
         # Validar que la función recivo() devuelva una lista
         if not datos:
-            return jsonify({"error": "No se encontraron datos para esta factura"}), 404
+            return jsonify({"error":
+                            "No se encontraron datos para esta factura"}), 404
 
         return jsonify(datos)
 
     except Exception as e:
         print("❌ Error en factura_json:", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@admin.route('/registros_entrega/<int:pedido_id>', methods=['GET'])
+@login_required
+def registros_entrega_json(pedido_id):
+    """
+    Devuelve los registros de entrega de un pedido en formato JSON
+    para mostrarlos en un modal.
+    """
+    from basedatos.models import db
+
+    try:
+        registros = db.session.execute("""
+            SELECT ID_Registro, ID_Pedido, ID_Empleado, Comentario,
+                   FechaRegistro, Foto1, Foto2, Foto3
+            FROM registros_entrega
+            WHERE ID_Pedido = :pedido_id
+        """, {'pedido_id': pedido_id}).mappings().all()
+
+        if not registros:
+            return jsonify([])
+
+        return jsonify([dict(r) for r in registros])
+
+    except Exception as e:
+        print("❌ Error obteniendo registros_entrega:", e)
         return jsonify({"error": str(e)}), 500
