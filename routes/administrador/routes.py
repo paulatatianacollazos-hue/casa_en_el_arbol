@@ -746,3 +746,24 @@ def empleados_calendario():
         for e in empleados
     ]
     return jsonify(data)
+
+
+@admin.route('/factura/<int:pedido_id>', methods=['GET'])
+@login_required
+def factura_json(pedido_id):
+    """
+    Devuelve los datos de la factura en formato JSON
+    para que puedan mostrarse en el modal de la interfaz.
+    """
+    try:
+        datos = recivo(pedido_id)
+
+        # Validar que la función recivo() devuelva una lista
+        if not datos:
+            return jsonify({"error": "No se encontraron datos para esta factura"}), 404
+
+        return jsonify(datos)
+
+    except Exception as e:
+        print("❌ Error en factura_json:", e)
+        return jsonify({"error": str(e)}), 500
