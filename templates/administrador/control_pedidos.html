@@ -55,7 +55,6 @@
             width: 95%;
             padding: 10px 10px;
             margin: 10px 0 10px 10px;
-            display: flex;
             font-size: 13px;
             border-radius: 10px;
             border:1px solid #d8d7d7;
@@ -147,6 +146,9 @@
             color: white;
         }
 
+        .datos-pedido{
+          display: flex;
+        }
     </style>
     {% endblock %}
 
@@ -163,14 +165,15 @@
     </div>
 
     <div class="pedidos">
+      <div class="datos-pedido">
       <p><strong>ID Pedido:</strong> {{ pedido.ID_Pedido }}</p>
       <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
       <p><strong>Empleado:</strong> {{ pedido.empleado }}</p>
       <p><strong>Fecha Pedido:</strong> {{ pedido.FechaPedido }}</p>
       <p><strong>Productos:</strong> {{ pedido.productos | safe }}</p>
       <p><strong>Estado:</strong> {{ pedido.Estado }}</p>
-      <p><strong>Fecha Entrega:</strong> {{ pedido.FechaEntrega or 'No definida' }}</p>
-
+      <p><strong>Fecha Entrega:</strong> {{ pedido.FechaEntrega or 'No definida' }}</p><br><br>
+      </div>
       <!-- 🧾 Botones de acción -->
       <div class="ms-auto">
         <button class="btn btn-outline-primary ver-factura-btn"
