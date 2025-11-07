@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from flask import jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import Usuario, Calendario, Notificaciones
+from basedatos.models import Usuario, Producto, Calendario, Notificaciones
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
@@ -466,4 +466,19 @@ def factura_pdf(pedido_id):
         return jsonify({"error": str(e)}), 500
 
 
+@cliente.route('/favoritos')
+def favoritos():
+    # Solo usuarios autenticados
+    if not current_user.is_authenticated:
+        flash("Debes iniciar sesión para ver tus favoritos", "warning")
+        return redirect(url_for('auth.login'))
 
+    # Obtener los IDs de favoritos del cliente
+    # Aquí se pueden pasar desde localStorage vía JS, 
+    # pero si quieres persistir en BD, podrías hacer:
+    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id), [])
+
+    # Obtener productos según IDs
+    productos = Producto.query.filter(Producto.id.in_(favoritos_usuario)).all()
+
+    return render_template('cliente/favoritos.html', productos=productos)
