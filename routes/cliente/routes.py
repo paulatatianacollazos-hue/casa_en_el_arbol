@@ -30,49 +30,32 @@ def dashboard():
 
 
 # ---------- INSTALACIONES ----------
-@cliente.route("/instalaciones", methods=["GET", "POST"])
+@cliente.route("/instalaciones/actualizar", methods=["GET", "POST"])
 @login_required
-def instalaciones_home():
+def actualizar_instalacion():
     if request.method == "POST":
         try:
-            fecha = datetime.strptime(request.form["fecha"], "%Y-%m-%d").date()
-            hora = datetime.strptime(request.form["hora"], "%H:%M").time()
-            ubicacion = request.form["ubicacion"]
-            tipo = request.form.get("tipo", "Instalación")
+            id_pedido = int(request.form["id_pedido"])
+            nueva_fecha = datetime.strptime(request.form["fecha_entrega"], "%Y-%m-%d").date()
 
-            nueva_cita = Calendario(
-                Fecha=fecha,
-                Hora=hora,
-                Ubicacion=ubicacion,
-                Tipo=tipo,
-                ID_Usuario=current_user.ID_Usuario
-            )
-            db.session.add(nueva_cita)
+            pedido = Pedido.query.get(id_pedido)
+            if not pedido:
+                flash("❌ Pedido no encontrado", "danger")
+                return redirect(url_for("instalaciones.actualizar_instalacion"))
+
+            # Actualizar fecha y marcar instalación
+            pedido.FechaEntrega = nueva_fecha
+            pedido.instalacion = 1  # Siempre marcar que sí hay instalación
             db.session.commit()
-            flash("✅ Instalación agendada con éxito", "success")
-            return redirect(url_for("cliente.confirmacion_instalacion"))
+
+            flash(f"✅ Pedido {id_pedido} actualizado correctamente", "success")
+            return redirect(url_for("instalaciones.actualizar_instalacion"))
+
         except Exception as e:
             db.session.rollback()
-            flash(f"❌ Error al agendar: {str(e)}", "danger")
+            flash(f"❌ Error al actualizar: {str(e)}", "danger")
 
-    citas = Calendario.query.filter_by(
-        ID_Usuario=current_user.ID_Usuario).all()
-    return render_template("cliente/instalaciones.html", citas=citas)
-
-
-@cliente.route("/instalaciones/confirmacion")
-@login_required
-def confirmacion_instalacion():
-    return render_template("cliente/confirmacion.html")
-
-
-@cliente.route("/instalaciones/lista")
-@login_required
-def lista_instalaciones():
-    citas = Calendario.query.filter_by(
-        ID_Usuario=current_user.ID_Usuario).all()
-    return render_template("cliente/lista.html", citas=citas)
-
+    return render_template("instalaciones/actualizar.html")
 
 # ---------- NOTIFICACIONES ----------
 @cliente.route("/notificaciones", methods=["GET", "POST"])
