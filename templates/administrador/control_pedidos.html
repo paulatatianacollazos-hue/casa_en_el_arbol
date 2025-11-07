@@ -227,6 +227,7 @@
 </div>
 
 <!-- Modal para ver registros de entrega -->
+<!-- Modal para ver registros de entrega -->
 <div class="modal fade" id="modalRegistros" tabindex="-1" aria-labelledby="modalRegistrosLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content" style="width: 1000px;">
@@ -242,18 +243,21 @@
               <th>Empleado</th>
               <th>Comentario</th>
               <th>Fecha</th>
-              <th>Fotos</th>
             </tr>
           </thead>
           <tbody id="registros-body">
             <!-- Se llena dinámicamente -->
           </tbody>
         </table>
+
+        <!-- Contenedor de fotos -->
+        <div id="fotos-entrega" class="d-flex flex-wrap gap-2 mt-3">
+          <!-- Se llenará dinámicamente -->
+        </div>
       </div>
     </div>
   </div>
 </div>
-
 
 
 {%endblock%}
@@ -298,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 🚚 Botón "Ver entrega"
+    // 🚚 Botón "Ver entrega"
     const btnEntrega = e.target.closest('.ver-registros-btn');
     if (btnEntrega) {
       const pedidoId = btnEntrega.dataset.pedidoId;
@@ -312,33 +317,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let registros = data.registros || [];
         let html = '';
+        let fotosHtml = '';
 
         if (registros.length === 0) {
-          html = `<tr><td colspan="5" class="text-center text-muted">No hay registros de entrega para este pedido.</td></tr>`;
+          html = `<tr><td colspan="4" class="text-center text-muted">No hay registros de entrega para este pedido.</td></tr>`;
         } else {
           registros.forEach(r => {
-            const fotos = [r.Foto1, r.Foto2, r.Foto3]
-              .filter(f => f)
-              .map(f => `<img src="/static/uploads/${f}" style="width:60px;height:60px;border-radius:5px;margin-right:5px;">`)
-              .join('');
             html += `
               <tr>
                 <td>${r.ID_Registro}</td>
                 <td>${r.ID_Empleado}</td>
                 <td>${r.Comentario || '-'}</td>
                 <td>${r.FechaRegistro}</td>
-                <td>${fotos || 'Sin fotos'}</td>
               </tr>`;
+
+            // Fotos separadas
+            [r.Foto1, r.Foto2, r.Foto3].filter(f => f).forEach(f => {
+              fotosHtml += `<img src="/static/uploads/${f}" 
+                                style="width:150px; height:150px; object-fit:cover; border-radius:8px;">`;
+            });
           });
         }
 
         document.getElementById('registros-body').innerHTML = html;
+        document.getElementById('fotos-entrega').innerHTML = fotosHtml || '<p class="text-muted">No hay fotos disponibles</p>';
+
         new bootstrap.Modal(document.getElementById('modalRegistros')).show();
+
       } catch (err) {
         console.error('Error al cargar registros de entrega:', err);
         alert('No se pudieron cargar los registros de entrega.');
       }
     }
+
   });
 });
 </script>
