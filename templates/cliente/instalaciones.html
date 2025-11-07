@@ -254,19 +254,25 @@
     <h2 class="mb-4">Actualizar Instalación de Pedido</h2>
 
 
-    <form method="POST">
+    <form method="POST" action="{{ url_for('cliente.actualizar_instalacion') }}">
         <div class="mb-3">
             <label for="id_pedido" class="form-label">ID del Pedido:</label>
             <input type="number" class="form-control" name="id_pedido" id="id_pedido" required>
         </div>
 
         <div class="mb-3">
-            <label for="fecha_entrega" class="form-label">Nueva Fecha de Entrega:</label>
+            <label for="fecha_entrega" class="form-label">Nueva Fecha:</label>
             <input type="date" class="form-control" name="fecha_entrega" id="fecha_entrega" required>
         </div>
 
-        <button type="submit" class="btn btn-success">Actualizar Instalación</button>
+        <div class="mb-3">
+            <label for="hora_entrega" class="form-label">Nueva Hora (opcional):</label>
+            <input type="time" class="form-control" name="hora_entrega" id="hora_entrega">
+        </div>
+
+        <button type="submit" class="btn btn-success">Actualizar Calendario</button>
     </form>
+
 </div>
 
 
