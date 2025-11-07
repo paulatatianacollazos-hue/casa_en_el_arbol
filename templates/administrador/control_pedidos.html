@@ -257,7 +257,6 @@
 
 {%endblock%}
 {% block extra_footer %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
@@ -317,103 +316,76 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
+  // 📦 Botón "Ver factura"
   document.addEventListener('click', async function(e) {
-    const btn = e.target.closest('.ver-factura-btn');
-    if (!btn) return;
-
-    const pedidoId = btn.dataset.pedidoId;
-    console.log("📦 Clic en Ver factura:", pedidoId); // <-- para verificar
-
-    try {
-      const res = await fetch(`/admin/factura/${pedidoId}`);
-      const data = await res.json();
-
-      if (data.error) throw new Error(data.error);
-
-      let html = '';
-      data.forEach(f => {
-        html += `
-          <tr>
-            <td>${f.NombreProducto}</td>
-            <td>${f.Cantidad}</td>
-            <td>$${f.PrecioUnidad}</td>
-            <td>${f.MetodoPago}</td>
-            <td>$${f.Monto}</td>
-            <td>${f.FechaPago}</td>
-          </tr>`;
-      });
-
-      document.getElementById('factura-body').innerHTML = html;
-      document.getElementById('btnDescargarPDF').href = `/admin/factura/pdf/${pedidoId}`;
-
-      // ✅ Mostrar modal correctamente
-      const modalFactura = new bootstrap.Modal(document.getElementById('modalFactura'));
-      modalFactura.show();
-
-    } catch (err) {
-      console.error('❌ Error al cargar factura:', err);
-      alert('No se pudo cargar la factura. Intenta más tarde.');
-    }
-  });
-
-  // Limpiar modal al cerrarlo
-  const modalFactura = document.getElementById('modalFactura');
-  modalFactura.addEventListener('hidden.bs.modal', () => {
-    document.getElementById('factura-body').innerHTML = '';
-    document.getElementById('btnDescargarPDF').href = '#';
-  });
-
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // --- Botón "Ver entrega" ---
-  document.addEventListener('click', async function(e) {
-    const btn = e.target.closest('.ver-registros-btn');
-    if (!btn) return;
-
-    const pedidoId = btn.dataset.pedidoId;
-    console.log("🚚 Clic en Ver registros:", pedidoId);
-
-    try {
-      const res = await fetch(`/admin/registros_entrega/${pedidoId}`);
-      const data = await res.json();
-
-      if (data.error) throw new Error(data.error);
-
-      let html = '';
-      if (data.length === 0) {
-        html = `<tr><td colspan="5" class="text-center text-muted">
-                  No hay registros de entrega para este pedido.
-                </td></tr>`;
-      } else {
-        data.forEach(r => {
-          const fotos = [r.Foto1, r.Foto2, r.Foto3]
-            .filter(f => f)
-            .map(f => `<img src="/static/uploads/${f}" 
-                        style="width:60px;height:60px;border-radius:5px;margin-right:5px;">`)
-            .join('');
+    const btnFactura = e.target.closest('.ver-factura-btn');
+    if (btnFactura) {
+      const pedidoId = btnFactura.dataset.pedidoId;
+      console.log("📦 Ver factura:", pedidoId);
+      try {
+        const res = await fetch(`/admin/factura/${pedidoId}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        let html = '';
+        data.forEach(f => {
           html += `
             <tr>
-              <td>${r.ID_Registro}</td>
-              <td>${r.ID_Empleado}</td>
-              <td>${r.Comentario || '-'}</td>
-              <td>${r.FechaRegistro}</td>
-              <td>${fotos || 'Sin fotos'}</td>
+              <td>${f.NombreProducto}</td>
+              <td>${f.Cantidad}</td>
+              <td>$${f.PrecioUnidad}</td>
+              <td>${f.MetodoPago}</td>
+              <td>$${f.Monto}</td>
+              <td>${f.FechaPago}</td>
             </tr>`;
         });
+        document.getElementById('factura-body').innerHTML = html;
+        document.getElementById('btnDescargarPDF').href = `/admin/factura/pdf/${pedidoId}`;
+        const modalFactura = new bootstrap.Modal(document.getElementById('modalFactura'));
+        modalFactura.show();
+      } catch (err) {
+        console.error('❌ Error al cargar factura:', err);
+        alert('No se pudo cargar la factura. Intenta más tarde.');
       }
+    }
 
-      document.getElementById('registros-body').innerHTML = html;
-
-      // ✅ Mostrar modal
-      const modalRegistros = new bootstrap.Modal(document.getElementById('modalRegistros'));
-      modalRegistros.show();
-
-    } catch (err) {
-      console.error('❌ Error al cargar registros:', err);
-      alert('No se pudo cargar los registros de entrega.');
+    // 🚚 Botón "Ver entrega"
+    const btnEntrega = e.target.closest('.ver-registros-btn');
+    if (btnEntrega) {
+      const pedidoId = btnEntrega.dataset.pedidoId;
+      console.log("🚚 Ver registros:", pedidoId);
+      try {
+        const res = await fetch(`/admin/registros_entrega/${pedidoId}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        let html = '';
+        if (data.length === 0) {
+          html = `<tr><td colspan="5" class="text-center text-muted">
+                    No hay registros de entrega para este pedido.
+                  </td></tr>`;
+        } else {
+          data.forEach(r => {
+            const fotos = [r.Foto1, r.Foto2, r.Foto3]
+              .filter(f => f)
+              .map(f => `<img src="/static/uploads/${f}" 
+                          style="width:60px;height:60px;border-radius:5px;margin-right:5px;">`)
+              .join('');
+            html += `
+              <tr>
+                <td>${r.ID_Registro}</td>
+                <td>${r.ID_Empleado}</td>
+                <td>${r.Comentario || '-'}</td>
+                <td>${r.FechaRegistro}</td>
+                <td>${fotos || 'Sin fotos'}</td>
+              </tr>`;
+          });
+        }
+        document.getElementById('registros-body').innerHTML = html;
+        const modalRegistros = new bootstrap.Modal(document.getElementById('modalRegistros'));
+        modalRegistros.show();
+      } catch (err) {
+        console.error('❌ Error al cargar registros:', err);
+        alert('No se pudo cargar los registros de entrega.');
+      }
     }
   });
 });
