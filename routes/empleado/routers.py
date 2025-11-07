@@ -274,7 +274,7 @@ def registro_entrega(pedido_id):
         fotos = request.files.getlist('fotos')
 
         # ✅ Carpeta donde se guardarán las imágenes
-        carpeta_destino = os.path.join('static', 'uploads', 'entregas')
+        carpeta_destino = os.path.join('static', 'img')
         os.makedirs(carpeta_destino, exist_ok=True)
 
         fotos_guardadas = []
@@ -317,7 +317,9 @@ def registro_entrega(pedido_id):
         cursor.close()
         conn.close()
 
-        flash("✅ Registro de entrega guardado y pedido marcado como entregado.", "success")
+        flash(
+            "✅ Registro de entrega guardado y pedido marcado como entregado.",
+            "success")
         return redirect(url_for('empleado.dashboard'))
 
     # Si es GET, mostrar formulario con datos del pedido
