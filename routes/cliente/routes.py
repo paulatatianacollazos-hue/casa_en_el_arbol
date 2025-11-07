@@ -30,7 +30,7 @@ def dashboard():
 
 
 # ---------- INSTALACIONES ----------
-@cliente.route("/instalaciones/actualizar", methods=["GET", "POST"])
+@cliente.route("/instalaciones", methods=["GET", "POST"])
 @login_required
 def actualizar_instalacion():
     if request.method == "POST":
@@ -41,7 +41,7 @@ def actualizar_instalacion():
             pedido = Pedido.query.get(id_pedido)
             if not pedido:
                 flash("❌ Pedido no encontrado", "danger")
-                return redirect(url_for("instalaciones.actualizar_instalacion"))
+                return redirect(url_for("cliente.instalaciones"))
 
             # Actualizar fecha y marcar instalación
             pedido.FechaEntrega = nueva_fecha
@@ -49,13 +49,14 @@ def actualizar_instalacion():
             db.session.commit()
 
             flash(f"✅ Pedido {id_pedido} actualizado correctamente", "success")
-            return redirect(url_for("instalaciones.actualizar_instalacion"))
+            return redirect(url_for("cliente.instalaciones"))
 
         except Exception as e:
             db.session.rollback()
             flash(f"❌ Error al actualizar: {str(e)}", "danger")
 
-    return render_template("instalaciones/actualizar.html")
+    return render_template("cliente/instalaciones.html")
+
 
 # ---------- NOTIFICACIONES ----------
 @cliente.route("/notificaciones", methods=["GET", "POST"])

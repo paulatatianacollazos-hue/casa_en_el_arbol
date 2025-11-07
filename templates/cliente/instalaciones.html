@@ -250,27 +250,27 @@
     </div>
 
     
-    <div class="agenda-card">
-      <h2>Agendar instalación</h2>
-      <form method="POST">
+    <div class="container">
+    <h2 class="mb-4">Actualizar Instalación de Pedido</h2>
+
+
+    <form method="POST">
         <div class="mb-3">
-          <label class="form-label">Dirección de instalación:</label>
-          <input type="text" name="ubicacion" class="form-control agenda-input" required>
+            <label for="id_pedido" class="form-label">ID del Pedido:</label>
+            <input type="number" class="form-control" name="id_pedido" id="id_pedido" required>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Fecha de instalación:</label>
-          <input type="date"  id="fecha" name="fecha" class="form-control agenda-input" required>
+            <label for="fecha_entrega" class="form-label">Nueva Fecha de Entrega:</label>
+            <input type="date" class="form-control" name="fecha_entrega" id="fecha_entrega" required>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Hora:</label>
-          <input type="time" name="hora" class="form-control agenda-input" required>
-        </div>
+        <button type="submit" class="btn btn-success">Actualizar Instalación</button>
+    </form>
+</div>
 
-        <button type="submit" class="agenda-btn">Confirmar instalación</button>
-      </form>
-    </div>
+
+
 
  <!-- Footer suscripción -->
     <section class="footer-suscripcion mt-5 bg-dark text-light py-4">
@@ -313,24 +313,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/actualizacion.js') }}"></script>
-<script>document.addEventListener("DOMContentLoaded", function () {
-  const inputFecha = document.getElementById("fecha");
-
-  if (inputFecha) {
-    
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const inputFecha = document.getElementById("fecha_entrega");
     const hoy = new Date();
     const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, "0"); 
-    const dd = String(hoy.getDate()).padStart(2, "0");      
-    const fechaHoy = `${yyyy}-${mm}-${dd}`;
-
-    
-    inputFecha.setAttribute("min", fechaHoy);
-  }
+    const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+    const dd = String(hoy.getDate()).padStart(2, "0");
+    inputFecha.min = `${yyyy}-${mm}-${dd}`;
 });
-
-
 </script>
+
 {% if current_user.is_authenticated %}
 <script>
   window.FLASK_USER_ID = "{{ current_user.id }}";
