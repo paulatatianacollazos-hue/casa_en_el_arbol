@@ -243,8 +243,49 @@
   }
 });
 
+</script>
+
+<script>
+document.addEventListener('click', async function(e) {
+  if (e.target.closest('.ver-factura-btn')) {
+    const btn = e.target.closest('.ver-factura-btn');
+    const pedidoId = btn.dataset.pedidoId;
+
+    try {
+      const res = await fetch(`/cliente/factura/${pedidoId}`);
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      let html = '';
+      data.forEach(f => {
+        html += `
+          <tr>
+            <td>${f.NombreProducto}</td>
+            <td>${f.cantidad}</td>
+            <td>$${f.PrecioUnidad}</td>
+            <td>${f.MetodoPago}</td>
+            <td>$${f.Monto}</td>
+            <td>${f.FechaPago}</td>
+          </tr>`;
+      });
+
+      document.getElementById('factura-body').innerHTML = html;
+
+      // 🔗 actualizar link del botón PDF
+      document.getElementById('btnDescargarPDF').href = `/cliente/factura/pdf/${pedidoId}`;
+
+      new bootstrap.Modal(document.getElementById('modalFactura')).show();
+
+    } catch (err) {
+      console.error('Error al cargar factura:', err);
+      alert('No se pudo cargar la factura. Intenta más tarde.');
+    }
+  }
+});
 
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
