@@ -126,7 +126,9 @@
         Añadir al carrito
       </button>
     </div>
-
+    <button class="btn-fav" data-id="{{ producto.ID_Producto }}">
+        <i class="bi bi-heart"></i>
+    </button>
     <div class="mt-3">
     <button id="btn-volver" class="btn btn-primary">Volver</button>
   </div>
@@ -181,27 +183,55 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-document.querySelectorAll('.btn-favorito').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        const productoId = btn.dataset.productoId;
+document.addEventListener("DOMContentLoaded", () => {
+
+    const userId = window.FLASK_USER_ID;
+    if(!userId) return; // si no hay usuario, no guardar favoritos
+
+    const storageKey = `favoritos_usuario_${userId}`;
+    let favoritos = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    // Inicializar íconos
+    document.querySelectorAll('.btn-favorito').forEach(btn => {
+        const id = parseInt(btn.dataset.productoId);
         const icon = btn.querySelector('i');
-
-        try {
-            const res = await fetch(`/favorito/${productoId}`, { method: 'POST' });
-            const data = await res.json();
-
-            if(data.status === 'removed'){
-                icon.classList.remove('text-danger');
-                // Opcional: eliminar el producto de la sección favoritos
-                const card = btn.closest('.col-md-3');
-                if(card) card.remove();
-            } else {
-                icon.classList.add('text-danger');
-            }
-        } catch(err) {
-            console.error('Error al actualizar favoritos:', err);
+        if(favoritos.includes(id)){
+            icon.classList.add('text-danger');
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill');
+        } else {
+            icon.classList.remove('text-danger');
+            icon.classList.remove('bi-heart-fill');
+            icon.classList.add('bi-heart');
         }
+
+        // Click en corazón
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // evitar click en producto
+            if(favoritos.includes(id)){
+                favoritos = favoritos.filter(f => f !== id);
+                icon.classList.remove('text-danger');
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+            } else {
+                favoritos.push(id);
+                icon.classList.add('text-danger');
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+            }
+            localStorage.setItem(storageKey, JSON.stringify(favoritos));
+        });
     });
+
+    // Click en producto → detalle
+    document.querySelectorAll('.caja').forEach(card => {
+        card.addEventListener('click', e => {
+            if(e.target.closest('.btn-favorito')) return;
+            const id = card.querySelector('[data-producto-id]').dataset.productoId;
+            window.location.href = `/cliente/producto/${id}`;
+        });
+    });
+
 });
 </script>
 
