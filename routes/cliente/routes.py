@@ -30,33 +30,31 @@ def dashboard():
 
 
 # ---------- INSTALACIONES ----------
-@cliente.route("/instalaciones", methods=["GET", "POST"])
-@login_required
+@cliente.route('/instalaciones', methods=['POST'])
 def actualizar_instalacion():
-    if request.method == "POST":
-        try:
-            id_pedido = int(request.form["id_pedido"])
-            nueva_fecha = datetime.strptime(request.form["fecha_entrega"], "%Y-%m-%d").date()
+    # Obtener los datos del formulario
+    id_pedido = request.form.get('id_pedido')
+    nueva_fecha = request.form.get('fecha_entrega')
 
-            pedido = Pedido.query.get(id_pedido)
-            if not pedido:
-                flash("❌ Pedido no encontrado", "danger")
-                return redirect(url_for("cliente.instalaciones"))
+    if not id_pedido or not nueva_fecha:
+        flash("Debes ingresar todos los datos", "danger")
+        return redirect(url_for('cliente.instalaciones'))  # Ajusta tu endpoint
 
-            # Actualizar fecha y marcar instalación
-            pedido.FechaEntrega = nueva_fecha
-            pedido.instalacion = 1  # Siempre marcar que sí hay instalación
-            db.session.commit()
+    # Buscar el calendario asociado al pedido
+    calendario = Calendario.query.filter_by(ID_Pedido=id_pedido).first()
+    if not calendario:
+        flash("No se encontró un calendario para este pedido", "danger")
+        return redirect(url_for('cliente.instalaciones'))
 
-            flash(f"✅ Pedido {id_pedido} actualizado correctamente", "success")
-            return redirect(url_for("cliente.instalaciones"))
+    # Actualizar fecha (y opcionalmente tipo si quieres)
+    calendario.Fecha = datetime.strptime(nueva_fecha, "%Y-%m-%d").date()
+    # calendario.Tipo = "Instalación"  # Opcional: cambiar el tipo si deseas
 
-        except Exception as e:
-            db.session.rollback()
-            flash(f"❌ Error al actualizar: {str(e)}", "danger")
+    # Guardar cambios en la base de datos
+    db.session.commit()
 
-    return render_template("cliente/instalaciones.html")
-
+    flash("Calendario actualizado correctamente", "success")
+    return redirect(url_for('cliente.instalaciones'))
 
 # ---------- NOTIFICACIONES ----------
 @cliente.route("/notificaciones", methods=["GET", "POST"])
