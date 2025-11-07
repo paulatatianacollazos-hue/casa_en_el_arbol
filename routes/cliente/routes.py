@@ -30,31 +30,34 @@ def dashboard():
 
 
 # ---------- INSTALACIONES ----------
-@cliente.route('/instalaciones', methods=['POST'])
+# Mostrar las instalaciones
+@cliente.route('/instalaciones', methods=['GET'])
+def instalaciones():
+    calendarios = Calendario.query.all()  # O filtra por usuario
+    return render_template('cliente/instalaciones.html', calendarios=calendarios)
+
+
+# Actualizar instalación
+@cliente.route('/instalaciones/actualizar', methods=['POST'])
 def actualizar_instalacion():
-    # Obtener los datos del formulario
     id_pedido = request.form.get('id_pedido')
     nueva_fecha = request.form.get('fecha_entrega')
 
     if not id_pedido or not nueva_fecha:
         flash("Debes ingresar todos los datos", "danger")
-        return redirect(url_for('cliente.instalaciones'))  # Ajusta tu endpoint
+        return redirect(url_for('cliente.instalaciones'))
 
-    # Buscar el calendario asociado al pedido
     calendario = Calendario.query.filter_by(ID_Pedido=id_pedido).first()
     if not calendario:
         flash("No se encontró un calendario para este pedido", "danger")
         return redirect(url_for('cliente.instalaciones'))
 
-    # Actualizar fecha (y opcionalmente tipo si quieres)
     calendario.Fecha = datetime.strptime(nueva_fecha, "%Y-%m-%d").date()
-    # calendario.Tipo = "Instalación"  # Opcional: cambiar el tipo si deseas
-
-    # Guardar cambios en la base de datos
     db.session.commit()
 
     flash("Calendario actualizado correctamente", "success")
     return redirect(url_for('cliente.instalaciones'))
+
 
 # ---------- NOTIFICACIONES ----------
 @cliente.route("/notificaciones", methods=["GET", "POST"])
