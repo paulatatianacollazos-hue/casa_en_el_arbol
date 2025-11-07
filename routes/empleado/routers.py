@@ -273,28 +273,40 @@ def registro_entrega(pedido_id):
         comentario = request.form.get('comentario')
         fotos = request.files.getlist('fotos')
 
-        # Guardar fotos en la carpeta correspondiente
-        fotos_guardadas = []
-        for foto in fotos[:3]:  # máximo 3 fotos
-            if foto and foto.filename != '':
-                nombre_archivo = secure_filename(foto.filename)
-                ruta = os.path.join('static/uploads/entregas', nombre_archivo)
-                foto.save(ruta)
-                fotos_guardadas.append(nombre_archivo)
+        # ✅ Carpeta donde se guardarán las imágenes
+        carpeta_destino = os.path.join('static', 'uploads', 'entregas')
+        os.makedirs(carpeta_destino, exist_ok=True)
 
-        # Rellenar con None las que falten
+        fotos_guardadas = []
+        for foto in fotos[:3]:  # límite de 3 fotos
+            if foto and foto.filename.strip() != '':
+                nombre_archivo = secure_filename(foto.filename)
+                ruta_completa = os.path.join(carpeta_destino, nombre_archivo)
+                foto.save(ruta_completa)
+                fotos_guardadas.append(nombre_archivo)
+            else:
+                fotos_guardadas.append(None)
+
+        # Rellenar con None las fotos faltantes
         while len(fotos_guardadas) < 3:
             fotos_guardadas.append(None)
 
-        # Guardar registro en la base de datos
+        # 🔹 Insertar en registros_entrega
         cursor.execute("""
-            INSERT INTO registros_entrega (ID_Pedido, ID_Empleado, Comentario,
-            Foto1, Foto2, Foto3)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (pedido_id, current_user.id, comentario, fotos_guardadas[0],
-              fotos_guardadas[1], fotos_guardadas[2]))
+            INSERT INTO registros_entrega (
+                ID_Pedido, ID_Empleado, Comentario,
+                Foto1, Foto2, Foto3
+            ) VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            pedido_id,
+            current_user.id,
+            comentario,
+            fotos_guardadas[0],
+            fotos_guardadas[1],
+            fotos_guardadas[2]
+        ))
 
-        # 🔥 Actualizar el estado del pedido a ENTREGADO
+        # 🔹 Actualizar el estado del pedido
         cursor.execute("""
             UPDATE pedido
             SET Estado = 'entregado'
@@ -305,12 +317,10 @@ def registro_entrega(pedido_id):
         cursor.close()
         conn.close()
 
-        flash(
-            "✅ Registro de entrega guardado y pedido marcado como entregado.",
-            "success")
+        flash("✅ Registro de entrega guardado y pedido marcado como entregado.", "success")
         return redirect(url_for('empleado.dashboard'))
 
-    # Si es GET, mostrar formulario
+    # Si es GET, mostrar formulario con datos del pedido
     cursor.execute("""
         SELECT p.*, c.Nombre AS ClienteNombre, c.Apellido AS ClienteApellido
         FROM pedido p
