@@ -151,42 +151,68 @@
     {% endblock %}
 
 {% block content %}
-    
-    <div class="intermedio"></div>
-    <div class="opciones1">
-        <div class="a"><a href="/admin/estado" style="margin-top: 20px;">ESTADO</a></div>
-        <div class="a"><a href="/admin/control_pedidos" style="margin-top: 20px;">PEDIDOS</a></div>
-        <div class="a"><a href="/admin/comentarios" style="margin-top: 20px;">COMENTARIOS</a></div>
-        <div class="a"><a href="/admin/reporte" style="margin-top: 20px;">REPORTE</a></div>
-        <div class="volver"><a href="/admin/actualizacion_datos">VOLVER</a></div>
-    </div>
+  {% for pedido in pedidos %}
+    <div class="pedidos">
+      <p><strong>ID Pedido:</strong> {{ pedido.ID_Pedido }}</p>
+      <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+      <p><strong>Empleado:</strong> {{ pedido.empleado }}</p>
+      <p><strong>Fecha Pedido:</strong> {{ pedido.FechaPedido }}</p>
+      <p><strong>Productos:</strong> {{ pedido.productos | safe }}</p>
+      <p><strong>Estado:</strong> {{ pedido.Estado }}</p>
+      <p><strong>Fecha Entrega:</strong> {{ pedido.FechaEntrega or 'No definida' }}</p>
 
-<div class="content-pedidos">
-    
-    <div class="contenedor-pedidos">
-    
+      <!-- 🧾 Botones de acción -->
+      <div class="ms-auto">
+        <button class="btn btn-outline-primary ver-factura-btn"
+                data-pedido-id="{{ pedido.ID_Pedido }}">
+          <i class="bi bi-receipt"></i> Ver factura
+        </button>
 
-        <div class="contenedor-pedidos">
-            <h2>Pedidos Registrados</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPedido">
-              Nuevo Pedido
-            </button>
-            {% for pedido in pedidos %}
-              <div class="pedidos">
-                <p><strong>ID Pedido:</strong> {{ pedido.ID_Pedido }}</p>
-                <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
-                <p><strong>Empleado:</strong> {{ pedido.empleado }}</p>
-                <p><strong>Fecha Pedido:</strong> {{ pedido.FechaPedido }}</p>
-                <p><strong>Productos:</strong> {{ pedido.productos | safe }}</p>
-                <p><strong>Estado:</strong> {{ pedido.Estado }}</p>
-                <p><strong>Fecha Entrega:</strong> {{ pedido.FechaEntrega or 'No definida' }}</p>
-              </div>
-            {% endfor %}
-        </div>
+        <a href="{{ url_for('admin.descargar_pedido_pdf', pedido_id=pedido.ID_Pedido) }}"
+          class="btn btn-outline-danger">
+          <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+        </a>
+      </div>
     </div>
-</div>
+  {%endfor%}
 
 <!-- Botón para abrir el modal -->
+<!-- Modal para ver factura -->
+<div class="modal fade" id="modalFactura" tabindex="-1" aria-labelledby="modalFacturaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="width: 1000px;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Factura del pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio unidad</th>
+              <th>Método de pago</th>
+              <th>Monto total</th>
+              <th>Fecha de pago</th>
+            </tr>
+          </thead>
+          <tbody id="factura-body">
+            <!-- Se llena dinámicamente -->
+          </tbody>
+        </table>
+
+        <div class="text-end">
+          <a id="btnDescargarPDF" href="#" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 
 {%endblock%}
