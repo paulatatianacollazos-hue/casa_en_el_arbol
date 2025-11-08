@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, flash, redirect, url_for
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
+from flask_wtf.csrf import CSRFProtect
 
 # ------------------ MODELOS ------------------ #
 from basedatos.models import db, Usuario
@@ -19,6 +20,9 @@ from routes.empleado.routers import empleado
 # ------------------ APP ------------------ #
 app = Flask(__name__)
 app.register_blueprint(empleado)
+
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 # ------------------ CONFIGURACIÓN PRINCIPAL ------------------ #
 app.config.update(
