@@ -9,7 +9,6 @@ from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id, recivo
 from basedatos.models import db, Comentarios, Direccion
-from basedatos.models import Pedido, Seguimiento
 import base64
 import os
 from basedatos.queries import crear_pedido_y_pago
@@ -355,24 +354,6 @@ def confirmar_pago():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@cliente.route('/seguimiento/<int:pedido_id>')
-def seguimiento(pedido_id):
-    pedido = Pedido.query.get_or_404(pedido_id)
-    seg = Seguimiento.query.filter_by(pedido_id=pedido_id).order_by(
-        Seguimiento.timestamp.desc()).first()
-    return render_template('seguimiento.html', pedido=pedido, seguimiento=seg)
-
-
-@cliente.route('/api/posicion/<int:pedido_id>')
-def api_posicion(pedido_id):
-    seg = Seguimiento.query.filter_by(pedido_id=pedido_id).order_by(
-        Seguimiento.timestamp.desc()).first()
-    if not seg:
-        return jsonify({'ok': False, 'message': 'No hay seguimiento'}), 404
-    return jsonify({'ok': True, 'lat': seg.lat, 'lng': seg.lng, 'estado':
-                    seg.estado, 'timestamp': seg.timestamp.isoformat()})
-
-
 # ---------- FAVORITOS ----------
 @cliente.route('/favorito/<int:producto_id>', methods=['POST'])
 @login_required
@@ -473,12 +454,11 @@ def favoritos():
         flash("Debes iniciar sesión para ver tus favoritos", "warning")
         return redirect(url_for('auth.login'))
 
-    # Obtener los IDs de favoritos del cliente
-    # Aquí se pueden pasar desde localStorage vía JS, 
-    # pero si quieres persistir en BD, podrías hacer:
-    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id), [])
+    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id),
+                                                         [])
 
-    # Obtener productos según IDs
-    productos = Producto.query.filter(Producto.id.in_(favoritos_usuario)).all()
+    # Corregimos el campo a ID_Producto
+    productos = Producto.query.filter(Producto.ID_Producto.in_(
+        favoritos_usuario)).all()
 
     return render_template('cliente/favoritos.html', productos=productos)
