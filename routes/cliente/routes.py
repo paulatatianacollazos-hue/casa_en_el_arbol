@@ -460,3 +460,10 @@ def favoritos():
         favoritos_usuario)).all()
 
     return render_template('cliente/favoritos.html', productos=productos)
+
+
+@cliente.route('/favoritos-json')
+@login_required
+def favoritos_json():
+    favoritos = session.get('favoritos', {}).get(str(current_user.id), [])
+    return jsonify(favoritos)

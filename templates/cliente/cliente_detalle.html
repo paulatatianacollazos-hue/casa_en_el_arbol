@@ -183,66 +183,53 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const userId = window.FLASK_USER_ID;
-  if (!userId) return; // Si no hay usuario logueado, no hace nada
+document.addEventListener("DOMContentLoaded", async () => {
+    const btn = document.querySelector(".btn-favorito");
+    if (!btn) return;
 
-  // --- Función: Alternar favorito ---
-  async function toggleFavorito(btn) {
-    const productoId = btn.dataset.productoId;
+    const productoId = parseInt(btn.dataset.productoId);
+
+    // Obtener favoritos del servidor
+    let favoritos = [];
+    try {
+        const res = await fetch("/favoritos-json");
+        if (res.ok) favoritos = await res.json();
+    } catch (err) {
+        console.error("Error obteniendo favoritos:", err);
+    }
+
     const icon = btn.querySelector("i");
 
-    try {
-      const res = await fetch(`/cliente/favorito/${productoId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token() }}"
-        }
-      });
-
-      const data = await res.json();
-
-      if (data.status === "added") {
+    // Pintar el corazón si el producto ya está en favoritos
+    if (favoritos.includes(productoId)) {
         icon.classList.add("text-danger", "bi-heart-fill");
         icon.classList.remove("bi-heart");
-      } else if (data.status === "removed") {
-        icon.classList.remove("text-danger", "bi-heart-fill");
-        icon.classList.add("bi-heart");
-      }
-    } catch (err) {
-      console.error("Error al alternar favorito:", err);
     }
-  }
 
-  // --- Asignar eventos a todos los botones ---
-  document.querySelectorAll(".btn-favorito").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleFavorito(btn);
-    });
-  });
+    // Función toggle favorito
+    async function toggleFavorito() {
+        try {
+            const res = await fetch(`/favorito/${productoId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            const data = await res.json();
 
-  // --- Mostrar corazón rojo si el producto está en el carrito ---
-  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-  document.querySelectorAll(".btn-favorito").forEach((btn) => {
-    const productoId = parseInt(btn.dataset.productoId);
-    const icon = btn.querySelector("i");
-
-    // Verificamos tanto item.id como item.ID_Producto (según cómo se guarde)
-    const enCarrito = carrito.some(item =>
-      item.id === productoId || item.ID_Producto === productoId
-    );
-
-    if (enCarrito) {
-      icon.classList.add("text-danger", "bi-heart-fill");
-      icon.classList.remove("bi-heart");
-    } else {
-      icon.classList.remove("text-danger", "bi-heart-fill");
-      icon.classList.add("bi-heart");
+            if (data.status === "added") {
+                icon.classList.add("text-danger", "bi-heart-fill");
+                icon.classList.remove("bi-heart");
+                favoritos.push(productoId);
+            } else {
+                icon.classList.remove("text-danger", "bi-heart-fill");
+                icon.classList.add("bi-heart");
+                favoritos = favoritos.filter(id => id !== productoId);
+            }
+        } catch (err) {
+            console.error("Error al alternar favorito:", err);
+        }
     }
-  });
+
+    btn.addEventListener("click", toggleFavorito);
 });
 </script>
 
