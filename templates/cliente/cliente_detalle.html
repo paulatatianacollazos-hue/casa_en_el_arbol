@@ -234,9 +234,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (carrito.some(item => item.id === productoId)) {
       icon.classList.add("text-danger", "bi-heart-fill");
       icon.classList.remove("bi-heart");
+    } else {
+      // En caso contrario, asegurar que esté vacío
+      icon.classList.remove("text-danger", "bi-heart-fill");
+      icon.classList.add("bi-heart");
     }
   });
 });
 </script>
+
 
 {% endblock %}
