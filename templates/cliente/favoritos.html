@@ -46,7 +46,9 @@
   {% if productos %}
     {% for producto in productos %}
       <div class="producto-card" data-id="{{ producto.ID_Producto }}">
-        <i class="bi bi-heart heart text-danger"></i>
+        <button class="btn-favorito" data-producto-id="{{ producto.ID_Producto }}">
+          <i class="bi bi-heart"></i>
+        </button>
         <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
         <h5>{{ producto.NombreProducto }}</h5>
         <p>${{ producto.PrecioUnidad }}</p>
@@ -57,3 +59,69 @@
   {% endif %}
 </div>
 {% endblock %}
+
+{% block extra_footer %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const userId = window.FLASK_USER_ID;
+  if (!userId) return; // Si no hay usuario logueado, no hace nada
+
+  // --- Función: Alternar favorito ---
+  async function toggleFavorito(btn) {
+    const productoId = btn.dataset.productoId;
+    const icon = btn.querySelector("i");
+
+    try {
+      const res = await fetch(`/cliente/favorito/${productoId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token() }}"
+        }
+      });
+
+      const data = await res.json();
+
+      if (data.status === "added") {
+        icon.classList.add("text-danger", "bi-heart-fill");
+        icon.classList.remove("bi-heart");
+      } else if (data.status === "removed") {
+        icon.classList.remove("text-danger", "bi-heart-fill");
+        icon.classList.add("bi-heart");
+      }
+    } catch (err) {
+      console.error("Error al alternar favorito:", err);
+    }
+  }
+
+  // --- Asignar eventos a todos los botones ---
+  document.querySelectorAll(".btn-favorito").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFavorito(btn);
+    });
+  });
+
+  // --- Mostrar corazón rojo si el producto está en el carrito ---
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+  document.querySelectorAll(".btn-favorito").forEach((btn) => {
+    const productoId = parseInt(btn.dataset.productoId);
+    const icon = btn.querySelector("i");
+
+    // Verificamos tanto item.id como item.ID_Producto (según cómo se guarde)
+    const enCarrito = carrito.some(item =>
+      item.id === productoId || item.ID_Producto === productoId
+    );
+
+    if (enCarrito) {
+      icon.classList.add("text-danger", "bi-heart-fill");
+      icon.classList.remove("bi-heart");
+    } else {
+      icon.classList.remove("text-danger", "bi-heart-fill");
+      icon.classList.add("bi-heart");
+    }
+  });
+});
+</script>
+{%endblock%}
