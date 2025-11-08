@@ -126,8 +126,8 @@
         Añadir al carrito
       </button>
     </div>
-    <button class="btn-fav" data-id="{{ producto.ID_Producto }}">
-        <i class="bi bi-heart"></i>
+    <button class="btn-favorito" data-producto-id="{{ producto.ID_Producto }}">
+      <i class="bi bi-heart"></i>
     </button>
     <div class="mt-3">
     <button id="btn-volver" class="btn btn-primary">Volver</button>
@@ -230,18 +230,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoId = parseInt(btn.dataset.productoId);
     const icon = btn.querySelector("i");
 
-    // Si el producto está en el carrito → corazon rojo lleno
-    if (carrito.some(item => item.id === productoId)) {
+    // Verificamos tanto item.id como item.ID_Producto (según cómo se guarde)
+    const enCarrito = carrito.some(item =>
+      item.id === productoId || item.ID_Producto === productoId
+    );
+
+    if (enCarrito) {
       icon.classList.add("text-danger", "bi-heart-fill");
       icon.classList.remove("bi-heart");
     } else {
-      // En caso contrario, asegurar que esté vacío
       icon.classList.remove("text-danger", "bi-heart-fill");
       icon.classList.add("bi-heart");
     }
   });
 });
 </script>
+
 
 
 {% endblock %}
