@@ -449,15 +449,12 @@ def factura_pdf(pedido_id):
 
 @cliente.route('/favoritos')
 def favoritos():
-    # Solo usuarios autenticados
     if not current_user.is_authenticated:
         flash("Debes iniciar sesión para ver tus favoritos", "warning")
         return redirect(url_for('auth.login'))
 
-    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id),
-                                                         [])
+    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id), [])
 
-    # Corregimos el campo a ID_Producto
     productos = Producto.query.filter(Producto.ID_Producto.in_(
         favoritos_usuario)).all()
 

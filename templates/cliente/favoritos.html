@@ -42,59 +42,18 @@
 
 {% block content %}
 <h2>Mis Favoritos</h2>
-<div class="favorito-container" id="favorito-container">
-  <!-- Los productos se agregarán aquí desde JS -->
+<div class="favorito-container">
+  {% if productos %}
+    {% for producto in productos %}
+      <div class="producto-card">
+        <i class="bi bi-heart heart text-danger"></i>
+        <img src="{{ url_for('static', filename=producto.Imagenes[0]) }}" alt="{{ producto.NombreProducto }}">
+        <h5>{{ producto.NombreProducto }}</h5>
+        <p>${{ producto.PrecioUnidad }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No tienes productos favoritos.</p>
+  {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_footer %}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const userId = "{{ current_user.id if current_user.is_authenticated else 'guest' }}";
-    const container = document.getElementById("favorito-container");
-
-    // Obtener favoritos de localStorage
-    let favoritos = JSON.parse(localStorage.getItem('favoritos_' + userId)) || [];
-
-    // Función para renderizar los productos favoritos
-    function renderFavoritos() {
-        container.innerHTML = '';
-        if(favoritos.length === 0){
-            container.innerHTML = '<p>No tienes productos favoritos.</p>';
-            return;
-        }
-
-        favoritos.forEach(producto => {
-            const card = document.createElement('div');
-            card.className = 'producto-card';
-
-            card.innerHTML = `
-                <i class="bi bi-heart heart text-danger"></i>
-                <img src="${producto.image}" alt="${producto.name}">
-                <h5>${producto.name}</h5>
-                <p>$${producto.price}</p>
-            `;
-
-            // Click en la tarjeta -> ir al detalle del producto
-            card.addEventListener('click', (e) => {
-                if(e.target.classList.contains('heart')) return; // Ignorar click en corazón
-                window.location.href = `/producto/${producto.id}`;
-            });
-
-            // Click en corazón -> quitar de favoritos
-            const heart = card.querySelector('.heart');
-            heart.addEventListener('click', (e) => {
-                e.stopPropagation();
-                favoritos = favoritos.filter(p => p.id !== producto.id);
-                localStorage.setItem('favoritos_' + userId, JSON.stringify(favoritos));
-                renderFavoritos();
-            });
-
-            container.appendChild(card);
-        });
-    }
-
-    renderFavoritos();
-});
-</script>
 {% endblock %}
