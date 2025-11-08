@@ -56,8 +56,8 @@
     <p><b>Color:</b> {{ producto.Color }}</p>
     <p><b>stock:</b>{{ producto.Stock}}</p>
     
-    <button class="btn-favorito" data-producto-id="{{ producto.id }}">
-      <i class="bi bi-heart {% if producto.id in session.get('favoritos', {}).get(current_user.id|string, []) %}text-danger{% endif %}"></i>
+    <button class="btn-favorito" data-producto-id="{{ producto.ID_Producto }}">
+      <i class="bi bi-heart"></i>
     </button>
 
     <div class="botones mt-3">
@@ -184,55 +184,66 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    const userId = "{{ current_user.id if current_user.is_authenticated else 'guest' }}";
+    const storageKeyFavoritos = `favoritos_usuario_${userId}`;
+    const storageKeyCarrito = `carrito_usuario_${userId}`;
 
-    const userId = window.FLASK_USER_ID;
-    if(!userId) return; // si no hay usuario, no guardar favoritos
+    let favoritos = JSON.parse(localStorage.getItem(storageKeyFavoritos)) || [];
+    let carrito = JSON.parse(localStorage.getItem(storageKeyCarrito)) || [];
 
-    const storageKey = `favoritos_usuario_${userId}`;
-    let favoritos = JSON.parse(localStorage.getItem(storageKey)) || [];
+    const btnFavorito = document.querySelector('.btn-favorito');
+    const icon = btnFavorito.querySelector('i');
+    const productoId = parseInt(btnFavorito.dataset.productoId);
 
-    // Inicializar íconos
-    document.querySelectorAll('.btn-favorito').forEach(btn => {
-        const id = parseInt(btn.dataset.productoId);
-        const icon = btn.querySelector('i');
-        if(favoritos.includes(id)){
-            icon.classList.add('text-danger');
-            icon.classList.remove('bi-heart');
-            icon.classList.add('bi-heart-fill');
-        } else {
+    // Pintar corazón si ya está en favoritos o en carrito
+    if(favoritos.includes(productoId) || carrito.some(p => p.id === productoId)){
+        icon.classList.add('text-danger');
+        icon.classList.remove('bi-heart');
+        icon.classList.add('bi-heart-fill');
+    }
+
+    // Click en corazón -> añadir/quitar de favoritos
+    btnFavorito.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if(favoritos.includes(productoId)){
+            favoritos = favoritos.filter(id => id !== productoId);
             icon.classList.remove('text-danger');
             icon.classList.remove('bi-heart-fill');
             icon.classList.add('bi-heart');
+        } else {
+            favoritos.push(productoId);
+            icon.classList.add('text-danger');
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill');
         }
+        localStorage.setItem(storageKeyFavoritos, JSON.stringify(favoritos));
+    });
 
-        // Click en corazón
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation(); // evitar click en producto
-            if(favoritos.includes(id)){
-                favoritos = favoritos.filter(f => f !== id);
-                icon.classList.remove('text-danger');
-                icon.classList.remove('bi-heart-fill');
-                icon.classList.add('bi-heart');
-            } else {
-                favoritos.push(id);
+    // Botón añadir al carrito
+    window.addToCartFromButton = function(btn){
+        const prod = {
+            id: parseInt(btn.dataset.id),
+            name: btn.dataset.name,
+            price: parseFloat(btn.dataset.price),
+            image: btn.dataset.image,
+            material: btn.dataset.material
+        };
+
+        // Evitar duplicados
+        if(!carrito.some(p => p.id === prod.id)){
+            carrito.push(prod);
+            localStorage.setItem(storageKeyCarrito, JSON.stringify(carrito));
+
+            // Pintar corazón en rojo
+            if(prod.id === productoId){
                 icon.classList.add('text-danger');
                 icon.classList.remove('bi-heart');
                 icon.classList.add('bi-heart-fill');
             }
-            localStorage.setItem(storageKey, JSON.stringify(favoritos));
-        });
-    });
-
-    // Click en producto → detalle
-    document.querySelectorAll('.caja').forEach(card => {
-        card.addEventListener('click', e => {
-            if(e.target.closest('.btn-favorito')) return;
-            const id = card.querySelector('[data-producto-id]').dataset.productoId;
-            window.location.href = `/cliente/producto/${id}`;
-        });
-    });
-
+        }
+    }
 });
 </script>
+
 
 {% endblock %}
