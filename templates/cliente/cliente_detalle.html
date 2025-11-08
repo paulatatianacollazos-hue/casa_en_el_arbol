@@ -222,6 +222,20 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleFavorito(btn);
     });
   });
+
+  // --- Mostrar corazón rojo si el producto está en el carrito ---
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+  document.querySelectorAll(".btn-favorito").forEach((btn) => {
+    const productoId = parseInt(btn.dataset.productoId);
+    const icon = btn.querySelector("i");
+
+    // Si el producto está en el carrito → corazon rojo lleno
+    if (carrito.some(item => item.id === productoId)) {
+      icon.classList.add("text-danger", "bi-heart-fill");
+      icon.classList.remove("bi-heart");
+    }
+  });
 });
 </script>
 
