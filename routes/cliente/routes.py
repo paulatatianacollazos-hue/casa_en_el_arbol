@@ -453,7 +453,8 @@ def favoritos():
         flash("Debes iniciar sesión para ver tus favoritos", "warning")
         return redirect(url_for('auth.login'))
 
-    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id), [])
+    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id),
+                                                         [])
 
     productos = Producto.query.filter(Producto.ID_Producto.in_(
         favoritos_usuario)).all()

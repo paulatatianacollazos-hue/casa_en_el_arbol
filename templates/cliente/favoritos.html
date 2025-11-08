@@ -45,9 +45,9 @@
 <div class="favorito-container">
   {% if productos %}
     {% for producto in productos %}
-      <div class="producto-card">
+      <div class="producto-card" data-id="{{ producto.ID_Producto }}">
         <i class="bi bi-heart heart text-danger"></i>
-        <img src="{{ url_for('static', filename=producto.Imagenes[0]) }}" alt="{{ producto.NombreProducto }}">
+        <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
         <h5>{{ producto.NombreProducto }}</h5>
         <p>${{ producto.PrecioUnidad }}</p>
       </div>

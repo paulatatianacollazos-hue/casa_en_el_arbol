@@ -184,94 +184,45 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  const userId = window.FLASK_USER_ID;
+  if (!userId) return; // Si no hay usuario logueado, no hace nada
 
-    const userId = window.FLASK_USER_ID; // ID del usuario desde Flask
-    if (!userId) return; // si no hay usuario, no guardar favoritos
+  // --- Función: Alternar favorito ---
+  async function toggleFavorito(btn) {
+    const productoId = btn.dataset.productoId;
+    const icon = btn.querySelector("i");
 
-    // Seleccionamos todos los botones de favorito en la página
-    document.querySelectorAll('.btn-favorito').forEach(btn => {
-        const productoId = parseInt(btn.dataset.productoId);
-        const icon = btn.querySelector('i');
-
-        // Función para verificar si el producto está en favoritos
-        async function checkFavorito() {
-            try {
-                fetch('/cliente/favorito/guardar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ producto_id: productoId })
-                }); // Endpoint que devuelve favoritos del usuario
-                const data = await res.json();
-                if (data.favoritos.includes(productoId)) {
-                    icon.classList.add('text-danger');
-                    icon.classList.remove('bi-heart');
-                    icon.classList.add('bi-heart-fill');
-                } else {
-                    icon.classList.remove('text-danger');
-                    icon.classList.remove('bi-heart-fill');
-                    icon.classList.add('bi-heart');
-                }
-            } catch (err) {
-                console.error("Error al obtener favoritos:", err);
-            }
+    try {
+      const res = await fetch(`/cliente/favorito/${productoId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token() }}"
         }
+      });
 
-        // Inicializamos el icono según favoritos
-        checkFavorito();
+      const data = await res.json();
 
-        // Click en corazón → añadir/quitar favorito
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            try {
-                const res = await fetch('/cliente/favorito/guardar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ producto_id: productoId })
-                });
-                const data = await res.json();
+      if (data.status === "added") {
+        icon.classList.add("text-danger", "bi-heart-fill");
+        icon.classList.remove("bi-heart");
+      } else if (data.status === "removed") {
+        icon.classList.remove("text-danger", "bi-heart-fill");
+        icon.classList.add("bi-heart");
+      }
+    } catch (err) {
+      console.error("Error al alternar favorito:", err);
+    }
+  }
 
-                // Actualizamos el icono según si está en favoritos
-                if (data.favoritos.includes(productoId)) {
-                    icon.classList.add('text-danger');
-                    icon.classList.remove('bi-heart');
-                    icon.classList.add('bi-heart-fill');
-                } else {
-                    icon.classList.remove('text-danger');
-                    icon.classList.remove('bi-heart-fill');
-                    icon.classList.add('bi-heart');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        });
+  // --- Asignar eventos a todos los botones ---
+  document.querySelectorAll(".btn-favorito").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFavorito(btn);
     });
-
-    // --- Corazones en rojo si el producto está en el carrito ---
-    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    document.querySelectorAll('.btn-favorito').forEach(btn => {
-        const productoId = parseInt(btn.dataset.productoId);
-        const icon = btn.querySelector('i');
-
-        if (carrito.some(item => item.id === productoId)) {
-            icon.classList.add('text-danger');
-            icon.classList.remove('bi-heart');
-            icon.classList.add('bi-heart-fill');
-        }
-    });
-
-    // --- Click en la tarjeta → ir al detalle del producto ---
-    document.querySelectorAll('.caja').forEach(card => {
-        card.addEventListener('click', e => {
-            if (e.target.closest('.btn-favorito')) return;
-            const id = card.querySelector('[data-producto-id]').dataset.productoId;
-            window.location.href = `/cliente/producto/${id}`;
-        });
-    });
+  });
 });
 </script>
-
 
 {% endblock %}
