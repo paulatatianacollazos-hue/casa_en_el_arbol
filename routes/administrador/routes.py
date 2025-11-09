@@ -61,7 +61,6 @@ def estadisticas_reseñas():
     Si es POST → recibe JSON y devuelve estadísticas agrupadas por mes.
     """
     if request.method == "GET":
-        # Renderizar una plantilla de dashboard (opcional)
         return render_template("admin/estadisticas_reseñas.html")
 
     data = request.json or {}
