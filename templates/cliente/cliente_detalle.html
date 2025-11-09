@@ -198,30 +198,40 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".corazon").forEach(corazon => {
-        corazon.addEventListener("click", () => {
-            const productoId = corazon.dataset.id;
+  document.querySelectorAll(".corazon").forEach(corazon => {
+    corazon.addEventListener("click", () => {
+      const productoId = corazon.dataset.id;
 
-            fetch(`/cliente/favorito/toggle/${productoId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ data: "algo" })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.accion === 'agregado') {
-                    corazon.classList.add('activo');
-                } else {
-                    corazon.classList.remove('activo');
-                }
-            })
-            .catch(err => console.error("Error en favorito:", err));
-        });
+      // Generar la URL correctamente desde Flask
+      const url = `/cliente/favorito/toggle/${productoId}`;
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})  // no necesitamos enviar datos extra
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("Respuesta del servidor:", data);
+        if (data.accion === "agregado") {
+          corazon.classList.add("activo");
+        } else if (data.accion === "eliminado") {
+          corazon.classList.remove("activo");
+        }
+      })
+      .catch(err => {
+        console.error("❌ Error en favorito:", err);
+        alert("Ocurrió un error al agregar/eliminar el favorito.");
+      });
     });
-});
+  });
 
 </script>
 
