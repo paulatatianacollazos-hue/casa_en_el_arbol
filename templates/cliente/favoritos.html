@@ -1,127 +1,40 @@
 {% extends "cliente/dashboard.html" %}
-{% block title %}Favoritos | Casa en el Árbol{% endblock %}
-
-{% block extra_css %}
-<style>
-  .favorito-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  .producto-card {
-    width: 200px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px;
-    position: relative;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-  }
-  .producto-card:hover {
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  }
-  .producto-card img {
-    width: 100%;
-    border-radius: 5px;
-  }
-  .producto-card .heart {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 20px;
-    color: red;
-  }
-  .producto-card .heart.inactive {
-    color: gray;
-  }
-  .producto-card h5 {
-    margin: 10px 0 5px 0;
-  }
-</style>
-{% endblock %}
+{% block title %}Mis Favoritos{% endblock %}
 
 {% block content %}
-<h2>Mis Favoritos</h2>
-<div class="favorito-container">
-  {% if productos %}
-    {% for producto in productos %}
-      <div class="producto-card" data-id="{{ producto.ID_Producto }}">
-        <button class="btn-favorito" data-producto-id="{{ producto.ID_Producto }}">
-          <i class="bi bi-heart"></i>
-        </button>
-        <img src="{{ url_for('static', filename=producto.Imagen) }}" alt="{{ producto.NombreProducto }}">
-        <h5>{{ producto.NombreProducto }}</h5>
-        <p>${{ producto.PrecioUnidad }}</p>
-      </div>
-    {% endfor %}
-  {% else %}
-    <p>No tienes productos favoritos.</p>
-  {% endif %}
+<div class="container mt-4">
+  <h2>Mis productos favoritos</h2>
+  <div id="lista-favoritos" class="row mt-3"></div>
 </div>
-{% endblock %}
 
-{% block extra_footer %}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const userId = window.FLASK_USER_ID;
-  if (!userId) return; // Si no hay usuario logueado, no hace nada
+  const contenedor = document.getElementById("lista-favoritos");
+  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
-  // --- Función: Alternar favorito ---
-  async function toggleFavorito(btn) {
-    const productoId = btn.dataset.productoId;
-    const icon = btn.querySelector("i");
-
-    try {
-      const res = await fetch(`/cliente/favorito/${productoId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token() }}"
-        }
-      });
-
-      const data = await res.json();
-
-      if (data.status === "added") {
-        icon.classList.add("text-danger", "bi-heart-fill");
-        icon.classList.remove("bi-heart");
-      } else if (data.status === "removed") {
-        icon.classList.remove("text-danger", "bi-heart-fill");
-        icon.classList.add("bi-heart");
-      }
-    } catch (err) {
-      console.error("Error al alternar favorito:", err);
-    }
-  }
-
-  // --- Asignar eventos a todos los botones ---
-  document.querySelectorAll(".btn-favorito").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleFavorito(btn);
+  if (favoritos.length === 0) {
+    contenedor.innerHTML = "<p>No tienes productos favoritos aún.</p>";
+  } else {
+    favoritos.forEach(prod => {
+      const div = document.createElement("div");
+      div.classList.add("col-md-3", "text-center", "mb-4");
+      div.innerHTML = `
+        <div class="card">
+          <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}">
+          <div class="card-body">
+            <h5 class="card-title">${prod.nombre}</h5>
+            <p>$${prod.precio}</p>
+            <button class="btn btn-outline-primary" onclick="verDetalle('${prod.id}')">Ver detalle</button>
+          </div>
+        </div>
+      `;
+      contenedor.appendChild(div);
     });
-  });
-
-  // --- Mostrar corazón rojo si el producto está en el carrito ---
-  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-  document.querySelectorAll(".btn-favorito").forEach((btn) => {
-    const productoId = parseInt(btn.dataset.productoId);
-    const icon = btn.querySelector("i");
-
-    // Verificamos tanto item.id como item.ID_Producto (según cómo se guarde)
-    const enCarrito = carrito.some(item =>
-      item.id === productoId || item.ID_Producto === productoId
-    );
-
-    if (enCarrito) {
-      icon.classList.add("text-danger", "bi-heart-fill");
-      icon.classList.remove("bi-heart");
-    } else {
-      icon.classList.remove("text-danger", "bi-heart-fill");
-      icon.classList.add("bi-heart");
-    }
-  });
+  }
 });
+
+function verDetalle(id) {
+  window.location.href = "/producto/" + id;  // Ajusta según tu ruta Flask
+}
 </script>
-{%endblock%}
+{% endblock %}

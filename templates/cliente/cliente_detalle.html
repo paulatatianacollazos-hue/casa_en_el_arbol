@@ -186,7 +186,54 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnPersonalizar = document.getElementById("btn-personalizar");
+  const btnVolver = document.getElementById("btn-volver");
+  const vistaPrincipal = document.getElementById("vista-principal");
+  const seccionPersonalizar = document.getElementById("seccion-personalizar");
 
+  // Mostrar personalización
+  btnPersonalizar.addEventListener("click", () => {
+    vistaPrincipal.classList.add("d-none");
+    seccionPersonalizar.classList.remove("d-none");
+    bootstrap.Carousel.getOrCreateInstance("#carouselPersonalizar").to(0);
+  });
+
+  // Volver
+  btnVolver.addEventListener("click", () => {
+    seccionPersonalizar.classList.add("d-none");
+    vistaPrincipal.classList.remove("d-none");
+    bootstrap.Carousel.getOrCreateInstance("#carouselPrincipal").to(0);
+  });
+
+  // ❤️ Favoritos
+  const corazon = document.getElementById("corazon-favorito");
+  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+  // Verificar si ya está en favoritos
+  if (favoritos.some(f => f.id === corazon.dataset.id)) {
+    corazon.classList.add("activo");
+  }
+
+  corazon.addEventListener("click", () => {
+    const id = corazon.dataset.id;
+    const nombre = corazon.dataset.nombre;
+    const precio = corazon.dataset.precio;
+    const imagen = corazon.dataset.imagen;
+
+    const index = favoritos.findIndex(f => f.id === id);
+    if (index > -1) {
+      favoritos.splice(index, 1);
+      corazon.classList.remove("activo");
+    } else {
+      favoritos.push({ id, nombre, precio, imagen });
+      corazon.classList.add("activo");
+    }
+    localStorage.setItem("favoritos", JSON.stringify(favoritos));
+  });
+});
+</script>
 
 
 {% endblock %}
