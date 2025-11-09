@@ -22,6 +22,24 @@
     padding: 10px 20px;
   }
 </style>
+<style>
+  .corazon {
+    font-size: 30px;
+    cursor: pointer;
+    color: gray;
+    transition: color 0.3s ease;
+    user-select: none;         /* Evita seleccionar texto al hacer clic */
+    position: relative;        /* Asegura que pueda estar encima */
+    z-index: 10;               /* Se pone por encima de otros elementos */
+    margin-left: 10px;
+    display: inline-block;     /* Define área clicable */
+  }
+
+  .corazon.activo {
+    color: red;
+  }
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -53,12 +71,15 @@
      <h2>{{ producto.NombreProducto }}
       <span class="corazon"
             id="corazon-favorito"
+            role="button"
+            tabindex="0"
             data-id="{{ producto.ID_Producto }}"
             data-nombre="{{ producto.NombreProducto }}"
             data-precio="{{ producto.PrecioUnidad }}"
             data-imagen="{{ url_for('static', filename=producto.Imagenes[0]) }}">
         ❤
       </span>
+
     </h2>
     <p><b>Material:</b> {{ producto.Material }}</p>
     <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
