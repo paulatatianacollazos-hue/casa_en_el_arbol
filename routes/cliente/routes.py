@@ -8,7 +8,7 @@ from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id, recivo
-from basedatos.models import db, Comentarios, Direccion, Pagos
+from basedatos.models import db, Comentarios, Direccion, Pedido
 import base64
 import os
 from basedatos.queries import crear_pedido_y_pago
@@ -265,35 +265,26 @@ def catalogo():
 @cliente.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
-    producto = get_producto_by_id(id_producto)
+    producto = Producto.query.get(id_producto)
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
 
-    # 1️⃣ Verificar si el usuario compró este producto
-    ha_comprado = db.session.query(Detalle_Pedido).join(
-        Pagos, Detalle_Pedido.ID_Pedido == Pagos.ID_Pedido
-    ).filter(
-        Pagos.ID_Usuario == current_user.ID_Usuario,
-        Detalle_Pedido.ID_Producto == id_producto
-    ).first() is not None
-
-    # 2️⃣ Obtener reseñas existentes del producto
-    reseñas = Comentarios.query.filter_by(ID_Producto=id_producto).order_by(
-        Comentarios.Fecha.desc()
-    ).all()
-
-    # 3️⃣ Calcular promedio de estrellas (opcional)
-    promedio = 0
-    if reseñas:
-        promedio = round(sum([r.Estrellas for r in reseñas]) / len(reseñas), 1)
+    # Verificar si el usuario ha comprado este producto
+    ha_comprado = (
+        db.session.query(Detalle_Pedido)
+        .join(Pedido, Detalle_Pedido.ID_Pedido == Pedido.ID_Pedido)
+        .filter(
+            Pedido.ID_Usuario == current_user.ID_Usuario,
+            Detalle_Pedido.ID_Producto == id_producto
+        )
+        .first() is not None
+    )
 
     return render_template(
         "cliente/cliente_detalle.html",
         producto=producto,
-        ha_comprado=ha_comprado,
-        reseñas=reseñas,
-        promedio=promedio
+        ha_comprado=ha_comprado
     )
 
 
