@@ -50,7 +50,16 @@
 
   <!-- Caja de información -->
   <div class="caja">
-    <h2>{{ producto.NombreProducto }}</h2>
+     <h2>{{ producto.NombreProducto }}
+      <span class="corazon"
+            id="corazon-favorito"
+            data-id="{{ producto.ID_Producto }}"
+            data-nombre="{{ producto.NombreProducto }}"
+            data-precio="{{ producto.PrecioUnidad }}"
+            data-imagen="{{ url_for('static', filename=producto.Imagenes[0]) }}">
+        ❤
+      </span>
+    </h2>
     <p><b>Material:</b> {{ producto.Material }}</p>
     <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
     <p><b>Color:</b> {{ producto.Color }}</p>
