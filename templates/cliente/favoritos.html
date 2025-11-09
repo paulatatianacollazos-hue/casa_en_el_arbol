@@ -7,19 +7,24 @@
     <div class="row">
       {% for prod in productos %}
         <div class="col-md-3">
-          <div class="card mb-3">
-            {% if prod.imagenes and prod.imagenes[0].ruta %}
-              <img src="{{ url_for('static', filename=prod.imagenes[0].ruta.replace('static/', '')) }}"
-                   class="card-img-top" alt="{{ prod.NombreProducto }}">
-            {% else %}
-              <img src="{{ url_for('static', filename='img/sin_imagen.png') }}"
-                   class="card-img-top" alt="Sin imagen">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ prod.NombreProducto }}</h5>
-              <p class="card-text">${{ prod.PrecioUnidad }}</p>
+          <a href="{{ url_for('cliente.detalle_producto', id_producto=prod.ID_Producto) }}" 
+             class="text-decoration-none text-dark">
+            <div class="card mb-3 shadow-sm h-100">
+              {% if prod.imagenes and prod.imagenes[0].ruta %}
+                <img src="{{ url_for('static', filename=prod.imagenes[0].ruta.replace('static/', '')) }}"
+                     class="card-img-top" alt="{{ prod.NombreProducto }}"
+                     style="height: 200px; object-fit: cover;">
+              {% else %}
+                <img src="{{ url_for('static', filename='img/sin_imagen.png') }}"
+                     class="card-img-top" alt="Sin imagen"
+                     style="height: 200px; object-fit: cover;">
+              {% endif %}
+              <div class="card-body text-center">
+                <h5 class="card-title">{{ prod.NombreProducto }}</h5>
+                <p class="card-text">${{ prod.PrecioUnidad }}</p>
+              </div>
             </div>
-          </div>
+          </a>
         </div>
       {% endfor %}
     </div>
