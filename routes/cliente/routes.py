@@ -416,3 +416,23 @@ def factura_pdf(pedido_id):
 @login_required  # opcional
 def favoritos():
     return render_template('cliente/favoritos.html')
+
+
+@cliente.route('/favorito/toggle/<int:producto_id>', methods=['POST'])
+@login_required
+def toggle_favorito(producto_id):
+    # Asegurarse de que exista la lista de favoritos en la sesión
+    if 'favoritos' not in session:
+        session['favoritos'] = []
+
+    favoritos = session['favoritos']
+
+    if producto_id in favoritos:
+        favoritos.remove(producto_id)
+        accion = 'removido'
+    else:
+        favoritos.append(producto_id)
+        accion = 'agregado'
+
+    session['favoritos'] = favoritos  # Guardar cambios
+    return jsonify({'status': 'ok', 'accion': accion, 'favoritos': favoritos})
