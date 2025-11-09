@@ -103,14 +103,12 @@
 <hr>
 <h3>⭐ Reseñas del producto</h3>
 
-{% if promedio > 0 %}
-  <p>Promedio: <strong>{{ promedio }}</strong> / 5</p>
-{% endif %}
+<div id="reseñas-contenedor"></div>
 
 {% if ha_comprado %}
-<form action="{{ url_for('cliente.dejar_reseña', id_producto=producto.ID_Producto) }}" method="POST" class="mb-4">
+<form id="form-reseña" class="mb-4">
   <label>Calificación:</label><br>
-  <select name="estrellas" class="form-select w-25 mb-2" required>
+  <select id="estrellas" class="form-select w-25 mb-2" required>
     <option value="5">⭐️⭐️⭐️⭐️⭐️ (5)</option>
     <option value="4">⭐️⭐️⭐️⭐️ (4)</option>
     <option value="3">⭐️⭐️⭐️ (3)</option>
@@ -118,7 +116,7 @@
     <option value="1">⭐️ (1)</option>
   </select>
   
-  <textarea name="comentario" class="form-control mb-2" placeholder="Escribe tu reseña..." required></textarea>
+  <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu reseña..." required></textarea>
   <button type="submit" class="btn btn-primary">Enviar reseña</button>
 </form>
 {% else %}
@@ -261,6 +259,79 @@ document.querySelectorAll(".corazon").forEach(corazon => {
 
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const productoId = {{ producto.ID_Producto }};
+  const reseñasContenedor = document.getElementById("reseñas-contenedor");
+  const formReseña = document.getElementById("form-reseña");
+  
+  // 🔹 Obtener reseñas del localStorage
+  function obtenerReseñas() {
+    const data = localStorage.getItem("reseñas");
+    return data ? JSON.parse(data) : {};
+  }
+
+  // 🔹 Guardar reseñas en localStorage
+  function guardarReseñas(reseñas) {
+    localStorage.setItem("reseñas", JSON.stringify(reseñas));
+  }
+
+  // 🔹 Mostrar reseñas en pantalla
+  function mostrarReseñas() {
+    reseñasContenedor.innerHTML = "";
+    const reseñas = obtenerReseñas();
+    const lista = reseñas[productoId] || [];
+
+    if (lista.length === 0) {
+      reseñasContenedor.innerHTML = "<p class='text-muted'>No hay reseñas aún.</p>";
+      return;
+    }
+
+    let html = "";
+    lista.reverse().forEach(r => {
+      html += `
+        <div class="border p-3 mb-3 rounded">
+          <strong>${r.nombre || "Usuario"}</strong>
+          <span class="text-warning">${"⭐".repeat(r.estrellas)}</span>
+          <p class="mb-0">${r.texto}</p>
+          <small class="text-muted">${r.fecha}</small>
+        </div>
+      `;
+    });
+    reseñasContenedor.innerHTML = html;
+  }
+
+  // 🔹 Enviar reseña
+  if (formReseña) {
+    formReseña.addEventListener("submit", e => {
+      e.preventDefault();
+      const estrellas = parseInt(document.getElementById("estrellas").value);
+      const texto = document.getElementById("comentario").value.trim();
+      const fecha = new Date().toLocaleDateString();
+
+      if (!texto) return alert("Por favor, escribe tu reseña.");
+
+      const reseñas = obtenerReseñas();
+      if (!reseñas[productoId]) reseñas[productoId] = [];
+
+      // Puedes agregar el nombre del usuario si está logueado
+      reseñas[productoId].push({
+        nombre: "{{ current_user.Nombre if current_user.is_authenticated else 'Usuario' }}",
+        estrellas,
+        texto,
+        fecha
+      });
+
+      guardarReseñas(reseñas);
+      formReseña.reset();
+      mostrarReseñas();
+    });
+  }
+
+  // 🔹 Inicializar
+  mostrarReseñas();
+});
+</script>
 
 
 
