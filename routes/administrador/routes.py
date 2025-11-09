@@ -44,7 +44,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or getattr(
-                current_user, "Rol", None) != "Administrador":
+                current_user, "Rol", None) != "admin":
             abort(403)  # Acceso prohibido
         return f(*args, **kwargs)
 
@@ -61,7 +61,7 @@ def estadisticas_reseñas():
     Si es POST → recibe JSON y devuelve estadísticas agrupadas por mes.
     """
     if request.method == "GET":
-        return render_template("admin/estadisticas_reseñas.html")
+        return render_template("administrador/estadisticas_reseñas.html")
 
     data = request.json or {}
     reseñas_productos = data.get("reseñas_productos", [])
