@@ -418,7 +418,7 @@ def favoritos():
     return render_template('cliente/favoritos.html')
 
 
-@cliente.route('/favorito/toggle/<int:producto_id>', methods=['GET', 'POST'])
+@cliente.route('/favorito/toggle/<int:producto_id>', methods=['POST'])
 @login_required
 def toggle_favorito(producto_id):
     favoritos = session.get('favoritos', [])
@@ -428,5 +428,7 @@ def toggle_favorito(producto_id):
     else:
         favoritos.append(producto_id)
         accion = 'agregado'
+
     session['favoritos'] = favoritos
-    return jsonify({'accion': accion})
+    db.session.commit() if hasattr(db, "session") else None  # opcional si usas base de datos
+    return jsonify({'accion': accion, 'favoritos': favoritos})
