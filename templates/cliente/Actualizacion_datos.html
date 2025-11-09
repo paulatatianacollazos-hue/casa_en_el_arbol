@@ -434,6 +434,7 @@
               <p class="precio mb-0">${{ producto.PrecioUnidad }}</p>
             </div>
           </div>
+
           {% endif %}
           {% endfor %}
         </div>
@@ -463,6 +464,16 @@
         Confirmación de entrega
       </a>
       {% endif %}
+      {% if item.Estado == 'entregado' %}
+        <div class="mt-2">
+          <button class="btn btn-outline-success btn-sm" 
+                  onclick="abrirModalResenaPedido('{{ item.ID_Pedido }}')">
+            ✍️ Dejar reseña del pedido
+          </button>
+        </div>
+        <div id="resena-pedido-{{ item.ID_Pedido }}" class="mt-2 small text-start"></div>
+      {% endif %}
+
     </div>
 
   </div>
@@ -627,6 +638,35 @@
   </div>
 </div>
 
+
+
+<!-- Modal de reseña de pedido -->
+<div class="modal fade" id="modalResenaPedido" tabindex="-1" aria-labelledby="modalResenaPedidoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalResenaPedidoLabel">Dejar reseña del pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tu opinión nos ayuda a mejorar el servicio 😊</p>
+        <label class="form-label mt-2">Calificación:</label>
+        <select id="estrellasPedido" class="form-select mb-2">
+          <option value="5">⭐⭐⭐⭐⭐</option>
+          <option value="4">⭐⭐⭐⭐</option>
+          <option value="3">⭐⭐⭐</option>
+          <option value="2">⭐⭐</option>
+          <option value="1">⭐</option>
+        </select>
+        <textarea id="comentarioPedido" class="form-control" placeholder="Escribe tu experiencia con este pedido..." rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-success" onclick="guardarResenaPedido()">Guardar reseña</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
     <!-- Controles -->
@@ -855,6 +895,90 @@ document.addEventListener('click', async function(e) {
   }
 });
 
+</script>
+<script>
+let pedidoActual = null;
+let modalResenaPedido = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  modalResenaPedido = new bootstrap.Modal(document.getElementById("modalResenaPedido"));
+  mostrarTodasLasResenasPedido();
+});
+
+// 🔸 Abrir modal
+function abrirModalResenaPedido(idPedido) {
+  pedidoActual = idPedido;
+  document.getElementById("comentarioPedido").value = "";
+  document.getElementById("estrellasPedido").value = 5;
+  modalResenaPedido.show();
+}
+
+// 🔸 Guardar reseña
+function guardarResenaPedido() {
+  const comentario = document.getElementById("comentarioPedido").value.trim();
+  const estrellas = document.getElementById("estrellasPedido").value;
+  const userId = window.FLASK_USER_ID || "anonimo";
+
+  if (!comentario) {
+    alert("Por favor escribe un comentario.");
+    return;
+  }
+
+  const key = "reseñas_pedidos_" + userId;
+  let reseñas = JSON.parse(localStorage.getItem(key)) || [];
+
+  // Ver si ya existe reseña del pedido
+  const existente = reseñas.find(r => r.idPedido == pedidoActual);
+  if (existente) {
+    existente.comentario = comentario;
+    existente.estrellas = estrellas;
+    existente.fecha = new Date().toLocaleString();
+  } else {
+    reseñas.push({
+      idPedido: pedidoActual,
+      comentario,
+      estrellas,
+      fecha: new Date().toLocaleString()
+    });
+  }
+
+  localStorage.setItem(key, JSON.stringify(reseñas));
+  modalResenaPedido.hide();
+  mostrarResenaPedido(pedidoActual);
+}
+
+// 🔸 Mostrar reseñas guardadas de todos los pedidos
+function mostrarTodasLasResenasPedido() {
+  const userId = window.FLASK_USER_ID || "anonimo";
+  const key = "reseñas_pedidos_" + userId;
+  const reseñas = JSON.parse(localStorage.getItem(key)) || [];
+
+  reseñas.forEach(r => mostrarResenaPedido(r.idPedido));
+}
+
+// 🔸 Mostrar reseña de un pedido específico
+function mostrarResenaPedido(idPedido) {
+  const userId = window.FLASK_USER_ID || "anonimo";
+  const key = "reseñas_pedidos_" + userId;
+  const reseñas = JSON.parse(localStorage.getItem(key)) || [];
+  const contenedor = document.getElementById(`resena-pedido-${idPedido}`);
+  const r = reseñas.find(x => x.idPedido == idPedido);
+
+  if (!contenedor) return;
+
+  if (!r) {
+    contenedor.innerHTML = "";
+    return;
+  }
+
+  contenedor.innerHTML = `
+    <div class="border rounded p-2 bg-light">
+      <strong>${"⭐".repeat(Number(r.estrellas))}</strong><br>
+      <small>${r.fecha}</small>
+      <p class="mb-0">${r.comentario}</p>
+    </div>
+  `;
+}
 </script>
 
 
