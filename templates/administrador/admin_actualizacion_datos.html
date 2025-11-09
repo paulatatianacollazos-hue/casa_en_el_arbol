@@ -196,21 +196,15 @@
         </strong>
         </div>
 
-            <li><a class="dropdown-item" href="{{ url_for('cliente.actualizacion_datos') }}">Perfil</a></li>
-            <li><a class="dropdown-item" href="">Historial</a></li>
-            <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
-            <li>
-          <a class="dropdown-item" 
-          {% if current_user.Rol == 'admin' %}
-            href="{{ url_for('admin.actualizacion_datos') }}"
-          {% else %}
-            href="{{ url_for('cliente.resenas') }}"
-          {% endif %}>
-          Reseñas
-        </a>
+          <li><a class="dropdown-item" href="{{ url_for('admin.actualizacion_datos') }}">Perfil</a></li>
+          <li><a class="dropdown-item" href="#">Historial</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('admin.gestion_roles') }}">Gestión de roles</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('admin.estadisticas_reseñas') }}">Estadísticas</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('admin.ver_reseñas') }}">Reseñas</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('admin.ver_notificaciones') }}">Notificaciones</a></li>
+
 
         </li>
-            <li><a class="dropdown-item" href="{{ url_for('cliente.ver_notificaciones_cliente') }}">Notificaciones</a></li>
             <div class="mt-3">
               <a href="{{ url_for('auth.logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
             </div>
