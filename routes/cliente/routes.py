@@ -10,6 +10,7 @@ from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id, recivo
 from basedatos.models import db, Comentarios, Direccion
 import base64
+from flask_wtf.csrf import csrf_exempt 
 import os
 from basedatos.queries import crear_pedido_y_pago
 from flask import make_response
@@ -356,10 +357,10 @@ def confirmar_pago():
 
 # ---------- FAVORITOS ----------
 @cliente.route('/favorito/<int:producto_id>', methods=['POST'])
+@csrf_exempt  # 👈 evita la validación CSRF en esta ruta
 @login_required
 def favorito(producto_id):
     favoritos = session.get('favoritos', {})
-
     user_id_str = str(current_user.id)
     user_favs = favoritos.get(user_id_str, [])
 
