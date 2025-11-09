@@ -100,27 +100,25 @@
   </div>
 </div>
 
-<hr>
-<h3>⭐ Reseñas del producto</h3>
+<h3 class="mt-4">🗣️ Reseñas</h3>
 
-<div id="reseñas-contenedor"></div>
+<div id="lista-reseñas" class="mb-3"></div>
 
 {% if ha_comprado %}
-<form id="form-reseña" class="mb-4">
-  <label>Calificación:</label><br>
-  <select id="estrellas" class="form-select w-25 mb-2" required>
-    <option value="5">⭐️⭐️⭐️⭐️⭐️ (5)</option>
-    <option value="4">⭐️⭐️⭐️⭐️ (4)</option>
-    <option value="3">⭐️⭐️⭐️ (3)</option>
-    <option value="2">⭐️⭐️ (2)</option>
-    <option value="1">⭐️ (1)</option>
-  </select>
-  
-  <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu reseña..." required></textarea>
-  <button type="submit" class="btn btn-primary">Enviar reseña</button>
-</form>
+  <div id="form-reseña" class="border p-3 rounded">
+    <h5>Deja tu reseña</h5>
+    <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..."></textarea>
+    <select id="estrellas" class="form-select mb-2">
+      <option value="5">⭐ 5 estrellas</option>
+      <option value="4">⭐ 4 estrellas</option>
+      <option value="3">⭐ 3 estrellas</option>
+      <option value="2">⭐ 2 estrellas</option>
+      <option value="1">⭐ 1 estrella</option>
+    </select>
+    <button class="btn btn-primary" onclick="guardarReseña({{ producto.ID_Producto }})">Enviar reseña</button>
+  </div>
 {% else %}
-<p class="text-muted">🛒 Solo puedes dejar una reseña si has comprado este producto.</p>
+  <p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
 {% endif %}
 
 {% if reseñas %}
@@ -261,78 +259,53 @@ document.querySelectorAll(".corazon").forEach(corazon => {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const productoId = {{ producto.ID_Producto }};
-  const reseñasContenedor = document.getElementById("reseñas-contenedor");
-  const formReseña = document.getElementById("form-reseña");
-  
-  // 🔹 Obtener reseñas del localStorage
-  function obtenerReseñas() {
-    const data = localStorage.getItem("reseñas");
-    return data ? JSON.parse(data) : {};
-  }
-
-  // 🔹 Guardar reseñas en localStorage
-  function guardarReseñas(reseñas) {
-    localStorage.setItem("reseñas", JSON.stringify(reseñas));
-  }
-
-  // 🔹 Mostrar reseñas en pantalla
-  function mostrarReseñas() {
-    reseñasContenedor.innerHTML = "";
-    const reseñas = obtenerReseñas();
-    const lista = reseñas[productoId] || [];
-
-    if (lista.length === 0) {
-      reseñasContenedor.innerHTML = "<p class='text-muted'>No hay reseñas aún.</p>";
-      return;
-    }
-
-    let html = "";
-    lista.reverse().forEach(r => {
-      html += `
-        <div class="border p-3 mb-3 rounded">
-          <strong>${r.nombre || "Usuario"}</strong>
-          <span class="text-warning">${"⭐".repeat(r.estrellas)}</span>
-          <p class="mb-0">${r.texto}</p>
-          <small class="text-muted">${r.fecha}</small>
-        </div>
-      `;
-    });
-    reseñasContenedor.innerHTML = html;
-  }
-
-  // 🔹 Enviar reseña
-  if (formReseña) {
-    formReseña.addEventListener("submit", e => {
-      e.preventDefault();
-      const estrellas = parseInt(document.getElementById("estrellas").value);
-      const texto = document.getElementById("comentario").value.trim();
-      const fecha = new Date().toLocaleDateString();
-
-      if (!texto) return alert("Por favor, escribe tu reseña.");
-
-      const reseñas = obtenerReseñas();
-      if (!reseñas[productoId]) reseñas[productoId] = [];
-
-      // Puedes agregar el nombre del usuario si está logueado
-      reseñas[productoId].push({
-        nombre: "{{ current_user.Nombre if current_user.is_authenticated else 'Usuario' }}",
-        estrellas,
-        texto,
-        fecha
-      });
-
-      guardarReseñas(reseñas);
-      formReseña.reset();
-      mostrarReseñas();
-    });
-  }
-
-  // 🔹 Inicializar
-  mostrarReseñas();
+  const idProducto = {{ producto.ID_Producto }};
+  mostrarReseñas(idProducto);
 });
-</script>
 
+function guardarReseña(idProducto) {
+  const comentario = document.getElementById("comentario").value.trim();
+  const estrellas = document.getElementById("estrellas").value;
+  if (!comentario) {
+    alert("Por favor escribe un comentario.");
+    return;
+  }
+
+  // Cargar reseñas actuales
+  let reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
+
+  reseñas.push({
+    idProducto: idProducto,
+    usuario: "{{ current_user.Nombre }}",
+    estrellas: estrellas,
+    comentario: comentario,
+    fecha: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("reseñas", JSON.stringify(reseñas));
+  document.getElementById("comentario").value = "";
+  mostrarReseñas(idProducto);
+}
+
+function mostrarReseñas(idProducto) {
+  const contenedor = document.getElementById("lista-reseñas");
+  const reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
+  const filtradas = reseñas.filter(r => r.idProducto === idProducto);
+
+  if (filtradas.length === 0) {
+    contenedor.innerHTML = "<p>No hay reseñas aún.</p>";
+    return;
+  }
+
+  contenedor.innerHTML = filtradas.map(r => `
+    <div class="border rounded p-2 mb-2">
+      <strong>${r.usuario}</strong> <small>${r.fecha}</small><br>
+      ${"⭐".repeat(r.estrellas)}<br>
+      ${r.comentario}
+    </div>
+  `).join("");
+}
+</script>
 
 
 {% endblock %}
