@@ -413,9 +413,20 @@ def factura_pdf(pedido_id):
 
 # ---------- FAVORITOS ----------
 @cliente.route('/favoritos')
-@login_required  # opcional
+@login_required
 def favoritos():
-    return render_template('cliente/favoritos.html')
+    # Obtener los IDs de los productos guardados en la sesión
+    favoritos_ids = session.get('favoritos', [])
+
+    # Si no hay favoritos, renderiza vacío
+    if not favoritos_ids:
+        return render_template('cliente/favoritos.html', productos=[])
+
+    # Consultar los productos favoritos en la base de datos
+    productos = Producto.query.filter(Producto.ID_Producto.in_(favoritos_ids)).all()
+
+    return render_template('cliente/favoritos.html', productos=productos)
+
 
 
 @cliente.route('/favorito/toggle/<int:producto_id>', methods=['POST'])
