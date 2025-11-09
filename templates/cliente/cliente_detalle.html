@@ -65,10 +65,11 @@
   <!-- Caja de información -->
   <div class="caja">
      <h2>{{ producto.NombreProducto }}
-      <span class="corazon {% if producto.ID_Producto in session.get('favoritos', []) %}activo{% endif %}"
-          data-id="{{ producto.ID_Producto }}">
+      {% set key = 'favoritos_' ~ current_user.ID_Usuario %}
+      <span class="corazon {% if producto.ID_Producto in session.get(key, []) %}activo{% endif %}"
+            data-id="{{ producto.ID_Producto }}">
         ❤
-    </span>
+      </span>
 
     </h2>
     <p><b>Material:</b> {{ producto.Material }}</p>
@@ -198,40 +199,24 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-  document.querySelectorAll(".corazon").forEach(corazon => {
-    corazon.addEventListener("click", () => {
-      const productoId = corazon.dataset.id;
+document.querySelectorAll(".corazon").forEach(corazon => {
+  corazon.addEventListener("click", () => {
+    const productoId = corazon.dataset.id;
+    const url = `/favorito/toggle/${productoId}`;
 
-      // Generar la URL correctamente desde Flask
-      const url = `/cliente/favorito/toggle/${productoId}`;
-
-      fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({})  // no necesitamos enviar datos extra
-      })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`Error HTTP ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        console.log("Respuesta del servidor:", data);
-        if (data.accion === "agregado") {
-          corazon.classList.add("activo");
-        } else if (data.accion === "eliminado") {
-          corazon.classList.remove("activo");
-        }
-      })
-      .catch(err => {
-        console.error("❌ Error en favorito:", err);
-        alert("Ocurrió un error al agregar/eliminar el favorito.");
-      });
-    });
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.accion === "agregado") corazon.classList.add("activo");
+      else corazon.classList.remove("activo");
+    })
+    .catch(err => console.error("Error:", err));
   });
+});
+
 
 </script>
 

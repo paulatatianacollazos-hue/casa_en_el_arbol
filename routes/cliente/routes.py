@@ -415,29 +415,27 @@ def factura_pdf(pedido_id):
 @cliente.route('/favoritos')
 @login_required
 def favoritos():
-    # Obtener los IDs de los productos guardados en la sesión
-    favoritos_ids = session.get('favoritos', [])
+    key = f"favoritos_{current_user.ID_Usuario}"
+    favoritos_ids = session.get(key, [])
 
-    # Si no hay favoritos, renderiza vacío
-    if not favoritos_ids:
-        return render_template('cliente/favoritos.html', productos=[])
+    productos = []
+    if favoritos_ids:
+        productos = Producto.query.filter(Producto.ID_Producto.in_(
+            favoritos_ids)).all()
 
-    # Consultar los productos favoritos en la base de datos
-    productos = Producto.query.filter(Producto.ID_Producto.in_(favoritos_ids)).all()
-
-    return render_template('cliente/favoritos.html', productos=productos)
-
+    return render_template("cliente/favoritos.html", productos=productos)
 
 
 @cliente.route('/favorito/toggle/<int:producto_id>', methods=['POST'])
 @login_required
 def toggle_favorito(producto_id):
-    favoritos = session.get('favoritos')
+    # Crea una clave única por usuario en la sesión
+    key = f"favoritos_{current_user.ID_Usuario}"
 
-    # Si no existe o no es lista, reinicializamos
-    if not isinstance(favoritos, list):
-        favoritos = []
+    # Obtiene la lista de favoritos del usuario (si no existe, crea una lista vacía)
+    favoritos = session.get(key, [])
 
+    # Agrega o quita el producto según corresponda
     if producto_id in favoritos:
         favoritos.remove(producto_id)
         accion = 'eliminado'
@@ -445,7 +443,8 @@ def toggle_favorito(producto_id):
         favoritos.append(producto_id)
         accion = 'agregado'
 
-    session['favoritos'] = favoritos
-    session.modified = True  # asegura que Flask actualice la cookie
+    # Guarda la lista actualizada en la sesión
+    session[key] = favoritos
+    session.modified = True
 
-    return jsonify({'accion': accion, 'favoritos': favoritos})
+    return jsonify({'accion': accion})

@@ -9,13 +9,10 @@
         <div class="col-md-3">
           <div class="card mb-3">
             {% if prod.imagenes and prod.imagenes[0].ruta %}
-              {% set ruta = prod.imagenes[0].ruta.replace('static/', '') %}
-              <img src="{{ url_for('static', filename=ruta) }}" class="card-img-top" alt="{{ prod.NombreProducto }}">
-
+              <img src="{{ url_for('static', filename=prod.imagenes[0].ruta.replace('static/', '')) }}"
+                   class="card-img-top" alt="{{ prod.NombreProducto }}">
             {% else %}
-              {% set ruta = prod.imagenes[0].ruta.replace('static/', '') %}
-              <img src="{{ url_for('static', filename=ruta) }}" class="card-img-top" alt="{{ prod.NombreProducto }}">
-
+              <img src="{{ url_for('static', filename='img/sin_imagen.png') }}"
                    class="card-img-top" alt="Sin imagen">
             {% endif %}
             <div class="card-body">
@@ -30,25 +27,4 @@
     <p>No tienes productos favoritos aún.</p>
   {% endif %}
 </div>
-
-<script>
-function toggleFavorito(id) {
-  fetch(`/favorito/toggle/${id}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.accion === "agregado") {
-      alert("Producto añadido a favoritos");
-    } else if (data.accion === "eliminado") {
-      alert("Producto eliminado de favoritos");
-    }
-    window.location.reload();
-  })
-  .catch(error => console.error("Error al actualizar favorito:", error));
-}
-</script>
 {% endblock %}
