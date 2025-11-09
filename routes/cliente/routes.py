@@ -355,42 +355,6 @@ def confirmar_pago():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# ---------- FAVORITOS ----------
-@cliente.route('/favorito/<int:producto_id>', methods=['POST'])
-@csrf_exempt  # 👈 evita la validación CSRF en esta ruta
-@login_required
-def favorito(producto_id):
-    favoritos = session.get('favoritos', {})
-    user_id_str = str(current_user.id)
-    user_favs = favoritos.get(user_id_str, [])
-
-    if producto_id in user_favs:
-        user_favs.remove(producto_id)
-        status = 'removed'
-    else:
-        user_favs.append(producto_id)
-        status = 'added'
-
-    favoritos[user_id_str] = user_favs
-    session['favoritos'] = favoritos
-
-    return jsonify({'status': status})
-
-
-@cliente.route('/factura/<int:pedido_id>', methods=['GET'])
-@login_required
-def factura(pedido_id):
-    """
-    Devuelve los datos de la factura en formato JSON
-    """
-    try:
-        datos = recivo(pedido_id)  # función de basedatos.queries
-        return jsonify(datos)
-    except Exception as e:
-        print("💥 Error al obtener factura:", e)
-        return jsonify({"error": str(e)}), 500
-
-
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
 @login_required
 def factura_pdf(pedido_id):
@@ -448,23 +412,4 @@ def factura_pdf(pedido_id):
         return jsonify({"error": str(e)}), 500
 
 
-@cliente.route('/favoritos')
-def favoritos():
-    if not current_user.is_authenticated:
-        flash("Debes iniciar sesión para ver tus favoritos", "warning")
-        return redirect(url_for('auth.login'))
-
-    favoritos_usuario = session.get('favoritos', {}).get(str(current_user.id),
-                                                         [])
-
-    productos = Producto.query.filter(Producto.ID_Producto.in_(
-        favoritos_usuario)).all()
-
-    return render_template('cliente/favoritos.html', productos=productos)
-
-
-@cliente.route('/favoritos-json')
-@login_required
-def favoritos_json():
-    favoritos = session.get('favoritos', {}).get(str(current_user.id), [])
-    return jsonify(favoritos)
+# ---------- FAVORITOS ----------
