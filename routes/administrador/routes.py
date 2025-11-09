@@ -149,12 +149,6 @@ def cambiar_rol(user_id):
 
 
 # ---------- RESEÑAS ----------
-@admin.route("/reseñas")
-@login_required
-@role_required("admin")
-def ver_reseñas():
-    return render_template("administrador/admin_reseñas.html", reviews=reviews)
-
 
 # ---------- NOTIFICACIONES ----------
 @admin.route("/notificaciones", methods=["GET", "POST"])
