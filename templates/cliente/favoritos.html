@@ -9,10 +9,13 @@
         <div class="col-md-3">
           <div class="card mb-3">
             {% if prod.imagenes and prod.imagenes[0].ruta %}
-              <img src="{{ url_for('static', filename=prod.imagenes[0].ruta) }}"
-                   class="card-img-top" alt="{{ prod.NombreProducto }}">
+              {% set ruta = prod.imagenes[0].ruta.replace('static/', '') %}
+              <img src="{{ url_for('static', filename=ruta) }}" class="card-img-top" alt="{{ prod.NombreProducto }}">
+
             {% else %}
-              <img src="{{ url_for('static', filename='img/sin_imagen.png') }}"
+              {% set ruta = prod.imagenes[0].ruta.replace('static/', '') %}
+              <img src="{{ url_for('static', filename=ruta) }}" class="card-img-top" alt="{{ prod.NombreProducto }}">
+
                    class="card-img-top" alt="Sin imagen">
             {% endif %}
             <div class="card-body">
