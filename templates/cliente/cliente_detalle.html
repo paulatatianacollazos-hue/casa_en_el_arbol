@@ -202,24 +202,26 @@ document.querySelectorAll(".corazon").forEach(corazon => {
     corazon.addEventListener("click", () => {
         const productoId = corazon.dataset.id;
 
-        fetch(`/favorito/toggle/${productoId}`, {
+        fetch(`/favorito/toggle/${productoId}`, {  // <-- backticks aquí
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token() }}"  // si usas CSRF
+                "Content-Type": "application/json"
             },
+            body: JSON.stringify({ data: "algo" })
         })
         .then(res => res.json())
         .then(data => {
-            if(data.accion === 'agregado'){
+            if (data.accion === 'agregado') {
                 corazon.classList.add('activo');
             } else {
                 corazon.classList.remove('activo');
             }
-        });
+        })
+        .catch(err => console.error("Error en favorito:", err));
     });
 });
 </script>
+
 
 
 
