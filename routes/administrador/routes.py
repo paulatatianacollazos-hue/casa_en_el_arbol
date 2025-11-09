@@ -51,7 +51,7 @@ def admin_required(f):
     return decorated_function
 
 
-@admin.route("/admin/estadisticas_reseñas", methods=["GET", "POST"])
+@admin.route("/estadisticas_reseñas", methods=["GET", "POST"])
 @login_required
 @admin_required
 def estadisticas_reseñas():
