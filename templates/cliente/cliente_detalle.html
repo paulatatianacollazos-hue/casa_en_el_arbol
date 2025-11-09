@@ -100,6 +100,47 @@
   </div>
 </div>
 
+<hr>
+<h3>⭐ Reseñas del producto</h3>
+
+{% if promedio > 0 %}
+  <p>Promedio: <strong>{{ promedio }}</strong> / 5</p>
+{% endif %}
+
+{% if ha_comprado %}
+<form action="{{ url_for('cliente.dejar_reseña', id_producto=producto.ID_Producto) }}" method="POST" class="mb-4">
+  <label>Calificación:</label><br>
+  <select name="estrellas" class="form-select w-25 mb-2" required>
+    <option value="5">⭐️⭐️⭐️⭐️⭐️ (5)</option>
+    <option value="4">⭐️⭐️⭐️⭐️ (4)</option>
+    <option value="3">⭐️⭐️⭐️ (3)</option>
+    <option value="2">⭐️⭐️ (2)</option>
+    <option value="1">⭐️ (1)</option>
+  </select>
+  
+  <textarea name="comentario" class="form-control mb-2" placeholder="Escribe tu reseña..." required></textarea>
+  <button type="submit" class="btn btn-primary">Enviar reseña</button>
+</form>
+{% else %}
+<p class="text-muted">🛒 Solo puedes dejar una reseña si has comprado este producto.</p>
+{% endif %}
+
+{% if reseñas %}
+  {% for r in reseñas %}
+    <div class="border p-3 mb-3 rounded">
+      <strong>{{ r.usuario.Nombre }} {{ r.usuario.Apellido }}</strong>
+      <span class="text-warning">
+        {% for i in range(r.Estrellas) %}⭐{% endfor %}
+      </span>
+      <p class="mb-0">{{ r.Texto }}</p>
+      <small class="text-muted">{{ r.Fecha.strftime('%d/%m/%Y') }}</small>
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">No hay reseñas aún.</p>
+{% endif %}
+
+
 <!-- SECCIÓN PERSONALIZAR -->
 <div id="seccion-personalizar" class="d-none">
   <div class="content1">

@@ -2,13 +2,13 @@ from flask import render_template, request, redirect, url_for, flash, session
 from flask import jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import Usuario, Producto, Calendario, Notificaciones
+from basedatos.models import Usuario, Producto, Calendario, Notificaciones, Detalle_Pedido
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
 from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id, recivo
-from basedatos.models import db, Comentarios, Direccion
+from basedatos.models import db, Comentarios, Direccion, Pagos
 import base64
 import os
 from basedatos.queries import crear_pedido_y_pago
@@ -119,26 +119,30 @@ def resenas():   # <- sin ñ
 
 
 # ---------- ESCRIBIR RESEÑA ----------
-@cliente.route("/reseñas/escribir", methods=["GET", "POST"])
+@cliente.route("/producto/<int:id_producto>/reseñar", methods=["POST"])
 @login_required
-def escribir_resena():   # <- sin ñ
-    if request.method == "POST":
-        pedido = request.form["pedido"]
-        cliente_nombre = request.form["cliente"]
-        estrellas = request.form["estrellas"]
-        comentario = request.form["comentario"]
+def dejar_reseña(id_producto):
+    texto = request.form.get("comentario")
+    estrellas = int(request.form.get("estrellas", 0))
 
-        reviews.append({
-            "pedido": pedido,
-            "cliente": cliente_nombre,
-            "estrellas": estrellas,
-            "comentario": comentario
-        })
+    if not texto or estrellas == 0:
+        flash("⚠️ Debes escribir un comentario y elegir estrellas.", "warning")
+        return redirect(url_for("cliente.detalle_producto",
+                                id_producto=id_producto))
 
-        flash("Reseña añadida con éxito", "success")
-        return redirect(url_for("cliente.resenas"))
+    nueva_resena = Comentarios(
+        ID_Usuario=current_user.ID_Usuario,
+        ID_Producto=id_producto,
+        Texto=texto,
+        Estrellas=estrellas,
+        Fecha=datetime.now()
+    )
+    db.session.add(nueva_resena)
+    db.session.commit()
 
-    return render_template("cliente/escribir.html")
+    flash("✅ ¡Gracias por dejar tu reseña!", "success")
+    return redirect(url_for("cliente.detalle_producto",
+                            id_producto=id_producto))
 
 
 # ---------- PERFIL Y DIRECCIONES ----------
@@ -264,8 +268,33 @@ def detalle_producto(id_producto):
     producto = get_producto_by_id(id_producto)
     if not producto:
         flash("Producto no encontrado", "error")
-        return redirect(url_for("admin.catalogo"))
-    return render_template("cliente/cliente_detalle.html", producto=producto)
+        return redirect(url_for("cliente.catalogo"))
+
+    # 1️⃣ Verificar si el usuario compró este producto
+    ha_comprado = db.session.query(Detalle_Pedido).join(
+        Pagos, Detalle_Pedido.ID_Pedido == Pagos.ID_Pedido
+    ).filter(
+        Pagos.ID_Usuario == current_user.ID_Usuario,
+        Detalle_Pedido.ID_Producto == id_producto
+    ).first() is not None
+
+    # 2️⃣ Obtener reseñas existentes del producto
+    reseñas = Comentarios.query.filter_by(ID_Producto=id_producto).order_by(
+        Comentarios.Fecha.desc()
+    ).all()
+
+    # 3️⃣ Calcular promedio de estrellas (opcional)
+    promedio = 0
+    if reseñas:
+        promedio = round(sum([r.Estrellas for r in reseñas]) / len(reseñas), 1)
+
+    return render_template(
+        "cliente/cliente_detalle.html",
+        producto=producto,
+        ha_comprado=ha_comprado,
+        reseñas=reseñas,
+        promedio=promedio
+    )
 
 
 @cliente.route("/firmar/<int:id_pedido>", methods=["GET", "POST"])
