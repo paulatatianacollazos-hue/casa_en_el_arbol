@@ -265,12 +265,13 @@ def catalogo():
 @cliente.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
-    producto = Producto.query.get(id_producto)
+    # Obtener el producto desde MySQL con tu función personalizada
+    producto = get_producto_by_id(id_producto)
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
 
-    # Detectar si el usuario compró este producto
+    # Detectar si el usuario compró este producto (usando SQLAlchemy)
     ha_comprado = (
         db.session.query(Detalle_Pedido)
         .join(Pedido, Detalle_Pedido.ID_Pedido == Pedido.ID_Pedido)
@@ -281,6 +282,7 @@ def detalle_producto(id_producto):
         .first() is not None
     )
 
+    # Renderizar la plantilla con el producto y si fue comprado
     return render_template(
         "cliente/cliente_detalle.html",
         producto=producto,
