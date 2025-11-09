@@ -198,28 +198,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-document.querySelectorAll(".corazon").forEach(corazon => {
-    corazon.addEventListener("click", () => {
-        const productoId = corazon.dataset.id;
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".corazon").forEach(corazon => {
+        corazon.addEventListener("click", () => {
+            const productoId = corazon.dataset.id;
 
-        fetch(`/favorito/toggle/${productoId}`, {  // <-- backticks aquí
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ data: "algo" })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.accion === 'agregado') {
-                corazon.classList.add('activo');
-            } else {
-                corazon.classList.remove('activo');
-            }
-        })
-        .catch(err => console.error("Error en favorito:", err));
+            fetch(`/cliente/favorito/toggle/${productoId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ data: "algo" })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.accion === 'agregado') {
+                    corazon.classList.add('activo');
+                } else {
+                    corazon.classList.remove('activo');
+                }
+            })
+            .catch(err => console.error("Error en favorito:", err));
+        });
     });
 });
+
 </script>
 
 
