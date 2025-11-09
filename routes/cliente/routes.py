@@ -10,7 +10,6 @@ from basedatos.queries import obtener_pedidos_por_cliente
 from basedatos.queries import get_productos, get_producto_by_id, recivo
 from basedatos.models import db, Comentarios, Direccion
 import base64
-from flask_wtf.csrf import csrf_exempt 
 import os
 from basedatos.queries import crear_pedido_y_pago
 from flask import make_response
@@ -413,3 +412,7 @@ def factura_pdf(pedido_id):
 
 
 # ---------- FAVORITOS ----------
+@cliente.route('/favoritos')
+@login_required  # opcional
+def favoritos():
+    return render_template('cliente/favoritos.html')
