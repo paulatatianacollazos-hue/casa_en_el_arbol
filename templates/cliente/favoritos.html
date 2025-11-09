@@ -3,38 +3,31 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2>Mis productos favoritos</h2>
-  <div id="lista-favoritos" class="row mt-3"></div>
-</div>
+  <h2>❤️ Mis productos favoritos</h2>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const contenedor = document.getElementById("lista-favoritos");
-  const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-
-  if (favoritos.length === 0) {
-    contenedor.innerHTML = "<p>No tienes productos favoritos aún.</p>";
-  } else {
-    favoritos.forEach(prod => {
-      const div = document.createElement("div");
-      div.classList.add("col-md-3", "text-center", "mb-4");
-      div.innerHTML = `
-        <div class="card">
-          <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}">
+  {% if productos and productos|length > 0 %}
+  <div class="row mt-3">
+    {% for prod in productos %}
+      <div class="col-md-3 text-center mb-4">
+        <div class="card shadow-sm">
+          <img src="{{ url_for('static', filename=prod.Imagenes[0]) }}" 
+               class="card-img-top" 
+               alt="{{ prod.NombreProducto }}" 
+               style="height: 200px; object-fit: cover;">
           <div class="card-body">
-            <h5 class="card-title">${prod.nombre}</h5>
-            <p>$${prod.precio}</p>
-            <button class="btn btn-outline-primary" onclick="verDetalle('${prod.id}')">Ver detalle</button>
+            <h5 class="card-title">{{ prod.NombreProducto }}</h5>
+            <p class="card-text">${{ prod.PrecioUnidad }}</p>
+            <a href="{{ url_for('cliente.detalle_producto', id_producto=prod.ID_Producto) }}" 
+               class="btn btn-outline-primary">
+              Ver detalle
+            </a>
           </div>
         </div>
-      `;
-      contenedor.appendChild(div);
-    });
-  }
-});
-
-function verDetalle(id) {
-  window.location.href = "/cliente/producto/" + id;  // Ajusta según tu ruta Flask
-}
-</script>
+      </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="mt-4">No tienes productos favoritos aún.</p>
+  {% endif %}
+</div>
 {% endblock %}

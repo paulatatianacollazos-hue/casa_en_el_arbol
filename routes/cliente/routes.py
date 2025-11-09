@@ -421,7 +421,12 @@ def favoritos():
 @cliente.route('/favorito/toggle/<int:producto_id>', methods=['POST'])
 @login_required
 def toggle_favorito(producto_id):
-    favoritos = session.get('favoritos', [])
+    favoritos = session.get('favoritos')
+
+    # Si no existe o no es lista, reinicializamos
+    if not isinstance(favoritos, list):
+        favoritos = []
+
     if producto_id in favoritos:
         favoritos.remove(producto_id)
         accion = 'eliminado'
@@ -430,5 +435,6 @@ def toggle_favorito(producto_id):
         accion = 'agregado'
 
     session['favoritos'] = favoritos
-    db.session.commit() if hasattr(db, "session") else None  # opcional si usas base de datos
+    session.modified = True  # asegura que Flask actualice la cookie
+
     return jsonify({'accion': accion, 'favoritos': favoritos})
