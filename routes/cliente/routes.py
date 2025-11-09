@@ -418,7 +418,7 @@ def favoritos():
     return render_template('cliente/favoritos.html')
 
 
-@cliente.route('/favorito/toggle/<int:producto_id>', methods=['POST'])
+@cliente.route('/favorito/toggle/<int:producto_id>', methods=['GET', 'POST'])
 @login_required
 def toggle_favorito(producto_id):
     favoritos = session.get('favoritos', [])
