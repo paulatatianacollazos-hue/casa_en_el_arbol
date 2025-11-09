@@ -121,20 +121,6 @@
   <p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
 {% endif %}
 
-{% if reseñas %}
-  {% for r in reseñas %}
-    <div class="border p-3 mb-3 rounded">
-      <strong>{{ r.usuario.Nombre }} {{ r.usuario.Apellido }}</strong>
-      <span class="text-warning">
-        {% for i in range(r.Estrellas) %}⭐{% endfor %}
-      </span>
-      <p class="mb-0">{{ r.Texto }}</p>
-      <small class="text-muted">{{ r.Fecha.strftime('%d/%m/%Y') }}</small>
-    </div>
-  {% endfor %}
-{% else %}
-  <p class="text-muted">No hay reseñas aún.</p>
-{% endif %}
 
 
 <!-- SECCIÓN PERSONALIZAR -->
@@ -258,35 +244,6 @@ document.querySelectorAll(".corazon").forEach(corazon => {
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const idProducto = {{ producto.ID_Producto }};
-  mostrarReseñas(idProducto);
-});
-
-function guardarReseña(idProducto) {
-  const comentario = document.getElementById("comentario").value.trim();
-  const estrellas = document.getElementById("estrellas").value;
-  if (!comentario) {
-    alert("Por favor escribe un comentario.");
-    return;
-  }
-
-  // Cargar reseñas actuales
-  let reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
-
-  reseñas.push({
-    idProducto: idProducto,
-    usuario: "{{ current_user.Nombre }}",
-    estrellas: estrellas,
-    comentario: comentario,
-    fecha: new Date().toLocaleString()
-  });
-
-  localStorage.setItem("reseñas", JSON.stringify(reseñas));
-  document.getElementById("comentario").value = "";
-  mostrarReseñas(idProducto);
-}
-
 function mostrarReseñas(idProducto) {
   const contenedor = document.getElementById("lista-reseñas");
   const reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
@@ -300,11 +257,12 @@ function mostrarReseñas(idProducto) {
   contenedor.innerHTML = filtradas.map(r => `
     <div class="border rounded p-2 mb-2">
       <strong>${r.usuario}</strong> <small>${r.fecha}</small><br>
-      ${"⭐".repeat(r.estrellas)}<br>
+      ${"⭐".repeat(Number(r.estrellas))}<br>
       ${r.comentario}
     </div>
   `).join("");
 }
+
 </script>
 
 

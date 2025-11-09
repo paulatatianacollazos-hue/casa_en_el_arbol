@@ -270,7 +270,7 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
 
-    # Verificar si el usuario ha comprado este producto
+    # Detectar si el usuario compró este producto
     ha_comprado = (
         db.session.query(Detalle_Pedido)
         .join(Pedido, Detalle_Pedido.ID_Pedido == Pedido.ID_Pedido)
