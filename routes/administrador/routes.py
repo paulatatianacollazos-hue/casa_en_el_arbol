@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from flask import flash, jsonify
+from flask import flash, jsonify, abort
 from flask_login import login_required, current_user
 from basedatos.models import (
     db, Usuario, Notificaciones,
@@ -40,11 +40,14 @@ admin = Blueprint("admin", __name__, url_prefix="/admin")
 def admin_required(f):
     """Decorador personalizado para restringir acceso a administradores"""
     from functools import wraps
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.Rol != "Administrador":
+        if not current_user.is_authenticated or getattr(
+                current_user, "Rol", None) != "Administrador":
             abort(403)  # Acceso prohibido
         return f(*args, **kwargs)
+
     return decorated_function
 
 
