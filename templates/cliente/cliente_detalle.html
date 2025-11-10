@@ -100,26 +100,6 @@
   </div>
 </div>
 
-<h3 class="mt-4">🗣️ Reseñas</h3>
-
-<div id="lista-reseñas" class="mb-3"></div>
-
-{% if ha_comprado %}
-  <div id="form-reseña" class="border p-3 rounded">
-    <h5>Deja tu reseña</h5>
-    <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..."></textarea>
-    <select id="estrellas" class="form-select mb-2">
-      <option value="5">⭐ 5 estrellas</option>
-      <option value="4">⭐ 4 estrellas</option>
-      <option value="3">⭐ 3 estrellas</option>
-      <option value="2">⭐ 2 estrellas</option>
-      <option value="1">⭐ 1 estrella</option>
-    </select>
-    <button class="btn btn-primary" onclick="guardarReseña({{ producto.ID_Producto }})">Enviar reseña</button>
-  </div>
-{% else %}
-  <p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
-{% endif %}
 
 
 
@@ -175,6 +155,28 @@
   </div>
   </div>
 </div>
+
+<h3 class="mt-4">🗣️ Reseñas</h3>
+
+
+
+{% if ha_comprado %}
+  <div id="form-reseña" class="border p-3 rounded">
+    <h5>Deja tu reseña</h5>
+    <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..."></textarea>
+    <select id="estrellas" class="form-select mb-2">
+      <option value="5">⭐ 5 estrellas</option>
+      <option value="4">⭐ 4 estrellas</option>
+      <option value="3">⭐ 3 estrellas</option>
+      <option value="2">⭐ 2 estrellas</option>
+      <option value="1">⭐ 1 estrella</option>
+    </select>
+    <button class="btn btn-primary" onclick="guardarReseña({{ producto.ID_Producto }})">Enviar reseña</button>
+  </div>
+{% else %}
+  <p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
+{% endif %}
+<div id="lista-reseñas" class="mb-3"></div>
 {% endblock %}
 
 {% block extra_footer %}
