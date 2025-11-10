@@ -268,7 +268,7 @@ function guardarReseña(idProducto) {
     usuario: "{{ current_user.Nombre }}",
     estrellas: estrellas,
     comentario: comentario,
-    fecha: new Date().toLocaleString()
+    fecha: new Date().toISOString()
   });
 
   // Guardar en localStorage
