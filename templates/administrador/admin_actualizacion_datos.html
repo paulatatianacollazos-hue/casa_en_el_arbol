@@ -453,18 +453,15 @@
               </tr>
             </div>
 
-            <div id="carouselProductos{{ pedido.id }}" class="carousel slide" data-bs-ride="carousel">
+<div id="carouselProductos{{ pedido.id }}" class="carousel slide" data-bs-ride="carousel">
   <div class="carousel-inner">
     {% set chunk_size = 4 %}
     {% for i in range(0, pedido.productos|length, chunk_size) %}
       <div class="carousel-item {% if i == 0 %}active{% endif %}">
-        <div class="d-flex justify-content-start gap-3">
+        <div class="d-flex justify-content-center gap-3">
           {% for producto in pedido.productos[i:i+chunk_size] %}
-            <div class="producto" style="flex: 1 0 22%; max-width: 22%;">
-              <img src="{{ url_for('static', filename='img/' + producto.imagen) }}"
-                class="d-block rounded shadow"
-                style="height: 200px; object-fit: cover; width: 100%;"
-                alt="{{ producto.nombre }}">
+            <div class="producto" style="flex: 0 0 22%;">
+              <img src="{{ url_for('static', filename='img/' + producto.imagen) }}" class="d-block w-100" alt="{{ producto.nombre }}">
               <p class="mb-1">{{ producto.nombre }} (x{{ producto.cantidad }})</p>
               <p class="mb-0">Precio: ${{ producto.precio }}</p>
             </div>
@@ -474,11 +471,11 @@
     {% endfor %}
   </div>
   <button class="carousel-control-prev" type="button" data-bs-target="#carouselProductos{{ pedido.id }}" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="carousel-control-prev-icon"></span>
     <span class="visually-hidden">Anterior</span>
   </button>
   <button class="carousel-control-next" type="button" data-bs-target="#carouselProductos{{ pedido.id }}" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="carousel-control-next-icon"></span>
     <span class="visually-hidden">Siguiente</span>
   </button>
 </div>
