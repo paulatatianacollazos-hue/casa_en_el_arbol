@@ -50,18 +50,16 @@
       color: black;
     }
 
-   .producto {
-  border: 1px solid #ccc;
-  background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
-  border-radius: 8px;
-  padding: 10px;
-  min-width: 200px;
-  max-width: 220px;
-  box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
-  text-align: center;
-  color: white;
-}
-
+    .producto {
+      border: 1px solid #ccc;
+      background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
+      border-radius: 8px;
+      padding: 10px;
+      width: 200px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      color: white;
+    }
 
     .producto img {
       max-width: 100%;
@@ -104,7 +102,7 @@
       left: 10%;
      }
 
-     .control a, button{
+     .control a, .control button{
       text-decoration: none;
       color: white;
       padding: 10px 20px;
@@ -119,24 +117,23 @@
       margin-bottom: 20px;
      }
 
-     .control a, button:hover{
+     .control a, .control button:hover{
       background-color: transparent;
       border: 1px solid ;
      }
 
-     .boton button{
+     .boton-detalle button{
       margin-top: 10px;
       background-color: transparent;
-      border: 1px solid white;
-      color: white;
+      border: 1px solid #7db243;
+      color: #7db243;
       padding: 10px 20px;
       position: relative;
       margin-left: 80%;
      }
 
-    .boton button:hover{
-      background-color: #fff;
-      background-color: #fff;
+    .boton-detalle button:hover{
+      background-color: #7db243;
       border:1px solid black;
       color: black;
       bottom: 2px;
@@ -455,41 +452,20 @@
               </tr>
             </div>
 
-            <div id="carousel-{{ pedido.id }}" class="carousel slide" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    {% for i in range(0, pedido.productos|length, 4) %}
-      <div class="carousel-item {% if i == 0 %}active{% endif %}">
-        <div class="d-flex justify-content-start gap-3">
-          {% for producto in pedido.productos[i:i+4] %}
-            <div class="producto flex-fill text-center">
-              <img src="{{ url_for('static', filename='img/' + producto.imagen) }}"
-                class="d-block rounded shadow"
-                style="max-height: 200px; object-fit: cover;"
-                alt="{{ producto.nombre }}">
-              <p>{{ producto.nombre }} (x{{ producto.cantidad }})</p>
-              <p>Precio: ${{ producto.precio }}</p>
+            <div class="productos">
+              {% for producto in pedido.productos %}
+                <div class="producto-item producto">
+                  <img src="{{ url_for('static', filename='img/' + producto.imagen) }}"
+                    class="d-block rounded shadow"
+                    style="max-height: 300px; object-fit: cover;"
+                    alt="{{ producto.nombre }}">
+                  <p>{{ producto.nombre }} (x{{ producto.cantidad }})</p>
+                  <p>Precio: ${{ producto.precio }}</p>
+                </div>
+              {% endfor %}
             </div>
-          {% endfor %}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ pedido.id }}" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Anterior</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ pedido.id }}" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Siguiente</span>
-  </button>
-</div>
-
-            <button class="btn btn-outline-primary ver-factura-btn"
-              data-pedido-id="{{ pedido.id }}">
-              <i class="bi bi-receipt"></i> Ver factura
-            </button>
           
-            <div class="boton">
+            <div class="boton-detalle" style="border: #7db243; color: #7db243;">
               <button style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button>
             </div>
 
