@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comparar Productos</title>
+</head>
+<body>
+    <h1>Comparación de Productos</h1>
+
+    <form method="POST">
+        <h3>Selecciona hasta 3 productos:</h3>
+        {% for producto in productos %}
+            <label>
+                <input type="checkbox" name="productos" value="{{ producto.id }}">
+                {{ producto.nombre }} - ${{ producto.precio }} ({{ producto.marca }})
+            </label><br>
+        {% endfor %}
+        <br>
+        <button type="submit">Comparar</button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p style="color:red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if seleccionados %}
+        <h2>Resultado de la comparación</h2>
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Nombre</th>
+                {% for p in seleccionados %}<td>{{ p.nombre }}</td>{% endfor %}
+            </tr>
+            <tr>
+                <th>Precio</th>
+                {% for p in seleccionados %}<td>${{ p.precio }}</td>{% endfor %}
+            </tr>
+            <tr>
+                <th>Marca</th>
+                {% for p in seleccionados %}<td>{{ p.marca }}</td>{% endfor %}
+            </tr>
+        </table>
+    {% endif %}
+</body>
+</html>
