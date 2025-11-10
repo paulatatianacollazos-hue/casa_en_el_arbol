@@ -1,48 +1,57 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Comparar Productos</title>
-</head>
-<body>
-    <h1>Comparación de Productos</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Comparar Productos</h2>
 
-    <form method="POST">
-        <h3>Selecciona hasta 3 productos:</h3>
-        {% for producto in productos %}
-            <label>
-                <input type="checkbox" name="productos" value="{{ producto.id }}">
-                {{ producto.nombre }} - ${{ producto.precio }} ({{ producto.marca }})
-            </label><br>
-        {% endfor %}
-        <br>
-        <button type="submit">Comparar</button>
-    </form>
+  <form method="POST">
+    <div class="row">
+      {% for p, c, img in productos %}
+        <div class="col-md-4 mb-3">
+          <div class="card shadow-sm">
+            {% if img %}
+              <img src="{{ img }}" class="card-img-top" alt="{{ p.NombreProducto }}">
+            {% else %}
+              <img src="{{ url_for('static', filename='img/no-image.png') }}" class="card-img-top" alt="Sin imagen">
+            {% endif %}
+            <div class="card-body">
+              <h5>{{ p.NombreProducto }}</h5>
+              <p><strong>Material:</strong> {{ p.Material }}</p>
+              <p><strong>Color:</strong> {{ p.Color }}</p>
+              <p><strong>Precio:</strong> ${{ "%.2f"|format(p.PrecioUnidad) }}</p>
+              <p><strong>Categoría:</strong> {{ c.NombreCategoria }}</p>
+              <input type="checkbox" name="productos" value="{{ p.ID_Producto }}">
+              Seleccionar
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary">Comparar seleccionados</button>
+  </form>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p style="color:red;">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    {% if seleccionados %}
-        <h2>Resultado de la comparación</h2>
-        <table border="1" cellpadding="8">
-            <tr>
-                <th>Nombre</th>
-                {% for p in seleccionados %}<td>{{ p.nombre }}</td>{% endfor %}
-            </tr>
-            <tr>
-                <th>Precio</th>
-                {% for p in seleccionados %}<td>${{ p.precio }}</td>{% endfor %}
-            </tr>
-            <tr>
-                <th>Marca</th>
-                {% for p in seleccionados %}<td>{{ p.marca }}</td>{% endfor %}
-            </tr>
-        </table>
-    {% endif %}
-</body>
-</html>
+  {% if seleccionados %}
+  <hr>
+  <h3>Resultado de la comparación</h3>
+  <div class="row">
+    {% for p, c, img in seleccionados %}
+      <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+          {% if img %}
+            <img src="{{ img }}" class="card-img-top" alt="{{ p.NombreProducto }}">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/no-image.png') }}" class="card-img-top" alt="Sin imagen">
+          {% endif %}
+          <div class="card-body">
+            <h5>{{ p.NombreProducto }}</h5>
+            <p><strong>Material:</strong> {{ p.Material }}</p>
+            <p><strong>Color:</strong> {{ p.Color }}</p>
+            <p><strong>Precio:</strong> ${{ "%.2f"|format(p.PrecioUnidad) }}</p>
+            <p><strong>Categoría:</strong> {{ c.NombreCategoria }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
