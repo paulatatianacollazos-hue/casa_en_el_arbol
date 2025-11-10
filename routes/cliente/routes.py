@@ -470,3 +470,30 @@ def toggle_favorito(producto_id):
     session.modified = True
 
     return jsonify({'accion': accion})
+
+
+
+# Comparación de productos
+@cliente.route('/comparar', methods=['GET', 'POST'])
+@login_required
+def comparar_productos():
+    # Obtener todos los productos del catálogo
+    productos = Producto.query.join(
+        db.session.query(Producto).join(Producto.categoria)
+    ).all()
+
+    seleccionados = []
+
+    if request.method == 'POST':
+        seleccion = request.form.getlist('productos')
+        if len(seleccion) > 3:
+            flash('Solo puedes comparar un máximo de 3 productos.', 'warning')
+        elif len(seleccion) == 0:
+            flash('Debes seleccionar al menos un producto.', 'warning')
+        else:
+            seleccionados = Producto.query.filter(Producto.ID_Producto.in_(seleccion)).all()
+
+    return render_template('cliente/comparar.html',
+                           productos=productos,
+                           seleccionados=seleccionados)
+
