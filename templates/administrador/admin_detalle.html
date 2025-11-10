@@ -1,4 +1,4 @@
-{% extends "administrador/admin_dashboard.html" %}
+{% extends "cliente/dashboard.html" %}
 {% block title %}{{ producto.NombreProducto }} | Casa en el Árbol{% endblock %}
 
 {% block extra_css %}
@@ -22,6 +22,20 @@
     padding: 10px 20px;
   }
 </style>
+<style>
+ .corazon {
+    cursor: pointer;
+    color: gray;
+    font-size: 24px;
+    transition: color 0.3s;
+}
+
+.corazon.activo {
+    color: red;
+}
+
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -50,33 +64,21 @@
 
   <!-- Caja de información -->
   <div class="caja">
-    <h2>{{ producto.NombreProducto }}</h2>
+
+    </h2>
     <p><b>Material:</b> {{ producto.Material }}</p>
     <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
     <p><b>Color:</b> {{ producto.Color }}</p>
     <p><b>stock:</b>{{ producto.Stock}}</p>
-    
-
-    <div class="botones mt-3">
-      <button class="btn btn-primary">Garantía</button>
-      <button class="btn btn-primary"
-        data-id="{{ producto.ID_Producto }}"
-        data-name="{{ producto.NombreProducto }}"
-        data-price="{{ producto.PrecioUnidad }}"
-        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-        data-material="{{ producto.Material }}"
-        onclick="addToCartFromButton(this)">
-        Añadir al carrito
-      </button>
+      
     </div>
 
-    <div class="botones mt-3">
-      <button id="btn-personalizar" class="btn btn-primary">
-        Personalizar
-      </button>
     </div>
   </div>
 </div>
+
+
+
 
 <!-- SECCIÓN PERSONALIZAR -->
 <div id="seccion-personalizar" class="d-none">
@@ -122,7 +124,7 @@
         Añadir al carrito
       </button>
     </div>
-
+  
     <div class="mt-3">
     <button id="btn-volver" class="btn btn-primary">Volver</button>
   </div>
@@ -130,6 +132,28 @@
   </div>
   </div>
 </div>
+
+<h3 class="mt-4">🗣️ Reseñas</h3>
+
+
+
+{% if ha_comprado %}
+  <div id="form-reseña" class="border p-3 rounded">
+    <h5>Deja tu reseña</h5>
+    <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..."></textarea>
+    <select id="estrellas" class="form-select mb-2">
+      <option value="5">⭐ 5 estrellas</option>
+      <option value="4">⭐ 4 estrellas</option>
+      <option value="3">⭐ 3 estrellas</option>
+      <option value="2">⭐ 2 estrellas</option>
+      <option value="1">⭐ 1 estrella</option>
+    </select>
+    <button class="btn btn-primary" onclick="guardarReseña({{ producto.ID_Producto }})">Enviar reseña</button>
+  </div>
+{% else %}
+  <p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
+{% endif %}
+<div id="lista-reseñas" class="mb-3"></div>
 {% endblock %}
 
 {% block extra_footer %}
@@ -176,4 +200,86 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<script>
+document.querySelectorAll(".corazon").forEach(corazon => {
+  corazon.addEventListener("click", () => {
+    const productoId = corazon.dataset.id;
+    const url = `/cliente/favorito/toggle/${productoId}`;
+
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.accion === "agregado") corazon.classList.add("activo");
+      else corazon.classList.remove("activo");
+    })
+    .catch(err => console.error("Error:", err));
+  });
+});
+
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const idProducto = {{ producto.ID_Producto }};
+  mostrarReseñas(idProducto);
+});
+
+function guardarReseña(idProducto) {
+  console.log("Reseñas crudas:", reseñas);
+  const comentario = document.getElementById("comentario").value.trim();
+  const estrellas = document.getElementById("estrellas").value;
+
+  if (!comentario) {
+    alert("Por favor escribe un comentario.");
+    return;
+  }
+
+  // Obtener reseñas guardadas en localStorage
+  let reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
+
+  // Agregar nueva reseña
+  reseñas.push({
+    idProducto: idProducto,
+    usuario: "{{ current_user.Nombre }}",
+    estrellas: estrellas,
+    comentario: comentario,
+    fecha: new Date().toISOString()
+  });
+
+  // Guardar en localStorage
+  localStorage.setItem("reseñas", JSON.stringify(reseñas));
+
+  // Limpiar campo de comentario
+  document.getElementById("comentario").value = "";
+
+  // Actualizar la lista en pantalla
+  mostrarReseñas(idProducto);
+}
+
+function mostrarReseñas(idProducto) {
+  const contenedor = document.getElementById("lista-reseñas");
+  const reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
+  const filtradas = reseñas.filter(r => r.idProducto === idProducto);
+
+  if (filtradas.length === 0) {
+    contenedor.innerHTML = "<p>No hay reseñas aún.</p>";
+    return;
+  }
+
+  contenedor.innerHTML = filtradas.map(r => `
+    <div class="border rounded p-2 mb-2">
+      <strong>${r.usuario}</strong> <small>${r.fecha}</small><br>
+      ${"⭐".repeat(Number(r.estrellas))}<br>
+      ${r.comentario}
+    </div>
+  `).join("");
+}
+</script>
+
+
+
 {% endblock %}
