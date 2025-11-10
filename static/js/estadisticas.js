@@ -4,15 +4,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const barsCanvas = document.getElementById("bars");
   const negTable = document.getElementById("negTable");
   const txtTotal = document.getElementById("txtTotal");
+  const promedioGeneral = document.getElementById("promedioGeneral");
 
   let pieChart, barChart;
 
   btnGen.addEventListener("click", generarEstadisticas);
 
   function generarEstadisticas() {
-    // 🔹 Cargar reseñas del localStorage (cada usuario tiene su clave)
-    const userId = window.FLASK_USER_ID || "anonimo";
-    const key = "reseñas_pedidos_" + userId;
+    // 🔹 Cargar todas las reseñas del localStorage
     const reseñas = JSON.parse(localStorage.getItem("reseñas") || "[]");
 
     if (reseñas.length === 0) {
@@ -40,17 +39,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 🔹 Calcular estadísticas básicas
+    // 🔹 Calcular estadísticas
     const total = filtradas.length;
-    const positivas = filtradas.filter(r => r.estrellas >= 4).length;
-    const neutras = filtradas.filter(r => r.estrellas === 3).length;
-    const negativas = filtradas.filter(r => r.estrellas <= 2).length;
+    const positivas = filtradas.filter(r => Number(r.estrellas) >= 4).length;
+    const neutras = filtradas.filter(r => Number(r.estrellas) === 3).length;
+    const negativas = filtradas.filter(r => Number(r.estrellas) <= 2).length;
     const promedio =
       filtradas.reduce((s, r) => s + Number(r.estrellas), 0) / total;
 
-    txtTotal.textContent = `Total reseñas: ${total} | Promedio general: ${promedio.toFixed(2)} ⭐`;
+    txtTotal.textContent = `Total reseñas: ${total}`;
+    promedioGeneral.textContent = `${promedio.toFixed(2)} ⭐`;
 
-    // 🔹 Generar gráfico circular (positivas / neutras / negativas)
+    // 🔹 Gráfico circular (Positivas / Neutras / Negativas)
     if (pieChart) pieChart.destroy();
     pieChart = new Chart(pieCanvas, {
       type: "pie",
@@ -62,10 +62,15 @@ document.addEventListener("DOMContentLoaded", () => {
             backgroundColor: ["#4caf50", "#ffca28", "#f44336"]
           }
         ]
+      },
+      options: {
+        plugins: {
+          legend: { position: "bottom" }
+        }
       }
     });
 
-    // 🔹 Generar gráfico de barras por mes
+    // 🔹 Gráfico de barras (promedio por mes)
     const agrupadas = agruparPorMes(filtradas);
     const meses = Object.keys(agrupadas);
     const valores = Object.values(agrupadas);
@@ -77,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         labels: meses,
         datasets: [
           {
-            label: "Promedio de estrellas por mes",
+            label: "Promedio de estrellas",
             data: valores,
             backgroundColor: "#42a5f5"
           }
@@ -90,30 +95,32 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 🔹 Mostrar tabla de comentarios negativos
-    const negativos = filtradas.filter(r => r.estrellas <= 2);
+    // 🔹 Tabla de comentarios negativos
+    const negativos = filtradas.filter(r => Number(r.estrellas) <= 2);
     negTable.innerHTML = negativos.length
       ? negativos
           .map(
             r =>
-              `<tr><td>${r.idPedido || "Pedido N/A"}</td><td>${r.comentario}</td></tr>`
+              `<tr><td>${r.idProducto || "Pedido N/A"}</td><td>${r.comentario}</td></tr>`
           )
           .join("")
-      : "<tr><td colspan='2'>No hay comentarios negativos.</td></tr>";
+      : "<tr><td colspan='2' class='text-center text-muted'>No hay comentarios negativos.</td></tr>";
   }
 
   function agruparPorMes(reseñas) {
-    const meses = [
+    const mesesNombre = [
       "Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"
     ];
     const agrupado = {};
+
     reseñas.forEach(r => {
       const f = new Date(r.fecha);
-      const key = meses[f.getMonth()] + " " + f.getFullYear();
+      const key = mesesNombre[f.getMonth()] + " " + f.getFullYear();
       if (!agrupado[key]) agrupado[key] = { suma: 0, n: 0 };
       agrupado[key].suma += Number(r.estrellas);
       agrupado[key].n++;
     });
+
     const resultado = {};
     for (const k in agrupado) {
       resultado[k] = (agrupado[k].suma / agrupado[k].n).toFixed(2);
