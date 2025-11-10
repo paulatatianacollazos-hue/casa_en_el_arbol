@@ -1,24 +1,33 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from flask import jsonify
+from flask import jsonify, make_response
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from basedatos.models import Usuario, Producto, Calendario, Notificaciones, Detalle_Pedido
-from basedatos.decoradores import role_required
-from basedatos.notificaciones import crear_notificacion
 from datetime import datetime
-from basedatos.queries import obtener_pedidos_por_cliente
-from basedatos.queries import get_productos, get_producto_by_id, recivo
-from basedatos.models import db, Comentarios, Direccion, Pedido
+from io import BytesIO
 import base64
 import os
-from basedatos.queries import crear_pedido_y_pago
-from flask import make_response
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from io import BytesIO
+
+from basedatos.models import (
+    db, Usuario, Producto, Calendario, Notificaciones, 
+    Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias
+)
+from basedatos.decoradores import role_required
+from basedatos.notificaciones import crear_notificacion
+from basedatos.queries import (
+    obtener_pedidos_por_cliente,
+    get_productos,
+    get_producto_by_id,
+    recivo,
+    crear_pedido_y_pago
+)
 
 from . import cliente
+
 reviews = []
+
 
 
 # ---------- DASHBOARD ----------
@@ -474,6 +483,7 @@ def toggle_favorito(producto_id):
 
 
 # Comparación de productos
+
 @cliente.route('/comparar', methods=['GET', 'POST'])
 @login_required
 def comparar_productos():
