@@ -932,13 +932,14 @@ function guardarResenaPedido() {
   if (existente) {
     existente.comentario = comentario;
     existente.estrellas = estrellas;
-    existente.fecha = new Date().toLocaleString();
+    existente.fecha = new Date().toISOString();
   } else {
     reseñas.push({
       idPedido: pedidoActual,
       comentario,
       estrellas,
-      fecha: new Date().toLocaleString()
+      fecha: new Date().toISOString()
+
     });
   }
 
