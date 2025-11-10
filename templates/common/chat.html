@@ -1,46 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Chat {{ rol }}</title>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <style>
-        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
-        #chat-box { border: 1px solid #ccc; background: white; padding: 10px; height: 300px; overflow-y: auto; }
-        #chat-box p { margin: 5px 0; }
-        .admin { color: red; }
-        .cliente { color: blue; }
-    </style>
+    <title>Chat en vivo</title>
+    <script>
+        async function enviarMensaje() {
+            const texto = document.getElementById('texto').value;
+            await fetch('{{ url_for(request.blueprint + ".enviar_mensaje_" + request.blueprint) }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ texto })
+            });
+            document.getElementById('texto').value = '';
+            obtenerMensajes();
+        }
+
+        async function obtenerMensajes() {
+            const res = await fetch('{{ url_for(request.blueprint + ".obtener_mensajes_" + request.blueprint) }}');
+            const data = await res.json();
+            const contenedor = document.getElementById('mensajes');
+            contenedor.innerHTML = data.map(m => `<p><b>${m.usuario}:</b> ${m.texto}</p>`).join('');
+        }
+
+        setInterval(obtenerMensajes, 2000);
+    </script>
 </head>
 <body>
-    <h2>Chat ({{ rol }})</h2>
-    <div id="chat-box"></div>
-    <input type="text" id="mensaje" placeholder="Escribe un mensaje...">
-    <button id="enviar">Enviar</button>
-
-    <script>
-        const socket = io();
-        const rol = "{{ rol }}";
-        const sala = "chat_general"; // ambos comparten la misma sala
-        const chatBox = document.getElementById('chat-box');
-
-        // Unirse a la sala
-        socket.emit('join', { sala: sala, rol: rol });
-
-        // Enviar mensaje
-        document.getElementById('enviar').onclick = function() {
-            const mensaje = document.getElementById('mensaje').value;
-            socket.emit('mensaje', { sala: sala, rol: rol, mensaje: mensaje });
-            document.getElementById('mensaje').value = '';
-        };
-
-        // Mostrar mensaje recibido
-        socket.on('nuevo_mensaje', function(data) {
-            const p = document.createElement('p');
-            p.innerHTML = `<strong class="${data.remitente}">${data.remitente}:</strong> ${data.mensaje}`;
-            chatBox.appendChild(p);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    </script>
+    <h2>Chat entre Cliente y Administrador</h2>
+    <div id="mensajes" style="border:1px solid #ccc; height:300px; overflow-y:auto;"></div>
+    <br>
+    <input type="text" id="texto" placeholder="Escribe un mensaje">
+    <button onclick="enviarMensaje()">Enviar</button>
 </body>
 </html>
