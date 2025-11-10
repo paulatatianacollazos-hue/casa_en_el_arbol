@@ -1,5 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
-from flask import jsonify, make_response
+from flask import render_template, request, redirect, url_for, flash, session, jsonify, make_response
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from datetime import datetime
@@ -26,8 +25,9 @@ from basedatos.queries import (
 
 from . import cliente
 
+# listas compartidas
+mensajes = []
 reviews = []
-
 
 
 # ---------- DASHBOARD ----------
@@ -511,3 +511,20 @@ def comparar_productos():
                            seleccionados=seleccionados)
 
 
+# ------------------ RUTAS DEL CHAT ------------------
+@cliente.route('/chat')
+@login_required
+def chat_cliente():
+    return render_template('common/chat.html', usuario='Cliente')
+
+@cliente.route('/enviar_mensaje', methods=['POST'])
+@login_required
+def enviar_mensaje_cliente():
+    data = request.get_json()
+    mensajes.append({'usuario': 'Cliente', 'texto': data.get('texto'), 'fecha': datetime.now().isoformat()})
+    return jsonify({'ok': True})
+
+@cliente.route('/obtener_mensajes')
+@login_required
+def obtener_mensajes_cliente():
+    return jsonify(mensajes)
