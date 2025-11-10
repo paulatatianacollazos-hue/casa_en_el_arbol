@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🔹 Cargar reseñas del localStorage (cada usuario tiene su clave)
     const userId = window.FLASK_USER_ID || "anonimo";
     const key = "reseñas_pedidos_" + userId;
-    const reseñas = JSON.parse(localStorage.getItem(key) || "[]");
+    const reseñas = JSON.parse(localStorage.getItem("reseñas") || "[]");
 
     if (reseñas.length === 0) {
       alert("No hay reseñas registradas todavía.");
