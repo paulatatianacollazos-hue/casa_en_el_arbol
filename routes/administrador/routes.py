@@ -37,62 +37,11 @@ reviews = []
 admin = Blueprint("admin", __name__, url_prefix="/admin")
 
 
-def admin_required(f):
-    """Decorador personalizado para restringir acceso a administradores"""
-    from functools import wraps
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or getattr(
-                current_user, "Rol", None) != "admin":
-            abort(403)  # Acceso prohibido
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
 @admin.route("/estadisticas_reseñas", methods=["GET", "POST"])
 @login_required
-@admin_required
 def estadisticas_reseñas():
-    """
-    Página o API protegida: solo administradores pueden acceder.
-    Si es GET → muestra dashboard.
-    Si es POST → recibe JSON y devuelve estadísticas agrupadas por mes.
-    """
-    if request.method == "GET":
-        return render_template("administrador/estadisticas_reseñas.html")
 
-    data = request.json or {}
-    reseñas_productos = data.get("reseñas_productos", [])
-    reseñas_pedidos = data.get("reseñas_pedidos", [])
-
-    def agrupar_por_mes(reseñas):
-        resumen = defaultdict(lambda: {"cantidad": 0, "suma": 0})
-        for r in reseñas:
-            try:
-                fecha = datetime.fromisoformat(r.get("fecha", str(datetime.now())))
-            except ValueError:
-                fecha = datetime.now()
-            key = (fecha.year, fecha.month)
-            resumen[key]["cantidad"] += 1
-            resumen[key]["suma"] += int(r.get("estrellas", 0))
-        return [
-            {
-                "anio": k[0],
-                "mes": k[1],
-                "cantidad": v["cantidad"],
-                "promedio_estrellas": round(v["suma"] / v["cantidad"], 2) if v["cantidad"] > 0 else 0
-            }
-            for k, v in resumen.items()
-        ]
-
-    resultado = {
-        "productos": agrupar_por_mes(reseñas_productos),
-        "pedidos": agrupar_por_mes(reseñas_pedidos)
-    }
-
-    return jsonify(resultado)
+    return render_template("administrador/estadisticas_reseñas.html")
 
 
 # ---------- DASHBOARD ----------
