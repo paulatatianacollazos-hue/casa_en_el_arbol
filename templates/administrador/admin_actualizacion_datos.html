@@ -200,7 +200,6 @@
           <li><a class="dropdown-item" href="#">Historial</a></li>
           <li><a class="dropdown-item" href="{{ url_for('admin.gestion_roles') }}">Gestión de roles</a></li>
           <li><a class="dropdown-item" href="{{ url_for('admin.estadisticas_reseñas') }}">Estadísticas</a></li>
-          <li><a class="dropdown-item" href="{{ url_for('admin.ver_reseñas') }}">Reseñas</a></li>
           <li><a class="dropdown-item" href="{{ url_for('admin.ver_notificaciones') }}">Notificaciones</a></li>
 
 
@@ -415,7 +414,7 @@
         </div>
         <button id="btnAsignarEmpleado" class="btn btn-success">Asignar empleado</button>
         <a href="{{ url_for('admin.control_pedidos') }}" class="btn btn-success">control de pedidos</a>
-        {% for pedido in pedidos %}
+        {% for pedido in pedidos if not pedido.ID_Empleado %}
           <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
             <h3>Pedido #{{ pedido.id }}</h3>
             <p><strong>Cliente:</strong> {{ pedido.usuario }}</p>
