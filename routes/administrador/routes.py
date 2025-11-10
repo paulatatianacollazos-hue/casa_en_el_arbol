@@ -829,3 +829,28 @@ def registros_entrega_json(pedido_id):
             "error": str(e),
             "message": "Ocurrió un error al obtener los registros de entrega."
         }), 500
+
+# ------------------ CHAT ADMIN ------------------
+# importa la lista global de mensajes del cliente
+from routes.cliente.routes import mensajes
+
+@admin.route('/chat')
+@login_required
+def chat_admin():
+    return render_template('common/chat.html', usuario='Administrador')
+
+@admin.route('/enviar_mensaje', methods=['POST'])
+@login_required
+def enviar_mensaje_admin():
+    data = request.get_json()
+    mensajes.append({
+        'usuario': 'Administrador',
+        'texto': data.get('texto'),
+        'fecha': datetime.now().isoformat()
+    })
+    return jsonify({'ok': True})
+
+@admin.route('/obtener_mensajes')
+@login_required
+def obtener_mensajes_admin():
+    return jsonify(mensajes)
