@@ -250,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function guardarReseña(idProducto) {
+  console.log("Reseñas crudas:", reseñas);
   const comentario = document.getElementById("comentario").value.trim();
   const estrellas = document.getElementById("estrellas").value;
 
