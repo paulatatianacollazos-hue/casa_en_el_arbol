@@ -17,6 +17,14 @@
 
 
   <style>
+    .seleccion-pedido{
+      margin-top: 130px;
+
+    }
+
+    .datos-pedido p{
+      margin-right: 30px;
+    }
 
     .i{
         height: 200px;
@@ -418,11 +426,15 @@
         {% for pedido in pedidos if pedido['id_empleado'] is none %}
           <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
             <h3>Pedido #{{ pedido.id }}</h3>
+            <div class="datos-pedido" style="display: flex;">
             <p><strong>Cliente:</strong> {{ pedido.usuario }}</p>
             <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
             <p><strong>Dirección:</strong> {{ pedido.direccion }}</p>
+            </div>
+            <div class="datos-pedido" style="display: flex;">
             <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
             <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            </div>
 
             <div class="estado-pedido">
               <td>{{ pedido.ID_Pedido }}</td>
