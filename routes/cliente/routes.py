@@ -51,33 +51,70 @@ def instalaciones():
 def actualizar_instalacion():
     id_pedido = request.form.get('id_pedido')
     nueva_fecha = request.form.get('fecha_entrega')
-    nueva_hora = request.form.get('hora_entrega')
+    nueva_hora = request.form.get('hora_entrega')  # opcional
 
+    # 1️⃣ Validar campos obligatorios
     if not id_pedido or not nueva_fecha:
-        flash("Debes ingresar todos los datos obligatorios", "danger")
+        flash("Debes ingresar todos los datos obligatorios.", "instalaciones-danger")
         return redirect(url_for('cliente.instalaciones'))
 
+    # 2️⃣ Validar que el pedido existe y pertenece al usuario
+    pedido = Pedido.query.get(id_pedido)
+    if not pedido:
+        flash("El pedido no existe.", "instalaciones-danger")
+        return redirect(url_for('cliente.instalaciones'))
+    if pedido.ID_Usuario != current_user.id:
+        flash("No puedes modificar un pedido que no es tuyo.", "instalaciones-warning")
+        return redirect(url_for('cliente.instalaciones'))
+
+    # 3️⃣ Buscar calendario asociado al pedido
     calendario = Calendario.query.filter_by(ID_Pedido=id_pedido).first()
-
     if not calendario:
-        flash("No se encontró un calendario para este pedido", "warning")
+        flash("No se encontró un calendario para este pedido.", "instalaciones-warning")
         return redirect(url_for('cliente.instalaciones'))
 
-    calendario.Fecha = datetime.strptime(nueva_fecha, "%Y-%m-%d").date()
+    # 4️⃣ Convertir fecha y hora
+    try:
+        fecha_dt = datetime.strptime(nueva_fecha, "%Y-%m-%d").date()
+        hora_dt = datetime.strptime(nueva_hora, "%H:%M").time() if nueva_hora else calendario.Hora
+    except ValueError:
+        flash("Formato de fecha u hora inválido.", "instalaciones-danger")
+        return redirect(url_for('cliente.instalaciones'))
 
-    if nueva_hora:
-        calendario.Hora = datetime.strptime(nueva_hora, "%H:%M").time()
+    # 5️⃣ Determinar intervalo según tipo
+    intervalo = timedelta(minutes=60 if calendario.Tipo == "Instalación" else 30)
+    nueva_datetime = datetime.combine(fecha_dt, hora_dt)
+    inicio_intervalo = nueva_datetime - intervalo
+    fin_intervalo = nueva_datetime + intervalo
 
+    # 6️⃣ Validar conflictos de horarios
+    otros_eventos = Calendario.query.filter(
+        Calendario.Fecha == fecha_dt,
+        Calendario.ID_Calendario != calendario.ID_Calendario
+    ).all()
+
+    for evento in otros_eventos:
+        if not evento.Hora:
+            continue
+        evento_datetime = datetime.combine(evento.Fecha, evento.Hora)
+        evento_intervalo = timedelta(minutes=60 if evento.Tipo == "Instalación" else 30)
+        if (inicio_intervalo <= evento_datetime <= fin_intervalo):
+            flash(f"Conflicto con otro evento ({evento.Tipo}) a las {evento.Hora.strftime('%H:%M')}. Elige otra hora.", "instalaciones-warning")
+            return redirect(url_for('cliente.instalaciones'))
+
+    # 7️⃣ Actualizar calendario
+    calendario.Fecha = fecha_dt
+    calendario.Hora = hora_dt
     calendario.Tipo = "Instalación"
 
     try:
-        db.session.add(calendario)  # asegúrate de que esté en la sesión
+        db.session.add(calendario)
         db.session.commit()
-        flash("Calendario actualizado correctamente", "success")
+        flash("Calendario actualizado correctamente.", "instalaciones-success")
     except Exception as e:
         db.session.rollback()
-        print("Error al actualizar:", e)
-        flash("Error al actualizar calendario", "danger")
+        print("Error al actualizar calendario:", e)
+        flash("Ocurrió un error al actualizar el calendario.", "instalaciones-danger")
 
     return redirect(url_for('cliente.instalaciones'))
 
@@ -485,7 +522,9 @@ def toggle_favorito(producto_id):
     return jsonify({'accion': accion})
 
 
+
 # Comparación de productos
+
 @cliente.route('/comparar', methods=['GET', 'POST'])
 @login_required
 def comparar_productos():
