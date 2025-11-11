@@ -49,32 +49,36 @@ def instalaciones():
 # Actualizar instalación
 @cliente.route('/instalaciones/actualizar', methods=['POST'])
 def actualizar_instalacion():
-    # Obtener datos del formulario
     id_pedido = request.form.get('id_pedido')
     nueva_fecha = request.form.get('fecha_entrega')
-    nueva_hora = request.form.get('hora_entrega')  # opcional
+    nueva_hora = request.form.get('hora_entrega')
 
     if not id_pedido or not nueva_fecha:
         flash("Debes ingresar todos los datos obligatorios", "danger")
         return redirect(url_for('cliente.instalaciones'))
 
-    # Buscar calendario del pedido
     calendario = Calendario.query.filter_by(ID_Pedido=id_pedido).first()
 
     if not calendario:
         flash("No se encontró un calendario para este pedido", "warning")
         return redirect(url_for('cliente.instalaciones'))
 
-    # Actualizar fecha, hora y tipo
     calendario.Fecha = datetime.strptime(nueva_fecha, "%Y-%m-%d").date()
 
     if nueva_hora:
         calendario.Hora = datetime.strptime(nueva_hora, "%H:%M").time()
 
-    calendario.Tipo = "Instalación"  # Aquí se asigna el tipo
+    calendario.Tipo = "Instalación"
 
-    db.session.commit()
-    flash("Calendario actualizado correctamente", "success")
+    try:
+        db.session.add(calendario)  # asegúrate de que esté en la sesión
+        db.session.commit()
+        flash("Calendario actualizado correctamente", "success")
+    except Exception as e:
+        db.session.rollback()
+        print("Error al actualizar:", e)
+        flash("Error al actualizar calendario", "danger")
+
     return redirect(url_for('cliente.instalaciones'))
 
 
