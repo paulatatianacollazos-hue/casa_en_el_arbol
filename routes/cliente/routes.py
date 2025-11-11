@@ -1,4 +1,5 @@
-from flask import render_template, request, redirect, url_for, flash, session, jsonify, make_response
+from flask import (render_template, request, redirect, url_for, flash, session,
+                   jsonify, make_response)
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
@@ -10,7 +11,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 from basedatos.models import (
-    db, Usuario, Producto, Calendario, Notificaciones, 
+    db, Usuario, Producto, Calendario, Notificaciones,
     Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias
 )
 from basedatos.decoradores import role_required
