@@ -133,12 +133,35 @@ def ver_notificaciones():
 
 
 # ---------- CONTROL_PEDIDOS ----------
-@admin.route("/control_pedidos")
+@admin.route("/control_pedidos", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
 def control_pedidos():
-    return render_template("administrador/control_pedidos.html",
-                           pedidos=todos_los_pedidos())
+    # Inicializar variables
+    pedidos = todos_los_pedidos()
+    comentarios = obtener_comentarios_agrupados()
+    reportes = []
+
+    # Manejo de filtros según POST
+    if request.method == "POST":
+        accion = request.form.get("accion")
+
+        if accion == "estado":  # filtro por estado de pedido
+            pedido_id = request.form.get("pedido_id")
+            return redirect(url_for("admin.control_pedidos", pedido_id=pedido_id))
+
+        elif accion == "reporte":  # búsqueda de reportes
+            reportes = buscar_pedidos()
+
+        # Podrías agregar más acciones según necesidad
+
+    # Renderizar el template unificado con todas las secciones
+    return render_template(
+        "administrador/control_pedidos.html",
+        pedidos=pedidos,
+        comentarios=comentarios,
+        reportes=reportes
+    )
 
 
 # ---------- ASIGNAR_EMPLEADO ----------
@@ -157,36 +180,6 @@ def asignar_empleado_route():
 def actualizar_pedido_route():
     actualizar_pedido_query(request.form)
     return redirect(url_for("admin.control_pedidos"))
-
-
-# ---------- ESTADO ----------
-@admin.route("/estado", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def estado_pedido():
-    if request.method == "POST":
-        pedido_id = request.form["pedido_id"]
-        return redirect(url_for("admin.control_pedidos", pedido_id=pedido_id))
-    return render_template("administrador/estado.html")
-
-
-# ---------- COMENTARIOS ----------
-@admin.route("/comentarios")
-@login_required
-@role_required("admin")
-def mostrar_comentarios():
-    return render_template("administrador/comentarios.html",
-                           comentarios=obtener_comentarios_agrupados())
-
-
-# ---------- REPORTES ----------
-@admin.route("/reporte", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def reporte_pedidos():
-    resultados = buscar_pedidos() if request.method == "POST" else []
-    return render_template("administrador/reportes_entrega.html",
-                           resultados=resultados)
 
 
 # ---------- ASIGNAR_CALENDARIO ----------
