@@ -66,6 +66,11 @@
       text-align: center;
       margin-bottom: 1.5rem;
     }
+
+    .caja{
+        background-color: #fff;
+        border-radius: 20px;
+    }
   </style>
 </head>
 <body>
@@ -249,8 +254,27 @@
         </div>
     </div>
 
-    
-    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if category.startswith('instalaciones') %}
+        <div 
+          class="alert 
+                 {% if 'success' in category %}alert-success
+                 {% elif 'danger' in category %}alert-danger
+                 {% elif 'warning' in category %}alert-warning
+                 {% else %}alert-info{% endif %} 
+                 alert-dismissible fade show mt-3"
+          role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+ <div class="caja">
     <h2 class="mb-4">Actualizar Instalación de Pedido</h2>
 
 
@@ -275,25 +299,6 @@
 
 </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      {% if category.startswith('instalaciones') %}
-        <div 
-          class="alert 
-                 {% if 'success' in category %}alert-success
-                 {% elif 'danger' in category %}alert-danger
-                 {% elif 'warning' in category %}alert-warning
-                 {% else %}alert-info{% endif %} 
-                 alert-dismissible fade show mt-3"
-          role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endwith %}
 
 
 
