@@ -141,42 +141,6 @@ def control_pedidos():
                            pedidos=todos_los_pedidos())
 
 
-@admin.route("/registrar_pedido", methods=["POST"])
-@login_required
-@role_required("admin")
-def registrar_pedido_route():
-    try:
-        nombre_comprador = request.form.get("nombreComprador")
-        fecha_entrega = request.form.get("fechaEntrega")
-        hora_entrega = request.form.get("horaEntrega")
-        destino = request.form.get("destino")
-        usuario_id = request.form.get("usuarioId", 1)
-
-        # Armar lista de productos [{id, cantidad, precio}]
-        productos = []
-        for prod, cant, prec in zip(
-            request.form.getlist("producto[]"),
-            request.form.getlist("cantidad[]"),
-            request.form.getlist("precio[]"),
-        ):
-            productos.append({
-                "id_producto": prod,
-                "cantidad": int(cant),
-                "precio": float(prec)
-            })
-
-        # Llamar función queries.py
-        from basedatos.queries import registrar_pedido
-        resultado = registrar_pedido(nombre_comprador, fecha_entrega,
-                                     hora_entrega, destino, usuario_id,
-                                     productos)
-
-        return jsonify(resultado)
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)})
-
-
 # ---------- ASIGNAR_EMPLEADO ----------
 @admin.route("/asignar_empleado", methods=["POST"])
 @login_required
