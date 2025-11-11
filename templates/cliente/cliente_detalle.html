@@ -302,7 +302,22 @@ function mostrarReseñas(idProducto) {
   `).join("");
 }
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const stock = {{ producto.Stock }};
+    const mensajeStock = document.getElementById("mensaje-stock");
 
+    if (stock <= 9 && stock > 0) {
+        mensajeStock.textContent = `⚠️ Quedan pocas unidades: ${stock} disponibles`;
+        mensajeStock.classList.add("mensaje-stock-pocas");
+    } else if (stock === 0) {
+        mensajeStock.textContent = "❌ Producto agotado";
+        mensajeStock.classList.add("mensaje-stock-agotado");
+        document.querySelectorAll(".btn-compra button").forEach(btn => btn.disabled = true);
+    }
+
+});
+</script>
 
 
 {% endblock %}
