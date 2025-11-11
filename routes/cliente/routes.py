@@ -481,9 +481,7 @@ def toggle_favorito(producto_id):
     return jsonify({'accion': accion})
 
 
-
 # Comparación de productos
-
 @cliente.route('/comparar', methods=['GET', 'POST'])
 @login_required
 def comparar_productos():
