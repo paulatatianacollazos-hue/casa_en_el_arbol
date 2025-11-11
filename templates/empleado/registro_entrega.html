@@ -39,9 +39,10 @@
           <button type="submit" class="btn btn-success">
             <i class="bi bi-save"></i> Guardar registro
           </button>
-          <a href="{{ url_for('empleado.actualizacion_datos') }}" class="btn btn-secondary">
+          <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2"
+            onclick="volverAtras()">
             <i class="bi bi-arrow-left"></i> Volver
-          </a>
+          </button>
         </div>
       </form>
     </div>
@@ -84,5 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
+<script>
+  function volverAtras() {
+    if (window.history.length > 1) {
+      window.history.back(); // 🔹 Regresa a la página anterior sin recargar toda la app
+    } else {
+      // Si no hay historial (por ejemplo, acceso directo)
+      window.location.href = "/"; // Cambia esta ruta a tu home o panel principal
+    }
+  }
+</script>
 {% endblock %}
