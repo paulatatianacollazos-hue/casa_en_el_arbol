@@ -64,18 +64,12 @@
             margin-left: 15px;
         }
 
-        .intermedio{
-            height: 180px;
-            width: 100%;
-        }
+       
 
         .opciones1{
            border:1px solid #e6e6e6;
            background-color: #fcfcfc;
            border-radius: 10px;
-            position: fixed;
-            top:200px;
-            left: 10px;
             bottom: 0;
             height: 65%;
             width: 13%;
@@ -153,9 +147,8 @@
     {% endblock %}
 
 {% block content %}
-  {% for pedido in pedidos %}
+<div style="display: flex;">
 
-   <div class="intermedio"></div>
     <div class="opciones1">
         <div class="a"><a href="/admin/estado" style="margin-top: 20px;">ESTADO</a></div>
         <div class="a"><a href="/admin/control_pedidos" style="margin-top: 20px;">PEDIDOS</a></div>
@@ -163,7 +156,8 @@
         <div class="a"><a href="/admin/reporte" style="margin-top: 20px;">REPORTE</a></div>
         <div class="volver"><a href="/admin/actualizacion_datos">VOLVER</a></div>
     </div>
-
+<div>
+  {% for pedido in pedidos %}
     <div class="pedidos">
       <div class="contenido">
         <div class="datos-pedido">
@@ -189,7 +183,7 @@
       </div>
     </div>
   {%endfor%}
-
+</div>
 <!-- Botón para abrir el modal -->
 <!-- Modal para ver factura -->
 <div class="modal fade" id="modalFactura" tabindex="-1" aria-labelledby="modalFacturaLabel" aria-hidden="true">
@@ -258,7 +252,7 @@
     </div>
   </div>
 </div>
-
+</div>
 
 {%endblock%}
 {% block extra_footer %}
