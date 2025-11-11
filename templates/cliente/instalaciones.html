@@ -275,6 +275,25 @@
 
 </div>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if category.startswith('instalaciones') %}
+        <div 
+          class="alert 
+                 {% if 'success' in category %}alert-success
+                 {% elif 'danger' in category %}alert-danger
+                 {% elif 'warning' in category %}alert-warning
+                 {% else %}alert-info{% endif %} 
+                 alert-dismissible fade show mt-3"
+          role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 
 
