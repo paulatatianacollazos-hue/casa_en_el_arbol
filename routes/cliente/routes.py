@@ -528,3 +528,22 @@ def enviar_mensaje_cliente():
 @login_required
 def obtener_mensajes_cliente():
     return jsonify(mensajes)
+
+
+@cliente.route('/factura/<int:pedido_id>', methods=['GET'])
+@login_required
+def obtener_factura(pedido_id):
+    """
+    Devuelve en JSON los detalles de una factura específica
+    para el pedido indicado.
+    """
+    try:
+        datos = recivo(pedido_id)  # ← esta función ya la usas en factura_pdf
+        if not datos:
+            return jsonify({"error": "Factura no encontrada"}), 404
+
+        return jsonify(datos)
+
+    except Exception as e:
+        print("❌ Error al obtener factura:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
