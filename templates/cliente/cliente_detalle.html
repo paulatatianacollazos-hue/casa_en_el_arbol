@@ -245,62 +245,7 @@ document.querySelectorAll(".corazon").forEach(corazon => {
 
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const idProducto = {{ producto.ID_Producto }};
-  mostrarReseñas(idProducto);
-});
 
-function guardarReseña(idProducto) {
-  console.log("Reseñas crudas:", reseñas);
-  const comentario = document.getElementById("comentario").value.trim();
-  const estrellas = document.getElementById("estrellas").value;
-
-  if (!comentario) {
-    alert("Por favor escribe un comentario.");
-    return;
-  }
-
-  // Obtener reseñas guardadas en localStorage
-  let reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
-
-  // Agregar nueva reseña
-  reseñas.push({
-    idProducto: idProducto,
-    usuario: "{{ current_user.Nombre }}",
-    estrellas: estrellas,
-    comentario: comentario,
-    fecha: new Date().toISOString()
-  });
-
-  // Guardar en localStorage
-  localStorage.setItem("reseñas", JSON.stringify(reseñas));
-
-  // Limpiar campo de comentario
-  document.getElementById("comentario").value = "";
-
-  // Actualizar la lista en pantalla
-  mostrarReseñas(idProducto);
-}
-
-function mostrarReseñas(idProducto) {
-  const contenedor = document.getElementById("lista-reseñas");
-  const reseñas = JSON.parse(localStorage.getItem("reseñas")) || [];
-  const filtradas = reseñas.filter(r => r.idProducto === idProducto);
-
-  if (filtradas.length === 0) {
-    contenedor.innerHTML = "<p>No hay reseñas aún.</p>";
-    return;
-  }
-
-  contenedor.innerHTML = filtradas.map(r => `
-    <div class="border rounded p-2 mb-2">
-      <strong>${r.usuario}</strong> <small>${r.fecha}</small><br>
-      ${"⭐".repeat(Number(r.estrellas))}<br>
-      ${r.comentario}
-    </div>
-  `).join("");
-}
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
