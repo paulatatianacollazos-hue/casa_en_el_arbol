@@ -476,7 +476,8 @@ def buscar_pedidos():
 
         # ➜ Cambiar: devolver lista de productos en lugar de HTML
         productos_lista = []
-        detalles = Detalle_Pedido.query.filter_by(ID_Pedido=pedido.ID_Pedido).all()
+        detalles = Detalle_Pedido.query.filter_by(
+            ID_Pedido=pedido.ID_Pedido).all()
 
         for detalle in detalles:
             producto = Producto.query.get(detalle.ID_Producto)
