@@ -61,7 +61,7 @@
 .opciones1{
     border:1px solid #d8d7d7;
     background-color: white;
-    border-radius: 10px;
+    border-radius: 20px;
     position: sticky;
     top: 110px;     /* Ajusta según la altura del encabezado */
     z-index: 10;
