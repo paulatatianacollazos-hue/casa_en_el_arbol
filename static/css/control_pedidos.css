@@ -1,0 +1,228 @@
+:root {
+    --primary-green: #5f8f3f;
+    --secondary-green: #4e7b33;
+    --light-green: #6c9a50;
+    --accent-green: #7cb342;
+    --bg-cream: #f8f6f0;
+    --text-dark: #2c3e50;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+/* Encabezado */
+.encabezado{
+    width: 90%;
+    background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
+    color: white;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 10%;
+}
+
+/* Contenedor principal */
+.contenedor-pedidos{
+   text-align: center;
+   min-height: 400px;
+   width: 100%;
+   margin-left: 30px;
+}
+
+/* Contenido de pedidos */
+.content-pedidos{
+    justify-content: center;
+    margin-top: 20px;
+    display: flex;
+    background-color: #fcfcfc;
+    width: 80%;
+    margin-left: 15%;
+    border:1px solid #e6e6e6;
+    border-radius: 10px;
+    min-height: 700px;
+}
+
+.pedidos{
+    background-color: #fff;
+    width: 95%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 13px;
+    border-radius: 10px;
+    border:1px solid #d8d7d7;
+}
+
+.pedidos p{
+    margin-left: 15px;
+}
+
+/* Sidebar */
+.opciones1{
+    border:1px solid #d8d7d7;
+    background-color: white;
+    border-radius: 10px;
+    position: sticky;
+    top: 110px;     /* Ajusta según la altura del encabezado */
+    z-index: 10;
+    bottom: 0;
+    height: 500px;
+    width: 8%;
+    margin-top: 20px;
+}
+
+a p{
+    text-decoration: none;
+    display: none;
+
+    
+}
+
+button p{
+  display: none;
+}
+
+a{
+  display: flex;
+  text-decoration: none;
+  margin-bottom: 0;
+}
+
+
+
+.opciones1:hover{
+  width: 220px;
+}
+
+.opciones1:hover button p, .opciones1:hover a p{
+  display: block;
+}
+
+
+h2{
+    color: #628D46;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+h1{
+    padding: 20px;
+}
+
+.datos-pedido{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+  form{
+            margin: 20px 0 0 4%;
+            border:1px solid #e6e6e6;
+            background-color: #fff;
+            width: 80%;
+            bottom: 370px;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+
+        form input{
+            width: 50%;
+            text-align: left;
+            margin-right: 20px;
+        }
+
+        select{
+            height: 40px;
+            width: 150px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+
+
+        h2{
+            color: #628D46;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            margin-left: 30%;
+        }
+
+        h1{
+            padding: 20px;
+        }
+
+
+        .content{
+            color: black;
+ 
+        }
+
+        textarea{
+            width: 80%;
+        }
+
+        form button{
+            background-color: #7db243;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10pxn 30px;
+            width: 250px;
+            height: 50px;
+        }
+
+        form button:hover{
+            background-color: transparent;
+            color: #7db243;
+            border: 1px solid #7db243;
+        }
+
+        .sidebar{
+          margin: 40px 0 20px 20px;
+        }
+
+        .btn{
+          border: none;
+          border-radius: 20px;
+          
+        }
+
+        .bi{
+          font-size: 18px;
+        }
+
+        /* Estilo del elemento activo (seleccionado) */
+.sidebar a.active {
+    background-color: #7db243 !important;
+    color: white ;
+    height: 50px;
+    border-radius: 20px -10px -10px 10px;
+    width: 73%;
+}
+
+.opciones1:hover .sidebar a.active{
+    width: 90%;
+}
+
+/* Todos los botones vuelven a su color normal */
+.sidebar a {
+    transition: 0.2s ease;
+    background-color: white;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: block;
+    height: 50px;
+}
+
+/* Hover: solo el elemento bajo el mouse se pinta */
+.btn:hover {
+    background-color: #7db243;
+    color: white !important;
+
+}
+
+.card {
+    width: 90%; 
+    margin: 20px 20px 0 2rem;
+
+}
