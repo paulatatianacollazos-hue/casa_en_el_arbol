@@ -67,8 +67,11 @@
     border:1px solid #d8d7d7;
     background-color: white;
     border-radius: 10px;
+    position: sticky;
+    top: 120px;     /* Ajusta según la altura del encabezado */
+    z-index: 10;
     bottom: 0;
-    height: 400px;
+    height: 500px;
     width: 13%;
 
 }
@@ -124,26 +127,6 @@ h1{
             border-radius: 10px;
         }
 
-        .opciones{
-          border:1px solid #e6e6e6;
-          background-color: #fcfcfc;
-          border-radius: 10px;
-          height: 65%;
-          width: 13%;
-          margin-left: 0; 
-
-        }
-
-
-        .a:hover{
-            background-color: #7db243;
-            color: white;
-            width: 80%;
-        }
-
-        .a a:hover{
-            color: white;
-        }
 
         h2{
             color: #628D46;
@@ -156,19 +139,7 @@ h1{
             padding: 20px;
         }
 
-        .a{
-            margin-top: 20px;
-            width: 80%;
-            border: 1px solid #c0c0c0;
-            height: auto;
-            position: relative;
-            top: 20px;
-            left: 10px;
-            padding: 10px 20px;
-            border-radius: 10px;
-            background-color: #fff;
-        }
-
+        
         .content{
             color: black;
  
@@ -350,40 +321,40 @@ h1{
 
         <button type="submit">Buscar</button>
         </div>
-    </form>
+      </form>
 
-    <div class="contenido" style="margin-bottom: 100px;">
-        {% if resultados %}
-        <div class="subcontenido">
-            <div class="titulo"><h2>Resultados:</h2></div><br>
-            
-                <table border="1">
-                   <tr>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Dirección</th>
-                        <th>Producto</th>
-                        <th>Empleado</th>
-                        <th>Estado</th>
-                    </tr>
-                    {% for row in resultados %}
+      <div class="contenido" style="margin-bottom: 100px;">
+          {% if resultados %}
+          <div class="subcontenido">
+              <div class="titulo"><h2>Resultados:</h2></div><br>
+              
+                  <table border="1">
                     <tr>
-                        <td>{{ row.fecha }}</td>
-                        <td>{{ row.cliente }}</td>
-                        <td>{{ row.direccion }}</td>
-                        <td>{{ row.productos | safe }}</td>
-                        <td>{{ row.empleado }}</td>
-                        <td>{{ row.estado }}</td>
-                    </tr>
-                    {% endfor %}
+                          <th>Fecha</th>
+                          <th>Cliente</th>
+                          <th>Dirección</th>
+                          <th>Producto</th>
+                          <th>Empleado</th>
+                          <th>Estado</th>
+                      </tr>
+                      {% for row in resultados %}
+                      <tr>
+                          <td>{{ row.fecha }}</td>
+                          <td>{{ row.cliente }}</td>
+                          <td>{{ row.direccion }}</td>
+                          <td>{{ row.productos | safe }}</td>
+                          <td>{{ row.empleado }}</td>
+                          <td>{{ row.estado }}</td>
+                      </tr>
+                      {% endfor %}
 
-                </table>
-                 {% else %}
-                    <div class="texto"><p>No se encontraron entregas con esos criterios.</p></div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+                  </table>
+                  {% else %}
+                      <div class="texto"><p>No se encontraron entregas con esos criterios.</p></div>
+                  {% endif %}
+              
+          </div>
+      </div>
     </div>
 </div>
 
