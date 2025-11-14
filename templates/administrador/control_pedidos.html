@@ -112,7 +112,7 @@
       <div class="profile-header mb-4">
         <h5 class="mb-0">REPORTES</h5>
       </div>
-      <form method="POST">
+      <form id="formReportes">
         <div class="caja">
         <h1>Generar Reporte</h1>
         <label for="fecha_pedido">Fecha del Pedido:</label><br>
@@ -238,7 +238,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalRegistrosInstance = new bootstrap.Modal(document.getElementById('modalRegistros'));
 
     document.addEventListener('click', async function(e) {
-        // Ver factura
+
+        // --- Ver factura ---
         const btnFactura = e.target.closest('.ver-factura-btn');
         if(btnFactura){
             const pedidoId = btnFactura.dataset.pedidoId;
@@ -246,6 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const res = await fetch(`/admin/factura/${pedidoId}`);
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
+
                 let html = '';
                 data.forEach(f => {
                     html += `
@@ -258,58 +260,100 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td>${f.FechaPago}</td>
                     </tr>`;
                 });
+
                 document.getElementById('factura-body').innerHTML = html;
                 document.getElementById('btnDescargarPDF').href = `/admin/factura/pdf/${pedidoId}`;
+
                 modalFacturaInstance.show();
+
             } catch(err){
                 console.error(err);
                 alert('No se pudo cargar la factura. Intenta más tarde.');
             }
         }
 
-        // Ver registros de entrega
-        const btnEntrega = e.target.closest('.ver-registros-btn');
-        if(btnEntrega){
-            const pedidoId = btnEntrega.dataset.pedidoId;
-            try {
-                const res = await fetch(`/admin/registros_entrega/${pedidoId}`);
-                const data = await res.json();
-                if(!data.success) throw new Error(data.message || "No se pudieron cargar los registros.");
+        // --- Ver registros (si tienes código) ---
+        const btnRegistros = e.target.closest('.ver-registros-btn');
+        if (btnRegistros) {
+            const pedidoId = btnRegistros.dataset.pedidoId;
+            modalRegistrosInstance.show();
+        }
 
-                let registros = data.registros || [];
-                let html = '';
-                let fotosHtml = '';
+    }); // FIN CLICK LISTENER
 
-                if(registros.length === 0){
-                    html = `<tr><td colspan="4" class="text-center text-muted">No hay registros de entrega para este pedido.</td></tr>`;
-                } else {
-                    registros.forEach(r => {
-                        html += `
-                        <tr>
-                            <td>${r.ID_Registro}</td>
-                            <td>${r.ID_Empleado}</td>
-                            <td>${r.Comentario || '-'}</td>
-                            <td>${r.FechaRegistro}</td>
-                        </tr>`;
-                        [r.Foto1, r.Foto2, r.Foto3].filter(f => f).forEach(f => {
-                            fotosHtml += `<img src="/static/img/entregas/${f}" 
-                                style="width:150px; height:150px; object-fit:cover; border-radius:8px;">`;
-                        });
-                    });
-                }
 
-                document.getElementById('registros-body').innerHTML = html;
-                document.getElementById('fotos-entrega').innerHTML = fotosHtml || '<p class="text-muted">No hay fotos disponibles</p>';
+    // ============================
+    //  FORMULARIO REPORTES (AJAX)
+    // ============================
 
-                modalRegistrosInstance.show();
-            } catch(err){
-                console.error(err);
-                alert('No se pudieron cargar los registros de entrega.');
-            }
+    const formReportes = document.getElementById("formReportes");
+    const divResultados = document.querySelector("#seccion-favoritos .contenido");
+
+    formReportes.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Evita recargar
+
+        const formData = new FormData(formReportes);
+
+        try {
+            const res = await fetch("/admin/control_pedidos/buscar", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+            renderResultados(data.resultados);
+
+        } catch (err) {
+            console.error(err);
+            divResultados.innerHTML = "<p>Error al buscar los resultados.</p>";
         }
     });
 
-    // Sidebar navegación
+
+    function renderResultados(lista) {
+        if (!lista || lista.length === 0) {
+            divResultados.innerHTML = `
+                <div class="texto"><p>No se encontraron entregas con esos criterios.</p></div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="subcontenido">
+                <div class="titulo"><h2>Resultados:</h2></div>
+                <table border="1">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Dirección</th>
+                        <th>Producto</th>
+                        <th>Empleado</th>
+                        <th>Estado</th>
+                    </tr>
+        `;
+
+        lista.forEach(row => {
+            html += `
+                <tr>
+                    <td>${row.fecha}</td>
+                    <td>${row.cliente}</td>
+                    <td>${row.direccion}</td>
+                    <td>${row.productos}</td>
+                    <td>${row.empleado}</td>
+                    <td>${row.estado}</td>
+                </tr>
+            `;
+        });
+
+        html += "</table></div>";
+
+        divResultados.innerHTML = html;
+    }
+
+
+    // ============================
+    //     Sidebar navegación
+    // ============================
     const secciones = {
         perfil: document.getElementById("seccion-perfil"),
         direcciones: document.getElementById("seccion-direcciones"),
@@ -319,32 +363,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuLinks = document.querySelectorAll(".sidebar a");
 
     function mostrarSeccion(activa){
-        Object.values(secciones).forEach(sec => { if(sec) sec.style.display = "none"; });
+        Object.values(secciones).forEach(sec => sec.style.display = "none");
         menuLinks.forEach(link => link.classList.remove("active"));
-        if(secciones[activa]) secciones[activa].style.display = "block";
-        const menuId = `menu-${activa}`;
-        const menuActivo = document.getElementById(menuId);
-        if(menuActivo) menuActivo.classList.add("active");
+
+        secciones[activa].style.display = "block";
+        document.getElementById(`menu-${activa}`).classList.add("active");
     }
 
     menuLinks.forEach(link => {
-    link.addEventListener("click", () => {
-        menuLinks.forEach(l => l.classList.remove("active")); // Quita activo a todos
-        link.classList.add("active"); // Activa solo el clicado
-        mostrarSeccion(link.id.replace('menu-', ''));
+        link.addEventListener("click", () => {
+            mostrarSeccion(link.id.replace('menu-', ''));
+        });
     });
-    });
-    mostrarSeccion("perfil");
 
-});
+    mostrarSeccion("perfil");  
+}); // FIN DOMContentLoaded
 
-// Volver atrás
+
+// Botón volver
 function volverAtras() {
-    if (window.history.length > 1) {
-        window.history.back();
-    } else {
-        window.location.href = "/";
-    }
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = "/";
 }
 </script>
+
+
 {% endblock %}

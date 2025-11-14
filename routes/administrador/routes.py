@@ -154,14 +154,23 @@ def control_pedidos():
             reportes = buscar_pedidos()
 
         # Podrías agregar más acciones según necesidad
-
+    resultados = []
     # Renderizar el template unificado con todas las secciones
     return render_template(
         "administrador/control_pedidos.html",
         pedidos=pedidos,
         comentarios=comentarios,
-        reportes=reportes
+        reportes=reportes,
+        resultados=resultados
     )
+
+
+@admin.route("/control_pedidos/buscar", methods=["POST"])
+@login_required
+@role_required("admin")
+def buscar_reportes_route():
+    resultados = buscar_pedidos()  # Esta función ya existe según tu código
+    return jsonify({"resultados": resultados})
 
 
 # ---------- ASIGNAR_EMPLEADO ----------
