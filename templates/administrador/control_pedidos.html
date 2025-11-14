@@ -80,26 +80,7 @@
     border-radius: 10px;
 }
 
-.a, .volver {
-    margin-top: 20px;
-    width: 80%;
-    border: 1px solid #c0c0c0;
-    height: auto;
-    position: relative;
-    left: 10px;
-    padding: 10px 20px;
-    border-radius: 10px;
-    background-color: #fff;
-}
 
-.a:hover, .volver:hover{
-    background-color: #7db243;
-    color: white;
-}
-
-.volver a:hover, .a a:hover{
-    color: white;
-}
 
 h2{
     color: #628D46;
@@ -150,13 +131,6 @@ h1{
 
         }
 
-        .opciones a{
-          text-decoration: none;
-          color: black;
-          width: 80%;
-          border-radius: 50px;
-          height: 50px;
-        }
 
         .a:hover{
             background-color: #7db243;
@@ -231,6 +205,31 @@ h1{
         .bi{
           font-size: 18px;
         }
+
+        /* Estilo del elemento activo (seleccionado) */
+.sidebar a.active {
+    background-color: #7db243 !important;
+    color: white !important;
+    height: 50px;
+    width: 140px;
+}
+
+/* Todos los botones vuelven a su color normal */
+.sidebar a {
+    transition: 0.2s ease;
+    background-color: white;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: block;
+}
+
+/* Hover: solo el elemento bajo el mouse se pinta */
+.sidebar a:hover {
+    background-color: #7db243;
+    color: rgb(255, 255, 255);
+}
+
 </style>
 {% endblock %}
 
@@ -549,9 +548,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     menuLinks.forEach(link => {
-        link.addEventListener("click", () => mostrarSeccion(link.id.replace('menu-', '')));
+    link.addEventListener("click", () => {
+        menuLinks.forEach(l => l.classList.remove("active")); // Quita activo a todos
+        link.classList.add("active"); // Activa solo el clicado
+        mostrarSeccion(link.id.replace('menu-', ''));
     });
-
+    });
     mostrarSeccion("perfil");
 
 });
