@@ -279,11 +279,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // --- Ver registros (si tienes código) ---
-        const btnRegistros = e.target.closest('.ver-registros-btn');
-        if (btnRegistros) {
-            const pedidoId = btnRegistros.dataset.pedidoId;
-            modalRegistrosInstance.show();
-        }
+      const btnRegistros = e.target.closest('.ver-registros-btn');
+      if (btnRegistros) {
+          const pedidoId = btnRegistros.dataset.pedidoId;
+
+          try {
+              const res = await fetch(`/admin/registros_entrega/${pedidoId}`);
+              const data = await res.json();
+
+              if (!data.success) {
+                  alert("No se encontraron registros para este pedido.");
+                  return;
+              }
+
+              // LLENAR TABLA
+              let html = "";
+              data.registros.forEach(r => {
+                  html += `
+                      <tr>
+                          <td>${r.id_registro}</td>
+                          <td>${r.empleado}</td>
+                          <td>${r.comentario}</td>
+                          <td>${r.fecha}</td>
+                      </tr>
+                  `;
+              });
+              document.getElementById("registros-body").innerHTML = html;
+
+              // LLENAR FOTOS
+              let fotosHTML = "";
+              data.fotos.forEach(f => {
+                  fotosHTML += `<img src="${f}" class="img-fluid" style="max-width:150px; border-radius:5px;">`;
+              });
+              document.getElementById("fotos-entrega").innerHTML = fotosHTML;
+
+              modalRegistrosInstance.show();
+
+          } catch (err) {
+              console.error(err);
+              alert("Error al cargar los registros de entrega.");
+          }
+      }
+
 
     }); // FIN CLICK LISTENER
 
