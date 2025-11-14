@@ -464,59 +464,37 @@ def buscar_pedidos():
     if nombre_cliente:
         filtros.append(Pedido.Nombre_Cliente.ilike(f"%{nombre_cliente}%"))
 
-    # Esto es solo ejemplo. Ajusta la lógica a tu modelo real
-    pedidos = Pedido.query \
-        .join(Usuario, Pedido.ID_Empleado == Usuario.ID_Usuario) \
-        .filter(and_(*filtros)).all()
+    pedidos = (
+        Pedido.query
+        .join(Usuario, Pedido.ID_Empleado == Usuario.ID_Usuario)
+        .filter(and_(*filtros))
+        .all()
+    )
 
     resultados = []
     for pedido in pedidos:
-        productos_html = "<ul>"
-        for detalle in Detalle_Pedido.query.filter_by(
-                ID_Pedido=pedido.ID_Pedido).all():
+
+        # ➜ Cambiar: devolver lista de productos en lugar de HTML
+        productos_lista = []
+        detalles = Detalle_Pedido.query.filter_by(ID_Pedido=pedido.ID_Pedido).all()
+
+        for detalle in detalles:
             producto = Producto.query.get(detalle.ID_Producto)
-            productos_html += f"""<li>{producto.NombreProducto}
-            x {detalle.Cantidad}</li>"""
-        productos_html += "</ul>"
+            productos_lista.append({
+                "producto": producto.NombreProducto,
+                "cantidad": detalle.Cantidad
+            })
 
         resultados.append({
-            "fecha": pedido.FechaEntrega,
+            "fecha": str(pedido.FechaEntrega),
             "cliente": pedido.NombreComprador,
             "direccion": pedido.Destino,
-            "productos": productos_html,
+            "productos": productos_lista,  # <-- LISTA, SIN HTML
             "empleado": pedido.empleado.Nombre if pedido.empleado else "N/A",
             "estado": pedido.Estado
         })
 
     return resultados
-
-
-def asignar_empleado(form_data):
-    """
-    Asigna un empleado (instalador/transportista) a un pedido.
-    Espera que form_data tenga: pedido_id, empleado_id.
-    """
-    try:
-        pedido_id = int(form_data.get("pedido_id"))
-        empleado_id = int(form_data.get("empleado_id"))
-
-        pedido = Pedido.query.get(pedido_id)
-        if not pedido:
-            return {"success": False, "error": "Pedido no encontrado"}
-
-        empleado = Usuario.query.get(empleado_id)
-        if not empleado:
-            return {"success": False, "error": "Empleado no encontrado"}
-
-        # Asignar empleado
-        pedido.ID_Empleado = empleado.ID_Usuario
-        db.session.commit()
-
-        return {"success": True, "message": f"""Empleado {empleado.Nombre}
-                asignado correctamente"""}
-    except Exception as e:
-        db.session.rollback()
-        return {"success": False, "error": str(e)}
 
 
 # ----------- ACTUALIZAR PEDIDO -----------
