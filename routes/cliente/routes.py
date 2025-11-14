@@ -98,7 +98,8 @@ def actualizar_instalacion():
         if not evento.Hora:
             continue
         evento_datetime = datetime.combine(evento.Fecha, evento.Hora)
-        evento_intervalo = timedelta(minutes=60 if evento.Tipo == "Instalación" else 30)
+        evento_intervalo = timedelta(
+            minutes=60 if evento.Tipo == "Instalación" else 30)
         if (inicio_intervalo <= evento_datetime <= fin_intervalo):
             flash(f"Conflicto con otro evento ({evento.Tipo}) a las {evento.Hora.strftime('%H:%M')}. Elige otra hora.", "instalaciones-warning")
             return redirect(url_for('cliente.instalaciones'))
