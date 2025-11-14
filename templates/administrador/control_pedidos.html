@@ -64,12 +64,13 @@
 
 /* Sidebar */
 .opciones1{
-    border:1px solid #e6e6e6;
-    background-color: #fcfcfc;
+    border:1px solid #d8d7d7;
+    background-color: white;
     border-radius: 10px;
     bottom: 0;
-    height: 65%;
+    height: 400px;
     width: 13%;
+    margin: 50px 0 0 20px;
 }
 
 .opciones1 a{
@@ -153,7 +154,7 @@ h1{
           text-decoration: none;
           color: black;
           width: 80%;
-          border-radius: 10px;
+          border-radius: 50px;
           height: 50px;
         }
 
@@ -191,28 +192,6 @@ h1{
             background-color: #fff;
         }
 
-        .volver{
-           margin-top: 80px;
-            width: 80%;
-            border: 1px solid #c0c0c0;
-            height: auto;
-            position: relative;
-            left: 10px;
-            padding: 10px 20px;
-            border-radius: 10px;
-            background-color: #fff;
-        }
-
-        .volver:hover{
-            background-color: #7db243;
-            color: white;
-            width: 80%;
-        }
-
-        .volver a:hover{
-            color: white;
-        }
-
         .content{
             color: black;
             margin-left: 30px;
@@ -240,18 +219,30 @@ h1{
             border: 1px solid #7db243;
         }
 
+        .sidebar{
+          margin: 40px 0 20px 20px;
+        }
+
+        .btn{
+          border: none;
+          
+        }
+
+        .bi{
+          font-size: 18px;
+        }
 </style>
 {% endblock %}
 
 {% block content %}
 <div style="display: flex;">
     <!-- Sidebar -->
-    <div class="opciones1">
-        <div class="sidebar shadow-sm">
-            <a id="menu-perfil" class="active"><i class="bi bi-box-seam me-2"></i>Pedidos</a><br>
-            <a id="menu-direcciones"><i class="bi bi-chat-square-text"></i>Comentarios</a><br>
-            <a id="menu-pedidos"><i class="bi bi-box2-heart"></i>Estado</a><br>
-            <a id="menu-favoritos"><i class="bi bi-truck"></i>Reporte</a><br> 
+    <div class="opciones1 shadow-sm">
+        <div class="sidebar ">
+            <a id="menu-perfil" class="active"><i class="bi bi-box-seam me-2"></i>Pedidos</a><br><br>
+            <a id="menu-direcciones"><i class="bi bi-chat-square-text me-2"></i>Comentarios</a><br><br>
+            <a id="menu-pedidos"><i class="bi bi-box2-heart me-2"></i>Estado</a><br><br>
+            <a id="menu-favoritos"><i class="bi bi-truck me-2"></i>Reporte</a><br><br>
             <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2"
                     onclick="volverAtras()">
                 <i class="bi bi-arrow-left"></i> Volver
