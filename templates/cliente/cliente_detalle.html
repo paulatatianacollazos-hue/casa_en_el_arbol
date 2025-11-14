@@ -156,27 +156,43 @@
   </div>
 </div>
 
-<h3 class="mt-4">🗣️ Reseñas</h3>
-
-
+<h3 class="mt-4">Reseñas</h3>
 
 {% if ha_comprado %}
-  <div id="form-reseña" class="border p-3 rounded">
-    <h5>Deja tu reseña</h5>
-    <textarea id="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..."></textarea>
-    <select id="estrellas" class="form-select mb-2">
+<div id="form-reseña" class="border p-3 rounded mb-4">
+  <h5>Deja tu reseña</h5>
+  <form method="POST" action="{{ url_for('cliente.guardar_reseña_producto', id_producto=producto.ID_Producto) }}">
+    <textarea name="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..." required></textarea>
+    <select name="estrellas" class="form-select mb-2" required>
+      <option value="">Selecciona estrellas</option>
       <option value="5">⭐ 5 estrellas</option>
       <option value="4">⭐ 4 estrellas</option>
       <option value="3">⭐ 3 estrellas</option>
       <option value="2">⭐ 2 estrellas</option>
       <option value="1">⭐ 1 estrella</option>
     </select>
-    <button class="btn btn-primary" onclick="guardarReseña({{ producto.ID_Producto }})">Enviar reseña</button>
-  </div>
+    <button type="submit" class="btn btn-primary">Enviar reseña</button>
+  </form>
+</div>
 {% else %}
-  <p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
+<p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
 {% endif %}
-<div id="lista-reseñas" class="mb-3"></div>
+
+<!-- Mostrar reseñas existentes -->
+<div id="lista-reseñas" class="mb-3">
+  {% if reseñas %}
+    {% for r in reseñas %}
+      <div class="border rounded p-3 mb-2">
+        <strong>{{ r.usuario.Nombre }}</strong>
+        <small class="text-muted">{{ r.Fecha.strftime("%d/%m/%Y %H:%M") }}</small><br>
+        {{ "⭐" * r.Estrellas }}<br>
+        {{ r.Comentario }}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No hay reseñas aún para este producto.</p>
+  {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_footer %}
