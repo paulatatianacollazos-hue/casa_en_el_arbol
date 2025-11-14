@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify, abort
 from flask_login import login_required, current_user
+from routes.cliente.routes import mensajes
 from basedatos.models import (
     db, Usuario, Notificaciones,
     Direccion, Calendario, Pedido
@@ -798,8 +799,6 @@ def registros_entrega_json(pedido_id):
 
 # ------------------ CHAT ADMIN ------------------
 # importa la lista global de mensajes del cliente
-from routes.cliente.routes import mensajes
-
 @admin.route('/chat')
 @login_required
 def chat_admin():
