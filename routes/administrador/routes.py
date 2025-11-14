@@ -748,12 +748,7 @@ def factura_json(pedido_id):
 @admin.route('/registros_entrega/<int:pedido_id>', methods=['GET'])
 @login_required
 def registros_entrega_json(pedido_id):
-    """
-    Devuelve los registros de entrega de un pedido en formato JSON.
-    Muestra fotos, comentarios y fecha del registro.
-    """
     try:
-        # 🧩 Ejecutamos consulta SQL segura con SQLAlchemy
         registros = db.session.execute(text("""
             SELECT
                 ID_Registro,
@@ -768,27 +763,38 @@ def registros_entrega_json(pedido_id):
             WHERE ID_Pedido = :pedido_id
         """), {'pedido_id': pedido_id}).mappings().all()
 
-        # 🧾 Si no hay registros, devolvemos lista vacía
         if not registros:
             return jsonify({
                 "success": False,
-                "message":
-                    f"No se encontraron registros de entrega para el pedido #{
-                        pedido_id}.",
-                "registros": []
+                "message": f"No se encontraron registros de entrega para el pedido #{pedido_id}.",
+                "registros": [],
+                "fotos": []
             }), 200
 
-        # 🔄 Convertimos los resultados a una lista de diccionarios
-        resultado = [dict(r) for r in registros]
+        lista_registros = []
+        lista_fotos = []
+
+        for r in registros:
+            lista_registros.append({
+                "id_registro": r["ID_Registro"],
+                "empleado": r["ID_Empleado"],  # cámbialo si tienes join con Usuario
+                "comentario": r["Comentario"],
+                "fecha": str(r["FechaRegistro"])
+            })
+
+            # === Procesar fotos ===
+            for campo_foto in ["Foto1", "Foto2", "Foto3"]:
+                foto = r.get(campo_foto)
+                if foto:
+                    lista_fotos.append(f"/static/img/entregas/{foto}")
 
         return jsonify({
             "success": True,
-            "message": f"Se encontraron {len(resultado)} registros.",
-            "registros": resultado
+            "registros": lista_registros,
+            "fotos": lista_fotos
         }), 200
 
     except Exception as e:
-        # 🔥 Captura de error detallada para depuración
         print("❌ Error obteniendo registros_entrega:")
         print(traceback.format_exc())
         return jsonify({
@@ -796,6 +802,7 @@ def registros_entrega_json(pedido_id):
             "error": str(e),
             "message": "Ocurrió un error al obtener los registros de entrega."
         }), 500
+
 
 # ------------------ CHAT ADMIN ------------------
 # importa la lista global de mensajes del cliente
