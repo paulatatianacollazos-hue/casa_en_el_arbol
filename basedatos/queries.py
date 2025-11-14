@@ -488,10 +488,13 @@ def buscar_pedidos():
 
         resultados.append({
             "fecha": str(pedido.FechaEntrega),
-            "cliente": pedido.NombreComprador,
+            "cliente": f"{pedido.usuario.Nombre} {pedido.usuario.Apellido or ''}",
             "direccion": pedido.Destino,
-            "productos": productos_lista,  # <-- LISTA, SIN HTML
-            "empleado": pedido.empleado.Nombre if pedido.empleado else "N/A",
+            "productos": productos_lista,
+            "empleado": (
+                f"{pedido.empleado.Nombre} {pedido.empleado.Apellido or ''}"
+                if pedido.empleado else "Sin asignar"
+            ),
             "estado": pedido.Estado
         })
 
