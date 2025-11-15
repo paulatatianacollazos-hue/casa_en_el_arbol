@@ -662,7 +662,10 @@
       <p>La dirección fue eliminada correctamente.</p>
       <div class="d-flex justify-content-center mt-3">
         <button type="button" class="btn btn-success px-4 rounded-pill" data-bs-dismiss="modal">
-          Entendido
+          {% if item.reseña %}
+          Editar reseña 
+          {%else}
+          Escribir reseña
         </button>
       </div>
     </div>
@@ -928,6 +931,7 @@ document.addEventListener('click', async function(e) {
 
 </script>
 <script>
+
 let pedidoActual = null;
 let modalResenaPedido = null;
 
