@@ -96,6 +96,10 @@
       <button id="btn-personalizar" class="btn btn-primary">
         Personalizar
       </button>
+      <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2 volver"
+                    onclick="volverAtras()">
+                <i class="bi bi-arrow-left"></i> <p>Volver</p>
+            </button>
     </div>
   </div>
 </div>
@@ -148,9 +152,11 @@
       </button>
     </div>
   
-    <div class="mt-3">
-    <button id="btn-volver" class="btn btn-primary">Volver</button>
-  </div>
+
+    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2 volver"
+                    onclick="volverAtras()">
+                <i class="bi bi-arrow-left"></i> <p>Volver</p>
+            </button>
     </div>
   </div>
   </div>
@@ -320,6 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
-
+<script>
+  function volverAtras() {
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = "/";
+}
+</script>
 
 {% endblock %}
