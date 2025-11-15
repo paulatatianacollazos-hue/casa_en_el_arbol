@@ -187,36 +187,23 @@ def guardar_reseña_pedido(id_pedido):
 
 
 # ---------- ESCRIBIR RESEÑA ----------
-@cliente.route("/producto/<int:id_producto>/reseña", methods=["POST"])
-@login_required
-def guardar_reseña_producto(id_producto):
-    producto = get_producto_by_id(id_producto)
-    if not producto:
-        flash("Producto no encontrado", "error")
-        return redirect(url_for("cliente.catalogo"))
-
-    comentario = request.form.get("comentario")
-    estrellas = request.form.get("estrellas")
-
-    if not comentario or not estrellas:
-        flash("Por favor completa todos los campos.", "error")
-        return redirect(url_for("cliente.detalle_producto",
-                                id_producto=id_producto))
-
-    nueva_reseña = Reseñas(
-        ID_Usuario=current_user.ID_Usuario,
+@cliente.route("/producto/<int:id_producto>/reseñas", methods=["GET"])
+def obtener_reseñas_producto(id_producto):
+    reseñas = Reseñas.query.filter_by(
         ID_Referencia=id_producto,
-        tipo="producto",  # 🔹 Importante
-        Comentario=comentario,
-        Estrellas=int(estrellas)
-    )
+        tipo="producto"
+    ).order_by(Reseñas.Fecha.desc()).all()
 
-    db.session.add(nueva_reseña)
-    db.session.commit()
+    lista = []
+    for r in reseñas:
+        lista.append({
+            "usuario": r.usuario.Nombre,
+            "comentario": r.Comentario,
+            "estrellas": r.Estrellas,
+            "fecha": r.Fecha.strftime("%d/%m/%Y")
+        })
 
-    flash("Gracias por dejar tu reseña ❤️", "success")
-    return redirect(url_for("cliente.detalle_producto",
-                            id_producto=id_producto))
+    return jsonify(lista)
 
 
 # ---------- PERFIL Y DIRECCIONES ----------
