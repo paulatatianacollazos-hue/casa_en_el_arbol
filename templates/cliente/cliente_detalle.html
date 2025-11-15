@@ -267,17 +267,14 @@ document.querySelectorAll(".corazon").forEach(corazon => {
 </script>
 
 <script>
-// ----------------------------
-// ⭐ MOSTRAR RESEÑAS (vía fetch)
-// ----------------------------
+// ---- MOSTRAR RESEÑAS ----
 function mostrarReseñas(idProducto) {
-
     fetch(`/cliente/producto/${idProducto}/reseñas`)
         .then(res => res.json())
         .then(lista => {
             const cont = document.getElementById("lista-reseñas");
 
-            if (!lista || !lista.length) {
+            if (!lista || lista.length === 0) {
                 cont.innerHTML = "<p>No hay reseñas aún para este producto.</p>";
                 return;
             }
@@ -294,11 +291,39 @@ function mostrarReseñas(idProducto) {
         .catch(err => console.error("Error cargando reseñas:", err));
 }
 
-// Ejecutar reseñas al cargar
+// ---- GUARDAR RESEÑA ----
+function guardarReseña(idProducto) {
+    const comentario = document.querySelector("textarea[name='comentario']").value.trim();
+    const estrellas = document.querySelector("select[name='estrellas']").value;
+
+    if (!comentario || !estrellas) {
+        alert("Debes completar todos los campos.");
+        return;
+    }
+
+    fetch(`/cliente/producto/${idProducto}/reseña`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comentario, estrellas })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            mostrarReseñas(idProducto);
+            document.querySelector("textarea[name='comentario']").value = "";
+        } else {
+            alert(data.message || "Error al guardar la reseña.");
+        }
+    })
+    .catch(err => console.error("Error guardando reseña:", err));
+}
+
+// ---- CARGAR RESEÑAS AL CARGAR LA PÁGINA ----
 document.addEventListener("DOMContentLoaded", () => {
     mostrarReseñas({{ producto.ID_Producto }});
 });
 </script>
+
 
 
 <script>
