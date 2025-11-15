@@ -187,17 +187,6 @@
             <li><a class="dropdown-item" href="{{ url_for('cliente.actualizacion_datos') }}">Perfil</a></li>
             <li><a class="dropdown-item" href="">Historial</a></li>
             <li><a class="dropdown-item" href="#">Mis pedidos</a></li>
-            <li>
-          <a class="dropdown-item" 
-          {% if current_user.Rol == 'admin' %}
-            href="{{ url_for('admin.actualizacion_datos') }}"
-          {% else %}
-            href="{{ url_for('cliente.resenas') }}"
-          {% endif %}>
-          Reseñas
-        </a>
-
-        </li>
             <li><a class="dropdown-item" href="{{ url_for('cliente.ver_notificaciones_cliente') }}">Notificaciones</a></li>
             <div class="mt-3">
               <a href="{{ url_for('auth.logout') }}" class="btn btn-primary w-100">Cerrar sesión</a>
@@ -465,17 +454,59 @@
       </a>
       {% endif %}
       {% if item.Estado == 'entregado' %}
-        <div class="mt-2">
-          <button class="btn btn-outline-success btn-sm" 
-                  onclick="abrirModalResenaPedido('{{ item.ID_Pedido }}')">
-            ✍️ Dejar reseña del pedido
-          </button>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalReseña{{ item.ID_Pedido }}">
+          Escribir reseña
+        </button>
+      {% endif %}
+      
+      <div class="modal fade" id="modalReseña{{ item.ID_Pedido }}" tabindex="-1" aria-labelledby="modalReseñaLabel{{ item.ID_Pedido }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <form action="{{ url_for('cliente.guardar_reseña_pedido', id_pedido=item.ID_Pedido) }}" method="POST">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalReseñaLabel{{ item.ID_Pedido }}">Reseña del pedido #{{ item.ID_Pedido }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Calificación</label>
+                  <select name="estrellas" class="form-select" required>
+                    <option value="">Selecciona</option>
+                    <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
+                    <option value="4">⭐️⭐️⭐️⭐️</option>
+                    <option value="3">⭐️⭐️⭐️</option>
+                    <option value="2">⭐️⭐️</option>
+                    <option value="1">⭐️</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Comentario</label>
+                  <textarea name="comentario" class="form-control" rows="3" required></textarea>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar reseña</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div id="resena-pedido-{{ item.ID_Pedido }}" class="mt-2 small text-start"></div>
+      </div>
+
+      <!-- Reseña mostrada -->
+      {% if item.reseña %}
+      <div class="alert alert-light border mt-3">
+        <h6>Tu reseña</h6>
+        <p>{{ item.reseña.Comentario }}</p>
+        <p>⭐ {{ item.reseña.Estrellas }} / 5</p>
+        <small class="text-muted">Fecha: {{ item.reseña.Fecha.strftime("%d/%m/%Y") }}</small>
+      </div>
       {% endif %}
 
     </div>
-
   </div>
   {% else %}
   <p class="text-muted">No tienes pedidos registrados.</p>
@@ -981,7 +1012,91 @@ function mostrarResenaPedido(idPedido) {
   `;
 }
 </script>
+<script>
+let pedidoActual = null;
+let modalResenaPedido = null;
 
+document.addEventListener("DOMContentLoaded", () => {
+  modalResenaPedido = new bootstrap.Modal(document.getElementById("modalResenaPedido"));
+  mostrarTodasLasResenasPedido();
+});
+
+// 🔸 Abrir modal
+function abrirModalResenaPedido(idPedido) {
+  pedidoActual = idPedido;
+  document.getElementById("comentarioPedido").value = "";
+  document.getElementById("estrellasPedido").value = 5;
+  modalResenaPedido.show();
+}
+
+// 🔸 Guardar reseña
+function guardarResenaPedido() {
+  const comentario = document.getElementById("comentarioPedido").value.trim();
+  const estrellas = document.getElementById("estrellasPedido").value;
+  const userId = window.FLASK_USER_ID || "anonimo";
+
+  if (!comentario) {
+    alert("Por favor escribe un comentario.");
+    return;
+  }
+
+  const key = "reseñas_pedidos_" + userId;
+  let reseñas = JSON.parse(localStorage.getItem(key)) || [];
+
+  // Ver si ya existe reseña del pedido
+  const existente = reseñas.find(r => r.idPedido == pedidoActual);
+  if (existente) {
+    existente.comentario = comentario;
+    existente.estrellas = estrellas;
+    existente.fecha = new Date().toISOString();
+  } else {
+    reseñas.push({
+      idPedido: pedidoActual,
+      comentario,
+      estrellas,
+      fecha: new Date().toISOString()
+
+    });
+  }
+
+  localStorage.setItem(key, JSON.stringify(reseñas));
+  modalResenaPedido.hide();
+  mostrarResenaPedido(pedidoActual);
+}
+
+// 🔸 Mostrar reseñas guardadas de todos los pedidos
+function mostrarTodasLasResenasPedido() {
+  const userId = window.FLASK_USER_ID || "anonimo";
+  const key = "reseñas_pedidos_" + userId;
+  const reseñas = JSON.parse(localStorage.getItem(key)) || [];
+
+  reseñas.forEach(r => mostrarResenaPedido(r.idPedido));
+}
+
+// 🔸 Mostrar reseña de un pedido específico
+function mostrarResenaPedido(idPedido) {
+  const userId = window.FLASK_USER_ID || "anonimo";
+  const key = "reseñas_pedidos_" + userId;
+  const reseñas = JSON.parse(localStorage.getItem(key)) || [];
+  const contenedor = document.getElementById(`resena-pedido-${idPedido}`);
+  const r = reseñas.find(x => x.idPedido == idPedido);
+
+  if (!contenedor) return;
+
+  if (!r) {
+    contenedor.innerHTML = "";
+    return;
+  }
+
+  contenedor.innerHTML = `
+    <div class="border rounded p-2 bg-light">
+      <strong>${"⭐".repeat(Number(r.estrellas))}</strong><br>
+      <small>${r.fecha}</small>
+      <p class="mb-0">${r.comentario}</p>
+    </div>
+  `;
+}
+</script>
 
 </body>
 </html>
