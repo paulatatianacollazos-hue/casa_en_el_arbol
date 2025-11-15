@@ -1,10 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Estadísticas de Satisfacción</title>
-
+{% extends "administrador/admin_dashboard.html" %}
+{% block title %}estadisticas | Casa en el Árbol{% endblock %}
+{% block extra_css %}
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -13,20 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Estilos propios -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 
-  
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- JS de estadísticas -->
   <script defer src="{{ url_for('static', filename='js/estadisticas.js') }}"></script>
-</head>
-
-<body class="container py-5" style="font-family: 'Poppins', sans-serif;">
-
+{%endblock%}
+{% block content %}
+<body class="containe py-5" style="font-family: 'Poppins', sans-serif;">
+  <div style="width: 90%; margin-left: 5%;">
   <h2 class="text-center mb-4"><i class="bi bi-bar-chart"></i> Estadísticas de satisfacción</h2>
 
   <!-- 🔹 Filtros -->
@@ -63,16 +56,29 @@
 
   <!-- 🔹 Gráficos -->
   <div class="row g-3">
+    <!-- Distribución por estrellas -->
     <div class="col-md-4">
       <div class="card p-3 shadow-sm">
         <h6 class="fw-semibold text-center">Distribución de satisfacción</h6>
         <canvas id="pie" style="max-height: 300px;"></canvas>
       </div>
     </div>
+
+    <!-- Promedio mensual -->
     <div class="col-md-8">
       <div class="card p-3 shadow-sm">
         <h6 class="fw-semibold text-center">Promedio de estrellas por mes</h6>
         <canvas id="bars" style="max-height: 300px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Comparativa por tipo (productos vs pedidos) -->
+  <div class="row mt-4">
+    <div class="col-md-6 mx-auto">
+      <div class="card p-3 shadow-sm">
+        <h6 class="fw-semibold text-center">Reseñas por tipo</h6>
+        <div id="tipoChartContainer" class="text-center"></div>
       </div>
     </div>
   </div>
@@ -94,9 +100,11 @@
       </table>
     </div>
   </div>
-
+  </div>
+  {%endblock%}
+  
+{% block extra_footer %}
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{%endblock%}
 
-</body>
-</html>

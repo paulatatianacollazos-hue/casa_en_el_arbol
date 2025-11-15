@@ -224,17 +224,26 @@ def guardar_reseña_producto(id_producto):
 @login_required
 @role_required("cliente", "admin")
 def actualizacion_datos():
-
     usuario = current_user
     user_id = usuario.ID_Usuario
-    direcciones = Direccion.query.filter_by(
-        ID_Usuario=usuario.ID_Usuario).all()
-    notificaciones = Notificaciones.query.filter_by(
-        ID_Usuario=usuario.ID_Usuario).order_by(
-            Notificaciones.Fecha.desc()).all()
 
+    # 📦 Direcciones y notificaciones del usuario
+    direcciones = Direccion.query.filter_by(ID_Usuario=user_id).all()
+    notificaciones = Notificaciones.query.filter_by(ID_Usuario=user_id).order_by(Notificaciones.Fecha.desc()).all()
+
+    # 🧾 Obtener pedidos con sus detalles (usa tu función personalizada)
     pedidos_con_detalles = obtener_pedidos_por_cliente(user_id)
 
+    # 🧩 Para cada pedido, buscar si tiene reseña tipo "pedido"
+    for pedido in pedidos_con_detalles:
+        reseña = Reseñas.query.filter_by(
+            ID_Usuario=user_id,
+            ID_Referencia=pedido["ID_Pedido"],  # referencia al ID del pedido
+            tipo="pedido"
+        ).first()
+        pedido["reseña"] = reseña  # ← Esto permite usar item.reseña en el HTML
+
+    # 🧠 Si el método es POST, actualizar datos del usuario
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         apellido = request.form.get("apellido", "").strip()
@@ -242,16 +251,15 @@ def actualizacion_datos():
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
-                  "warning")
+            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.", "warning")
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
+
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.",
-                      "danger")
+                flash("El correo ya está registrado por otro usuario.", "danger")
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
@@ -262,11 +270,11 @@ def actualizacion_datos():
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="""Tus datos personales se han actualizado
-                    correctamente."""
+                    mensaje="Tus datos personales se han actualizado correctamente."
                 )
                 flash("✅ Perfil actualizado correctamente", "success")
 
+    # 🧾 Renderizar la vista con toda la información
     return render_template(
         "cliente/actualizacion_datos.html",
         usuario=usuario,
