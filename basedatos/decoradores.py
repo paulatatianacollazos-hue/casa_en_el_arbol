@@ -87,3 +87,5 @@ def send_reset_email(user_email, user_name, token):
 
     # Enviar el correo
     mail.send(msg)
+
+

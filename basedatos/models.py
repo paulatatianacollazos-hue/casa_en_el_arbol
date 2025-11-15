@@ -274,3 +274,30 @@ class RegistroEntrega(db.Model):
 
     pedido = db.relationship('Pedido', backref='registros_entrega')
     empleado = db.relationship('Usuario', backref='registros_realizados')
+
+
+class Reseñas(db.Model):
+    __tablename__ = "Reseñas"
+
+    ID_Reseña = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"),
+                           nullable=False)
+    ID_Referencia = db.Column(db.Integer, nullable=False)
+    tipo = db.Column(db.String(50), nullable=False)
+    Comentario = db.Column(db.Text, nullable=False)
+    Estrellas = db.Column(db.Integer, nullable=False)
+    Fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relaciones
+    usuario = db.relationship("Usuario", backref="reseñas", lazy=True)
+
+    def __init__(self, ID_Usuario, ID_Referencia, tipo, Comentario, Estrellas):
+        if tipo not in ["producto", "pedido"]:
+            raise ValueError(
+                "El campo 'tipo' solo puede ser 'producto' o 'pedido'")
+        self.ID_Usuario = ID_Usuario
+        self.ID_Referencia = ID_Referencia
+        self.tipo = tipo
+        self.Comentario = Comentario
+        self.Estrellas = Estrellas
+        self.Fecha = datetime.utcnow()

@@ -12,7 +12,8 @@ from reportlab.pdfgen import canvas
 
 from basedatos.models import (
     db, Usuario, Producto, Calendario, Notificaciones,
-    Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias
+    Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias,
+    Reseñas
 )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -148,51 +149,72 @@ def ver_notificaciones_cliente():
 
 
 # ---------- RESEÑAS ----------
-@cliente.route("/reseñas", methods=["GET", "POST"])
+@cliente.route("/guardar_reseña_pedido/<int:id_pedido>", methods=["POST"])
 @login_required
-def resenas():   # <- sin ñ
-    if request.method == "POST":
-        pedido = request.form["pedido"]
-        cliente_nombre = request.form["cliente"]
-        estrellas = request.form["estrellas"]
-        comentario = request.form["comentario"]
-        reviews.append({
-            "pedido": pedido,
-            "cliente": cliente_nombre,
-            "estrellas": estrellas,
-            "comentario": comentario
-        })
-        flash("Reseña añadida con éxito", "success")
-        return redirect(url_for("cliente.resenas"))
+def guardar_reseña_pedido(id_pedido):
+    comentario = request.form.get("comentario")
+    estrellas = request.form.get("estrellas")
 
-    avg = round(sum([int(r["estrellas"]) for r in reviews]) / len(
-        reviews), 2) if reviews else "N/A"
-    return render_template("cliente/reseñas.html", reviews=reviews, avg=avg)
+    if not comentario or not estrellas:
+        flash("Por favor, completa todos los campos.", "error")
+        return redirect(url_for("cliente.actualizacion_datos"))
+
+    reseña = Reseñas.query.filter_by(
+        ID_Usuario=current_user.ID_Usuario,
+        ID_Referencia=id_pedido,
+        tipo="pedido"
+    ).first()
+
+    if reseña:
+        reseña.Comentario = comentario
+        reseña.Estrellas = int(estrellas)
+        reseña.Fecha = datetime.utcnow()
+        mensaje = "Reseña actualizada correctamente."
+    else:
+        nueva_reseña = Reseñas(
+            ID_Usuario=current_user.ID_Usuario,
+            ID_Referencia=id_pedido,
+            tipo="pedido",
+            Comentario=comentario,
+            Estrellas=int(estrellas)
+        )
+        db.session.add(nueva_reseña)
+        mensaje = "Reseña guardada correctamente."
+
+    db.session.commit()
+    flash(mensaje, "success")
+    return redirect(url_for("cliente.actualizacion_datos"))
 
 
 # ---------- ESCRIBIR RESEÑA ----------
-@cliente.route("/producto/<int:id_producto>/reseñar", methods=["POST"])
+@cliente.route("/producto/<int:id_producto>/reseña", methods=["POST"])
 @login_required
-def dejar_reseña(id_producto):
-    texto = request.form.get("comentario")
-    estrellas = int(request.form.get("estrellas", 0))
+def guardar_reseña_producto(id_producto):
+    producto = get_producto_by_id(id_producto)
+    if not producto:
+        flash("Producto no encontrado", "error")
+        return redirect(url_for("cliente.catalogo"))
 
-    if not texto or estrellas == 0:
-        flash("⚠️ Debes escribir un comentario y elegir estrellas.", "warning")
+    comentario = request.form.get("comentario")
+    estrellas = request.form.get("estrellas")
+
+    if not comentario or not estrellas:
+        flash("Por favor completa todos los campos.", "error")
         return redirect(url_for("cliente.detalle_producto",
                                 id_producto=id_producto))
 
-    nueva_resena = Comentarios(
+    nueva_reseña = Reseñas(
         ID_Usuario=current_user.ID_Usuario,
-        ID_Producto=id_producto,
-        Texto=texto,
-        Estrellas=estrellas,
-        Fecha=datetime.now()
+        ID_Referencia=id_producto,
+        tipo="producto",  # 🔹 Importante
+        Comentario=comentario,
+        Estrellas=int(estrellas)
     )
-    db.session.add(nueva_resena)
+
+    db.session.add(nueva_reseña)
     db.session.commit()
 
-    flash("✅ ¡Gracias por dejar tu reseña!", "success")
+    flash("Gracias por dejar tu reseña ❤️", "success")
     return redirect(url_for("cliente.detalle_producto",
                             id_producto=id_producto))
 
