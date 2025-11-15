@@ -455,7 +455,11 @@
       {% endif %}
       {% if item.Estado == 'entregado' %}
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalReseña{{ item.ID_Pedido }}">
-          Escribir reseña
+          {% if item.reseña %}
+            Editar reseña 
+          {%else%}
+            Escribir reseña
+          {%endif%}
         </button>
       {% endif %}
       
@@ -467,6 +471,7 @@
                 <h5 class="modal-title" id="modalReseñaLabel{{ item.ID_Pedido }}">Reseña del pedido #{{ item.ID_Pedido }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
+
 
               <div class="modal-body">
                 <div class="mb-3">
@@ -488,7 +493,6 @@
               </div>
 
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar reseña</button>
               </div>
             </form>
@@ -661,12 +665,7 @@
       </h5>
       <p>La dirección fue eliminada correctamente.</p>
       <div class="d-flex justify-content-center mt-3">
-        <button type="button" class="btn btn-success px-4 rounded-pill" data-bs-dismiss="modal">
-          {% if item.reseña %}
-          Editar reseña 
-          {%else}
-          Escribir reseña
-        </button>
+       
       </div>
     </div>
   </div>
