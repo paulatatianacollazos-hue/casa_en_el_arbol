@@ -264,51 +264,43 @@ document.querySelectorAll(".corazon").forEach(corazon => {
 });
 
 
-function guardarReseña(idProducto) {
-    const comentario = document.getElementById("comentario").value.trim();
-    const estrellas = document.getElementById("estrellas").value;
+</script>
 
-    if (!comentario) { alert("Escribe un comentario."); return; }
-
-    fetch(`/cliente/producto/${idProducto}/reseña`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ comentario, estrellas })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById("comentario").value = "";
-            mostrarReseñas(idProducto);
-        } else alert(data.message);
-    });
-}
-
+<script>
+// ----------------------------
+// ⭐ MOSTRAR RESEÑAS (vía fetch)
+// ----------------------------
 function mostrarReseñas(idProducto) {
+
     fetch(`/cliente/producto/${idProducto}/reseñas`)
         .then(res => res.json())
         .then(lista => {
             const cont = document.getElementById("lista-reseñas");
-            if (!lista.length) { cont.innerHTML = "<p>No hay reseñas aún.</p>"; return; }
+
+            if (!lista || !lista.length) {
+                cont.innerHTML = "<p>No hay reseñas aún para este producto.</p>";
+                return;
+            }
+
             cont.innerHTML = lista.map(r => `
-                <div class="reseña">
-                    <strong>${r.usuario}</strong> <small>${r.fecha}</small><br>
+                <div class="border rounded p-3 mb-2">
+                    <strong>${r.usuario}</strong>
+                    <small class="text-muted">${r.fecha}</small><br>
                     ${"⭐".repeat(r.estrellas)}<br>
                     ${r.comentario}
                 </div>
             `).join("");
-        });
+        })
+        .catch(err => console.error("Error cargando reseñas:", err));
 }
 
-// Inicializar reseñas al cargar
+// Ejecutar reseñas al cargar
 document.addEventListener("DOMContentLoaded", () => {
     mostrarReseñas({{ producto.ID_Producto }});
 });
-
 </script>
 
 
-</script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const stock = {{ producto.Stock }};
