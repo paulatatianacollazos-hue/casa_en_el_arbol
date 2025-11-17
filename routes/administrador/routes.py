@@ -290,6 +290,81 @@ def estadisticas():
     return render_template("administrador/estadisticas.html")
 
 
+@admin.route("/estadisticas_reseñas")
+@login_required
+@role_required("admin")
+def estadisticas_reseñas():
+    try:
+        # -----------------------
+        # EJEMPLO — ADAPTAR A TU BD
+        # -----------------------
+
+        # Promedio general
+        promedio_general = db.session.execute("""
+            SELECT COALESCE(AVG(estrellas), 0) AS promedio
+            FROM reseñas
+        """).scalar()
+
+        # Total de reseñas
+        total = db.session.execute("""
+            SELECT COUNT(*) FROM reseñas
+        """).scalar()
+
+        # Por estrellas (1 a 5)
+        por_estrellas = [
+            db.session.execute(
+                "SELECT COUNT(*) FROM reseñas WHERE estrellas = :s",
+                {"s": i}
+            ).scalar()
+            for i in range(1, 6)
+        ]
+
+        # Promedio por mes
+        por_mes = db.session.execute("""
+            SELECT 
+                DATE_FORMAT(fecha, '%Y-%m') AS mes,
+                AVG(estrellas) AS promedio
+            FROM reseñas
+            GROUP BY DATE_FORMAT(fecha, '%Y-%m')
+            ORDER BY mes
+        """).fetchall()
+
+        por_mes = [{"mes": r[0], "promedio": float(r[1])} for r in por_mes]
+
+        # Por tipo
+        por_tipo = {
+            "producto": db.session.execute("""
+                SELECT COUNT(*) FROM reseñas WHERE tipo = 'producto'
+            """).scalar(),
+            "pedido": db.session.execute("""
+                SELECT COUNT(*) FROM reseñas WHERE tipo = 'pedido'
+            """).scalar(),
+        }
+
+        # Comentarios negativos
+        negativos = db.session.execute("""
+            SELECT pedido_id, comentario
+            FROM reseñas
+            WHERE estrellas <= 2
+        """).fetchall()
+
+        negativos = [{"pedido": r[0], "comentario": r[1]} for r in negativos]
+
+        # RETORNAR JSON
+        return jsonify({
+            "promedio_general": float(promedio_general),
+            "total": total,
+            "por_estrellas": por_estrellas,
+            "por_mes": por_mes,
+            "por_tipo": por_tipo,
+            "negativos": negativos
+        })
+
+    except Exception as e:
+        print("ERROR en estadísticas:", e)
+        return jsonify({"error": "fallo"}), 500
+
+
 # ---------- Perfil y Direcciones ----------
 @admin.route("/actualizacion_datos", methods=["GET", "POST"])
 @login_required
