@@ -338,3 +338,8 @@ def registro_entrega(pedido_id):
         return redirect(url_for('empleado.dashboard'))
 
     return render_template("empleado/registro_entrega.html", pedido=pedido)
+
+
+@empleado.route("/nosotros")
+def nosotros():
+    return render_template("cliente/Nosotros.html")
