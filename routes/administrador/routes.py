@@ -879,19 +879,30 @@ def obtener_mensajes_admin():
     return jsonify(mensajes)
 
 
-@admin.route("/admin/usuarios_calendario")
+@admin.route("/usuarios_calendario")
 @login_required
 @role_required("admin")
 def usuarios_calendario():
     try:
-        empleados = Usuario.query.filter_by(Rol="empleado", Activo=True).all()
+        usuarios = db.session.query(Usuario).all()
 
-        data = [{
-            "id": u.ID_Usuario,
-            "nombre": f"{u.Nombre} {u.Apellido or ''}"
-        } for u in empleados]
+        data = []
+        for u in usuarios:
+            # Detectar automáticamente el campo ID
+            id_usuario = (
+                getattr(u, "ID_Usuario", None) or
+                getattr(u, "ID_usuario", None) or
+                getattr(u, "id_usuario", None) or
+                getattr(u, "id", None)
+            )
 
-        return jsonify({"usuarios": data})
+            data.append({
+                "id": id_usuario,
+                "nombre": f"{u.Nombre} {u.Apellido}",
+                "rol": u.Rol
+            })
+
+        return jsonify(data)
 
     except Exception as e:
         print("❌ Error cargando usuarios:", e)
