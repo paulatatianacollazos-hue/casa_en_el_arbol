@@ -53,9 +53,12 @@
     <label class="form-label fw-bold">Selecciona una dirección:</label>
     <select id="direccion-envio" class="form-select">
       {% for d in direcciones %}
-        <option value="{{ d.id }}">{{ d.direccion_completa }}</option>
+        <option value="{{ d.ID_Direccion }}" style="color: black;">
+          {{ d.Direccion }}, {{ d.Barrio }}, {{ d.Ciudad }} - {{ d.Departamento }}
+        </option>
       {% endfor %}
     </select>
+
   </div>
 
   <!-- 🔹 Carrusel de 6 productos -->
@@ -113,12 +116,6 @@
     </select>
 
     <button class="btn btn-success mt-3" id="confirmar-pago">Confirmar</button>
-  </div>
-
-  <!-- 🔹 Calendario -->
-  <div class="mt-4 text-center">
-    <label class="fw-semibold">Selecciona fecha de entrega:</label>
-    <input type="date" id="fecha-entrega" class="form-control w-auto mx-auto">
   </div>
 
   <!-- 🔹 Mensajes -->
@@ -232,6 +229,49 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+document.getElementById("confirmar-pago").addEventListener("click", async () => {
+  const direccion = document.getElementById("direccion-envio").value;
+  const metodoPago = document.getElementById("metodo-pago").value;
+
+  if (!metodoPago) {
+    alert("Por favor selecciona un método de pago");
+    return;
+  }
+
+  document.getElementById("mensaje-cargando").classList.remove("d-none");
+
+  try {
+    const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        metodo_pago: metodoPago,
+        productos: productos,
+        total: total,
+        direccion: direccion
+      })
+    });
+
+    const result = await response.json();
+
+    document.getElementById("mensaje-cargando").classList.add("d-none");
+
+    if (result.success) {
+      document.getElementById("mensaje-exito").classList.remove("d-none");
+
+      setTimeout(() => {
+        window.location.href = "/cliente/carrito";
+      }, 2000);
+    } else {
+      alert("Error: " + result.error);
+    }
+  } catch (error) {
+    document.getElementById("mensaje-cargando").classList.add("d-none");
+    alert("Ocurrió un error al procesar el pedido");
+    console.error(error);
+  }
+});
+
 </script>
 {% endblock %}
 

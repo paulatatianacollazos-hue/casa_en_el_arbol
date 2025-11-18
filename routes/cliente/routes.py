@@ -425,10 +425,15 @@ def carrito():
 
 
 @cliente.route('/pagos')
+@login_required
 def pagos():
-    direcciones = Direccion.query.filter_by(id_usuario=current_user.id).all()
+    direcciones = current_user.direcciones  # ✔ mucho mejor
 
-    return render_template('cliente/pagos.html', direcciones=direcciones)
+    return render_template(
+        "cliente/pagos.html",
+        direcciones=direcciones
+    )
+
 
 
 @cliente.route('/confirmar_pago', methods=['POST'])
@@ -440,16 +445,35 @@ def confirmar_pago():
     metodo_pago = data.get("metodo_pago")
     productos = data.get("productos", [])
     total = data.get("total", 0)
+    direccion_id = data.get("direccion")
 
     print("🎭 Rol actual:", getattr(current_user, "rol", "Desconocido"))
+    print("🏠 Dirección seleccionada:", direccion_id)
+
+    if not direccion_id:
+        return jsonify({"success": False, "error": "No se seleccionó una dirección"}), 400
 
     try:
+        # Buscar la dirección en la base de datos
+        direccion_obj = Direccion.query.get(direccion_id)
+
+        if not direccion_obj:
+            return jsonify({"success": False, "error": "La dirección no existe"}), 404
+
+        # Armar la dirección completa
+        direccion_texto = (
+            f"{direccion_obj.Direccion}, "
+            f"{direccion_obj.Barrio}, "
+            f"{direccion_obj.Ciudad} - {direccion_obj.Departamento}"
+        )
+
+        # Crear pedido
         pedido_id = crear_pedido_y_pago(
             id_usuario=current_user.id,
             carrito=productos,
             metodo_pago=metodo_pago,
             monto_total=total,
-            destino="Dirección registrada"
+            destino=direccion_texto
         )
 
         if pedido_id:
@@ -457,8 +481,7 @@ def confirmar_pago():
             return jsonify({"success": True, "pedido_id": pedido_id}), 200
         else:
             print("⚠️ No se pudo crear el pedido")
-            return jsonify({"success": False, "error":
-                            "Error al crear el pedido"}), 500
+            return jsonify({"success": False, "error": "Error al crear el pedido"}), 500
 
     except Exception as e:
         print("💥 Error en confirmar_pago:", e)
