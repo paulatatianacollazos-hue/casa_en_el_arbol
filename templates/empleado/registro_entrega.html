@@ -1,7 +1,9 @@
 {% extends "empleado/dashboard.html" %}
 {% block content %}
 
-<!-- 🔹 Vista principal -->
+<!-- ------------------------------- -->
+<!--        VISTA PRINCIPAL         -->
+<!-- ------------------------------- -->
 <div id="vista-principal">
 
 <div class="container mt-5">
@@ -10,12 +12,15 @@
       <h5 class="mb-0">📦 Registro de Entrega - Pedido #{{ pedido_id }}</h5>
     </div>
     <div class="card-body">
+
       <form method="POST" enctype="multipart/form-data">
+
         <div class="mb-3">
           <label class="form-label">Comentario del instalador</label>
           <textarea class="form-control" name="comentario" rows="3" required></textarea>
         </div>
 
+        <!-- Fotos dinámicas - máximo 3 -->
         <div class="mb-3">
           <label class="form-label">Subir fotos de la entrega (máximo 3)</label>
 
@@ -35,19 +40,20 @@
           <div id="limite-msg-principal" class="text-danger small mt-2" style="display:none;">
             ⚠️ Solo puedes subir un máximo de 3 imágenes.
           </div>
+
         </div>
 
         <div class="text-end mt-4">
 
-          <!-- 🔹 Cambiado a type="button" -->
+          <!-- 🔹 Botón para abrir la vista personalizar -->
           <button type="button" id="btn-personalizar" class="btn btn-primary">
-            Instalación
+            Personalizar instalación
           </button>
 
           <button type="submit" class="btn btn-success">
             <i class="bi bi-save"></i> Guardar registro
           </button>
-          
+
           <button type="button" class="btn btn-outline-secondary" onclick="volverAtras()">
             <i class="bi bi-arrow-left"></i> Volver
           </button>
@@ -55,72 +61,73 @@
         </div>
 
       </form>
+
     </div>
   </div>
 </div>
 
-</div> <!-- cierre vista principal -->
+</div>
+<!-- FIN VISTA PRINCIPAL -->
 
 
-<!-- 🔹 Vista Personalizada -->
+
+<!-- ------------------------------- -->
+<!--       VISTA PERSONALIZAR        -->
+<!-- ------------------------------- -->
 <div id="seccion-personalizar" class="d-none">
 
 <div class="container mt-5">
   <div class="card shadow-sm border-0">
-    <div class="card-header bg-success text-white">
-      <h5 class="mb-0">📦 Registro de Entrega - Pedido #{{ pedido_id }}</h5>
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0" style="">🔧 Personalización de Instalación - Pedido #{{ pedido_id }}</h5>
     </div>
+
     <div class="card-body">
+
       <form method="POST" enctype="multipart/form-data">
+
+        <!-- Comentario -->
         <div class="mb-3">
           <label class="form-label">Comentario del instalador</label>
-          <textarea class="form-control" name="comentario" rows="3" required></textarea>
+          <textarea class="form-control" name="comentario_personalizar" rows="3" required></textarea>
         </div>
 
+        <!-- Imagen ANTES -->
         <div class="mb-3">
-          <label class="form-label">Subir fotos de la entrega (máximo 3)</label>
+          <label class="form-label fw-bold">📸 Foto ANTES</label>
+          <input type="file" name="foto_antes" class="form-control" accept="image/*" required>
+        </div>
 
-          <div id="contenedor-fotos-principal">
-            <div class="input-group mb-2 foto-input">
-              <input type="file" class="form-control" name="fotos" accept="image/*" required>
-              <button type="button" class="btn btn-outline-danger btn-quitar">
-                <i class="bi bi-x-lg"></i>
-              </button>
-            </div>
-          </div>
-
-          <button type="button" id="btn-agregar-foto-principal" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-plus-circle"></i> Agregar otra imagen
-          </button>
-
-          <div id="limite-msg-principal" class="text-danger small mt-2" style="display:none;">
-            ⚠️ Solo puedes subir un máximo de 3 imágenes.
-          </div>
+        <!-- Imagen DESPUÉS -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">📸 Foto DESPUÉS</label>
+          <input type="file" name="foto_despues" class="form-control" accept="image/*" required>
         </div>
 
         <div class="text-end mt-4">
+          <button type="submit" class="btn btn-success">Guardar personalización</button>
 
-          <!-- 🔹 Cambiado a type="button" -->
-
-          <button type="submit" class="btn btn-success">
-            <i class="bi bi-save"></i> Guardar registro
-          </button>
-          
-          <button type="button" class="btn btn-outline-secondary" onclick="volverAtras()">
+          <button type="button" id="btn-volver" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Volver
           </button>
-
         </div>
 
       </form>
+
     </div>
   </div>
-</div>
 
 </div>
 
+</div>
+<!-- FIN VISTA PERSONALIZAR -->
 
-<!-- 🔹 Script manejo de fotos -->
+
+<!-- ------------------------------- -->
+<!--           SCRIPTS              -->
+<!-- ------------------------------- -->
+
+<!-- Manejo de fotos dinámicas (vista principal) -->
 <script>
 function activarFotoManager(prefix) {
   const contenedor = document.getElementById(`contenedor-fotos-${prefix}`);
@@ -156,13 +163,14 @@ function activarFotoManager(prefix) {
   });
 }
 
-// activar para la vista principal
+// Activar al cargar
 document.addEventListener("DOMContentLoaded", () => {
   activarFotoManager("principal");
 });
 </script>
 
-<!-- 🔹 Script para alternar vistas -->
+
+<!-- Alternar vistas principal ↔ personalizar -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const btnPersonalizar = document.getElementById("btn-personalizar");
