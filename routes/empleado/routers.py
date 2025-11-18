@@ -342,4 +342,4 @@ def registro_entrega(pedido_id):
 
 @empleado.route("/nosotros")
 def nosotros():
-    return render_template("cliente/Nosotros.html")
+    return render_template("empleado/Nosotros.html")
