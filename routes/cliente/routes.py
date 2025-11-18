@@ -426,7 +426,9 @@ def carrito():
 
 @cliente.route('/pagos')
 def pagos():
-    return render_template('cliente/pagos.html')
+    direcciones = Direccion.query.filter_by(id_usuario=current_user.id).all()
+
+    return render_template('cliente/pagos.html', direcciones=direcciones)
 
 
 @cliente.route('/confirmar_pago', methods=['POST'])

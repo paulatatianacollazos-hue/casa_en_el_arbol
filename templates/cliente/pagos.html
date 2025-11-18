@@ -48,11 +48,20 @@
 <div class="container py-5">
   <h2 class="text-center mb-4">🛒 Confirmar Pago</h2>
 
-  <!-- Carrusel sin autoplay ni loop -->
-  <div id="carouselProductos" class="carousel slide" data-bs-wrap="false">
+  <!-- 🔹 Selector de direcciones -->
+  <div class="mb-4">
+    <label class="form-label fw-bold">Selecciona una dirección:</label>
+    <select id="direccion-envio" class="form-select">
+      {% for d in direcciones %}
+        <option value="{{ d.id }}">{{ d.direccion_completa }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- 🔹 Carrusel de 6 productos -->
+  <div id="carouselProductos" class="carousel slide">
     <div class="carousel-inner" id="carousel-content"></div>
 
-    <!-- Controles -->
     <button class="carousel-control-prev" type="button" data-bs-target="#carouselProductos" data-bs-slide="prev">
       <span class="carousel-control-prev-icon"></span>
     </button>
@@ -61,139 +70,170 @@
     </button>
   </div>
 
-  <!-- Total -->
-  <div class="text-center mt-4">
-    <h4>Total a pagar: <span id="total-pago" class="text-success fw-bold">$0.00</span></h4>
+  <!-- 🔹 Tabla resumen -->
+  <div class="mt-5">
+    <h4 class="fw-bold">Resumen del pedido</h4>
 
-    <!-- 🔹 Método de pago -->
-    <div class="mt-4 d-flex justify-content-center align-items-center flex-column">
-      <label for="metodo-pago" class="form-label fw-semibold">Método de pago:</label>
-      <select id="metodo-pago" class="form-select w-auto">
-        <option value="" selected disabled>Seleccione una opción</option>
-        <option value="tarjeta">Tarjeta</option>
-        <option value="nequi">Nequi</option>
-        <option value="contraentrega">Contra entrega</option>
-      </select>
+    <table class="table table-bordered mt-3">
+      <thead class="table-dark">
+        <tr>
+          <th>Producto</th>
+          <th>Cant.</th>
+          <th>Precio</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-resumen"></tbody>
 
-      <!-- 🔹 Mensaje de opción no disponible -->
-      <div id="mensaje-no-disponible" class="alert alert-warning mt-3 d-none w-50 text-center" role="alert">
-        ⚠️ Esta opción no está disponible por el momento.
-      </div>
-    </div>
-
-    <button class="btn btn-success mt-3 px-4" id="confirmar-pago">
-      Confirmar pago
-    </button>
+      <tfoot>
+        <tr>
+          <th colspan="3">Subtotal</th>
+          <td id="subtotal"></td>
+        </tr>
+        <tr>
+          <th colspan="3" class="text-success">Envío</th>
+          <td class="text-success fw-bold">GRATIS</td>
+        </tr>
+        <tr class="table-primary">
+          <th colspan="3">Total</th>
+          <td id="total-final" class="fw-bold"></td>
+        </tr>
+      </tfoot>
+    </table>
   </div>
+
+  <!-- 🔹 Método de pago -->
+  <div class="text-center mt-4">
+    <label class="form-label fw-semibold">Método de pago:</label>
+    <select id="metodo-pago" class="form-select w-auto mx-auto">
+      <option value="" disabled selected>Seleccionar</option>
+      <option value="contraentrega">Contra entrega</option>
+      <option value="tarjeta">Tarjeta</option>
+      <option value="nequi">Nequi</option>
+    </select>
+
+    <button class="btn btn-success mt-3" id="confirmar-pago">Confirmar</button>
+  </div>
+
+  <!-- 🔹 Calendario -->
+  <div class="mt-4 text-center">
+    <label class="fw-semibold">Selecciona fecha de entrega:</label>
+    <input type="date" id="fecha-entrega" class="form-control w-auto mx-auto">
+  </div>
+
+  <!-- 🔹 Mensajes -->
+  <div id="mensaje-cargando" class="alert alert-info mt-4 d-none text-center">⏳ Procesando pedido...</div>
+  <div id="mensaje-exito" class="alert alert-success mt-4 d-none text-center">🎉 Pedido realizado con éxito</div>
+
 </div>
 {% endblock %}
+
 
 {% block extra_footer %}
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const carouselContent = document.getElementById("carousel-content");
-    const totalPago = document.getElementById("total-pago");
+document.addEventListener("DOMContentLoaded", () => {
+  const productos = JSON.parse(localStorage.getItem(getCartKey())) || [];
+  const carouselContent = document.getElementById("carousel-content");
+  const tabla = document.getElementById("tabla-resumen");
 
-    const productos = JSON.parse(localStorage.getItem(getCartKey())) || [];
-    if (productos.length === 0) {
-      carouselContent.innerHTML = `
-        <div class="text-center p-5">
-          No hay productos en tu carrito.
-          <a href="/cliente/catalogo" class="alert-link d-block mt-2">Volver al catálogo</a>
-        </div>`;
-      totalPago.textContent = "$0.00";
-      return;
-    }
+  let total = 0;
 
-    const chunkSize = 3;
-    let total = 0;
-    const slides = [];
+  /*******************************
+   * 🔹 Mostrar 6 productos por slide
+   *******************************/
+  const chunkSize = 6;
+  const slides = [];
 
-    for (let i = 0; i < productos.length; i += chunkSize) {
-      const grupo = productos.slice(i, i + chunkSize);
-      let grupoHTML = "";
+  for (let i = 0; i < productos.length; i += chunkSize) {
+    const grupo = productos.slice(i, i + chunkSize);
+    let grupoHTML = "";
 
-      grupo.forEach(p => {
-        const subtotal = (p.price || 0) * (p.quantity || 1);
-        total += subtotal;
-        grupoHTML += `
-          <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-              <img src="${p.image}" class="card-img-top" style="height:220px; object-fit:cover;">
-              <div class="card-body text-center">
-                <h5 class="card-title mb-1">${p.name}</h5>
-                <p class="text-muted mb-1">Cantidad: ${p.quantity || 1}</p>
-                <p class="fw-bold text-success mb-0">$${subtotal.toFixed(2)}</p>
-              </div>
+    grupo.forEach(p => {
+      grupoHTML += `
+        <div class="col-md-2 col-sm-4 col-6">
+          <div class="card border-0 shadow-sm mb-3">
+            <img src="${p.image}" class="card-img-top" style="height:100px; object-fit:cover;">
+            <div class="card-body text-center p-2">
+              <small>${p.name}</small><br>
+              <small class="text-muted">x${p.quantity}</small>
             </div>
           </div>
-        `;
-      });
-
-      slides.push(`
-        <div class="carousel-item ${i === 0 ? "active" : ""}">
-          <div class="row justify-content-center">
-            ${grupoHTML}
-          </div>
         </div>
-      `);
-    }
-
-    carouselContent.innerHTML = slides.join("");
-    totalPago.textContent = "$" + total.toFixed(2);
-
-    const metodoPago = document.getElementById("metodo-pago");
-    const mensaje = document.getElementById("mensaje-no-disponible");
-
-    metodoPago.addEventListener("change", () => {
-      if (metodoPago.value === "tarjeta" || metodoPago.value === "nequi") {
-        mensaje.classList.remove("d-none");
-      } else {
-        mensaje.classList.add("d-none");
-      }
+      `;
     });
 
-    // 🔹 Confirmar pago
-    document.getElementById("confirmar-pago").addEventListener("click", async () => {
-      if (!metodoPago.value) {
-        alert("⚠️ Debes seleccionar un método de pago antes de confirmar.");
-        return;
-      }
+    slides.push(`
+      <div class="carousel-item ${i === 0 ? "active" : ""}">
+        <div class="row justify-content-center">${grupoHTML}</div>
+      </div>
+    `);
+  }
 
-      if (metodoPago.value === "tarjeta" || metodoPago.value === "nequi") {
-        alert("⚠️ Este método de pago no está disponible por el momento.");
-        return;
-      }
+  carouselContent.innerHTML = slides.join("");
 
-      try {
-        const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            metodo_pago: metodoPago.value,
-            productos: productos,
-            total: total
-          })
-        });
 
-        const result = await response.json();
+  /*******************************
+   * 🔹 Tabla resumen
+   *******************************/
+  productos.forEach(p => {
+    const subtotal = p.price * p.quantity;
+    total += subtotal;
 
-        if (result.success) {
-          alert("✅ Pedido registrado correctamente.");
-          localStorage.removeItem(getCartKey());
-          window.location.href = "/cliente/catalogo";
-        } else {
-          alert("❌ Error al registrar el pedido: " + (result.error || 'Desconocido'));
-        }
-      } catch (error) {
-        console.error(error);
-        alert("❌ Error de conexión con el servidor.");
-      }
-    });
+    tabla.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.quantity}</td>
+        <td>$${p.price.toFixed(2)}</td>
+        <td>$${subtotal.toFixed(2)}</td>
+      </tr>
+    `;
   });
-</script>
 
+  document.getElementById("subtotal").textContent = "$" + total.toFixed(2);
+  document.getElementById("total-final").textContent = "$" + total.toFixed(2);
+
+
+  /*******************************
+   * 🔹 Confirmar pago
+   *******************************/
+  const metodoPago = document.getElementById("metodo-pago");
+
+  document.getElementById("fecha-entrega").addEventListener("change", (e) => {
+    document.getElementById("mensaje-cargando").classList.remove("d-none");
+
+    setTimeout(() => {
+      document.getElementById("mensaje-cargando").classList.add("d-none");
+      document.getElementById("mensaje-exito").classList.remove("d-none");
+
+      setTimeout(() => {
+        window.location.href = "/cliente/carrito";
+      }, 2000);
+
+    }, 3000);
+  });
+
+  document.getElementById("confirmar-pago").addEventListener("click", async () => {
+
+    const direccion = document.getElementById("direccion-envio").value;
+
+    const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        metodo_pago: metodoPago.value,
+        productos: productos,
+        total: total,
+        direccion: direccion
+      })
+    });
+
+    const result = await response.json();
+  });
+
+});
+</script>
 {% endblock %}
+
 </body>
 
