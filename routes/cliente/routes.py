@@ -703,3 +703,38 @@ def buscar_productos():
     except Exception as e:
         print("ERROR EN /buscar_productos:", e)
         return jsonify({"error": str(e)}), 500
+
+
+BASE_KNOWLEDGE = {
+    "privacidad": "Nuestra política de privacidad protege tus datos.",
+    "devoluciones": "Puedes solicitar una devolución dentro de 30 días con tu recibo.",
+    "garantía": "Todos los productos tienen 1 año de garantía por defectos de fábrica.",
+    "empresa": "Somos una empresa comprometida con la satisfacción del cliente.",
+    "soporte": "Soporte disponible de lunes a viernes, 8am a 5pm."
+}
+
+FORBIDDEN_WORDS = [
+    "tarjeta", "credito", "contraseña", "password",
+    "cedula", "documento", "banco", "cuenta"
+]
+
+
+@cliente.route('/api/chatbot', methods=['POST'])
+def chatbot_response():
+    user_message = request.json.get("message", "").lower()
+
+    for word in FORBIDDEN_WORDS:
+        if word in user_message:
+            return jsonify({"response": "Lo siento, no puedo ayudarte con información personal o sensible."})
+
+    for key, value in BASE_KNOWLEDGE.items():
+        if key in user_message:
+            return jsonify({"response": value})
+
+    return jsonify({"response": "No tengo información sobre eso. Consulta las secciones oficiales de la empresa."})
+
+
+@cliente.route('/chatbot')
+def chatbot():
+
+    return render_template("cliente/chatbot.html")

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot - Asistente Virtual</title>
+
+    <style>
+        body { font-family: Arial; background: #f5f6fa; margin:0; display:flex; flex-direction:column; height:100vh; }
+        header { background:#4e73df; padding:15px; color:white; text-align:center; font-size:22px; font-weight:bold; }
+        #chat-container { flex:1; display:flex; flex-direction:column; max-width:700px; margin:auto; width:100%; height:100%; background:white; border-radius:8px; margin-top:20px; margin-bottom:20px; box-shadow:0 0 12px rgba(0,0,0,0.1); }
+        #chat-messages { padding:15px; flex:1; overflow-y:auto; }
+        .fade-in { animation: fadeIn .3s ease-in-out; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
+        .msg-user, .msg-bot { margin:10px 0; display:flex; gap:8px; }
+        .msg-user { justify-content:flex-end; }
+        .msg-bot { justify-content:flex-start; }
+        .msg-user span { background:#4e73df; color:white; padding:10px 14px; border-radius:12px; max-width:60%; }
+        .msg-bot span { background:#e5e7eb; padding:10px 14px; border-radius:12px; max-width:60%; }
+        .avatar { width:38px; height:38px; border-radius:50%; }
+        #chat-input { display:flex; border-top:1px solid #ddd; }
+        #message { flex:1; padding:12px; border:none; outline:none; font-size:16px; }
+        #send-btn { width:120px; background:#4e73df; color:white; border:none; cursor:pointer; font-size:16px; }
+        #send-btn:hover { background:#3b5cc0; }
+    </style>
+</head>
+
+<body>
+
+<header>Asistente Virtual</header>
+
+<div id="chat-container">
+    <div id="chat-messages"></div>
+
+    <div id="chat-input">
+        <input type="text" id="message" placeholder="Escribe tu mensaje...">
+        <button id="send-btn" onclick="sendMessage()">Enviar</button>
+    </div>
+</div>
+
+<script>
+let chatArea = document.getElementById("chat-messages");
+
+window.onload = function() {
+    let history = localStorage.getItem("chatHistory");
+    if (history) {
+        chatArea.innerHTML = history;
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+};
+
+function saveHistory() {
+    localStorage.setItem("chatHistory", chatArea.innerHTML);
+}
+
+function sendMessage() {
+    const message = document.getElementById("message").value.trim();
+    if (!message) return;
+
+    chatArea.innerHTML += `
+        <div class="msg-user fade-in">
+            <span>${message}</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
+        </div>
+    `;
+    chatArea.scrollTop = chatArea.scrollHeight;
+    saveHistory();
+
+    fetch("/api/chatbot", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({message})
+    })
+    .then(res => res.json())
+    .then(data => {
+        chatArea.innerHTML += `
+            <div class="msg-bot fade-in">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712100.png" class="avatar">
+                <span>${data.response}</span>
+            </div>
+        `;
+        chatArea.scrollTop = chatArea.scrollHeight;
+        saveHistory();
+    });
+
+    document.getElementById("message").value = "";
+}
+
+document.getElementById("message").addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+});
+</script>
+
+</body>
+</html>
