@@ -394,12 +394,12 @@ searchInput.addEventListener('input', async () => {
         if (data.length) {
             // Generamos HTML de los productos encontrados
             mainContent.innerHTML = `
-                <div class="row g-3">
+                <div class="row g-3" style="padding: 40px;">
                     ${data.map(p => `
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-md-3 col-sm-6" >
                             <div class="card producto-card">
                                 <a href="/detalle_producto/${p.id}">
-                                    <img src="/${p.imagen}" class="card-img-top" alt="${p.nombre}">
+                                    <img src="${p.imagen}" class="card-img-top" alt="${p.nombre}">
                                 </a>
                                 <div class="card-body text-center">
                                     <h6 class="card-title">${p.nombre}</h6>
