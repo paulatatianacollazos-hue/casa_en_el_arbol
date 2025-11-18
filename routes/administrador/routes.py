@@ -292,7 +292,6 @@ def estadisticas_reseñas():
         # Total de reseñas
         total = db.session.query(Reseñas).count()
 
-        # Si no hay reseñas → devolver estructura vacía válida
         if total == 0:
             return jsonify({
                 "promedio_general": 0,
@@ -308,32 +307,38 @@ def estadisticas_reseñas():
 
         # Conteo por estrellas
         por_estrellas = [
-            db.session.query(Reseñas).filter(Reseñas.Estrellas == i).count()
+            db.session.query(Reseñas)
+            .filter(Reseñas.Estrellas == i)
+            .count()
             for i in range(1, 6)
         ]
 
-        # Promedio por mes (SQLite usa strftime)
+        # 🔥 PROMEDIO POR MES (PARA MYSQL)
         mensual = db.session.query(
-            func.strftime("%Y-%m", Reseñas.Fecha).label("mes"),
+            func.date_format(Reseñas.Fecha, "%Y-%m").label("mes"),
             func.avg(Reseñas.Estrellas).label("prom")
         ).group_by("mes").order_by("mes").all()
 
-        por_mes = [{"mes": m.mes, "promedio": float(m.prom)} for m in mensual]
+        por_mes = [
+            {"mes": m.mes, "promedio": float(m.prom)} for m in mensual
+        ]
 
-        # Por tipo (producto o pedido)
+        # 🔥 POR TIPO (CORREGIDO)
         por_tipo = {
-            "producto": db.session.query(Reseñas).filter(
-                Reseñas.Tipo == "producto").count(),
-            "pedido": db.session.query(Reseñas).filter(
-                Reseñas.Tipo == "pedido").count()
+            "producto": db.session.query(Reseñas).filter(Reseñas.tipo == "producto").count(),
+            "pedido": db.session.query(Reseñas).filter(Reseñas.tipo == "pedido").count()
         }
 
-        # Reseñas negativas (1 o 2 estrellas)
+        # 🔥 RESEÑAS NEGATIVAS
         negativos_query = db.session.query(Reseñas).filter(
-            Reseñas.Estrellas <= 2).all()
+            Reseñas.Estrellas <= 2
+        ).all()
+
         negativos = [
-            {"pedido": r.PedidoID,
-             "comentario": r.Comentario or "Sin comentario"}
+            {
+                "pedido": r.ID_Referencia,    # ← Ajusta si este nombre es distinto
+                "comentario": r.Comentario or "Sin comentario"
+            }
             for r in negativos_query
         ]
 
