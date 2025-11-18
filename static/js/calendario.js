@@ -21,12 +21,20 @@ let usuarioActualId = null; // ID real del usuario logueado
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
+    const data = await resp.json();
 
-    usuarios = (await resp.json()).map(u => ({
-      id: u.id || u.ID_Empleado || u.ID_Usuario,
+    if (!data.usuarios) {
+      console.error("❌ La respuesta no contiene 'usuarios':", data);
+      return;
+    }
+
+    usuarios = data.usuarios.map(u => ({
+      id: u.id || u.ID_Usuario,
       nombre: u.nombre || u.Nombre || "",
-      rol: (u.rol || u.Rol || "").toLowerCase(),
+      rol: (u.rol || u.Rol || "empleado").toLowerCase()
     }));
+
+    selectorUsuario.innerHTML = "";
 
     // Opción Mi calendario
     const optMi = document.createElement("option");
@@ -34,14 +42,15 @@ async function cargarUsuarios() {
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Empleados
+    // Agregar empleados
     usuarios.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = String(u.id);
-      opt.textContent = `${u.nombre} (${u.rol})`;
+      opt.value = u.id;
+      opt.textContent = u.nombre;
       selectorUsuario.appendChild(opt);
     });
 
+    // Set ID del usuario actual
     const inputUsuario = document.getElementById("usuarioId");
     if (inputUsuario) usuarioActualId = inputUsuario.value;
 
@@ -49,6 +58,7 @@ async function cargarUsuarios() {
     console.error("❌ Error al cargar usuarios:", err);
   }
 }
+
 
 
 // =============================================================
