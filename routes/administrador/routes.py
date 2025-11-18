@@ -921,3 +921,6 @@ def programaciones_todas():
     except Exception as e:
         print("❌ Error cargando programaciones:", e)
         return jsonify({"error": "Error interno"}), 500
+
+
+

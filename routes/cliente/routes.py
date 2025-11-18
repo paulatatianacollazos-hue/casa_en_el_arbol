@@ -627,16 +627,43 @@ def obtener_factura(pedido_id):
         return jsonify({"error": "Error interno del servidor"}), 500
 
 
-@cliente.route("/empleado/programaciones_todas")
+@cliente.route('/detalle_pedido/<int:pedido_id>')
 @login_required
-def programaciones_todas():
-    try:
-        eventos = Calendario.query.all()
+def detalle_pedido(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    cliente = Usuario.query.get(pedido.ID_Usuario)
+    empleado = Usuario.query.get(pedido.ID_Empleado
+                                 ) if pedido.ID_Empleado else None
+    direccion = Direccion.query.filter_by(ID_Usuario=cliente.ID_Usuario
+                                          ).first()
 
-        data = [e.to_dict() for e in eventos]
+    detalles = (
+        db.session.query(Detalle_Pedido, Producto)
+        .join(Producto, Detalle_Pedido.ID_Producto == Producto.ID_Producto)
+        .filter(Detalle_Pedido.ID_Pedido == pedido_id)
+        .all()
+    )
 
-        return jsonify({"eventos": data})
+    productos = [{
+        "nombre": prod.NombreProducto,
+        "cantidad": det.Cantidad,
+        "color": prod.Color or "N/A",
+        "material": prod.Material or "N/A"
+    } for det, prod in detalles]
 
-    except Exception as e:
-        print("❌ Error cargando programaciones:", e)
-        return jsonify({"error": "Error interno"}), 500
+    estados = ["pendiente", "en proceso", "en reparto", "entregado"]
+    estado_actual = pedido.Estado
+    progreso = (estados.index(
+        estado_actual) + 1) / len(estados
+                                  ) * 100 if estado_actual in estados else 0
+
+    return render_template(
+        "cliente/detalle_pedido.html",
+        pedido=pedido,
+        cliente=cliente,
+        empleado=empleado,
+        direccion=direccion,
+        productos=productos,
+        progreso=progreso,
+        estado_actual=estado_actual
+    )
