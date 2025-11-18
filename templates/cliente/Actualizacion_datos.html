@@ -427,16 +427,14 @@
           {% endif %}
           
           {% endfor %}
-          <a href="{{ url_for('cliente.detalle_pedido', pedido_id=pedido.ID_Pedido) }}" 
-        class="btn btn-primary">
-          Ver Detalle
-      </a>
+          
+
         </div>
       </div>
-      
+        
       {% endfor %}
     </div>
-
+    
     <!-- Controles -->
     <button class="carousel-control-prev" type="button" data-bs-target="#pedidoCarousel{{ item.id_pedido }}" data-bs-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -453,7 +451,10 @@
               data-pedido-id="{{ item.ID_Pedido }}">
         <i class="bi bi-receipt"></i> Ver factura
       </button>
-      
+      <a href="{{ url_for('cliente.detalle_pedido', pedido_id=item.ID_Pedido) }}" 
+        class="btn btn-primary">
+        Ver Detalle
+      </a>
       {% if item.Estado == 'entregado' %}
       <a href="{{ url_for('cliente.firmar_entrega', id_pedido=item.ID_Pedido) }}" class="btn btn-success">
         Confirmación de entrega
