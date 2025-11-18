@@ -21,27 +21,42 @@ let usuarioActualId = null; // ID real del usuario logueado
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
+    const data = await resp.json();
 
-    usuarios = (await resp.json()).map(u => ({
-      id: u.id || u.ID_Empleado || u.ID_Usuario,
-      nombre: u.nombre || u.Nombre || "",
-      rol: (u.rol || u.Rol || "").toLowerCase(),
-    }));
+    console.log("DEBUG usuarios:", data);
 
-    // Opción Mi calendario
+    // Asegurar que existe la lista
+    const lista = data.usuarios || [];
+
+    // ===============================
+    //   FILTRAR SOLO ROL EMPLEADO
+    // ===============================
+    usuarios = lista
+      .filter(u => (u.rol || "").toLowerCase() === "empleado")
+      .map(u => ({
+        id: u.id,
+        nombre: u.nombre,
+        rol: u.rol.toLowerCase()
+      }));
+
+    // Limpiar selector
+    selectorUsuario.innerHTML = "";
+
+    // Opción MI CALENDARIO
     const optMi = document.createElement("option");
     optMi.value = "mi";
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Empleados
+    // Agregar SOLO empleados
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = String(u.id);
-      opt.textContent = `${u.nombre} (${u.rol})`;
+      opt.textContent = u.nombre;
       selectorUsuario.appendChild(opt);
     });
 
+    // Cargar id del usuario logueado
     const inputUsuario = document.getElementById("usuarioId");
     if (inputUsuario) usuarioActualId = inputUsuario.value;
 
@@ -49,6 +64,7 @@ async function cargarUsuarios() {
     console.error("❌ Error al cargar usuarios:", err);
   }
 }
+
 
 
 // =============================================================
