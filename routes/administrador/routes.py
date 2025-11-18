@@ -2,9 +2,10 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify, abort
 from flask_login import login_required, current_user
 from routes.cliente.routes import mensajes
+from sqlalchemy import func
 from basedatos.models import (
     db, Usuario, Notificaciones,
-    Direccion, Calendario, Pedido
+    Direccion, Calendario, Pedido, Reseñas
     )
 from sqlalchemy import text
 import traceback
@@ -281,19 +282,49 @@ def estadisticas():
     return render_template("administrador/estadisticas_reseñas.html")
 
 
-@admin.route("/estadisticas_reseñas", methods=["GET"])
+@admin.route("/estadisticas_reseñas")
 @login_required
 @role_required("admin")
 def estadisticas_reseñas():
     try:
         print("📊 CARGANDO ESTADÍSTICAS...")
-        data = generar_estadisticas_reseñas()
-        return jsonify(data)
+
+        # Si no hay reseñas, responder limpio sin marcar error
+        total_reseñas = db.session.query(Reseñas).count()
+
+        if total_reseñas == 0:
+            print("⚠️ No hay reseñas aún.")
+            return jsonify({
+                "mensual": [],
+                "promedio_general": 0,
+                "cantidad_total": 0
+            })
+
+        # GENERAR ESTADISTICAS
+        mensual = db.session.query(
+            func.strftime("%Y-%m", Reseñas.Fecha).label("mes"),
+            func.avg(Reseñas.Estrellas).label("promedio")
+        ).group_by("mes").order_by("mes").all()
+
+        datos_mensuales = [
+            {"mes": m.mes, "promedio": float(m.promedio)}
+            for m in mensual
+        ]
+
+        promedio_general = db.session.query(
+            func.avg(Reseñas.Estrellas)
+        ).scalar()
+
+        return jsonify({
+            "mensual": datos_mensuales,
+            "promedio_general": round(float(promedio_general), 2),
+            "cantidad_total": total_reseñas
+        })
 
     except Exception as e:
         print("❌ ERROR EN estadisticas_reseñas:", e)
         traceback.print_exc()
-        return jsonify({"error": str(e), "success": False}), 500
+        return jsonify({"error": "Error interno"}), 500
 
 
 # ---------- Perfil y Direcciones ----------
