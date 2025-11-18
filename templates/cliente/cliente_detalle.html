@@ -330,18 +330,23 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
     const stock = {{ producto.Stock }};
     const mensajeStock = document.getElementById("mensaje-stock");
+    const btnAgregarCarrito = document.querySelector(".botones button[onclick^='addToCartFromButton']");
 
     if (stock <= 9 && stock > 0) {
+        // Mostrar advertencia de pocas unidades
         mensajeStock.textContent = `⚠️ Quedan pocas unidades: ${stock} disponibles`;
-        mensajeStock.classList.add("mensaje-stock-pocas");
-    } else if (stock === 0) {
-        mensajeStock.textContent = "❌ Producto agotado";
-        mensajeStock.classList.add("mensaje-stock-agotado");
-        document.querySelectorAll(".btn-compra button").forEach(btn => btn.disabled = true);
+        mensajeStock.style.color = "orange"; // opcional: cambiar color
     }
 
+    if (stock === 0) {
+        // Mostrar agotado y deshabilitar botón
+        mensajeStock.textContent = "❌ Producto agotado";
+        mensajeStock.style.color = "red";
+        if (btnAgregarCarrito) btnAgregarCarrito.style.display = "none"; // ocultar botón
+    }
 });
 </script>
+
 <script>
   function volverAtras() {
     if (window.history.length > 1) window.history.back();
