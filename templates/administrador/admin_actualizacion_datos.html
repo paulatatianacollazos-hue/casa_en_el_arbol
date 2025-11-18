@@ -516,7 +516,7 @@
           <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;">
             <option value="mi">🗓️ Mi calendario</option>
             {% for emp in empleados %}
-              <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
+              <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">{{ emp.Nombre }} {{ emp.Apellido }}</option>
             {% endfor %}
           </select>
         </div>
