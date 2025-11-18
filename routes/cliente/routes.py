@@ -778,23 +778,23 @@ def get_intent(message):
 
     # SaludOs
     if any(w in message for w in ["hola", "buenas", "hey", "saludos"]):
-        return make_response("¡Hola! ¿En qué puedo ayudarte hoy?")
+        return make_responses("¡Hola! ¿En qué puedo ayudarte hoy?")
 
     # Agradecimientos
     if any(w in message for w in ["gracias", "te agradezco", "muchas gracias"]):
-        return make_response("¡Con gusto! Si necesitas algo más, aquí estoy.")
+        return make_responses("¡Con gusto! Si necesitas algo más, aquí estoy.")
 
     # Preguntar precios
     if "precio" in message:
-        return make_response("Si deseas saber el precio de un producto, puedes buscarlo directamente en el catálogo o mencionarme el nombre del mueble.")
+        return make_responses("Si deseas saber el precio de un producto, puedes buscarlo directamente en el catálogo o mencionarme el nombre del mueble.")
 
     # Preguntar productos
     if any(w in message for w in ["tienen", "venden", "producto", "muebles"]):
-        return make_response("Sí, contamos con una variedad de productos como salas, dormitorios, comedores y muebles personalizados.")
+        return make_responses("Sí, contamos con una variedad de productos como salas, dormitorios, comedores y muebles personalizados.")
 
     # Horarios
     if "horario" in message or "abren" in message or "cierran" in message:
-        return make_response("Nuestro horario de atención es de lunes a viernes de 9am a 6pm, y sábados de 10am a 4pm.")
+        return make_responses("Nuestro horario de atención es de lunes a viernes de 9am a 6pm, y sábados de 10am a 4pm.")
 
     return None  # No se detectó intención
 
