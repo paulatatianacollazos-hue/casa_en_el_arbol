@@ -388,7 +388,7 @@ searchInput.addEventListener('input', async () => {
 
     try {
         // Llamada al backend para buscar productos relacionados
-        const res = await fetch(`/buscar_productos?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/cliente/buscar_productos?q=${encodeURIComponent(query)}`);
         const data = await res.json();
 
         if (data.length) {
@@ -399,7 +399,7 @@ searchInput.addEventListener('input', async () => {
                         <div class="col-md-3 col-sm-6">
                             <div class="card producto-card">
                                 <a href="/detalle_producto/${p.id}">
-                                    <img src="/static/${p.imagen}" class="card-img-top" alt="${p.nombre}">
+                                    <img src="/${p.imagen}" class="card-img-top" alt="${p.nombre}">
                                 </a>
                                 <div class="card-body text-center">
                                     <h6 class="card-title">${p.nombre}</h6>

@@ -112,21 +112,6 @@ def detalle_producto(id_producto):
     return render_template("common/detalles.html", producto=producto)
 
 
-@app.route('/buscar_productos')
-def buscar_productos():
-    q = request.args.get('q', '')
-    if not q:
-        return jsonify([])
-
-    productos = Producto.query.filter(Producto.nombre.ilike(f"%{q}%")).all()
-    results = [
-        {"id": p.id, "nombre": p.nombre, "precio": p.precio,
-         "imagen": p.imagen}
-        for p in productos
-    ]
-    return jsonify(results)
-
-
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
 with app.app_context():
     print("\n🔗 RUTAS REGISTRADAS:")
