@@ -667,3 +667,22 @@ def detalle_pedido(pedido_id):
         progreso=progreso,
         estado_actual=estado_actual
     )
+
+
+@cliente.route('/buscar_productos')
+def buscar_productos():
+    query = request.args.get('q', '').strip()
+    if query:
+        productos = Producto.query.filter(Producto.NombreProducto.ilike(
+            f'%{query}%')).all()
+    else:
+        productos = []
+
+    resultados = [{
+        'id': p.id,
+        'nombre': p.NombreProducto,
+        'precio': p.PrecioUnidad,
+        'imagen': p.Imagen
+    } for p in productos]
+
+    return jsonify(resultados)

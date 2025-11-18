@@ -365,6 +365,48 @@
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+const searchInput = document.getElementById('searchInput');
+const mainContent = document.getElementById('main-content');
+let originalContent = mainContent.innerHTML; // Guardamos el contenido original
+
+searchInput.addEventListener('input', async () => {
+    const query = searchInput.value.trim();
+
+    if(!query){
+        // Si el input está vacío, volvemos al contenido original
+        mainContent.innerHTML = originalContent;
+        return;
+    }
+
+    // Hacer petición AJAX al backend
+    const res = await fetch(`/buscar_productos?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    // Generar HTML de los productos
+    if(data.length){
+        mainContent.innerHTML = `
+        <div class="row g-3">
+            ${data.map(p => `
+                <div class="col-md-3 col-sm-6">
+                    <div class="card producto-card">
+                        <a href="/detalle_producto/${p.id}">
+                            <img src="/static/${p.imagen}" class="card-img-top" alt="${p.nombre}">
+                        </a>
+                        <div class="card-body text-center">
+                            <h6 class="card-title">${p.nombre}</h6>
+                            <p class="precio">$${p.precio}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>`;
+    } else {
+        mainContent.innerHTML = '<p class="text-muted">No se encontraron productos.</p>';
+    }
+});
+</script>
+
 
 {% endblock %}
 
