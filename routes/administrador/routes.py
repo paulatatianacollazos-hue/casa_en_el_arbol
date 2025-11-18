@@ -286,22 +286,14 @@ def estadisticas():
 @role_required("admin")
 def estadisticas_reseñas():
     try:
-        # 👉 pon esto para ver el error real
         print("📊 CARGANDO ESTADÍSTICAS...")
-        
-        # Aquí construyes todo
-        data = generar_estadisticas_reseñas()  # <- tu función interna
-
+        data = generar_estadisticas_reseñas()
         return jsonify(data)
 
     except Exception as e:
         print("❌ ERROR EN estadisticas_reseñas:", e)
         traceback.print_exc()
-
-        return jsonify({
-            "error": str(e),
-            "success": False
-        }), 500
+        return jsonify({"error": str(e), "success": False}), 500
 
 
 # ---------- Perfil y Direcciones ----------
