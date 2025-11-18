@@ -73,8 +73,12 @@ async function cargarUsuarios() {
 async function cargarProgramaciones() {
   try {
     const resp = await fetch("/empleado/programaciones_todas");
+    const json = await resp.json();
 
-    programaciones = (await resp.json()).map(ev => ({
+    // 💥 CORRECCIÓN IMPORTANTE
+    const lista = json.eventos || [];
+
+    programaciones = lista.map(ev => ({
       ID_Usuario: ev.ID_Usuario || ev.id_usuario || ev.usuario_id || null,
       Tipo: ev.Tipo || ev.tipo || "",
       Fecha: ev.Fecha || ev.fecha || "",
