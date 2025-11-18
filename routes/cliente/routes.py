@@ -440,32 +440,34 @@ def pagos():
 def confirmar_pago():
     data = request.get_json()
     productos_carrito = data.get('productos', [])
-    total = data.get('total', 0)
     metodo_pago = data.get('metodo_pago')
-    direccion_id = data.get('direccion')
+    direccion_id = data.get('direccion')  # puedes usar Destino si lo deseas
+    total = data.get('total', 0)  # opcional, si quieres guardarlo en Pedido
 
     try:
         # Validar stock
         for item in productos_carrito:
             producto = Producto.query.get(item['id'])
-            if producto.stock < item['quantity']:
+            if not producto:
+                return jsonify({"success": False, "error": f"Producto {item['id']} no encontrado."})
+            if producto.Stock < item['quantity']:
                 return jsonify({
                     "success": False,
-                    "error": f"No hay suficiente stock para {producto.nombre}."
+                    "error": f"No hay suficiente stock para {producto.NombreProducto}."
                 })
 
         # Descontar stock
         for item in productos_carrito:
             producto = Producto.query.get(item['id'])
-            producto.stock -= item['quantity']
+            producto.Stock -= item['quantity']
             db.session.add(producto)
 
-        # Guardar pedido (opcional)
+        # Crear pedido
         nuevo_pedido = Pedido(
-            cliente_id=current_user.id,  # si usas flask-login
-            total=total,
-            metodo_pago=metodo_pago,
-            direccion_id=direccion_id
+            ID_Usuario=current_user.ID_Usuario,
+            Destino=direccion_id,  # o la dirección completa según tu implementación
+            Estado='pendiente',
+            FechaPedido=datetime.utcnow()
         )
         db.session.add(nuevo_pedido)
         db.session.commit()  # guardar pedido y actualizar stock
@@ -473,10 +475,10 @@ def confirmar_pago():
         # Guardar detalle de pedido
         for item in productos_carrito:
             detalle = Detalle_Pedido(
-                pedido_id=nuevo_pedido.id,
-                producto_id=item['id'],
-                cantidad=item['quantity'],
-                precio=item['price']
+                ID_Pedido=nuevo_pedido.ID_Pedido,
+                ID_Producto=item['id'],
+                Cantidad=item['quantity'],
+                PrecioUnidad=item['price']
             )
             db.session.add(detalle)
 
@@ -487,6 +489,7 @@ def confirmar_pago():
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)})
+
 
 
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
