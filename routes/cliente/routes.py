@@ -441,8 +441,8 @@ def confirmar_pago():
     data = request.get_json()
     productos_carrito = data.get('productos', [])
     metodo_pago = data.get('metodo_pago')
-    direccion_id = data.get('direccion')  # puedes usar Destino si lo deseas
-    total = data.get('total', 0)  # opcional, si quieres guardarlo en Pedido
+    direccion_id = data.get('direccion')  # ID de la dirección seleccionada
+    total = data.get('total', 0)
 
     try:
         # Validar stock
@@ -462,10 +462,16 @@ def confirmar_pago():
             producto.Stock -= item['quantity']
             db.session.add(producto)
 
+        # Obtener la dirección completa
+        direccion = Direccion.query.get(direccion_id)
+        if not direccion:
+            return jsonify({"success": False, "error": "Dirección no encontrada."})
+        destino_texto = f"{direccion.Direccion}, {direccion.Barrio or ''}, {direccion.Ciudad or ''}, {direccion.Departamento or ''}, {direccion.Pais or ''}"
+
         # Crear pedido
         nuevo_pedido = Pedido(
             ID_Usuario=current_user.ID_Usuario,
-            Destino=direccion_id,  # o la dirección completa según tu implementación
+            Destino=destino_texto,
             Estado='pendiente',
             FechaPedido=datetime.utcnow()
         )
