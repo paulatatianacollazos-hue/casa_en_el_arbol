@@ -1,8 +1,10 @@
 from flask import request, jsonify
+from sqlalchemy import func
 from datetime import datetime, timedelta
 from basedatos.db import get_connection
 from sqlalchemy import and_
-from basedatos.models import db, Pedido, Usuario, Detalle_Pedido, Comentarios
+from basedatos.models import (
+    db, Pedido, Usuario, Detalle_Pedido, Comentarios, Reseñas)
 from basedatos.models import Producto, Calendario
 import os
 from werkzeug.utils import secure_filename
@@ -837,7 +839,8 @@ def crear_evento(data):
         )
         db.session.add(nuevo)
         db.session.commit()
-        return {"mensaje": "Evento agregado correctamente", "id": nuevo.ID_Calendario}
+        return {"mensaje": "Evento agregado correctamente",
+                "id": nuevo.ID_Calendario}
     except Exception as e:
         db.session.rollback()
         raise Exception(f"Error al crear el evento: {e}")
@@ -893,3 +896,94 @@ def recivo(pedido_id):
     cursor.close()
     conn.close()
     return resultados
+
+
+def generar_estadisticas_reseñas():
+
+    data = {}
+
+    # -----------------------------------------------------------
+    # 1️⃣ Promedio general y total de reseñas
+    # -----------------------------------------------------------
+    promedio = db.session.query(func.avg(Reseñas.Estrellas)).scalar()
+    total = db.session.query(func.count(Reseñas.ID_Reseña)).scalar()
+
+    data["promedio_general"] = round(promedio or 0, 2)
+    data["total"] = total or 0
+
+    # -----------------------------------------------------------
+    # 2️⃣ Distribución por estrellas
+    # -----------------------------------------------------------
+    estrellas = db.session.query(
+        Reseñas.Estrellas,
+        func.count(Reseñas.ID_Reseña)
+    ).group_by(Reseñas.Estrellas).all()
+
+    # Inicia en 0 para que siempre existan 5 valores
+    arr = [0, 0, 0, 0, 0]
+
+    for estrella, cantidad in estrellas:
+        if 1 <= estrella <= 5:
+            arr[estrella - 1] = cantidad
+
+    data["por_estrellas"] = arr
+
+    # -----------------------------------------------------------
+    # 3️⃣ Promedios por mes (últimos 12 meses)
+    # -----------------------------------------------------------
+    por_mes = db.session.query(
+        func.date_format(Reseñas.Fecha, "%Y-%m").label("mes"),
+        func.avg(Reseñas.Estrellas)
+    ).group_by("mes").order_by("mes").all()
+
+    meses_legibles = []
+    meses_nombres = {
+        "01": "Enero", "02": "Febrero", "03": "Marzo",
+        "04": "Abril", "05": "Mayo", "06": "Junio",
+        "07": "Julio", "08": "Agosto", "09": "Septiembre",
+        "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
+    }
+
+    for mes, promedio in por_mes:
+        y, m = mes.split("-")
+        meses_legibles.append({
+            "mes": f"{meses_nombres[m]} {y}",
+            "promedio": round(promedio, 2)
+        })
+
+    data["por_mes"] = meses_legibles
+
+    # -----------------------------------------------------------
+    # 4️⃣ Comparativa por tipo
+    # -----------------------------------------------------------
+    tipo_counts = db.session.query(
+        Reseñas.tipo,
+        func.count(Reseñas.ID_Reseña)
+    ).group_by(Reseñas.tipo).all()
+
+    por_tipo = {"producto": 0, "pedido": 0}
+
+    for tipo, cant in tipo_counts:
+        if tipo == "producto":
+            por_tipo["producto"] = cant
+        elif tipo == "pedido":
+            por_tipo["pedido"] = cant
+
+    data["por_tipo"] = por_tipo
+
+    # -----------------------------------------------------------
+    # 5️⃣ Comentarios negativos (estrellas <= 2)
+    # -----------------------------------------------------------
+    negativos = db.session.query(
+        Reseñas.ID_Referencia,
+        Reseñas.Comentario
+    ).filter(Reseñas.Estrellas <= 2).all()
+
+    lista_neg = [
+        {"pedido": ped, "comentario": com}
+        for ped, com in negativos
+    ]
+
+    data["negativos"] = lista_neg
+
+    return data

@@ -16,7 +16,6 @@ from flask import make_response
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
-from collections import defaultdict
 from basedatos.queries import (
     obtener_todos_los_pedidos,
     obtener_empleados,
@@ -25,24 +24,16 @@ from basedatos.queries import (
     buscar_pedidos,
     asignar_empleado as asignar_empleado_query,
     actualizar_pedido as actualizar_pedido_query,
-    asignar_calendario as asignar_calendario_query,
     get_producto_by_id,
     guardar_producto,
-    get_productos, detalle, recivo
-
+    get_productos, detalle, recivo,
+    generar_estadisticas_reseñas
 )
 
 reviews = []
 
 # 🔑 Nombre del blueprint debe ser "admin"
 admin = Blueprint("admin", __name__, url_prefix="/admin")
-
-
-@admin.route("/estadisticas_reseñas", methods=["GET", "POST"])
-@login_required
-def estadisticas_reseñas():
-
-    return render_template("administrador/estadisticas_reseñas.html")
 
 
 # ---------- DASHBOARD ----------
@@ -290,79 +281,27 @@ def estadisticas():
     return render_template("administrador/estadisticas.html")
 
 
-@admin.route("/estadisticas_reseñas")
+@admin.route("/estadisticas_reseñas", methods=["GET"])
 @login_required
 @role_required("admin")
 def estadisticas_reseñas():
     try:
-        # -----------------------
-        # EJEMPLO — ADAPTAR A TU BD
-        # -----------------------
+        # 👉 pon esto para ver el error real
+        print("📊 CARGANDO ESTADÍSTICAS...")
+        
+        # Aquí construyes todo
+        data = generar_estadisticas_reseñas()  # <- tu función interna
 
-        # Promedio general
-        promedio_general = db.session.execute("""
-            SELECT COALESCE(AVG(estrellas), 0) AS promedio
-            FROM reseñas
-        """).scalar()
-
-        # Total de reseñas
-        total = db.session.execute("""
-            SELECT COUNT(*) FROM reseñas
-        """).scalar()
-
-        # Por estrellas (1 a 5)
-        por_estrellas = [
-            db.session.execute(
-                "SELECT COUNT(*) FROM reseñas WHERE estrellas = :s",
-                {"s": i}
-            ).scalar()
-            for i in range(1, 6)
-        ]
-
-        # Promedio por mes
-        por_mes = db.session.execute("""
-            SELECT 
-                DATE_FORMAT(fecha, '%Y-%m') AS mes,
-                AVG(estrellas) AS promedio
-            FROM reseñas
-            GROUP BY DATE_FORMAT(fecha, '%Y-%m')
-            ORDER BY mes
-        """).fetchall()
-
-        por_mes = [{"mes": r[0], "promedio": float(r[1])} for r in por_mes]
-
-        # Por tipo
-        por_tipo = {
-            "producto": db.session.execute("""
-                SELECT COUNT(*) FROM reseñas WHERE tipo = 'producto'
-            """).scalar(),
-            "pedido": db.session.execute("""
-                SELECT COUNT(*) FROM reseñas WHERE tipo = 'pedido'
-            """).scalar(),
-        }
-
-        # Comentarios negativos
-        negativos = db.session.execute("""
-            SELECT pedido_id, comentario
-            FROM reseñas
-            WHERE estrellas <= 2
-        """).fetchall()
-
-        negativos = [{"pedido": r[0], "comentario": r[1]} for r in negativos]
-
-        # RETORNAR JSON
-        return jsonify({
-            "promedio_general": float(promedio_general),
-            "total": total,
-            "por_estrellas": por_estrellas,
-            "por_mes": por_mes,
-            "por_tipo": por_tipo,
-            "negativos": negativos
-        })
+        return jsonify(data)
 
     except Exception as e:
-        print("ERROR en estadísticas:", e)
-        return jsonify({"error": "fallo"}), 500
+        print("❌ ERROR EN estadisticas_reseñas:", e)
+        traceback.print_exc()
+
+        return jsonify({
+            "error": str(e),
+            "success": False
+        }), 500
 
 
 # ---------- Perfil y Direcciones ----------
@@ -852,7 +791,7 @@ def registros_entrega_json(pedido_id):
         for r in registros:
             lista_registros.append({
                 "id_registro": r["ID_Registro"],
-                "empleado": r["ID_Empleado"],  # cámbialo si tienes join con Usuario
+                "empleado": r["ID_Empleado"],
                 "comentario": r["Comentario"],
                 "fecha": str(r["FechaRegistro"])
             })
@@ -886,6 +825,7 @@ def registros_entrega_json(pedido_id):
 def chat_admin():
     return render_template('common/chat.html', usuario='Administrador')
 
+
 @admin.route('/enviar_mensaje', methods=['POST'])
 @login_required
 def enviar_mensaje_admin():
@@ -896,6 +836,7 @@ def enviar_mensaje_admin():
         'fecha': datetime.now().isoformat()
     })
     return jsonify({'ok': True})
+
 
 @admin.route('/obtener_mensajes')
 @login_required
