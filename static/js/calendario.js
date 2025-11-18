@@ -21,42 +21,23 @@ let usuarioActualId = null; // ID real del usuario logueado
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
-    const data = await resp.json();
+    usuarios = await resp.json();
 
-    console.log("DEBUG usuarios:", data);
-
-    // Asegurar que existe la lista
-    const lista = data.usuarios || [];
-
-    // ===============================
-    //   FILTRAR SOLO ROL EMPLEADO
-    // ===============================
-    usuarios = lista
-      .filter(u => (u.rol || "").toLowerCase() === "empleado")
-      .map(u => ({
-        id: u.id,
-        nombre: u.nombre,
-        rol: u.rol.toLowerCase()
-      }));
-
-    // Limpiar selector
-    selectorUsuario.innerHTML = "";
-
-    // Opción MI CALENDARIO
+    // Opción “Mi calendario”
     const optMi = document.createElement("option");
     optMi.value = "mi";
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Agregar SOLO empleados
+    // Agregar empleados
     usuarios.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = String(u.id);
-      opt.textContent = u.nombre;
+      opt.value = u.id;
+      opt.textContent = `${u.nombre} (${u.rol})`;
       selectorUsuario.appendChild(opt);
     });
 
-    // Cargar id del usuario logueado
+    // Guardar ID del usuario logueado si existe input hidden
     const inputUsuario = document.getElementById("usuarioId");
     if (inputUsuario) usuarioActualId = inputUsuario.value;
 
@@ -65,59 +46,38 @@ async function cargarUsuarios() {
   }
 }
 
-
-
 // =============================================================
 // 🔹 Cargar programaciones desde el servidor
 // =============================================================
 async function cargarProgramaciones() {
   try {
     const resp = await fetch("/empleado/programaciones_todas");
-    const json = await resp.json();
-
-    // 💥 CORRECCIÓN IMPORTANTE
-    const lista = json.eventos || [];
-
-    programaciones = lista.map(ev => ({
-      ID_Usuario: ev.ID_Usuario || ev.id_usuario || ev.usuario_id || null,
-      Tipo: ev.Tipo || ev.tipo || "",
-      Fecha: ev.Fecha || ev.fecha || "",
-      Hora: ev.Hora || ev.hora || "",
-      Ubicacion: ev.Ubicacion || ev.ubicacion || "",
-      ID_Pedido: ev.ID_Pedido || ev.id_pedido || null,
-      Empleado_Nombre: ev.Empleado_Nombre || ev.empleado_nombre || "",
-      Visibilidad: ev.Visibilidad || ev.visibilidad || "",
-    }));
-
+    programaciones = await resp.json();
     renderCalendario(fechaActual);
-
   } catch (err) {
     console.error("❌ Error al cargar programaciones:", err);
   }
 }
 
-
 // =============================================================
 // 🔹 Filtrar eventos por usuario
 // =============================================================
 function filtrarEventosParaUsuario(eventos, usuarioId) {
+  const usuario = usuarios.find(u => u.id == usuarioId);
 
-  // ============================
-  // 🟢 ADMIN: Ver todas las programaciones
-  // ============================
-  if (usuarioId === "mi") {
-    return eventos;  // mostrar TODO sin filtrar
+  if (!usuario && usuarioId !== "mi") return [];
+
+  // Empleado: propios eventos + globales
+  if (usuarioId === "mi" || (usuario && usuario.rol.toLowerCase() === "empleado")) {
+    const id = usuarioId === "mi" ? usuarioActualId : usuario.id;
+    return eventos.filter(ev => ev.ID_Usuario == id || ev.Tipo.toLowerCase() === "global");
   }
 
-  // ============================
-  // 🟡 Ver solo el calendario del empleado seleccionado
-  // ============================
-  const usuario = usuarios.find(u => u.id == usuarioId);
-  if (!usuario) return [];
+  // Otros roles
+  if (usuario) return eventos.filter(ev => ev.ID_Usuario == usuario.id);
 
-  return eventos.filter(ev => ev.ID_Usuario == usuario.id);
+  return [];
 }
-
 
 // =============================================================
 // 🔹 Renderizar calendario
