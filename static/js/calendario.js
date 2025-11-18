@@ -57,12 +57,25 @@ async function cargarUsuarios() {
 async function cargarProgramaciones() {
   try {
     const resp = await fetch("/empleado/programaciones_todas");
-    programaciones = await resp.json();
+
+    programaciones = (await resp.json()).map(ev => ({
+      ID_Usuario: ev.ID_Usuario || ev.id_usuario || ev.usuario_id || null,
+      Tipo: ev.Tipo || ev.tipo || "",
+      Fecha: ev.Fecha || ev.fecha || "",
+      Hora: ev.Hora || ev.hora || "",
+      Ubicacion: ev.Ubicacion || ev.ubicacion || "",
+      ID_Pedido: ev.ID_Pedido || ev.id_pedido || null,
+      Empleado_Nombre: ev.Empleado_Nombre || ev.empleado_nombre || "",
+      Visibilidad: ev.Visibilidad || ev.visibilidad || "",
+    }));
+
     renderCalendario(fechaActual);
+
   } catch (err) {
     console.error("❌ Error al cargar programaciones:", err);
   }
 }
+
 
 // =============================================================
 // 🔹 Filtrar eventos por usuario
