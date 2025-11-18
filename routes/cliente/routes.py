@@ -437,55 +437,56 @@ def pagos():
 
 
 @cliente.route('/confirmar_pago', methods=['POST'])
-@login_required
 def confirmar_pago():
     data = request.get_json()
-    print("📦 Datos recibidos:", data)
-
-    metodo_pago = data.get("metodo_pago")
-    productos = data.get("productos", [])
-    total = data.get("total", 0)
-    direccion_id = data.get("direccion")
-
-    print("🎭 Rol actual:", getattr(current_user, "rol", "Desconocido"))
-    print("🏠 Dirección seleccionada:", direccion_id)
-
-    if not direccion_id:
-        return jsonify({"success": False, "error": "No se seleccionó una dirección"}), 400
+    productos_carrito = data.get('productos', [])
+    total = data.get('total', 0)
+    metodo_pago = data.get('metodo_pago')
+    direccion_id = data.get('direccion')
 
     try:
-        # Buscar la dirección en la base de datos
-        direccion_obj = Direccion.query.get(direccion_id)
+        # Validar stock
+        for item in productos_carrito:
+            producto = Producto.query.get(item['id'])
+            if producto.stock < item['quantity']:
+                return jsonify({
+                    "success": False,
+                    "error": f"No hay suficiente stock para {producto.nombre}."
+                })
 
-        if not direccion_obj:
-            return jsonify({"success": False, "error": "La dirección no existe"}), 404
+        # Descontar stock
+        for item in productos_carrito:
+            producto = Producto.query.get(item['id'])
+            producto.stock -= item['quantity']
+            db.session.add(producto)
 
-        # Armar la dirección completa
-        direccion_texto = (
-            f"{direccion_obj.Direccion}, "
-            f"{direccion_obj.Barrio}, "
-            f"{direccion_obj.Ciudad} - {direccion_obj.Departamento}"
-        )
-
-        # Crear pedido
-        pedido_id = crear_pedido_y_pago(
-            id_usuario=current_user.id,
-            carrito=productos,
+        # Guardar pedido (opcional)
+        nuevo_pedido = Pedido(
+            cliente_id=current_user.id,  # si usas flask-login
+            total=total,
             metodo_pago=metodo_pago,
-            monto_total=total,
-            destino=direccion_texto
+            direccion_id=direccion_id
         )
+        db.session.add(nuevo_pedido)
+        db.session.commit()  # guardar pedido y actualizar stock
 
-        if pedido_id:
-            print("✅ Pedido creado con ID:", pedido_id)
-            return jsonify({"success": True, "pedido_id": pedido_id}), 200
-        else:
-            print("⚠️ No se pudo crear el pedido")
-            return jsonify({"success": False, "error": "Error al crear el pedido"}), 500
+        # Guardar detalle de pedido
+        for item in productos_carrito:
+            detalle = Detalle_Pedido(
+                pedido_id=nuevo_pedido.id,
+                producto_id=item['id'],
+                cantidad=item['quantity'],
+                precio=item['price']
+            )
+            db.session.add(detalle)
+
+        db.session.commit()
+
+        return jsonify({"success": True})
 
     except Exception as e:
-        print("💥 Error en confirmar_pago:", e)
-        return jsonify({"success": False, "error": str(e)}), 500
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)})
 
 
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
