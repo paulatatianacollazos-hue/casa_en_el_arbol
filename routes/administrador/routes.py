@@ -278,7 +278,7 @@ def asignar_calendario_route():
 @login_required
 @role_required("admin")
 def estadisticas():
-    return render_template("administrador/estadisticas.html")
+    return render_template("administrador/estadisticas_reseñas.html")
 
 
 @admin.route("/estadisticas_reseñas", methods=["GET"])
