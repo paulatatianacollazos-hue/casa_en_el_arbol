@@ -287,42 +287,67 @@ def estadisticas():
 @role_required("admin")
 def estadisticas_reseñas():
     try:
-        print("📊 CARGANDO ESTADÍSTICAS...")
+        print("📊 Generando estadísticas de reseñas...")
 
-        # Si no hay reseñas, responder limpio sin marcar error
-        total_reseñas = db.session.query(Reseñas).count()
+        # Total de reseñas
+        total = db.session.query(Reseñas).count()
 
-        if total_reseñas == 0:
-            print("⚠️ No hay reseñas aún.")
+        # Si no hay reseñas → devolver estructura vacía válida
+        if total == 0:
             return jsonify({
-                "mensual": [],
                 "promedio_general": 0,
-                "cantidad_total": 0
+                "total": 0,
+                "por_estrellas": [0, 0, 0, 0, 0],
+                "por_mes": [],
+                "por_tipo": {"producto": 0, "pedido": 0},
+                "negativos": []
             })
 
-        # GENERAR ESTADISTICAS
-        mensual = db.session.query(
-            func.strftime("%Y-%m", Reseñas.Fecha).label("mes"),
-            func.avg(Reseñas.Estrellas).label("promedio")
-        ).group_by("mes").order_by("mes").all()
+        # Promedio general
+        promedio = db.session.query(func.avg(Reseñas.Estrellas)).scalar() or 0
 
-        datos_mensuales = [
-            {"mes": m.mes, "promedio": float(m.promedio)}
-            for m in mensual
+        # Conteo por estrellas
+        por_estrellas = [
+            db.session.query(Reseñas).filter(Reseñas.Estrellas == i).count()
+            for i in range(1, 6)
         ]
 
-        promedio_general = db.session.query(
-            func.avg(Reseñas.Estrellas)
-        ).scalar()
+        # Promedio por mes (SQLite usa strftime)
+        mensual = db.session.query(
+            func.strftime("%Y-%m", Reseñas.Fecha).label("mes"),
+            func.avg(Reseñas.Estrellas).label("prom")
+        ).group_by("mes").order_by("mes").all()
+
+        por_mes = [{"mes": m.mes, "promedio": float(m.prom)} for m in mensual]
+
+        # Por tipo (producto o pedido)
+        por_tipo = {
+            "producto": db.session.query(Reseñas).filter(
+                Reseñas.Tipo == "producto").count(),
+            "pedido": db.session.query(Reseñas).filter(
+                Reseñas.Tipo == "pedido").count()
+        }
+
+        # Reseñas negativas (1 o 2 estrellas)
+        negativos_query = db.session.query(Reseñas).filter(
+            Reseñas.Estrellas <= 2).all()
+        negativos = [
+            {"pedido": r.PedidoID,
+             "comentario": r.Comentario or "Sin comentario"}
+            for r in negativos_query
+        ]
 
         return jsonify({
-            "mensual": datos_mensuales,
-            "promedio_general": round(float(promedio_general), 2),
-            "cantidad_total": total_reseñas
+            "promedio_general": round(float(promedio), 2),
+            "total": total,
+            "por_estrellas": por_estrellas,
+            "por_mes": por_mes,
+            "por_tipo": por_tipo,
+            "negativos": negativos
         })
 
     except Exception as e:
-        print("❌ ERROR EN estadisticas_reseñas:", e)
+        print("❌ ERROR EN ESTADÍSTICAS:", e)
         traceback.print_exc()
         return jsonify({"error": "Error interno"}), 500
 
