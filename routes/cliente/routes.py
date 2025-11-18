@@ -671,20 +671,21 @@ def detalle_pedido(pedido_id):
 
 @cliente.route('/buscar_productos')
 def buscar_productos():
-    from database import mysql
+
     query = request.args.get('q', '')
 
     try:
-        cursor = mysql.connection.cursor(dictionary=True)
+        conn = get_connection()                    # ← CORREGIDO
+        cursor = conn.cursor(dictionary=True)      # ← AHORA funciona
 
         sql = """
-            SELECT 
+            SELECT
                 p.ID_Producto AS id,
                 p.NombreProducto AS nombre,
                 p.PrecioUnidad AS precio,
                 COALESCE(i.ruta, 'img/default.png') AS imagen
             FROM producto p
-            LEFT JOIN imagenproducto i 
+            LEFT JOIN imagenproducto i
                 ON p.ID_Producto = i.ID_Producto
             WHERE p.NombreProducto LIKE %s
             GROUP BY p.ID_Producto
@@ -693,11 +694,12 @@ def buscar_productos():
 
         cursor.execute(sql, (f"%{query}%",))
         productos = cursor.fetchall()
+
         cursor.close()
+        conn.close()        # ← Muy importante
 
         return jsonify(productos)
 
     except Exception as e:
         print("ERROR EN /buscar_productos:", e)
         return jsonify({"error": str(e)}), 500
-
