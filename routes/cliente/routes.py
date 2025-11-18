@@ -625,3 +625,18 @@ def obtener_factura(pedido_id):
     except Exception as e:
         print("❌ Error al obtener factura:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
+
+@cliente.route("/empleado/programaciones_todas")
+@login_required
+def programaciones_todas():
+    try:
+        eventos = Calendario.query.all()
+
+        data = [e.to_dict() for e in eventos]
+
+        return jsonify({"eventos": data})
+
+    except Exception as e:
+        print("❌ Error cargando programaciones:", e)
+        return jsonify({"error": "Error interno"}), 500
