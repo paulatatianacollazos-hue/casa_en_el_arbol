@@ -21,23 +21,27 @@ let usuarioActualId = null; // ID real del usuario logueado
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
-    usuarios = await resp.json();
 
-    // Opción “Mi calendario”
+    usuarios = (await resp.json()).map(u => ({
+      id: u.id || u.ID_Empleado || u.ID_Usuario,
+      nombre: u.nombre || u.Nombre || "",
+      rol: (u.rol || u.Rol || "").toLowerCase(),
+    }));
+
+    // Opción Mi calendario
     const optMi = document.createElement("option");
     optMi.value = "mi";
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Agregar empleados
+    // Empleados
     usuarios.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = u.id;
+      opt.value = String(u.id);
       opt.textContent = `${u.nombre} (${u.rol})`;
       selectorUsuario.appendChild(opt);
     });
 
-    // Guardar ID del usuario logueado si existe input hidden
     const inputUsuario = document.getElementById("usuarioId");
     if (inputUsuario) usuarioActualId = inputUsuario.value;
 
@@ -45,6 +49,7 @@ async function cargarUsuarios() {
     console.error("❌ Error al cargar usuarios:", err);
   }
 }
+
 
 // =============================================================
 // 🔹 Cargar programaciones desde el servidor
