@@ -443,15 +443,11 @@
               <td>{{ pedido.ID_Pedido }}</td>
               <tr>
                 <td>
-                  {% if pedido.ID_Empleado %}
-                    <span>✅ Asignado</span>
-                  {% else %}
                     <input type="checkbox"
                     class="seleccion-pedido"
                     value="{{ pedido.id }}"
                     data-empleado="{{ pedido.ID_Empleado | default('') }}"
                     style="width: 50px; height: 50px;">
-                  {% endif %}
                 </td>
               </tr>
             </div>
@@ -519,7 +515,9 @@
           <label for="selectorUsuario" class="fw-bold mb-0">Ver calendario de:</label>
           <select id="selectorUsuario" class="form-select form-select-sm" style="width: 250px;">
             <option value="mi">🗓️ Mi calendario</option>
-            <!-- Las demás opciones se cargarán dinámicamente desde Flask -->
+            {% for emp in empleados %}
+              <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
+            {% endfor %}
           </select>
         </div>
         <div class="d-flex justify-content-center mb-3 gap-2">
