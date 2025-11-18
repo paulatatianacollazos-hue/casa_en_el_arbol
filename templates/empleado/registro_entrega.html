@@ -79,7 +79,7 @@
 <div class="container mt-5">
   <div class="card shadow-sm border-0">
     <div class="card-header bg-primary text-white">
-      <h5 class="mb-0" style="">🔧 Personalización de Instalación - Pedido #{{ pedido_id }}</h5>
+      <h5 class="mb-0" style="">🔧 Instalación - Pedido #{{ pedido_id }}</h5>
     </div>
 
     <div class="card-body">
@@ -89,19 +89,19 @@
         <!-- Comentario -->
         <div class="mb-3">
           <label class="form-label">Comentario del instalador</label>
-          <textarea class="form-control" name="comentario_personalizar" rows="3" required></textarea>
+          <textarea class="form-control" name="comentario" rows="3" required></textarea>
         </div>
 
         <!-- Imagen ANTES -->
         <div class="mb-3">
           <label class="form-label fw-bold">📸 Foto ANTES</label>
-          <input type="file" name="foto_antes" class="form-control" accept="image/*" required>
+          <input type="file" name="fotos" class="form-control" accept="image/*" required>
         </div>
 
         <!-- Imagen DESPUÉS -->
         <div class="mb-3">
           <label class="form-label fw-bold">📸 Foto DESPUÉS</label>
-          <input type="file" name="foto_despues" class="form-control" accept="image/*" required>
+          <input type="file" name="fotos" class="form-control" accept="image/*" required>
         </div>
 
         <div class="text-end mt-4">
