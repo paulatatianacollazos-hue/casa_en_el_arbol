@@ -97,21 +97,23 @@ async function cargarProgramaciones() {
 // 🔹 Filtrar eventos por usuario
 // =============================================================
 function filtrarEventosParaUsuario(eventos, usuarioId) {
-  const usuario = usuarios.find(u => u.id == usuarioId);
 
-  if (!usuario && usuarioId !== "mi") return [];
-
-  // Empleado: propios eventos + globales
-  if (usuarioId === "mi" || (usuario && usuario.rol.toLowerCase() === "empleado")) {
-    const id = usuarioId === "mi" ? usuarioActualId : usuario.id;
-    return eventos.filter(ev => ev.ID_Usuario == id || ev.Tipo.toLowerCase() === "global");
+  // ============================
+  // 🟢 ADMIN: Ver todas las programaciones
+  // ============================
+  if (usuarioId === "mi") {
+    return eventos;  // mostrar TODO sin filtrar
   }
 
-  // Otros roles
-  if (usuario) return eventos.filter(ev => ev.ID_Usuario == usuario.id);
+  // ============================
+  // 🟡 Ver solo el calendario del empleado seleccionado
+  // ============================
+  const usuario = usuarios.find(u => u.id == usuarioId);
+  if (!usuario) return [];
 
-  return [];
+  return eventos.filter(ev => ev.ID_Usuario == usuario.id);
 }
+
 
 // =============================================================
 // 🔹 Renderizar calendario
