@@ -211,32 +211,18 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("confirmar-pago").addEventListener("click", async () => {
-
-    const direccion = document.getElementById("direccion-envio").value;
-
-    const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        metodo_pago: metodoPago.value,
-        productos: productos,
-        total: total,
-        direccion: direccion
-      })
-    });
-
-    const result = await response.json();
-  });
-
-});
-document.getElementById("confirmar-pago").addEventListener("click", async () => {
   const direccion = document.getElementById("direccion-envio").value;
   const metodoPago = document.getElementById("metodo-pago").value;
 
-  if (!metodoPago) {
-    alert("Por favor selecciona un método de pago");
-    return;
-  }
+  if (!metodoPago) return alert("Por favor selecciona un método de pago");
+  if (!direccion) return alert("Selecciona una dirección");
+  if (!productos.length) return alert("No hay productos en el carrito");
+
+  // Asegurarse que price y quantity sean números
+  productos.forEach(p => {
+    p.price = Number(p.price);
+    p.quantity = Number(p.quantity);
+  });
 
   document.getElementById("mensaje-cargando").classList.remove("d-none");
 
@@ -253,24 +239,23 @@ document.getElementById("confirmar-pago").addEventListener("click", async () => 
     });
 
     const result = await response.json();
-
     document.getElementById("mensaje-cargando").classList.add("d-none");
 
     if (result.success) {
       document.getElementById("mensaje-exito").classList.remove("d-none");
-
-      setTimeout(() => {
-        window.location.href = "/cliente/carrito";
-      }, 2000);
+      setTimeout(() => window.location.href = "/cliente/carrito", 2000);
     } else {
-      alert("Error: " + result.error);
+      alert("Error del servidor: " + result.error);
+      console.error(result.error);
     }
+
   } catch (error) {
     document.getElementById("mensaje-cargando").classList.add("d-none");
     alert("Ocurrió un error al procesar el pedido");
     console.error(error);
   }
 });
+})
 
 </script>
 {% endblock %}
