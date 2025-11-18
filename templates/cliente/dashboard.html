@@ -41,7 +41,7 @@
       <div class="search-container mx-auto d-none d-md-block">
         <input type="text" name="nombre" class="form-control" 
        placeholder="Ingrese su nombre" 
-       value="{{ usuario.Nombre }}">
+       value="{{ session.get('username', '') }}">
 
       </div>
 
