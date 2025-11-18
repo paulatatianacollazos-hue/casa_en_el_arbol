@@ -713,7 +713,8 @@ BASE_KNOWLEDGE = {
     "soporte": "Nuestro equipo de soporte atiende de lunes a viernes, de 8am a 5pm.",
 }
 
-FORBIDDEN_WORDS = ["tarjeta", "credito", "contraseña", "password", "cedula", "documento", "banco", "cuenta"]
+FORBIDDEN_WORDS = ["tarjeta", "credito", "contraseña", "password", "cedula",
+                   "documento", "banco", "cuenta"]
 
 
 # --- MEMORIA CORTA DEL CHAT ---
