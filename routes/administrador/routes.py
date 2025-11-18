@@ -888,7 +888,6 @@ def usuarios_calendario():
 
         data = []
         for u in usuarios:
-            # Detectar automáticamente el campo ID
             id_usuario = (
                 getattr(u, "ID_Usuario", None) or
                 getattr(u, "ID_usuario", None) or
@@ -902,7 +901,7 @@ def usuarios_calendario():
                 "rol": u.Rol
             })
 
-        return jsonify(data)
+        return jsonify({"usuarios": data})
 
     except Exception as e:
         print("❌ Error cargando usuarios:", e)
