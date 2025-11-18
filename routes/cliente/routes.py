@@ -9,7 +9,7 @@ import os
 from sqlalchemy import or_
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-
+from basedatos.db import get_connection
 from basedatos.models import (
     db, Usuario, Producto, Calendario, Notificaciones,
     Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias,
@@ -671,61 +671,33 @@ def detalle_pedido(pedido_id):
 
 @cliente.route('/buscar_productos')
 def buscar_productos():
-    query = request.args.get('q', '').strip()
-    if query:
-        productos = Producto.query.filter(Producto.NombreProducto.ilike(
-            f'%{query}%')).all()
-    else:
-        productos = []
+    from database import mysql
+    query = request.args.get('q', '')
 
-    resultados = [{
-        'id': p.id,
-        'nombre': p.NombreProducto,
-        'precio': p.PrecioUnidad,
-        'imagen': p.Imagen
-    } for p in productos]
+    try:
+        cursor = mysql.connection.cursor(dictionary=True)
 
-    return jsonify(resultados)
+        sql = """
+            SELECT 
+                p.ID_Producto AS id,
+                p.NombreProducto AS nombre,
+                p.PrecioUnidad AS precio,
+                COALESCE(i.ruta, 'img/default.png') AS imagen
+            FROM producto p
+            LEFT JOIN imagenproducto i 
+                ON p.ID_Producto = i.ID_Producto
+            WHERE p.NombreProducto LIKE %s
+            GROUP BY p.ID_Producto
+            LIMIT 20
+        """
 
+        cursor.execute(sql, (f"%{query}%",))
+        productos = cursor.fetchall()
+        cursor.close()
 
-@cliente.route("/buscar", methods=["GET"])
-def buscar():
-    termino = request.args.get("q", "").strip()
+        return jsonify(productos)
 
-    if len(termino) < 2:
-        return jsonify({"error": "Debe ingresar al menos 2 caracteres."}), 400
+    except Exception as e:
+        print("ERROR EN /buscar_productos:", e)
+        return jsonify({"error": str(e)}), 500
 
-    caracteres_prohibidos = [";", "--", "<", ">", "{", "}", "'"]
-    if any(c in termino for c in caracteres_prohibidos):
-        return jsonify({"error":
-                        "La búsqueda contiene caracteres no permitidos."}), 400
-
-    query = (
-        db.session.query(Pedido)
-        .join(Usuario, Pedido.ID_Usuario == Usuario.ID_Usuario)
-        .join(Producto, Pedido.ID_Producto == Producto.ID_Producto)
-        .filter(
-            or_(
-                Usuario.nombre.ilike(f"%{termino}%"),
-                Pedido.numero_pedido.ilike(f"%{termino}%"),
-                Producto.nombre.ilike(f"%{termino}%"),
-            )
-        )
-    )
-
-    if hasattr(current_user, "rol") and current_user.rol == "cliente":
-        query = query.filter(Pedido.ID_Usuario == current_user.ID_Usuario)
-
-    resultados = query.limit(50).all()
-
-    lista = []
-    for r in resultados:
-        lista.append({
-            "numero_pedido": r.numero_pedido,
-            "cliente": r.usuario.nombre if current_user.rol == "admin" else "Tú",
-            "producto": r.producto.nombre,
-            "fecha": r.fecha.strftime("%Y-%m-%d"),
-            "detalle_url": f"/pedido/{r.ID_Pedido}"
-        })
-
-    return jsonify(lista)

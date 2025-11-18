@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template, flash, redirect, url_for
+from flask import Flask, render_template, flash, redirect, url_for, jsonify, request
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
-
+from basedatos.queries import Producto
 
 # ------------------ MODELOS ------------------ #
 from basedatos.models import db, Usuario
@@ -110,6 +110,21 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("admin.catalogo"))
     return render_template("common/detalles.html", producto=producto)
+
+
+@app.route('/buscar_productos')
+def buscar_productos():
+    q = request.args.get('q', '')
+    if not q:
+        return jsonify([])
+
+    productos = Producto.query.filter(Producto.nombre.ilike(f"%{q}%")).all()
+    results = [
+        {"id": p.id, "nombre": p.nombre, "precio": p.precio,
+         "imagen": p.imagen}
+        for p in productos
+    ]
+    return jsonify(results)
 
 
 # ------------------ DEBUG: MOSTRAR TODAS LAS RUTAS ------------------ #
