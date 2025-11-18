@@ -131,21 +131,24 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const productos = JSON.parse(localStorage.getItem(getCartKey())) || [];
-  const carouselContent = document.getElementById("carousel-content");
   const tabla = document.getElementById("tabla-resumen");
+  const carouselContent = document.getElementById("carousel-content");
+  const subtotalEl = document.getElementById("subtotal");
+  const totalFinalEl = document.getElementById("total-final");
+  const mensajeCargando = document.getElementById("mensaje-cargando");
+  const mensajeExito = document.getElementById("mensaje-exito");
+  const confirmarBtn = document.getElementById("confirmar-pago");
+  const metodoPagoEl = document.getElementById("metodo-pago");
+  const direccionEl = document.getElementById("direccion-envio");
 
   let total = 0;
 
-  /*******************************
-   * 🔹 Mostrar 6 productos por slide
-   *******************************/
+  // Construir carousel
   const chunkSize = 6;
   const slides = [];
-
   for (let i = 0; i < productos.length; i += chunkSize) {
     const grupo = productos.slice(i, i + chunkSize);
     let grupoHTML = "";
-
     grupo.forEach(p => {
       grupoHTML += `
         <div class="col-md-2 col-sm-4 col-6">
@@ -159,103 +162,70 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
     });
-
     slides.push(`
       <div class="carousel-item ${i === 0 ? "active" : ""}">
         <div class="row justify-content-center">${grupoHTML}</div>
       </div>
     `);
   }
-
   carouselContent.innerHTML = slides.join("");
 
-
-  /*******************************
-   * 🔹 Tabla resumen
-   *******************************/
+  // Tabla resumen
   productos.forEach(p => {
-    const subtotal = p.price * p.quantity;
+    const subtotal = Number(p.price) * Number(p.quantity);
     total += subtotal;
-
     tabla.innerHTML += `
       <tr>
         <td>${p.name}</td>
         <td>${p.quantity}</td>
-        <td>$${p.price.toFixed(2)}</td>
+        <td>$${Number(p.price).toFixed(2)}</td>
         <td>$${subtotal.toFixed(2)}</td>
       </tr>
     `;
   });
+  subtotalEl.textContent = "$" + total.toFixed(2);
+  totalFinalEl.textContent = "$" + total.toFixed(2);
 
-  document.getElementById("subtotal").textContent = "$" + total.toFixed(2);
-  document.getElementById("total-final").textContent = "$" + total.toFixed(2);
+  // Botón confirmar
+  confirmarBtn.addEventListener("click", async () => {
+    const metodoPago = metodoPagoEl.value;
+    const direccion = direccionEl.value;
 
+    if (!metodoPago) return alert("Por favor selecciona un método de pago");
+    if (!direccion) return alert("Selecciona una dirección");
+    if (!productos.length) return alert("No hay productos en el carrito");
 
-  /*******************************
-   * 🔹 Confirmar pago
-   *******************************/
-  const metodoPago = document.getElementById("metodo-pago");
+    mensajeCargando.classList.remove("d-none");
 
-  document.getElementById("fecha-entrega").addEventListener("change", (e) => {
-    document.getElementById("mensaje-cargando").classList.remove("d-none");
+    try {
+      const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          metodo_pago: metodoPago,
+          productos: productos,
+          total: total,
+          direccion: direccion
+        })
+      });
+      const result = await response.json();
+      mensajeCargando.classList.add("d-none");
 
-    setTimeout(() => {
-      document.getElementById("mensaje-cargando").classList.add("d-none");
-      document.getElementById("mensaje-exito").classList.remove("d-none");
-
-      setTimeout(() => {
-        window.location.href = "/cliente/carrito";
-      }, 2000);
-
-    }, 3000);
-  });
-
-  document.getElementById("confirmar-pago").addEventListener("click", async () => {
-  const direccion = document.getElementById("direccion-envio").value;
-  const metodoPago = document.getElementById("metodo-pago").value;
-
-  if (!metodoPago) return alert("Por favor selecciona un método de pago");
-  if (!direccion) return alert("Selecciona una dirección");
-  if (!productos.length) return alert("No hay productos en el carrito");
-
-  // Asegurarse que price y quantity sean números
-  productos.forEach(p => {
-    p.price = Number(p.price);
-    p.quantity = Number(p.quantity);
-  });
-
-  document.getElementById("mensaje-cargando").classList.remove("d-none");
-
-  try {
-    const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        metodo_pago: metodoPago,
-        productos: productos,
-        total: total,
-        direccion: direccion
-      })
-    });
-
-    const result = await response.json();
-    document.getElementById("mensaje-cargando").classList.add("d-none");
-
-    if (result.success) {
-      document.getElementById("mensaje-exito").classList.remove("d-none");
-      setTimeout(() => window.location.href = "/cliente/carrito", 2000);
-    } else {
-      alert("Error del servidor: " + result.error);
-      console.error(result.error);
+      if (result.success) {
+        mensajeExito.classList.remove("d-none");
+        setTimeout(() => window.location.href = "/cliente/carrito", 2000);
+      } else {
+        alert("Error del servidor: " + result.error);
+        console.error(result.error);
+      }
+    } catch (error) {
+      mensajeCargando.classList.add("d-none");
+      alert("Ocurrió un error al procesar el pedido");
+      console.error(error);
     }
-
-  } catch (error) {
-    document.getElementById("mensaje-cargando").classList.add("d-none");
-    alert("Ocurrió un error al procesar el pedido");
-    console.error(error);
-  }
+  });
 });
-})
+
 
 </script>
 {% endblock %}
