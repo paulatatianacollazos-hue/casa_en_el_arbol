@@ -634,7 +634,8 @@ def chat_cliente():
 @login_required
 def enviar_mensaje_cliente():
     data = request.get_json()
-    mensajes.append({'usuario': 'Cliente', 'texto': data.get('texto'), 'fecha': datetime.now().isoformat()})
+    mensajes.append({'usuario': 'Cliente', 'texto': data.get('texto'),
+                     'fecha': datetime.now().isoformat()})
     return jsonify({'ok': True})
 
 @cliente.route('/obtener_mensajes')
