@@ -612,24 +612,6 @@ def obtener_programaciones(fecha):
         return jsonify([]), 500
 
 
-@admin.route('/programaciones_todas')
-@login_required
-def programaciones_todas():
-    eventos = Calendario.query.filter_by(
-        ID_Usuario=current_user.ID_Usuario).all()
-    return jsonify([
-        {
-            "ID_Calendario": e.ID_Calendario,
-            "Fecha": e.Fecha.strftime("%Y-%m-%d"),
-            "Hora": str(e.Hora),
-            "Ubicacion": e.Ubicacion,
-            "ID_Pedido": e.ID_Pedido,
-            "Tipo": e.Tipo
-        }
-        for e in eventos
-    ])
-
-
 @admin.route("/admin/calendario/nuevo_evento", methods=["POST"])
 @login_required
 def crear_evento_calendario():
@@ -897,31 +879,35 @@ def obtener_mensajes_admin():
     return jsonify(mensajes)
 
 
-@admin.route("/usuarios_calendario")
+@admin.route("/admin/usuarios_calendario")
 @login_required
 @role_required("admin")
 def usuarios_calendario():
     try:
-        usuarios = db.session.query(Usuario).all()
+        empleados = Usuario.query.filter_by(Rol="empleado", Activo=True).all()
 
-        data = []
-        for u in usuarios:
-            # Detectar automáticamente el campo ID
-            id_usuario = (
-                getattr(u, "ID_Usuario", None) or
-                getattr(u, "ID_usuario", None) or
-                getattr(u, "id_usuario", None) or
-                getattr(u, "id", None)
-            )
+        data = [{
+            "id": u.ID_Usuario,
+            "nombre": f"{u.Nombre} {u.Apellido or ''}"
+        } for u in empleados]
 
-            data.append({
-                "id": id_usuario,
-                "nombre": f"{u.Nombre} {u.Apellido}",
-                "rol": u.Rol
-            })
-
-        return jsonify(data)
+        return jsonify({"usuarios": data})
 
     except Exception as e:
         print("❌ Error cargando usuarios:", e)
+        return jsonify({"error": "Error interno"}), 500
+
+
+@admin.route("/empleado/programaciones_todas")
+@login_required
+def programaciones_todas():
+    try:
+        eventos = Calendario.query.all()
+
+        data = [e.to_dict() for e in eventos]
+
+        return jsonify({"eventos": data})
+
+    except Exception as e:
+        print("❌ Error cargando programaciones:", e)
         return jsonify({"error": "Error interno"}), 500
