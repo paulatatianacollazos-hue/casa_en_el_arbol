@@ -789,7 +789,6 @@ def chatbot_response():
         "response": "No tengo información específica sobre eso, pero puedo ayudarte con devoluciones, garantías, horarios, productos o políticas."
     })
 
-
 @cliente.route('/chatbot')
 def chatbot():
 
