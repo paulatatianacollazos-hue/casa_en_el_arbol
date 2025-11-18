@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import base64
 import os
-
+from sqlalchemy import or_
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
@@ -686,3 +686,46 @@ def buscar_productos():
     } for p in productos]
 
     return jsonify(resultados)
+
+
+@cliente.route("/buscar", methods=["GET"])
+def buscar():
+    termino = request.args.get("q", "").strip()
+
+    if len(termino) < 2:
+        return jsonify({"error": "Debe ingresar al menos 2 caracteres."}), 400
+
+    caracteres_prohibidos = [";", "--", "<", ">", "{", "}", "'"]
+    if any(c in termino for c in caracteres_prohibidos):
+        return jsonify({"error":
+                        "La búsqueda contiene caracteres no permitidos."}), 400
+
+    query = (
+        db.session.query(Pedido)
+        .join(Usuario, Pedido.ID_Usuario == Usuario.ID_Usuario)
+        .join(Producto, Pedido.ID_Producto == Producto.ID_Producto)
+        .filter(
+            or_(
+                Usuario.nombre.ilike(f"%{termino}%"),
+                Pedido.numero_pedido.ilike(f"%{termino}%"),
+                Producto.nombre.ilike(f"%{termino}%"),
+            )
+        )
+    )
+
+    if hasattr(current_user, "rol") and current_user.rol == "cliente":
+        query = query.filter(Pedido.ID_Usuario == current_user.ID_Usuario)
+
+    resultados = query.limit(50).all()
+
+    lista = []
+    for r in resultados:
+        lista.append({
+            "numero_pedido": r.numero_pedido,
+            "cliente": r.usuario.nombre if current_user.rol == "admin" else "Tú",
+            "producto": r.producto.nombre,
+            "fecha": r.fecha.strftime("%Y-%m-%d"),
+            "detalle_url": f"/pedido/{r.ID_Pedido}"
+        })
+
+    return jsonify(lista)
