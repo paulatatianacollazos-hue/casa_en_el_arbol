@@ -21,7 +21,13 @@ let usuarioActualId = null; // ID real del usuario logueado
 async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
-    usuarios = await resp.json();
+    const data = await resp.json();
+
+    // Backend devuelve { usuarios: [...] }
+    usuarios = data.usuarios || [];
+
+    // Limpiar selector
+    selectorUsuario.innerHTML = "";
 
     // Opción “Mi calendario”
     const optMi = document.createElement("option");
@@ -29,15 +35,15 @@ async function cargarUsuarios() {
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Agregar empleados
+    // Agregar empleados (funciona ahora porque usuarios tiene datos)
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
-      opt.textContent = `${u.nombre} (${u.rol})`;
+      opt.textContent = u.nombre;
       selectorUsuario.appendChild(opt);
     });
 
-    // Guardar ID del usuario logueado si existe input hidden
+    // ID del usuario logueado (para "mi")
     const inputUsuario = document.getElementById("usuarioId");
     if (inputUsuario) usuarioActualId = inputUsuario.value;
 
@@ -63,21 +69,20 @@ async function cargarProgramaciones() {
 // 🔹 Filtrar eventos por usuario
 // =============================================================
 function filtrarEventosParaUsuario(eventos, usuarioId) {
-  const usuario = usuarios.find(u => u.id == usuarioId);
 
-  if (!usuario && usuarioId !== "mi") return [];
-
-  // Empleado: propios eventos + globales
-  if (usuarioId === "mi" || (usuario && usuario.rol.toLowerCase() === "empleado")) {
-    const id = usuarioId === "mi" ? usuarioActualId : usuario.id;
-    return eventos.filter(ev => ev.ID_Usuario == id || ev.Tipo.toLowerCase() === "global");
+  // Si el admin selecciona "mi": NO se usa (solo para empleados)
+  if (usuarioId === "mi") {
+    return eventos; // admin ve todo lo global
   }
 
-  // Otros roles
-  if (usuario) return eventos.filter(ev => ev.ID_Usuario == usuario.id);
+  const usuario = usuarios.find(u => u.id == usuarioId);
+  if (!usuario) return [];
 
-  return [];
+  return eventos.filter(ev =>
+    ev.Empleado_ID == usuarioId || ev.Tipo?.toLowerCase() === "global"
+  );
 }
+
 
 // =============================================================
 // 🔹 Renderizar calendario
