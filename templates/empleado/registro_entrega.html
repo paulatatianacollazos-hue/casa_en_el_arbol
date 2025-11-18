@@ -1,6 +1,9 @@
 {% extends "empleado/dashboard.html" %}
 {% block content %}
 
+<!-- 🔹 Vista principal -->
+<div id="vista-principal">
+
 <div class="container mt-5">
   <div class="card shadow-sm border-0">
     <div class="card-header bg-success text-white">
@@ -16,8 +19,7 @@
         <div class="mb-3">
           <label class="form-label">Subir fotos de la entrega (máximo 3)</label>
 
-          <!-- Contenedor de inputs dinámicos -->
-          <div id="contenedor-fotos">
+          <div id="contenedor-fotos-principal">
             <div class="input-group mb-2 foto-input">
               <input type="file" class="form-control" name="fotos" accept="image/*" required>
               <button type="button" class="btn btn-outline-danger btn-quitar">
@@ -26,93 +28,113 @@
             </div>
           </div>
 
-          <button type="button" id="btn-agregar-foto" class="btn btn-outline-primary btn-sm">
+          <button type="button" id="btn-agregar-foto-principal" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-plus-circle"></i> Agregar otra imagen
           </button>
 
-          <div id="limite-msg" class="text-danger small mt-2" style="display:none;">
+          <div id="limite-msg-principal" class="text-danger small mt-2" style="display:none;">
             ⚠️ Solo puedes subir un máximo de 3 imágenes.
           </div>
         </div>
 
         <div class="text-end mt-4">
+
+          <!-- 🔹 Cambiado a type="button" -->
+          <button type="button" id="btn-personalizar" class="btn btn-primary">
+            Instalación
+          </button>
+
           <button type="submit" class="btn btn-success">
             <i class="bi bi-save"></i> Guardar registro
           </button>
-          <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2"
-            onclick="volverAtras()">
+          
+          <button type="button" class="btn btn-outline-secondary" onclick="volverAtras()">
             <i class="bi bi-arrow-left"></i> Volver
           </button>
-          <button id="btn-personalizar" class="btn btn-primary">
-            instalacion
-          </button>
+
         </div>
+
       </form>
     </div>
   </div>
 </div>
+
+</div> <!-- cierre vista principal -->
+
+
+<!-- 🔹 Vista Personalizada -->
 <div id="seccion-personalizar" class="d-none">
-  <div class="container mt-5">
-    <div class="card shadow-sm border-0">
-      <div class="card-header bg-success text-white">
-        <h5 class="mb-0">📦 Registro de Entrega - Pedido #{{ pedido_id }}</h5>
-      </div>
-      <div class="card-body">
-        <form method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Comentario del instalador</label>
-            <textarea class="form-control" name="comentario" rows="3" required></textarea>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label">Subir fotos de la entrega (máximo 3)</label>
+<div class="container mt-5">
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">📦 Registro de Entrega - Pedido #{{ pedido_id }}</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Comentario del instalador</label>
+          <textarea class="form-control" name="comentario" rows="3" required></textarea>
+        </div>
 
-            <!-- Contenedor de inputs dinámicos -->
-            <div id="contenedor-fotos">
-              <div class="input-group mb-2 foto-input">
-                <input type="file" class="form-control" name="fotos" accept="image/*" required>
-                <button type="button" class="btn btn-outline-danger btn-quitar">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-            </div>
+        <div class="mb-3">
+          <label class="form-label">Subir fotos de la entrega (máximo 3)</label>
 
-            <button type="button" id="btn-agregar-foto" class="btn btn-outline-primary btn-sm">
-              <i class="bi bi-plus-circle"></i> Agregar otra imagen
-            </button>
-
-            <div id="limite-msg" class="text-danger small mt-2" style="display:none;">
-              ⚠️ Solo puedes subir un máximo de 3 imágenes.
+          <div id="contenedor-fotos-principal">
+            <div class="input-group mb-2 foto-input">
+              <input type="file" class="form-control" name="fotos" accept="image/*" required>
+              <button type="button" class="btn btn-outline-danger btn-quitar">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </div>
           </div>
 
-          <div class="text-end mt-4">
-            <button type="submit" class="btn btn-success">
-              <i class="bi bi-save"></i> Guardar registro
-            </button>
-            <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2"
-              onclick="volverAtras()">
-              <i class="bi bi-arrow-left"></i> Volver
-            </button>
+          <button type="button" id="btn-agregar-foto-principal" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Agregar otra imagen
+          </button>
+
+          <div id="limite-msg-principal" class="text-danger small mt-2" style="display:none;">
+            ⚠️ Solo puedes subir un máximo de 3 imágenes.
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="text-end mt-4">
+
+          <!-- 🔹 Cambiado a type="button" -->
+
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Guardar registro
+          </button>
+          
+          <button type="button" class="btn btn-outline-secondary" onclick="volverAtras()">
+            <i class="bi bi-arrow-left"></i> Volver
+          </button>
+
+        </div>
+
+      </form>
     </div>
   </div>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const contenedor = document.getElementById("contenedor-fotos");
-  const btnAgregar = document.getElementById("btn-agregar-foto");
-  const limiteMsg = document.getElementById("limite-msg");
 
-  // 🔹 Agregar un nuevo input de imagen (hasta 3)
+</div>
+
+
+<!-- 🔹 Script manejo de fotos -->
+<script>
+function activarFotoManager(prefix) {
+  const contenedor = document.getElementById(`contenedor-fotos-${prefix}`);
+  const btnAgregar = document.getElementById(`btn-agregar-foto-${prefix}`);
+  const limiteMsg = document.getElementById(`limite-msg-${prefix}`);
+
   btnAgregar.addEventListener("click", () => {
     const totalInputs = contenedor.querySelectorAll(".foto-input").length;
+
     if (totalInputs >= 3) {
       limiteMsg.style.display = "block";
       return;
     }
+
     limiteMsg.style.display = "none";
 
     const div = document.createElement("div");
@@ -126,52 +148,49 @@ document.addEventListener("DOMContentLoaded", () => {
     contenedor.appendChild(div);
   });
 
-  // 🔹 Quitar un input de imagen
   contenedor.addEventListener("click", (e) => {
     if (e.target.closest(".btn-quitar")) {
-      const totalInputs = contenedor.querySelectorAll(".foto-input").length;
       e.target.closest(".foto-input").remove();
-      if (totalInputs <= 3) limiteMsg.style.display = "none";
+      limiteMsg.style.display = "none";
     }
   });
+}
+
+// activar para la vista principal
+document.addEventListener("DOMContentLoaded", () => {
+  activarFotoManager("principal");
 });
 </script>
-<script>
-  function volverAtras() {
-    if (window.history.length > 1) {
-      window.history.back(); // 🔹 Regresa a la página anterior sin recargar toda la app
-    } else {
-      // Si no hay historial (por ejemplo, acceso directo)
-      window.location.href = "/"; // Cambia esta ruta a tu home o panel principal
-    }
-  }
-</script>
+
+<!-- 🔹 Script para alternar vistas -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const btnPersonalizar = document.getElementById("btn-personalizar");
   const btnVolver = document.getElementById("btn-volver");
-  const vistaPrincipal = document.getElementById("vista-principal");
-  const seccionPersonalizar = document.getElementById("seccion-personalizar");
 
-  // Mostrar personalización
+  const vista = document.getElementById("vista-principal");
+  const personalizar = document.getElementById("seccion-personalizar");
+
   btnPersonalizar.addEventListener("click", () => {
-    vistaPrincipal.classList.add("d-none");
-    seccionPersonalizar.classList.remove("d-none");
-
-    // Reiniciar carrusel personalizado
-    const personalizarCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPersonalizar");
-    personalizarCarousel.to(0);
+    vista.classList.add("d-none");
+    personalizar.classList.remove("d-none");
   });
 
-  // Volver a vista principal
   btnVolver.addEventListener("click", () => {
-    seccionPersonalizar.classList.add("d-none");
-    vistaPrincipal.classList.remove("d-none");
-
-    // Reiniciar carrusel principal
-    const principalCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPrincipal");
-    principalCarousel.to(0);
+    personalizar.classList.add("d-none");
+    vista.classList.remove("d-none");
   });
 });
 </script>
+
+<script>
+function volverAtras() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location.href = "/";
+  }
+}
+</script>
+
 {% endblock %}
