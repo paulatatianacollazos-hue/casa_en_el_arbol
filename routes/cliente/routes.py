@@ -759,7 +759,7 @@ CONTEXT = {
 
 
 # --- RESPUESTAS MÁS HUMANAS ---
-def make_response(text):
+def make_responses(text):
     """Genera respuestas más naturales para sonar como una IA."""
     neutral = [
         "Entiendo, déjame ayudarte con eso:",
