@@ -123,6 +123,31 @@
   <div id="mensaje-exito" class="alert alert-success mt-4 d-none text-center">🎉 Pedido realizado con éxito</div>
 
 </div>
+
+
+<!-- 🔹 Modal de confirmación -->
+<div class="modal fade" id="modal-pedido" tabindex="-1" aria-labelledby="modalPedidoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-3">
+      <div class="modal-body">
+        <div id="modal-contenido">
+          <!-- Contenido dinámico: cargando / éxito -->
+          <div id="modal-cargando">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3">⏳ Procesando pedido...</p>
+          </div>
+          <div id="modal-exito" class="d-none">
+            <i class="bi bi-check-circle-fill text-success" style="font-size:3rem;"></i>
+            <p class="mt-3">🎉 Pedido realizado con éxito</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 
@@ -135,8 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const carouselContent = document.getElementById("carousel-content");
   const subtotalEl = document.getElementById("subtotal");
   const totalFinalEl = document.getElementById("total-final");
-  const mensajeCargando = document.getElementById("mensaje-cargando");
-  const mensajeExito = document.getElementById("mensaje-exito");
   const confirmarBtn = document.getElementById("confirmar-pago");
   const metodoPagoEl = document.getElementById("metodo-pago");
   const direccionEl = document.getElementById("direccion-envio");
@@ -186,7 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
   subtotalEl.textContent = "$" + total.toFixed(2);
   totalFinalEl.textContent = "$" + total.toFixed(2);
 
-  // Botón confirmar
+  // Modal de Bootstrap
+  const modalEl = new bootstrap.Modal(document.getElementById('modal-pedido'));
+  const modalCargando = document.getElementById('modal-cargando');
+  const modalExito = document.getElementById('modal-exito');
+
   confirmarBtn.addEventListener("click", async () => {
     const metodoPago = metodoPagoEl.value;
     const direccion = direccionEl.value;
@@ -195,36 +222,55 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!direccion) return alert("Selecciona una dirección");
     if (!productos.length) return alert("No hay productos en el carrito");
 
-    mensajeCargando.classList.remove("d-none");
+    // Mostrar modal con cargando
+    modalCargando.classList.remove("d-none");
+    modalExito.classList.add("d-none");
+    modalEl.show();
 
-    try {
-      const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          metodo_pago: metodoPago,
-          productos: productos,
-          total: total,
-          direccion: direccion
-        })
-      });
-      const result = await response.json();
-      mensajeCargando.classList.add("d-none");
+    // Simular procesamiento 3 segundos
+    setTimeout(async () => {
 
-      if (result.success) {
-        mensajeExito.classList.remove("d-none");
-        setTimeout(() => window.location.href = "/cliente/carrito", 2000);
-      } else {
-        alert("Error del servidor: " + result.error);
-        console.error(result.error);
+      try {
+        const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            metodo_pago: metodoPago,
+            productos: productos,
+            total: total,
+            direccion: direccion
+          })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          // Mostrar éxito 5 segundos
+          modalCargando.classList.add("d-none");
+          modalExito.classList.remove("d-none");
+
+          setTimeout(() => {
+            modalEl.hide();
+            window.location.href = "/cliente/catalogo"; // redirigir a catálogo
+          }, 5000);
+
+        } else {
+          modalEl.hide();
+          alert("Error del servidor: " + result.error);
+          console.error(result.error);
+        }
+
+      } catch (error) {
+        modalEl.hide();
+        alert("Ocurrió un error al procesar el pedido");
+        console.error(error);
       }
-    } catch (error) {
-      mensajeCargando.classList.add("d-none");
-      alert("Ocurrió un error al procesar el pedido");
-      console.error(error);
-    }
+
+    }, 3000);
+
   });
+
 });
+
 
 
 </script>
