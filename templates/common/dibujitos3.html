@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body{
+            height: 100vh;
+            width: 1000px;
+            
+        }
+
+        .caja{
+            clip-path: url(#mi-forma-svg);
+            height: 400px;
+            width: 800PX;
+            background-color: thistle;
+            margin-top: 50px;
+        }
+        
+        a{
+            text-decoration: none;
+            
+        }
+        .boton1{
+            padding: 5px 40px;
+            background-color: thistle;
+            border-radius: 20px;
+            position: relative;
+            top: 20px;
+            box-shadow: -10px 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .boton2{
+            border: 1px solid thistle;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: thistle;
+            position: relative;
+            top: 20px;
+            box-shadow: -10px 8px 20px rgba(0,0,0,0.3);
+            margin-left: 30px;
+        }
+
+        .subcaja{
+            
+            background-color: thistle;
+            height: 50px;
+            width: 180px;
+            position: relative;
+            left: 27%;
+            top: 150px;
+            border-radius: 15px;
+        }
+
+        .caja1{
+            clip-path: url(#mi-forma1-svg);
+            height: 500px;
+            width: 800px;
+            background-color: thistle;
+        }
+    </style>
+</head>
+<body>
+    <a href="" class="boton1">MATERI SEPTEMBER #1</a>
+    <a href="" class="boton2">CURVED</a>
+    <a href="" class="boton2">SHADOW</a>
+    <div class="subcaja">
+
+    </div>
+    <div class="caja">
+    </div>
+    <div class="caja1">
+
+    </div>
+    <svg>
+
+        <clipPath id="mi-forma1-svg">
+        <path d="M 10,60 L 140,60 L 150,50 L 150,10 L 160,0 Z"/>
+        </clipPath>
+    </svg>
+    <svg>
+        <clipPath id="mi-forma-svg">
+        <path d="M 10,50 L 250,50 A 10,10 0,0,1 260,60 L 260,100 A 10,10 0,0,0 270,110
+        L 450,110 A 10,10 0,0,0 460,100 L 460,60 A 10,10 0,0,1 470,50 L 700,50 
+        A 10,10 0,0,1 710,60 L 710,300 A 10,10 0,0,1 700,310 L 10,310 A 10,10 0,0,1 0,300
+        L 0,60 A 10,10 0,0,1 10,50 Z" />
+        </clipPath>
+    </svg>
+    
+</body>
+</html>
