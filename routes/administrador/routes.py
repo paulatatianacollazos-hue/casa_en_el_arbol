@@ -925,39 +925,41 @@ def programaciones_todas():
 
 @admin.route("/buscar", methods=["GET"])
 def buscar():
-    q = request.args.get("q", "").strip()
+    try:
+        q = request.args.get("q", "").strip()
 
-    # Si no hay texto → devolver vacío
-    if not q:
-        return jsonify({"productos": [], "pedidos": []})
+        if not q:
+            return jsonify({"productos": [], "pedidos": []})
 
-    # Buscar productos por nombre
-    productos = Producto.query.filter(
-        Producto.NombreProducto.ilike(f"%{q}%")
-    ).all()
-
-    # Buscar pedidos por ID (solo si el usuario escribe números)
-    pedidos = []
-    if q.isdigit():
-        pedidos = Pedido.query.filter(
-            Pedido.ID_Pedido.ilike(f"%{q}%")
+        productos = Producto.query.filter(
+            Producto.NombreProducto.ilike(f"%{q}%")
         ).all()
 
-    return jsonify({
-        "productos": [
-            {
-                "id": p.ID_Producto,
-                "nombre": p.NombreProducto,
-                "precio": p.PrecioUnidad,
-                "imagen": url_for("static", filename=p.Imagen)
-            } for p in productos
-        ],
-        "pedidos": [
-            {
-                "id": ped.ID_Pedido,
-                "estado": ped.Estado,
-                "total": ped.Total,
-                "fecha": ped.Fecha.strftime("%Y-%m-%d")
-            } for ped in pedidos
-        ]
-    })
+        pedidos = []
+        if q.isdigit():
+            pedidos = Pedido.query.filter(
+                Pedido.ID_Pedido == int(q)
+            ).all()
+
+        return jsonify({
+            "productos": [
+                {
+                    "id": p.ID_Producto,
+                    "nombre": p.NombreProducto,
+                    "precio": p.PrecioUnidad,
+                    "imagen": url_for("static", filename=p.Imagen)
+                } for p in productos
+            ],
+            "pedidos": [
+                {
+                    "id": ped.ID_Pedido,
+                    "estado": ped.Estado,
+                    "total": ped.Total,
+                    "fecha": ped.Fecha.strftime("%Y-%m-%d")
+                } for ped in pedidos
+            ]
+        })
+
+    except Exception as e:
+        print("\n❌ ERROR EN /admin/buscar →", e, "\n")
+        return jsonify({"error": str(e)}), 500
