@@ -950,10 +950,8 @@ def buscar():
                     "id": p.ID_Producto,
                     "nombre": p.NombreProducto,
                     "precio": p.PrecioUnidad,
-                    "imagenes": [
-                        url_for("static", filename=img.ruta) if img.ruta else "/static/img/placeholder.png"
-                        for img in p.imagenes
-                    ] or ["/static/img/placeholder.png"]  # Si no tiene imágenes
+                    # Usar directamente la ruta que está en la base de datos
+                    "imagen": p.imagenes[0].ruta if p.imagenes else "/static/img/placeholder.png"
                 }
                 for p in productos
             ],
