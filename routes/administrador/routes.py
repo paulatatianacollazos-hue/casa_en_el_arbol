@@ -923,17 +923,20 @@ def programaciones_todas():
         return jsonify({"error": "Error interno"}), 500
 
 
-@admin.route("/buscar")
+@admin.route("/buscar", methods=["GET"])
 def buscar():
     q = request.args.get("q", "").strip()
 
+    # Si no hay texto → devolver vacío
     if not q:
         return jsonify({"productos": [], "pedidos": []})
 
+    # Buscar productos por nombre
     productos = Producto.query.filter(
         Producto.NombreProducto.ilike(f"%{q}%")
     ).all()
 
+    # Buscar pedidos por ID (solo si el usuario escribe números)
     pedidos = []
     if q.isdigit():
         pedidos = Pedido.query.filter(
@@ -941,7 +944,20 @@ def buscar():
         ).all()
 
     return jsonify({
-        "productos": [...],
-        "pedidos": [...]
+        "productos": [
+            {
+                "id": p.ID_Producto,
+                "nombre": p.NombreProducto,
+                "precio": p.PrecioUnidad,
+                "imagen": url_for("static", filename=p.Imagen)
+            } for p in productos
+        ],
+        "pedidos": [
+            {
+                "id": ped.ID_Pedido,
+                "estado": ped.Estado,
+                "total": ped.Total,
+                "fecha": ped.Fecha.strftime("%Y-%m-%d")
+            } for ped in pedidos
+        ]
     })
-

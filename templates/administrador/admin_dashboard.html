@@ -366,23 +366,21 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
 const searchInput = document.getElementById('searchInput');
-const mainContent = document.querySelector('.col-md-9.col-lg-10');
+const mainContent = document.getElementById('main-content');
 
-// Guardamos el contenido original para restaurarlo
+// Guardamos el contenido original
 let originalContent = mainContent.innerHTML;
 
 searchInput.addEventListener('input', async () => {
     const query = searchInput.value.trim();
 
-    // Si no hay texto → restauramos el contenido original
     if (!query) {
         mainContent.innerHTML = originalContent;
         return;
     }
 
     try {
-        // Llamada al backend (productos + pedidos por ID)
-        const res = await fetch(`/cliente/buscar?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/admin/buscar?q=${encodeURIComponent(query)}`);
         const data = await res.json();
 
         // ----- Productos encontrados -----
@@ -408,7 +406,7 @@ searchInput.addEventListener('input', async () => {
             `;
         }
 
-        // ----- Pedidos encontrados (solo si coincide el ID) -----
+        // ----- Pedidos encontrados por ID -----
         let pedidosHTML = "";
         if (data.pedidos.length > 0) {
             pedidosHTML = `
@@ -426,25 +424,20 @@ searchInput.addEventListener('input', async () => {
             `;
         }
 
-        // Si no hay nada
         if (!productosHTML && !pedidosHTML) {
-            mainContent.innerHTML = `
-                <p class="text-muted mt-4">No se encontraron resultados.</p>
-            `;
+            mainContent.innerHTML = `<p class="text-muted mt-4">No se encontraron resultados.</p>`;
             return;
         }
 
-        // Insertar resultados
         mainContent.innerHTML = productosHTML + pedidosHTML;
 
     } catch (error) {
         console.error("Error:", error);
-        mainContent.innerHTML = `
-            <p class="text-danger mt-4">Error al realizar la búsqueda.</p>
-        `;
+        mainContent.innerHTML = `<p class="text-danger mt-4">Error al realizar la búsqueda.</p>`;
     }
 });
 </script>
+
 
     {% include 'common/partials/chat_flotante.html' %}
 
