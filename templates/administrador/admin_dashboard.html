@@ -185,6 +185,7 @@
             </ul>
         </div>
     </div>
+<div id="main-content">
 {% block content %}
     <!-- Carrusel principal -->
     <div id="carouselEjemplo" class="carousel slide" data-bs-ride="carousel">
@@ -322,6 +323,7 @@
         </div>
     </section>
     {%endblock%}
+</div>
     <!-- Footer suscripción -->
     <section class="footer-suscripcion mt-5 bg-dark text-light py-4">
         <div class="container">
@@ -362,6 +364,87 @@
     {% block extra_footer %}{%endblock%}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+const searchInput = document.getElementById('searchInput');
+const mainContent = document.querySelector('.col-md-9.col-lg-10');
+
+// Guardamos el contenido original para restaurarlo
+let originalContent = mainContent.innerHTML;
+
+searchInput.addEventListener('input', async () => {
+    const query = searchInput.value.trim();
+
+    // Si no hay texto → restauramos el contenido original
+    if (!query) {
+        mainContent.innerHTML = originalContent;
+        return;
+    }
+
+    try {
+        // Llamada al backend (productos + pedidos por ID)
+        const res = await fetch(`/cliente/buscar?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        // ----- Productos encontrados -----
+        let productosHTML = "";
+        if (data.productos.length > 0) {
+            productosHTML = `
+                <h4 class="mt-4">Productos encontrados</h4>
+                <div class="row g-3">
+                ${data.productos.map(p => `
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card producto-card">
+                            <a href="/detalle_producto/${p.id}">
+                                <img src="${p.imagen}" class="card-img-top">
+                            </a>
+                            <div class="card-body text-center">
+                                <h6 class="card-title">${p.nombre}</h6>
+                                <p class="precio">$${p.precio}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+                </div>
+            `;
+        }
+
+        // ----- Pedidos encontrados (solo si coincide el ID) -----
+        let pedidosHTML = "";
+        if (data.pedidos.length > 0) {
+            pedidosHTML = `
+                <h4 class="mt-5">Pedidos encontrados</h4>
+                <div class="list-group">
+                ${data.pedidos.map(p => `
+                    <a href="/cliente/detalle_pedido/${p.id}" class="list-group-item list-group-item-action">
+                        <strong>Pedido #${p.id}</strong>
+                        <br>Estado: ${p.estado}
+                        <br>Total: $${p.total}
+                        <br><small>Fecha: ${p.fecha}</small>
+                    </a>
+                `).join('')}
+                </div>
+            `;
+        }
+
+        // Si no hay nada
+        if (!productosHTML && !pedidosHTML) {
+            mainContent.innerHTML = `
+                <p class="text-muted mt-4">No se encontraron resultados.</p>
+            `;
+            return;
+        }
+
+        // Insertar resultados
+        mainContent.innerHTML = productosHTML + pedidosHTML;
+
+    } catch (error) {
+        console.error("Error:", error);
+        mainContent.innerHTML = `
+            <p class="text-danger mt-4">Error al realizar la búsqueda.</p>
+        `;
+    }
+});
+</script>
 
     {% include 'common/partials/chat_flotante.html' %}
 

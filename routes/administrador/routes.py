@@ -5,7 +5,7 @@ from routes.cliente.routes import mensajes
 from sqlalchemy import func
 from basedatos.models import (
     db, Usuario, Notificaciones,
-    Direccion, Calendario, Pedido, Reseñas
+    Direccion, Calendario, Pedido, Reseñas, Producto
     )
 from sqlalchemy import text
 import traceback
@@ -923,4 +923,25 @@ def programaciones_todas():
         return jsonify({"error": "Error interno"}), 500
 
 
+@admin.route("/buscar")
+def buscar():
+    q = request.args.get("q", "").strip()
+
+    if not q:
+        return jsonify({"productos": [], "pedidos": []})
+
+    productos = Producto.query.filter(
+        Producto.NombreProducto.ilike(f"%{q}%")
+    ).all()
+
+    pedidos = []
+    if q.isdigit():
+        pedidos = Pedido.query.filter(
+            Pedido.ID_Pedido.ilike(f"%{q}%")
+        ).all()
+
+    return jsonify({
+        "productos": [...],
+        "pedidos": [...]
+    })
 
