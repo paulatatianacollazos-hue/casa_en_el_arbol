@@ -931,32 +931,41 @@ def buscar():
         if not q:
             return jsonify({"productos": [], "pedidos": []})
 
+        # Buscar productos
         productos = Producto.query.filter(
             Producto.NombreProducto.ilike(f"%{q}%")
         ).all()
 
+        # Buscar pedidos por ID si la búsqueda es número
         pedidos = []
         if q.isdigit():
             pedidos = Pedido.query.filter(
                 Pedido.ID_Pedido == int(q)
             ).all()
 
+        # Construcción del JSON
         return jsonify({
             "productos": [
                 {
                     "id": p.ID_Producto,
                     "nombre": p.NombreProducto,
                     "precio": p.PrecioUnidad,
-                    "imagen": url_for("static", filename=p.Imagen)
-                } for p in productos
+                    "imagen": (
+                        url_for("static", filename=p.imagenes[0].ruta)
+                        if p.imagenes and p.imagenes[0].ruta
+                        else "/static/img/placeholder.png"
+                    )
+                }
+                for p in productos
             ],
             "pedidos": [
                 {
                     "id": ped.ID_Pedido,
                     "estado": ped.Estado,
-                    "total": ped.Total,
-                    "fecha": ped.Fecha.strftime("%Y-%m-%d")
-                } for ped in pedidos
+                    "total": sum(det.Cantidad * det.PrecioUnidad for det in ped.detalles_pedido),
+                    "fecha": ped.FechaPedido.strftime("%Y-%m-%d") if ped.FechaPedido else ""
+                }
+                for ped in pedidos
             ]
         })
 
