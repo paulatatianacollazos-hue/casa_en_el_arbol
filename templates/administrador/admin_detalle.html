@@ -328,48 +328,55 @@ function mostrarReseñas(idProducto) {
 </script>
 
 <script>
-  document.getElementById("btn-editar-producto").addEventListener("click", (e) => {
-  const btn = e.currentTarget;
+document.addEventListener("DOMContentLoaded", () => {
+  const btnEditar = document.getElementById("btn-editar-producto");
   const modal = new bootstrap.Modal(document.getElementById("modalEditarProducto"));
+  const form = document.getElementById("formEditarProducto");
 
-  document.getElementById("productoId").value = btn.dataset.id;
-  document.getElementById("nombreProducto").value = btn.dataset.nombre;
-  document.getElementById("precioProducto").value = btn.dataset.precio;
-  document.getElementById("materialProducto").value = btn.dataset.material;
-  document.getElementById("colorProducto").value = btn.dataset.color;
-  document.getElementById("stockProducto").value = btn.dataset.stock;
+  // Abrir modal y llenar inputs
+  btnEditar.addEventListener("click", (e) => {
+    const btn = e.currentTarget;
+    document.getElementById("productoId").value = btn.dataset.id;
+    document.getElementById("nombreProducto").value = btn.dataset.nombre;
+    document.getElementById("precioProducto").value = btn.dataset.precio;
+    document.getElementById("materialProducto").value = btn.dataset.material;
+    document.getElementById("colorProducto").value = btn.dataset.color;
+    document.getElementById("stockProducto").value = btn.dataset.stock;
 
-  modal.show();
-});
+    modal.show();
+  });
 
-document.getElementById("formEditarProducto").addEventListener("submit", async (e) => {
-  e.preventDefault();
+  // Enviar formulario
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const productoId = document.getElementById("productoId").value;
-  const nombre = document.getElementById("nombreProducto").value;
-  const precio = document.getElementById("precioProducto").value;
-  const material = document.getElementById("materialProducto").value;
-  const color = document.getElementById("colorProducto").value;
-  const stock = document.getElementById("stockProducto").value;
+    const productoId = document.getElementById("productoId").value;
+    const nombre = document.getElementById("nombreProducto").value;
+    const precio = document.getElementById("precioProducto").value;
+    const material = document.getElementById("materialProducto").value;
+    const color = document.getElementById("colorProducto").value;
+    const stock = document.getElementById("stockProducto").value;
 
-  try {
-    const resp = await fetch(`/administrador/editar_producto/${productoId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, precio, material, color, stock })
-    });
-    const result = await resp.json();
+    try {
+      const resp = await fetch(`/administrador/editar_producto/${productoId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, precio, material, color, stock })
+      });
 
-    if (resp.ok && result.success) {
-      alert("✅ Producto actualizado correctamente");
-      location.reload(); // recarga para reflejar cambios
-    } else {
-      alert("❌ Error al actualizar producto");
+      const result = await resp.json();
+
+      if (resp.ok && result.success) {
+        alert("✅ Producto actualizado correctamente");
+        location.reload(); // recarga para reflejar cambios
+      } else {
+        alert("❌ Error al actualizar producto: " + (result.error || "Desconocido"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error al actualizar producto: " + err.message);
     }
-  } catch (err) {
-    console.error(err);
-    alert("❌ Error al actualizar producto");
-  }
+  });
 });
 
 </script>

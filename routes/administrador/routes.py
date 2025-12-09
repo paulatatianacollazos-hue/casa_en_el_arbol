@@ -8,6 +8,7 @@ from basedatos.models import (
     Direccion, Calendario, Pedido, Reseñas, Producto
     )
 from sqlalchemy import text
+from basedatos.db import get_connection
 import traceback
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
@@ -974,11 +975,18 @@ def buscar():
 @admin.route("/administrador/editar_producto/<int:producto_id>", methods=["POST"])
 def editar_producto(producto_id):
     data = request.json
+    if not data:
+        return jsonify({"success": False, "error": "No se recibieron datos"}), 400
+
     nombre = data.get("nombre")
-    precio = data.get("precio")
     material = data.get("material")
     color = data.get("color")
-    stock = data.get("stock")
+
+    try:
+        precio = float(data.get("precio", 0))
+        stock = int(data.get("stock", 0))
+    except ValueError:
+        return jsonify({"success": False, "error": "Precio o stock inválido"}), 400
 
     conn = get_connection()
     cursor = conn.cursor()
