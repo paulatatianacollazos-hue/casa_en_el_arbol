@@ -753,81 +753,58 @@ BASE_KNOWLEDGE = {
     "garantía": "Todos nuestros productos cuentan con 1 año de garantía por defectos de fábrica.",
     "empresa": "Somos Casa en el Árbol, diseñamos muebles con identidad y calidad profesional.",
     "soporte": "Nuestro equipo de soporte atiende de lunes a viernes, de 8am a 5pm.",
+    "productos": "Contamos con salas, dormitorios, comedores y muebles personalizados."
 }
 
 FORBIDDEN_WORDS = ["tarjeta", "credito", "contraseña", "password", "cedula",
                    "documento", "banco", "cuenta"]
 
-
-# --- MEMORIA CORTA DEL CHAT ---
-CONTEXT = {
-    "last_question": None
-}
+CONTEXT = {"last_question": None}
 
 
-# --- RESPUESTAS MÁS HUMANAS ---
 def make_responses(text):
-    """Genera respuestas más naturales para sonar como una IA."""
+    import random
     neutral = [
         "Entiendo, déjame ayudarte con eso:",
         "Perfecto, esto es lo que puedo decirte:",
         "Claro, aquí tienes la información:",
         "Buena pregunta. Aquí tienes la respuesta:",
     ]
-
-    import random
     return random.choice(neutral) + " " + text
 
 
-# --- DETECCIÓN DE INTENCIONES ---
 def get_intent(message):
     message = message.lower()
-
-    # SaludOs
     if any(w in message for w in ["hola", "buenas", "hey", "saludos"]):
         return make_responses("¡Hola! ¿En qué puedo ayudarte hoy?")
-
-    # Agradecimientos
     if any(w in message for w in ["gracias", "te agradezco", "muchas gracias"]):
         return make_responses("¡Con gusto! Si necesitas algo más, aquí estoy.")
-
-    # Preguntar precios
     if "precio" in message:
-        return make_responses("Si deseas saber el precio de un producto, puedes buscarlo directamente en el catálogo o mencionarme el nombre del mueble.")
-
-    # Preguntar productos
-    if any(w in message for w in ["tienen", "venden", "producto", "muebles"]):
-        return make_responses("Sí, contamos con una variedad de productos como salas, dormitorios, comedores y muebles personalizados.")
-
-    # Horarios
+        return make_responses("Puedes consultar el precio de nuestros muebles en el catálogo.")
+    if any(w in message for w in ["producto", "muebles", "tienen", "venden"]):
+        return make_responses("Contamos con diferentes productos como salas, dormitorios, comedores y muebles personalizados.")
     if "horario" in message or "abren" in message or "cierran" in message:
         return make_responses("Nuestro horario de atención es de lunes a viernes de 9am a 6pm, y sábados de 10am a 4pm.")
+    return None
 
-    return None  # No se detectó intención
 
-
-# --- ENDPOINT IA MEJORADA ---
 @cliente.route('/api/chatbot', methods=['POST'])
 def chatbot_response():
     user_message = request.json.get("message", "").lower()
-
-    # Palabras prohibidas
+    
     for word in FORBIDDEN_WORDS:
         if word in user_message:
             return jsonify({"response": "Por tu seguridad, no puedo ayudarte con datos personales o sensibles."})
-
-    # Coincidencia exacta con base de conocimiento
+    
     for key, value in BASE_KNOWLEDGE.items():
         if key in user_message:
             CONTEXT["last_question"] = key
-            return jsonify({"response": make_response(value)})
+            return jsonify({"response": make_responses(value)})
 
-    # Intenciones generales
     intent_response = get_intent(user_message)
     if intent_response:
         return jsonify({"response": intent_response})
 
-    # Si no entendió:
     return jsonify({
         "response": "No tengo información específica sobre eso, pero puedo ayudarte con devoluciones, garantías, horarios, productos o políticas."
     })
@@ -835,7 +812,6 @@ def chatbot_response():
 
 @cliente.route('/chatbot')
 def chatbot():
-
     return render_template("cliente/chatbot.html")
 
 

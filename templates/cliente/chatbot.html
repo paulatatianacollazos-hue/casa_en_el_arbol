@@ -4,46 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot - Asistente Virtual</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
     <style>
         :root {
-      --primary-green: #5f8f3f;
-      --secondary-green: #4e7b33;
-      --light-green: #6c9a50;
-      --accent-green: #7cb342;
-      --bg-cream: #f8f6f0;
-      --text-dark: #2c3e50;
-      --shadow-light: rgba(0, 0, 0, 0.08);
-      --shadow-medium: rgba(0, 0, 0, 0.15);
-    }
-    
-        body { font-family: Arial; background: #f5f6fa; margin:0; display:flex; flex-direction:column; height:100vh; }
-        header { background:#4e73df; padding:15px; color:white; text-align:center; font-size:22px; font-weight:bold; }
-        #chat-container { flex:1; display:flex; flex-direction:column; max-width:700px; margin:auto; width:100%; height:100%; background:white; border-radius:8px; margin-top:20px; margin-bottom:20px; box-shadow:0 0 12px rgba(0,0,0,0.1); }
-        #chat-messages { padding:15px; flex:1; overflow-y:auto; }
-        .fade-in { animation: fadeIn .3s ease-in-out; }
-        @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
-        .msg-user, .msg-bot { margin:10px 0; display:flex; gap:8px; }
-        .msg-user { justify-content:flex-end; }
-        .msg-bot { justify-content:flex-start; }
-        .msg-user span { background:#4e73df; color:white; padding:10px 14px; border-radius:12px; max-width:60%; }
-        .msg-bot span { background:#e5e7eb; padding:10px 14px; border-radius:12px; max-width:60%; }
-        .avatar { width:38px; height:38px; border-radius:50%; }
-        #chat-input { display:flex; border-top:1px solid #ddd; }
-        #message { flex:1; padding:12px; border:none; outline:none; font-size:16px; }
-        #send-btn { width:120px; background:#4e73df; color:white; border:none; cursor:pointer; font-size:16px; }
-        #send-btn:hover { background:#3b5cc0; }
+            --primary-green: #5f8f3f;
+            --accent-green: #7cb342;
+            --bg-light: #f5f6fa;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--bg-light);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
+            padding: 15px;
+            color: white;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 700px;
+            margin: 20px auto;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        #chat-messages {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .fade-in {
+            animation: fadeIn .3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg-user, .msg-bot {
+            margin: 10px 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .msg-user { justify-content: flex-end; }
+        .msg-bot { justify-content: flex-start; }
+
+        .msg-user span {
+            background: var(--primary-green);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+
+        .msg-bot span {
+            background: #e5e7eb;
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+        }
+
+        #chat-input {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+
+        #message {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+
+        #send-btn {
+            width: 120px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #send-btn:hover { background: var(--accent-green); }
+
+        #quick-questions {
+            padding: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            border-top: 1px solid #ddd;
+        }
+
+        #quick-questions button {
+            flex: 1;
+            min-width: 100px;
+        }
     </style>
 </head>
-
 <body>
 
-<header style="background: linear-gradient(90deg, var(--primary-green), var(--accent-green));"><button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2 volver"
-                    onclick="volverAtras()" style="border: none; background-color: transparent; color: white; position: relative; right: 40%;">
-                <i class="bi bi-arrow-left"></i> Volver
-            </button>
-            Asistente Virtual</header>
+<header>
+    <button type="button" class="btn btn-outline-light d-flex align-items-center gap-2"
+        onclick="volverAtras()" style="border: none; background: transparent; color: white;">
+        <i class="bi bi-arrow-left"></i> Volver
+    </button>
+    Asistente Virtual
+</header>
 
 <div id="chat-container">
     <div id="chat-messages"></div>
@@ -51,6 +150,14 @@
     <div id="chat-input">
         <input type="text" id="message" placeholder="Escribe tu mensaje...">
         <button id="send-btn" onclick="sendMessage()">Enviar</button>
+    </div>
+
+    <div id="quick-questions">
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('devoluciones')">Devoluciones</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('garantía')">Garantía</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('horario')">Horario</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('productos')">Productos</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('privacidad')">Privacidad</button>
     </div>
 </div>
 
@@ -69,18 +176,30 @@ function saveHistory() {
     localStorage.setItem("chatHistory", chatArea.innerHTML);
 }
 
-function sendMessage() {
-    const message = document.getElementById("message").value.trim();
-    if (!message) return;
+function appendMessage(user, message) {
+    const avatarUser = user === 'user' 
+        ? 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+        : 'https://cdn-icons-png.flaticon.com/512/4712/4712100.png';
+
+    const className = user === 'user' ? 'msg-user' : 'msg-bot';
 
     chatArea.innerHTML += `
-        <div class="msg-user fade-in">
+        <div class="${className} fade-in">
+            ${user === 'bot' ? `<img src="${avatarUser}" class="avatar">` : ''}
             <span>${message}</span>
-            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
+            ${user === 'user' ? `<img src="${avatarUser}" class="avatar">` : ''}
         </div>
     `;
     chatArea.scrollTop = chatArea.scrollHeight;
     saveHistory();
+}
+
+function sendMessage() {
+    const input = document.getElementById("message");
+    const message = input.value.trim();
+    if (!message) return;
+
+    appendMessage('user', message);
 
     fetch("/cliente/api/chatbot", {
         method: "POST",
@@ -88,29 +207,32 @@ function sendMessage() {
         body: JSON.stringify({message})
     })
     .then(res => res.json())
-    .then(data => {
-        chatArea.innerHTML += `
-            <div class="msg-bot fade-in">
-                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712100.png" class="avatar">
-                <span>${data.response}</span>
-            </div>
-        `;
-        chatArea.scrollTop = chatArea.scrollHeight;
-        saveHistory();
-    });
+    .then(data => appendMessage('bot', data.response));
 
-    document.getElementById("message").value = "";
+    input.value = "";
+}
+
+function sendQuick(keyword) {
+    appendMessage('user', keyword);
+    fetch("/cliente/api/chatbot", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({message: keyword})
+    })
+    .then(res => res.json())
+    .then(data => appendMessage('bot', data.response));
 }
 
 document.getElementById("message").addEventListener("keypress", e => {
     if (e.key === "Enter") sendMessage();
 });
-</script>
-<script>
-  function volverAtras() {
+
+function volverAtras() {
     if (window.history.length > 1) window.history.back();
     else window.location.href = "/";
 }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
