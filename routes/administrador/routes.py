@@ -500,8 +500,10 @@ def catalogo():
 @role_required("admin")
 def guardar_producto_route():
     try:
-        conn = get_connection()  # <-- Llamar a la función
+        conn = get_connection()          # Llamar a la función
         cursor = conn.cursor()
+
+        # Guardar datos del producto
         cursor.execute("""
             INSERT INTO producto (NombreProducto, Stock, StockMinimo, Material, Color,
                                   PrecioUnidad, ID_Categoria, ID_Proveedor)
@@ -509,7 +511,7 @@ def guardar_producto_route():
         """, (
             request.form['NombreProducto'],
             int(request.form['Stock']),
-            int(request.form.get('StockMinimo', 0)),  # valor por defecto 0
+            int(request.form.get('StockMinimo', 0)),
             request.form['Material'],
             request.form['Color'],
             float(request.form['PrecioUnidad']),
@@ -525,22 +527,20 @@ def guardar_producto_route():
             for file in files:
                 if file and file.filename != '':
                     filename = secure_filename(file.filename)
-                    filepath = os.path.join(
-                        current_app.config['UPLOAD_FOLDER'], filename)
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                     file.save(filepath)
-                    image_url = f"static/img/{filename}"
+                    image_url = f"/static/img/{filename}"
+
                     cursor.execute("""
-                        INSERT INTO imagenproducto (ID_Producto, Imagen)
+                        INSERT INTO imagenproducto (ID_Producto, ruta)
                         VALUES (%s, %s)
                     """, (producto_id, image_url))
 
-        get_connection.commit()
-        return jsonify({"success": True,
-                        "message": "Producto guardado con éxito",
-                        "id": producto_id})
+        conn.commit()  # ✅ Commit en el objeto de conexión
+        return jsonify({"success": True, "message": "Producto guardado con éxito", "id": producto_id})
 
     except Exception as e:
-        get_connection.rollback()
+        conn.rollback()  # ✅ Rollback en el objeto de conexión
         return jsonify({"success": False, "message": str(e)})
 
 
