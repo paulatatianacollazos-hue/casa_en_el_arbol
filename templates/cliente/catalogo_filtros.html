@@ -67,9 +67,7 @@
           </div>
         </div>
         {% endfor %}
-      </div>
-    </div>
-    <div class="col-md-9">
+        <div class="col-md-9">
       <div class="row" id="productos-grid">
         {% for producto in productos %}
         <div class="col-md-4 mb-4 producto-item" 
@@ -78,7 +76,7 @@
             data-color="{{ producto.Color }}"
             data-precio="{{ producto.PrecioUnidad }}">
           <div class="card h-100">
-            <img src="{{ producto.imagen or 'img/default.png' }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
+            <img src="{{ producto.imagen or 'static/img/default.png' }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
             <div class="card-body">
               <h6 class="card-title">{{ producto.NombreProducto }}</h6>
               <p class="card-text">Precio: ${{ producto.PrecioUnidad }}</p>
@@ -89,6 +87,9 @@
       </div>
     </div>
 
+      </div>
+    </div>
+    
   </div>
 </div>
 
