@@ -832,7 +832,28 @@ def chatbot_response():
         "response": "No tengo información específica sobre eso, pero puedo ayudarte con devoluciones, garantías, horarios, productos o políticas."
     })
 
+
 @cliente.route('/chatbot')
 def chatbot():
 
     return render_template("cliente/chatbot.html")
+
+
+# Ejemplo en tu ruta Flask
+@cliente.route("/catalogo_filtros")
+@login_required
+def catalogo_filtros():
+    productos = Producto.query.all()
+    categorias = Categorias.query.all()
+
+    # Sacamos materiales y colores únicos
+    materiales = list(set([p.Material for p in productos if p.Material]))
+    colores = list(set([p.Color for p in productos if p.Color]))
+
+    return render_template(
+        "cliente/catalogo_filtros.html",
+        productos=productos,
+        categorias=categorias,
+        materiales=materiales,
+        colores=colores
+    )

@@ -1,0 +1,137 @@
+{% extends "cliente/dashboard.html" %}
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Filtros por Categorías -->
+  <div class="mb-4">
+    <h5>Categorías:</h5>
+    <div class="btn-group" role="group" aria-label="Categorías">
+      {% for categoria in categorias %}
+        <button class="btn btn-outline-primary categoria-btn" data-categoria="{{ categoria.ID_Categoria }}">
+          {{ categoria.NombreCategoria }}
+        </button>
+      {% endfor %}
+      <button class="btn btn-outline-secondary categoria-btn" data-categoria="todas">Todas</button>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- Menú lateral de filtros -->
+    <div class="col-md-3 mb-4">
+      <div class="card p-3">
+        <h6>Filtrar por Material</h6>
+        {% for material in materiales %}
+        <div class="form-check">
+          <input class="form-check-input filtro-material" type="checkbox" value="{{ material }}">
+          <label class="form-check-label">{{ material }}</label>
+        </div>
+        {% endfor %}
+
+        <hr>
+        <h6>Filtrar por Color</h6>
+        {% for color in colores %}
+        <div class="form-check">
+          <input class="form-check-input filtro-color" type="checkbox" value="{{ color }}">
+          <label class="form-check-label">{{ color }}</label>
+        </div>
+        {% endfor %}
+
+        <hr>
+        <h6>Filtrar por Precio</h6>
+        <div class="mb-2">
+          <label>Min: <input type="number" class="form-control precio-min" placeholder="0"></label>
+        </div>
+        <div class="mb-2">
+          <label>Max: <input type="number" class="form-control precio-max" placeholder="1000"></label>
+        </div>
+        <button class="btn btn-primary w-100" id="aplicar-filtros">Aplicar filtros</button>
+      </div>
+    </div>
+
+    <!-- Zona de productos -->
+    <div class="col-md-9">
+      <div class="row" id="productos-grid">
+        {% for producto in productos %}
+        <div class="col-md-4 mb-4 producto-item" 
+             data-categoria="{{ producto.categoria_id }}"
+             data-material="{{ producto.Material }}"
+             data-color="{{ producto.Color }}"
+             data-precio="{{ producto.PrecioUnidad }}">
+          <div class="card h-100">
+            <img src="{{ producto.imagen or 'img/default.png' }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
+            <div class="card-body">
+              <h6 class="card-title">{{ producto.NombreProducto }}</h6>
+              <p class="card-text">Precio: ${{ producto.PrecioUnidad }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="row" id="productos-grid">
+        {% for producto in productos %}
+        <div class="col-md-4 mb-4 producto-item" 
+            data-categoria="{{ producto.ID_Categoria }}"
+            data-material="{{ producto.Material }}"
+            data-color="{{ producto.Color }}"
+            data-precio="{{ producto.PrecioUnidad }}">
+          <div class="card h-100">
+            <img src="{{ producto.imagen or 'img/default.png' }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
+            <div class="card-body">
+              <h6 class="card-title">{{ producto.NombreProducto }}</h6>
+              <p class="card-text">Precio: ${{ producto.PrecioUnidad }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Filtrar por categorías
+  const categoriaBtns = document.querySelectorAll('.categoria-btn');
+  const productos = document.querySelectorAll('.producto-item');
+
+  categoriaBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-categoria');
+      productos.forEach(p => {
+        if(cat === 'todas' || p.getAttribute('data-categoria') === cat){
+          p.style.display = 'block';
+        } else {
+          p.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Filtrar por material, color y precio
+  document.getElementById('aplicar-filtros').addEventListener('click', () => {
+    const materialesSel = Array.from(document.querySelectorAll('.filtro-material:checked')).map(i => i.value);
+    const coloresSel = Array.from(document.querySelectorAll('.filtro-color:checked')).map(i => i.value);
+    const precioMin = parseFloat(document.querySelector('.precio-min').value) || 0;
+    const precioMax = parseFloat(document.querySelector('.precio-max').value) || Infinity;
+
+    productos.forEach(p => {
+      const mat = p.getAttribute('data-material');
+      const col = p.getAttribute('data-color');
+      const precio = parseFloat(p.getAttribute('data-precio'));
+
+      const matOk = materialesSel.length === 0 || materialesSel.includes(mat);
+      const colOk = coloresSel.length === 0 || coloresSel.includes(col);
+      const precioOk = precio >= precioMin && precio <= precioMax;
+
+      if(matOk && colOk && precioOk){
+        p.style.display = 'block';
+      } else {
+        p.style.display = 'none';
+      }
+    });
+  });
+</script>
+{% endblock %}
