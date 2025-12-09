@@ -186,7 +186,7 @@
         <p>Precio: ${{ p.PrecioUnidad }}</p>
         {% if p['Stock'] <= p['StockMinimo'] %}
         <div style="
-            background:#ff4d4d;
+            background:#4CAF50;
             color:white;
             padding:5px 10px;
             border-radius:6px;
@@ -194,9 +194,10 @@
             margin:10px auto;
             font-weight:bold;
             font-size:14px;">
-            ⚠️ Pocas unidades
+            Pocas unidades (Stock actual: {{ p['Stock'] }})
         </div>
         {% endif %}
+
 
       </div>
     </div>
