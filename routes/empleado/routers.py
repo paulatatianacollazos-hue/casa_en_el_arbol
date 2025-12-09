@@ -240,10 +240,11 @@ def detalle_pedido(pedido_id):
             p.ID_Pedido,
             p.FechaPedido,
             p.Destino,
-            p.Estado,              -- ✅ Agregado
+            p.Estado,
             u.Nombre AS ClienteNombre,
             u.Apellido AS ClienteApellido,
             u.Correo AS ClienteCorreo,
+            dp.ID_Producto,                 -- ✅ AGREGADO AQUÍ
             dp.Cantidad,
             dp.PrecioUnidad,
             pr.NombreProducto
@@ -368,19 +369,6 @@ def pedido_productos(id_pedido):
         return redirect(url_for("cliente.detalle_pedido", id_pedido=id_pedido))
 
     return render_template("cliente/pedido_productos.html", pedido=pedido, productos=productos)
-
-
-@empleado.route("/pedido/<int:id_pedido>/detalle")
-@login_required
-def detalles_pedido(id_pedido):
-    pedido = Pedido.query.get_or_404(id_pedido)
-    productos = (
-        db.session.query(Detalle_Pedido, Producto)
-        .join(Producto, Detalle_Pedido.ID_Producto == Producto.ID_Producto)
-        .filter(Detalle_Pedido.ID_Pedido == id_pedido)
-        .all()
-    )
-    return render_template("cliente/detalle_pedido.html", pedido=pedido, productos=productos)
 
 
 @empleado.route("/actualizar_productos/<int:pedido_id>", methods=["POST"])
