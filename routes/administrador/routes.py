@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from flask import flash, jsonify, abort
+from flask import flash, jsonify, abort, current_app
 from flask_login import login_required, current_user
 from routes.cliente.routes import mensajes
 from sqlalchemy import func
+from werkzeug.utils import secure_filename
+import os
 from basedatos.models import (
     db, Usuario, Notificaciones,
     Direccion, Calendario, Pedido, Reseñas, Producto
