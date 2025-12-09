@@ -10,7 +10,9 @@
     .filtro-activo { font-weight: bold; }
   </style>
 </head>
+{% extends "cliente/dashboard.html" %}
 <body>
+{% block content %}
 <div class="container-fluid mt-4">
   <div class="row">
     <!-- Sidebar filtros -->
@@ -67,7 +69,7 @@
     </div>
   </div>
 </div>
-
+{%endblock%}
 <script>
   // Función de filtrado
   function filtrarProductos() {
