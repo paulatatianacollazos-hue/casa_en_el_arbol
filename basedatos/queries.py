@@ -664,22 +664,30 @@ def guardar_producto_route():
 
 
 def get_productos():
-    conn = get_connection()  # 👈 aquí faltaba crear la conexión
+    conn = get_connection()
     query = """
-        SELECT p.ID_Producto, p.NombreProducto, p.Material, p.PrecioUnidad,
-        p.Color,
-               (SELECT i.ruta
-                FROM imagenproducto i
-                WHERE i.ID_Producto = p.ID_Producto
-                LIMIT 1) AS Imagen
+        SELECT 
+            p.ID_Producto,
+            p.NombreProducto,
+            p.Stock,
+            p.StockMinimo,
+            p.Material,
+            p.PrecioUnidad,
+            p.Color,
+            (SELECT i.ruta
+             FROM imagenproducto i
+             WHERE i.ID_Producto = p.ID_Producto
+             LIMIT 1) AS Imagen
         FROM producto p;
     """
+
     cursor = conn.cursor(dictionary=True)
     cursor.execute(query)
     productos = cursor.fetchall()
     cursor.close()
-    conn.close()  # 👈 no olvides cerrar la conexión
+    conn.close()
     return productos
+
 
 
 def get_producto_by_id(id_producto):

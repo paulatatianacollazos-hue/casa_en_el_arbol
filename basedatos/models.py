@@ -97,6 +97,7 @@ class Producto(db.Model):
     Material = db.Column(db.String(50))
     PrecioUnidad = db.Column(db.Float, nullable=False)
     Color = db.Column(db.String(30))
+    StockMinimo = db.Column(db.Integer, nullable=False, default=0)
 
     ID_Proveedor = db.Column(db.Integer, db.ForeignKey(
         'Proveedor.ID_Proveedor'), nullable=False)
