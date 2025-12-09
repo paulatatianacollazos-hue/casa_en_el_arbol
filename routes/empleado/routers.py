@@ -382,3 +382,59 @@ def detalles_pedido(id_pedido):
     )
     return render_template("cliente/detalle_pedido.html", pedido=pedido, productos=productos)
 
+
+@empleado.route("/guardar_recogido/<int:pedido_id>", methods=["POST"])
+@login_required
+def guardar_recogido(pedido_id):
+    data = request.get_json()
+
+    if not data or "productos" not in data:
+        return jsonify({"success": False, "message": "Datos inválidos"}), 400
+
+    productos = data["productos"]  # Lista: [{id_producto, recogido}, ...]
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        for item in productos:
+            id_producto = item.get("id_producto")
+            recogido = item.get("recogido")
+
+            if id_producto is None:
+                continue
+
+            # Verificar si ya existe registro
+            cursor.execute("""
+                SELECT * FROM productos_recogidos
+                WHERE ID_Pedido = %s AND ID_Producto = %s
+            """, (pedido_id, id_producto))
+
+            existe = cursor.fetchone()
+
+            if existe:
+                # Actualizar
+                cursor.execute("""
+                    UPDATE productos_recogidos
+                    SET Recogido = %s
+                    WHERE ID_Pedido = %s AND ID_Producto = %s
+                """, (recogido, pedido_id, id_producto))
+            else:
+                # Insertar nuevo registro
+                cursor.execute("""
+                    INSERT INTO productos_recogidos (ID_Pedido, ID_Producto, Recogido)
+                    VALUES (%s, %s, %s)
+                """, (pedido_id, id_producto, recogido))
+
+        conn.commit()
+
+        return jsonify({"success": True, "message": "Productos actualizados correctamente"})
+
+    except Exception as e:
+        conn.rollback()
+        print("❌ ERROR:", e)
+        return jsonify({"success": False, "message": "Error al guardar la selección"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
