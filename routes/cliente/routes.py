@@ -440,7 +440,7 @@ def confirmar_pago():
     data = request.get_json()
     productos_carrito = data.get('productos', [])
     metodo_pago = data.get('metodo_pago')
-    instalaciones = data.get('instalacion')   # 🔹 <- AGREGADO
+    instalacion = data.get('instalacion')   # usar singular aquí
     direccion_id = data.get('direccion')
     total = data.get('total', 0)
 
@@ -469,13 +469,13 @@ def confirmar_pago():
 
         destino_texto = f"{direccion.Direccion}, {direccion.Barrio or ''}, {direccion.Ciudad or ''}, {direccion.Departamento or ''}, {direccion.Pais or ''}"
 
-        # Crear pedido
+        # Crear pedido con Instalacion (singular)
         nuevo_pedido = Pedido(
             ID_Usuario=current_user.ID_Usuario,
             Destino=destino_texto,
             Estado='pendiente',
             FechaPedido=datetime.utcnow(),
-            Instalaciones=instalaciones   # 🔹 <- SE GUARDA EN BD
+            Instalacion=instalacion  # coincide con el modelo
         )
         db.session.add(nuevo_pedido)
         db.session.commit()
