@@ -676,6 +676,7 @@ def detalle_pedido(pedido_id):
                                  ) if pedido.ID_Empleado else None
     direccion = Direccion.query.filter_by(ID_Usuario=cliente.ID_Usuario
                                           ).first()
+    calendario = Calendario.query.filter_by(ID_Pedido=pedido_id).first()
 
     detalles = (
         db.session.query(Detalle_Pedido, Producto)
@@ -705,7 +706,8 @@ def detalle_pedido(pedido_id):
         direccion=direccion,
         productos=productos,
         progreso=progreso,
-        estado_actual=estado_actual
+        estado_actual=estado_actual,
+        calendario=calendario
     )
 
 

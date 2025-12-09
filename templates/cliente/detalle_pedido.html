@@ -166,7 +166,19 @@
       <strong>Fecha de pedido:</strong> {{ pedido.FechaPedido or '---' }}<br>
       <strong>Fecha de entrega:</strong> {{ pedido.FechaEntrega or '---' }}
     </p>
-
+    {% if pedido.Instalacion and calendario %}
+<div class="programacion">
+  <h3>Programación de {{ calendario.Tipo }}</h3>
+  <form method="POST" action="{{ url_for('cliente.actualizar_instalacion') }}">
+    <input type="hidden" name="id_pedido" value="{{ pedido.ID_Pedido }}">
+    <label>Fecha:</label>
+    <input type="date" name="fecha_entrega" value="{{ calendario.Fecha }}">
+    <label>Hora:</label>
+    <input type="time" name="hora_entrega" value="{{ calendario.Hora }}">
+    <button type="submit">Actualizar</button>
+  </form>
+</div>
+{% endif %}
   </div>
 </div>
 {% endblock %}
