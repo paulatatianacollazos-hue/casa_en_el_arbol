@@ -489,6 +489,7 @@ def borrar_direccion(id_direccion):
 @role_required("admin")
 def catalogo():
     productos = get_productos()
+    print(productos)
     return render_template("administrador/catalogo.html", productos=productos)
 
 
