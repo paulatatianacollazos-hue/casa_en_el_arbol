@@ -38,20 +38,26 @@
       <div class="row" id="productos-grid">
         {% for producto in productos %}
         <div class="col-md-4 mb-4 producto-item"
-             data-categoria="{{ producto.ID_Categoria }}"
-             data-material="{{ producto.Material }}"
-             data-color="{{ producto.Color }}"
-             data-precio="{{ producto.PrecioUnidad }}">
-          <div class="card h-100">
-            <img src="{{ producto.imagenes[0].ruta if producto.imagenes else 'static/img/default.png' }}" class="card-img-top" alt="{{ producto.NombreProducto }}">
-            <div class="card-body">
-              <h6 class="card-title">{{ producto.NombreProducto }}</h6>
-              <p class="card-text">Precio: ${{ producto.PrecioUnidad }}</p>
+            data-categoria="{{ producto.ID_Categoria }}"
+            data-material="{{ producto.Material }}"
+            data-color="{{ producto.Color }}"
+            data-precio="{{ producto.PrecioUnidad }}">
+            
+          <a href="{{ url_for('cliente.detalle_producto', id_producto=producto.ID_Producto) }}" class="text-decoration-none text-dark">
+            <div class="card h-100">
+              <img src="{{ producto.imagenes[0].ruta if producto.imagenes else 'static/img/default.png' }}" 
+                  class="card-img-top" alt="{{ producto.NombreProducto }}">
+              <div class="card-body">
+                <h6 class="card-title">{{ producto.NombreProducto }}</h6>
+                <p class="card-text">Precio: ${{ producto.PrecioUnidad }}</p>
+              </div>
             </div>
-          </div>
+          </a>
+
         </div>
         {% endfor %}
       </div>
+
     </div>
   </div>
 </div>
