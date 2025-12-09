@@ -1050,3 +1050,23 @@ def editar_producto(producto_id):
     finally:
         cursor.close()
         conn.close()
+
+
+@admin.route('/eliminar_producto/<int:producto_id>', methods=['POST'])
+@login_required
+@role_required("admin")
+def eliminar_producto_route(producto_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Eliminar imágenes relacionadas primero
+        cursor.execute("DELETE FROM imagenproducto WHERE ID_Producto = %s", (producto_id,))
+        # Eliminar producto
+        cursor.execute("DELETE FROM producto WHERE ID_Producto = %s", (producto_id,))
+
+        conn.commit()
+        return jsonify({"success": True, "message": "Producto eliminado con éxito"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)})

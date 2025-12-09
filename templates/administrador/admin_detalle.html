@@ -83,6 +83,12 @@
         data-stockminimo="{{ producto.StockMinimo }}">
         Editar producto
     </button>
+
+    <button class="btn btn-danger" id="btn-eliminar-producto"
+        data-id="{{ producto.ID_Producto }}">
+        Eliminar producto
+    </button>
+
     </div>
     
     </div>
@@ -398,5 +404,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 </script>
+<script>
+document.getElementById("btn-eliminar-producto").addEventListener("click", async () => {
+    const productoId = document.getElementById("btn-eliminar-producto").dataset.id;
+
+    if (!confirm("¿Estás seguro de eliminar este producto? Esta acción no se puede deshacer.")) {
+        return;
+    }
+
+    try {
+        const resp = await fetch(`/admin/eliminar_producto/${productoId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        const data = await resp.json();
+
+        if (data.success) {
+            alert(data.message);
+            // Redirige a la lista de productos o dashboard
+            window.location.href = "/admin/lista_productos";
+        } else {
+            alert("Error al eliminar: " + data.message);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Ocurrió un error al intentar eliminar el producto.");
+    }
+});
+</script>
+
 
 {% endblock %}
