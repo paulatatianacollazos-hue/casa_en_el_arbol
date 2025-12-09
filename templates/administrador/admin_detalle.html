@@ -242,24 +242,24 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const btnPersonalizar = document.getElementById("btn-personalizar");
-  const btnVolver = document.getElementById("btn-volver");
+  const btnGarantia = document.getElementById("btn-garantia");
+  const btnVolverGarantia = document.getElementById("btn-volver-garantia");
   const vistaPrincipal = document.getElementById("vista-principal");
-  const seccionPersonalizar = document.getElementById("seccion-personalizar");
+  const seccionGarantia = document.getElementById("seccion-garantia");
 
-  // Mostrar personalización
-  btnPersonalizar.addEventListener("click", () => {
+  // Mostrar sección garantía
+  btnGarantia.addEventListener("click", () => {
     vistaPrincipal.classList.add("d-none");
-    seccionPersonalizar.classList.remove("d-none");
+    seccionGarantia.classList.remove("d-none");
 
-    // Reiniciar carrusel personalizado
-    const personalizarCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPersonalizar");
-    personalizarCarousel.to(0);
+    // Reiniciar carrusel de garantía
+    const garantiaCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselGarantia");
+    garantiaCarousel.to(0);
   });
 
   // Volver a vista principal
-  btnVolver.addEventListener("click", () => {
-    seccionPersonalizar.classList.add("d-none");
+  btnVolverGarantia.addEventListener("click", () => {
+    seccionGarantia.classList.add("d-none");
     vistaPrincipal.classList.remove("d-none");
 
     // Reiniciar carrusel principal
@@ -267,6 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
     principalCarousel.to(0);
   });
 });
+
 </script>
 <script>
 document.querySelectorAll(".corazon").forEach(corazon => {
