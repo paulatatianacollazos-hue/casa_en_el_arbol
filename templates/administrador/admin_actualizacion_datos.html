@@ -429,7 +429,12 @@
         
         {% for pedido in pedidos if pedido['id_empleado'] is none %}
           <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
-            <h3>Pedido #{{ pedido.id }}</h3>
+            <h3>Pedido #{{ pedido.id }}   
+            {% if pedido.instalacion == 'si' %}
+                Instalación
+            {% else %}
+                Entrega
+            {% endif %}</h3>
             <div class="datos-pedido" style="display: flex;">
             <p><strong>Cliente:</strong> {{ pedido.usuario }}</p>
             <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
@@ -438,11 +443,8 @@
             <div class="datos-pedido" style="display: flex;">
             <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
             <p><strong>Total:</strong> ${{ pedido.total }}</p>
-            {% if pedido.Instalacion == 'si' %}
-              Instalación
-            {% else %}
-              Entrega
-            {% endif %}
+            
+
             </div>
 
             <div class="estado-pedido">
