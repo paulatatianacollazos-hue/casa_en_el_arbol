@@ -616,46 +616,57 @@ def guardar_producto(data, files):
     return producto_id
 
 
-def guardar_producto(form, imagenes):
-    nombre = form.get("NombreProducto")
-    material = form.get("Material")
-    color = form.get("Color")
-    precio = float(form.get("PrecioUnidad", 0))
-    stock = int(form.get("Stock", 0))
-    stock_minimo = int(form.get("StockMinimo", 0))  # <-- aquí capturas StockMinimo
-    id_categoria = int(form.get("ID_Categoria", 0))
-    id_proveedor = int(form.get("ID_Proveedor", 0))
-
-    conn = get_connection()
-    cursor = conn.cursor()
+@admin.route('/guardar_producto', methods=['POST'])
+@login_required
+@role_required("admin")
+def guardar_producto_route():
     try:
-        # Insertar en la tabla producto
+        # Obtener datos del formulario
+        nombre = request.form['NombreProducto']
+        stock = int(request.form['Stock'])
+        stock_minimo = int(request.form['StockMinimo'])  # ✅ Nuevo campo
+        material = request.form['Material']
+        color = request.form['Color']
+        precio = float(request.form['PrecioUnidad'])
+        id_categoria = int(request.form['ID_Categoria'])
+        id_proveedor = int(request.form['ID_Proveedor'])
+
+        # Guardar datos del producto
+        cursor = db.connection.cursor()
         cursor.execute("""
-            INSERT INTO producto
-            (NombreProducto, PrecioUnidad, Material, Color, Stock, StockMinimo, ID_Categoria, ID_Proveedor)
+            INSERT INTO producto 
+            (NombreProducto, Stock, StockMinimo, Material, Color, PrecioUnidad, ID_Categoria, ID_Proveedor)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (nombre, precio, material, color, stock, stock_minimo, id_categoria, id_proveedor))
-        
+        """, (nombre, stock, stock_minimo, material, color, precio, id_categoria, id_proveedor))
         producto_id = cursor.lastrowid
 
-        # Guardar imágenes (si las hay)
-        for imagen in imagenes:
-            if imagen.filename != "":
-                filename = secure_filename(imagen.filename)
-                imagen.save(os.path.join("static/img/productos", filename))
-                cursor.execute("""
-                    INSERT INTO producto_imagen (ID_Producto, RutaImagen)
-                    VALUES (%s, %s)
-                """, (producto_id, f"img/productos/{filename}"))
+        # Guardar imágenes
+        if 'imagenes[]' in request.files:
+            files = request.files.getlist('imagenes[]')
 
-        conn.commit()
-        return producto_id
+            # Asegurarse de que la carpeta exista
+            upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/img/productos')
+            os.makedirs(upload_folder, exist_ok=True)
+
+            for file in files:
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    filepath = os.path.join(upload_folder, filename)
+                    file.save(filepath)
+
+                    # Guardar ruta en base de datos
+                    image_url = f"img/productos/{filename}"
+                    cursor.execute("""
+                        INSERT INTO imagenproducto (ID_Producto, Imagen)
+                        VALUES (%s, %s)
+                    """, (producto_id, image_url))
+
+        db.connection.commit()
+        return jsonify({"success": True, "message": "Producto guardado con éxito", "id": producto_id})
+
     except Exception as e:
-        conn.rollback()
-        raise e
-    finally:
-        cursor.close()
-        conn.close()
+        db.connection.rollback()
+        return jsonify({"success": False, "message": str(e)})
 
 
 def get_productos():
