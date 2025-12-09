@@ -32,13 +32,15 @@ def obtener_todos_los_pedidos():
             pe.FechaPedido,
             ip.ruta AS ImagenURL,
             p.PrecioUnidad,
-            pe.ID_Empleado
+            pe.ID_Empleado,
+            pe.Instalacion  -- 🔹 se agrega Instalacion
         FROM Pedido pe
         JOIN Usuario u ON pe.ID_Usuario = u.ID_Usuario
         JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
         JOIN Producto p ON dp.ID_Producto = p.ID_Producto
         LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
-        ORDER BY pe.FechaPedido DESC
+        ORDER BY pe.FechaPedido DESC;
+
     """
 
     cursor.execute(query)
@@ -75,7 +77,8 @@ def obtener_todos_los_pedidos():
                 'direccion': row[3],
                 'fecha': fecha,
                 'productos': {},
-                'id_empleado': row[10]
+                'id_empleado': row[10],
+                'instalacion': row[11]  # 🔹 aquí se guarda Instalacion
             }
 
         productos = pedidos_dict[id_pedido]['productos']
