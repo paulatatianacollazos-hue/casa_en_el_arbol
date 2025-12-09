@@ -440,7 +440,7 @@ def confirmar_pago():
     data = request.get_json()
     productos_carrito = data.get('productos', [])
     metodo_pago = data.get('metodo_pago')
-    instalaciones = data.get('instalaciones')   # 🔹 <- AGREGADO
+    instalaciones = data.get('instalacion')   # 🔹 <- AGREGADO
     direccion_id = data.get('direccion')
     total = data.get('total', 0)
 
