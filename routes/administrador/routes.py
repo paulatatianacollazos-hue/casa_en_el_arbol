@@ -500,7 +500,7 @@ def catalogo():
 @role_required("admin")
 def guardar_producto_route():
     try:
-        conn = get_connection()          # Llamar a la función
+        conn = get_connection()
         cursor = conn.cursor()
 
         # Guardar datos del producto
@@ -521,7 +521,15 @@ def guardar_producto_route():
 
         producto_id = cursor.lastrowid
 
-        # Guardar imágenes
+        # Guardar garantía (si existe)
+        if 'Garantia' in request.form and request.form['Garantia'].strip() != "":
+            garantia_texto = request.form['Garantia'][:255]  # Limitar a 255 caracteres
+            cursor.execute("""
+                INSERT INTO garantia (ID_Producto, descripcion)
+                VALUES (%s, %s)
+            """, (producto_id, garantia_texto))
+
+        # Guardar imágenes (si hay)
         if 'imagenes[]' in request.files:
             files = request.files.getlist('imagenes[]')
             for file in files:
@@ -536,11 +544,11 @@ def guardar_producto_route():
                         VALUES (%s, %s)
                     """, (producto_id, image_url))
 
-        conn.commit()  # ✅ Commit en el objeto de conexión
+        conn.commit()  # Commit de toda la transacción
         return jsonify({"success": True, "message": "Producto guardado con éxito", "id": producto_id})
 
     except Exception as e:
-        conn.rollback()  # ✅ Rollback en el objeto de conexión
+        conn.rollback()  # Rollback si hay error
         return jsonify({"success": False, "message": str(e)})
 
 
