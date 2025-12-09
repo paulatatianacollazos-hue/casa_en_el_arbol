@@ -969,3 +969,30 @@ def buscar():
     except Exception as e:
         print("\n❌ ERROR EN /admin/buscar →", e, "\n")
         return jsonify({"error": str(e)}), 500
+
+
+@admin.route("/administrador/editar_producto/<int:producto_id>", methods=["POST"])
+def editar_producto(producto_id):
+    data = request.json
+    nombre = data.get("nombre")
+    precio = data.get("precio")
+    material = data.get("material")
+    color = data.get("color")
+    stock = data.get("stock")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE producto
+            SET NombreProducto=%s, PrecioUnidad=%s, Material=%s, Color=%s, Stock=%s
+            WHERE ID_Producto=%s
+        """, (nombre, precio, material, color, stock, producto_id))
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)})
+    finally:
+        cursor.close()
+        conn.close()
