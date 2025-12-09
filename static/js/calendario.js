@@ -1,5 +1,5 @@
 // =============================================================
-// 📅 CALENDARIO ADMINISTRADOR (Gestiona reuniones y eventos)
+// 📅 CALENDARIO ADMINISTRADOR (Gestiona reuniones y pedidos)
 // =============================================================
 
 const grid = document.getElementById("calendar-grid");
@@ -12,8 +12,8 @@ const selectorUsuario = document.getElementById("selectorUsuario");
 let fechaActual = new Date();
 let programaciones = [];
 let usuarios = [];
-let usuarioSeleccionado = "mi"; // Valor por defecto: Mi calendario
-let usuarioActualId = null; // ID real del usuario logueado
+let usuarioSeleccionado = "mi";
+let usuarioActualId = null;
 
 // =============================================================
 // 🔹 Cargar empleados desde el backend
@@ -22,20 +22,14 @@ async function cargarUsuarios() {
   try {
     const resp = await fetch("/admin/usuarios_calendario");
     const data = await resp.json();
-
-    // Backend devuelve { usuarios: [...] }
     usuarios = data.usuarios || [];
-
-    // Limpiar selector
     selectorUsuario.innerHTML = "";
 
-    // Opción “Mi calendario”
     const optMi = document.createElement("option");
     optMi.value = "mi";
     optMi.textContent = "🗓️ Mi calendario";
     selectorUsuario.appendChild(optMi);
 
-    // Agregar empleados (funciona ahora porque usuarios tiene datos)
     usuarios.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.id;
@@ -43,7 +37,6 @@ async function cargarUsuarios() {
       selectorUsuario.appendChild(opt);
     });
 
-    // ID del usuario logueado (para "mi")
     const inputUsuario = document.getElementById("usuarioId");
     if (inputUsuario) usuarioActualId = inputUsuario.value;
 
@@ -69,46 +62,29 @@ async function cargarProgramaciones() {
 // 🔹 Filtrar eventos por usuario
 // =============================================================
 function filtrarEventosParaUsuario(eventos, usuarioId) {
-
-  // Si el admin selecciona "mi": NO se usa (solo para empleados)
-  if (usuarioId === "mi") {
-    return eventos; // admin ve todo lo global
-  }
-
-  const usuario = usuarios.find(u => u.id == usuarioId);
-  if (!usuario) return [];
-
-  return eventos.filter(ev =>
-    ev.Empleado_ID == usuarioId || ev.Tipo?.toLowerCase() === "global"
-  );
+  if (usuarioId === "mi") return eventos;
+  return eventos.filter(ev => ev.Empleado_ID == usuarioId || ev.Tipo?.toLowerCase() === "global");
 }
-
 
 // =============================================================
 // 🔹 Renderizar calendario
 // =============================================================
 function renderCalendario(fecha) {
   grid.innerHTML = "";
-
   const año = fecha.getFullYear();
   const mes = fecha.getMonth();
   const primerDia = new Date(año, mes, 1);
   const ultimoDia = new Date(año, mes + 1, 0);
   const primerDiaSemana = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
 
-  mesTitulo.textContent = fecha.toLocaleDateString("es-ES", {
-    month: "long",
-    year: "numeric"
-  });
+  mesTitulo.textContent = fecha.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
 
-  // Celdas vacías
   for (let i = 0; i < primerDiaSemana; i++) {
     const celdaVacia = document.createElement("div");
     celdaVacia.classList.add("day", "empty");
     grid.appendChild(celdaVacia);
   }
 
-  // Días del mes
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const fechaDia = new Date(año, mes, dia);
     const fechaStr = fechaDia.toISOString().split("T")[0];
@@ -117,10 +93,7 @@ function renderCalendario(fecha) {
     celda.dataset.fecha = fechaStr;
     celda.innerHTML = `<div class="day-header">${dia}</div>`;
 
-    const eventosDelDia = filtrarEventosParaUsuario(
-      programaciones.filter(ev => ev.Fecha === fechaStr),
-      usuarioSeleccionado
-    );
+    const eventosDelDia = filtrarEventosParaUsuario(programaciones.filter(ev => ev.Fecha === fechaStr), usuarioSeleccionado);
 
     if (eventosDelDia.length > 0) {
       const tipos = [...new Set(eventosDelDia.map(ev => ev.Tipo))];
@@ -132,24 +105,12 @@ function renderCalendario(fecha) {
         "Global": "bg-success",
         "Personal": "bg-secondary"
       };
-
-      const etiquetas = tipos.map(t => {
-        const color = colores[t] || "bg-secondary";
-        return `<span class="badge ${color} me-1">${t}</span>`;
-      }).join("");
-
+      const etiquetas = tipos.map(t => `<span class="badge ${colores[t] || 'bg-secondary'} me-1">${t}</span>`).join("");
       celda.innerHTML += `<div class="event-tags mt-1">${etiquetas}</div>`;
     }
 
-    // Día actual
     const hoy = new Date();
-    if (
-      fechaDia.getDate() === hoy.getDate() &&
-      fechaDia.getMonth() === hoy.getMonth() &&
-      fechaDia.getFullYear() === hoy.getFullYear()
-    ) {
-      celda.classList.add("hoy");
-    }
+    if (fechaDia.toDateString() === hoy.toDateString()) celda.classList.add("hoy");
 
     celda.addEventListener("click", () => abrirMiModalConFecha(fechaStr, usuarioSeleccionado));
     grid.appendChild(celda);
@@ -157,20 +118,14 @@ function renderCalendario(fecha) {
 }
 
 // =============================================================
-// 🔹 Modal con eventos del día
+// 🔹 Modal con eventos del día y productos con checkbox
 // =============================================================
 window.abrirMiModalConFecha = async function(fecha, usuarioId) {
   const modalEl = document.getElementById('modalPedidosDia');
   const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
   const contenido = document.getElementById('contenidoPedidosDia');
 
-  console.log("🗓️ Día seleccionado:", fecha);
-  console.log("📦 Programaciones:", programaciones);
-
-  const eventosDelDia = filtrarEventosParaUsuario(
-    programaciones.filter(ev => ev.Fecha === fecha),
-    usuarioId
-  );
+  const eventosDelDia = filtrarEventosParaUsuario(programaciones.filter(ev => ev.Fecha === fecha), usuarioId);
 
   if (!eventosDelDia || eventosDelDia.length === 0) {
     contenido.innerHTML = "<p class='text-center text-muted'>No hay eventos programados para este día.</p>";
@@ -178,48 +133,27 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
     return;
   }
 
-  const esEntregaOInstalacion = eventosDelDia.some(ev =>
-    ev.Tipo?.toLowerCase().includes("entrega") || ev.Tipo?.toLowerCase().includes("instalacion")
-  );
-
-  if (esEntregaOInstalacion) {
-  contenido.innerHTML = `<p class='text-muted text-center'>Cargando detalles de los pedidos...</p>`;
-  modal.show();
-
-  // Filtrar solo eventos con pedido asociado
   const pedidosDelDia = eventosDelDia.filter(ev => ev.ID_Pedido);
-
   if (!pedidosDelDia.length) {
     contenido.innerHTML = "<p class='text-center text-danger'>No se encontraron pedidos asociados para este día.</p>";
+    modal.show();
     return;
   }
 
-  // Cargar todos los pedidos en paralelo
   const resultados = await Promise.all(
     pedidosDelDia.map(async (evento) => {
       try {
         const res = await fetch(`/empleado/detalle_pedido/${evento.ID_Pedido}`);
         const data = await res.json();
-
-        if (data.error) {
-          return `<div class='alert alert-danger'>Error en pedido #${evento.ID_Pedido}: ${data.error}</div>`;
-        }
+        if (data.error) return `<div class='alert alert-danger'>Error en pedido #${evento.ID_Pedido}: ${data.error}</div>`;
 
         const info = data[0];
 
-        // Calcular monto total del pedido
-        const total = data.reduce((sum, p) => {
-          const cantidad = parseFloat(p.Cantidad || p.cantidad || 0);
-          const precio = parseFloat(p.PrecioUnidad || p.preciounidad || 0);
-          return sum + cantidad * precio;
-        }, 0);
-
-        // Renderizar lista de productos
-        const productos = data.map(p => `
+        const productosHTML = data.map(p => `
           <tr>
             <td>${p.NombreProducto}</td>
-            <td>${p.Cantidad}</td>
-            <td>$${parseFloat(p.PrecioUnidad || 0).toFixed(2)}</td>
+            <td><input type="checkbox" class="chk-producto" data-id="${p.ID_Producto}" ${p.marcado ? 'checked' : ''}></td>
+            <td class="estado-producto">${p.marcado ? 'Recogido' : 'No recogido'}</td>
           </tr>
         `).join("");
 
@@ -232,34 +166,24 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
               <p><strong>Cliente:</strong> ${info.ClienteNombre} ${info.ClienteApellido}</p>
               <p><strong>Dirección:</strong> ${info.DireccionEntrega}</p>
               <p><strong>Fecha:</strong> ${info.FechaPedido}</p>
-              <p><strong>Estado:</strong> 
-                ${info.Estado === 'entregado'
-                  ? "<span class='badge bg-success'>Entregado</span>"
-                  : info.Estado === 'pendiente'
-                  ? "<span class='badge bg-warning text-dark'>Pendiente</span>"
-                  : `<span class='badge bg-secondary'>${info.Estado || 'Sin estado'}</span>`
-                }
-              </p>
+              <p><strong>Estado:</strong> ${info.Estado}</p>
 
-              <h6 class='mt-3'>Productos:</h6>
-              <table class='table table-bordered table-sm'>
-                <thead class='table-light'>
-                  <tr><th>Producto</th><th>Cantidad</th><th>Precio</th></tr>
-                </thead>
-                <tbody>${productos}</tbody>
-              </table>
-
-              <p class='fw-bold text-end fs-6'>
-                Total del pedido: <span class='text-success'>$${total.toFixed(2)}</span>
-              </p>
-
-              <div class='text-end'>
-                <a href='/empleado/registro_entrega/${info.ID_Pedido}' class='btn btn-outline-success btn-sm'>
-                  <i class="bi bi-journal-text"></i> Registro de Entrega
-                </a>
-                
-              </div>
-              
+              <form id="formProductosPedido-${info.ID_Pedido}">
+                <table class='table table-bordered table-sm'>
+                  <thead class='table-light'>
+                    <tr><th>Producto</th><th>Seleccionar</th><th>Estado</th></tr>
+                  </thead>
+                  <tbody>
+                    ${productosHTML}
+                  </tbody>
+                </table>
+                <div class="d-flex justify-content-between">
+                  <button type="submit" class="btn btn-sm btn-primary">Guardar selección</button>
+                  <button type="button" class="btn btn-outline-success btn-sm" onclick="abrirModalEntrega(${info.ID_Pedido})">
+                    <i class="bi bi-journal-text"></i> Registro de Entrega
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         `;
@@ -270,64 +194,84 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
     })
   );
 
-  // Mostrar todos los pedidos
   contenido.innerHTML = resultados.join("");
+  modal.show();
 
-} else {
-    contenido.innerHTML = eventosDelDia.map(ev => `
-      <div>
-        <strong>${ev.Tipo}</strong>: ${ev.Empleado_Nombre || 'Sin asignar'}<br>
-        <strong>Ubicación:</strong> ${ev.Ubicacion}<br>
-        <strong>Hora:</strong> ${ev.Hora}
-      </div><hr>
-    `).join("");
-    modal.show();
-  }
+  // 🔹 Listeners para checkboxes
+  document.querySelectorAll(".chk-producto").forEach(chk => {
+    chk.addEventListener("change", (e) => {
+      const row = e.target.closest("tr");
+      const estadoCelda = row.querySelector(".estado-producto");
+      estadoCelda.textContent = e.target.checked ? "Recogido" : "No recogido";
+    });
+  });
+
+  // 🔹 Listeners para guardar productos
+  pedidosDelDia.forEach(evento => {
+    const form = document.getElementById(`formProductosPedido-${evento.ID_Pedido}`);
+    if (!form) return;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const checkboxes = form.querySelectorAll(".chk-producto");
+      const productosMarcados = Array.from(checkboxes)
+        .filter(chk => chk.checked)
+        .map(chk => chk.dataset.id);
+
+      try {
+        const resp = await fetch(`/empleado/actualizar_productos/${evento.ID_Pedido}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productos: productosMarcados })
+        });
+        const result = await resp.json();
+        if (resp.ok && result.success) alert("✅ Selección de productos guardada correctamente");
+        else alert("❌ Error al guardar selección");
+      } catch (err) {
+        console.error("❌ Error al enviar productos:", err);
+        alert("Error al guardar la selección");
+      }
+    });
+  });
+};
+
+// =============================================================
+// 🔹 ABRIR MODAL DE REGISTRO DE ENTREGA
+// =============================================================
+window.abrirModalEntrega = function(pedidoId) {
+  const input = document.getElementById("pedidoEntregaId");
+  if (!input) { alert("⚠️ No se encontró el campo oculto del pedido en el modal."); return; }
+  input.value = pedidoId;
+  const modal = new bootstrap.Modal(document.getElementById("modalRegistroEntrega"));
+  modal.show();
 };
 
 // =============================================================
 // 🔹 Controles del calendario
 // =============================================================
-btnHoy.addEventListener("click", () => {
-  fechaActual = new Date();
-  renderCalendario(fechaActual);
-});
-
+btnHoy.addEventListener("click", () => { fechaActual = new Date(); renderCalendario(fechaActual); });
 btnMes.addEventListener("click", () => {
   const selectorMes = document.createElement("input");
   selectorMes.type = "month";
-  selectorMes.style.position = "absolute";
-  selectorMes.style.opacity = "0";
+  selectorMes.style.position = "absolute"; selectorMes.style.opacity = "0";
   document.body.appendChild(selectorMes);
-
   const año = fechaActual.getFullYear();
   const mes = String(fechaActual.getMonth() + 1).padStart(2, "0");
   selectorMes.value = `${año}-${mes}`;
-
-  selectorMes.addEventListener("change", (e) => {
+  selectorMes.addEventListener("change", e => {
     const [nuevoAño, nuevoMes] = e.target.value.split("-");
-    fechaActual = new Date(parseInt(nuevoAño), parseInt(nuevoMes) - 1, 1);
+    fechaActual = new Date(parseInt(nuevoAño), parseInt(nuevoMes)-1, 1);
     renderCalendario(fechaActual);
     document.body.removeChild(selectorMes);
   });
-
-  selectorMes.showPicker?.();
-  selectorMes.click();
+  selectorMes.showPicker?.(); selectorMes.click();
 });
-
 btnAño.addEventListener("click", () => {
   const añoActual = fechaActual.getFullYear();
   const nuevoAño = prompt("Ingrese un año:", añoActual);
-  if (nuevoAño && !isNaN(nuevoAño)) {
-    fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
-    renderCalendario(fechaActual);
-  }
-});
-
-selectorUsuario.addEventListener("change", (e) => {
-  usuarioSeleccionado = e.target.value;
+  if (nuevoAño && !isNaN(nuevoAño)) fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
   renderCalendario(fechaActual);
 });
+selectorUsuario.addEventListener("change", (e) => { usuarioSeleccionado = e.target.value; renderCalendario(fechaActual); });
 
 // =============================================================
 // 🔹 Inicialización
@@ -335,97 +279,4 @@ selectorUsuario.addEventListener("change", (e) => {
 document.addEventListener("DOMContentLoaded", async () => {
   await cargarUsuarios();
   await cargarProgramaciones();
-});
-
-// =============================================================
-// 🔹 Crear evento o reunión
-// =============================================================
-document.getElementById("formNuevoEvento").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const form = e.target;
-  const data = {
-    Tipo: form.Tipo.value,
-    Fecha: form.Fecha.value,
-    Hora: form.Hora.value,
-    Ubicacion: form.Ubicacion.value,
-    Visibilidad: form.Visibilidad.value
-  };
-
-  try {
-    const resp = await fetch("/admin/admin/calendario/nuevo_evento", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-
-    const result = await resp.json();
-    if (!resp.ok || !result.ok) {
-      alert(result.error || "Error al crear evento");
-      return;
-    }
-
-    alert("✅ Evento creado correctamente");
-    const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoEvento"));
-    modal.hide();
-    await cargarProgramaciones();
-
-  } catch (err) {
-    console.error("❌ Error al enviar evento:", err);
-    alert("Error al crear el evento");
-  }
-});
-
-
-// =============================================================
-// 🔹 ABRIR MODAL DE REGISTRO DE ENTREGA
-// =============================================================
-window.abrirModalEntrega = function (pedidoId) {
-  console.log("🟢 Abriendo modal para pedido:", pedidoId);
-  const input = document.getElementById("pedidoEntregaId");
-  if (!input) {
-    alert("⚠️ No se encontró el campo oculto del pedido en el modal.");
-    return;
-  }
-
-  input.value = pedidoId;
-
-  const modal = new bootstrap.Modal(document.getElementById("modalRegistroEntrega"));
-  modal.show();
-};
-
-// =============================================================
-// 🔹 ENVIAR FORMULARIO DE REGISTRO DE ENTREGA
-// =============================================================
-document.addEventListener("DOMContentLoaded", () => {
-  const formEntrega = document.getElementById("formRegistroEntrega");
-  if (!formEntrega) return;
-
-  formEntrega.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const pedidoId = document.getElementById("pedidoEntregaId").value;
-    const formData = new FormData(formEntrega);
-
-    console.log("🚀 Enviando registro de entrega para pedido:", pedidoId);
-
-    try {
-      const response = await fetch(`/empleado/registro_entrega/${pedidoId}`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        alert("✅ Registro de entrega guardado correctamente.");
-        formEntrega.reset();
-        bootstrap.Modal.getInstance(document.getElementById("modalRegistroEntrega")).hide();
-      } else {
-        alert("❌ Error: " + (result.message || "No se pudo guardar el registro."));
-      }
-    } catch (err) {
-      console.error("❌ Error al enviar formulario:", err);
-      alert("Error al enviar los datos al servidor.");
-    }
-  });
 });
