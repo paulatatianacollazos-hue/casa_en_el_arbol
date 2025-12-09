@@ -126,10 +126,14 @@
 
     <div class="caja">
       <h2>{{ producto.NombreProducto }}</h2>
-      <p><b>Garantía:</b> {{ producto.Garantia }}</p>
+      <p><b>Garantía:</b> <span id="texto-garantia">{{ producto.Garantia }}</span></p>
 
       <div class="botones mt-3">
-       
+        <button id="btn-editar-garantia" class="btn btn-warning"
+                data-garantia="{{ producto.Garantia }}"
+                data-id="{{ producto.ID_Producto }}">
+          Editar Garantía
+        </button>
       </div>
 
       <div class="mt-3">
@@ -138,6 +142,29 @@
     </div>
   </div>
 </div>
+
+<!-- Modal para editar garantía -->
+<div class="modal fade" id="modalEditarGarantia" tabindex="-1" aria-labelledby="modalEditarGarantiaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formEditarGarantia">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarGarantiaLabel">Editar Garantía</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <textarea id="inputGarantia" class="form-control" rows="5"></textarea>
+          <input type="hidden" id="idProductoGarantia">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 
 <h3 class="mt-4">🗣️ Reseñas</h3>
@@ -421,6 +448,55 @@ document.getElementById("btn-eliminar-producto").addEventListener("click", async
         console.error(err);
         alert("Ocurrió un error al intentar eliminar el producto.");
     }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnEditar = document.getElementById("btn-editar-garantia");
+  const modal = new bootstrap.Modal(document.getElementById("modalEditarGarantia"));
+  const inputGarantia = document.getElementById("inputGarantia");
+  const idProductoGarantia = document.getElementById("idProductoGarantia");
+
+  // Abrir modal y llenar textarea con el valor actual
+  btnEditar.addEventListener("click", () => {
+    inputGarantia.value = btnEditar.dataset.garantia;
+    idProductoGarantia.value = btnEditar.dataset.id;
+    modal.show();
+  });
+
+  // Guardar cambios
+  document.getElementById("formEditarGarantia").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = idProductoGarantia.value;
+    const garantia = inputGarantia.value.trim();
+
+    if (!garantia) {
+      alert("El campo de garantía no puede estar vacío.");
+      return;
+    }
+
+    try {
+      const resp = await fetch(`/admin/editar_garantia/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ garantia })
+      });
+
+      const data = await resp.json();
+
+      if (data.success) {
+        document.getElementById("texto-garantia").textContent = garantia;
+        alert("✅ Garantía actualizada correctamente");
+        modal.hide();
+      } else {
+        alert("❌ Error al actualizar garantía: " + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error al actualizar garantía.");
+    }
+  });
 });
 </script>
 
