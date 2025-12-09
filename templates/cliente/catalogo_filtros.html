@@ -1,21 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Catálogo de Productos</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .sidebar { border-right: 1px solid #ddd; padding-right: 15px; }
-    .producto-item { display: block; }
-    .filtro-activo { font-weight: bold; }
-  </style>
-</head>
 {% extends "cliente/dashboard.html" %}
-<body>
+
 {% block content %}
 <div class="container-fluid mt-4">
   <div class="row">
-    <!-- Sidebar filtros -->
     <div class="col-md-3 sidebar">
       <h5>Filtrar por Material</h5>
       {% for material in materiales %}
@@ -39,7 +26,6 @@
       </div>
     </div>
 
-    <!-- Contenido productos -->
     <div class="col-md-9">
       <div class="mb-3">
         <h5>Categorías</h5>
@@ -69,9 +55,10 @@
     </div>
   </div>
 </div>
-{%endblock%}
+{% endblock %}
+{% block extra_foour %}
 <script>
-  // Función de filtrado
+window.addEventListener('DOMContentLoaded', function() {
   function filtrarProductos() {
     const materiales = Array.from(document.querySelectorAll('.filtro-material:checked')).map(el => el.value);
     const colores = Array.from(document.querySelectorAll('.filtro-color:checked')).map(el => el.value);
@@ -95,7 +82,6 @@
     });
   }
 
-  // Eventos
   document.querySelectorAll('.filtro-material, .filtro-color').forEach(el => el.addEventListener('change', filtrarProductos));
   document.getElementById('filtrar-precio').addEventListener('click', filtrarProductos);
 
@@ -111,6 +97,6 @@
     document.querySelectorAll('.filtro-categoria').forEach(b => b.classList.remove('filtro-activo'));
     filtrarProductos();
   });
+});
 </script>
-</body>
-</html>
+{% endblock %}
