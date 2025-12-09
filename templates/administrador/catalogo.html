@@ -184,6 +184,20 @@
         <h3>{{ p.NombreProducto }}</h3>
         <p>Material: {{ p.Material }}</p>
         <p>Precio: ${{ p.PrecioUnidad }}</p>
+        {% if p.Stock <= p.StockMinimo %}
+        <div style="
+            background:#ff4d4d;
+            color:white;
+            padding:5px 10px;
+            border-radius:6px;
+            width:max-content;
+            margin:10px auto;
+            font-weight:bold;
+            font-size:14px;">
+            ⚠️ Pocas unidades
+        </div>
+        {% endif %}
+
       </div>
     </div>
   {% endfor %}
