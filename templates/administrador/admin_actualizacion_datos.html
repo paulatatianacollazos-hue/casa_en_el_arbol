@@ -438,6 +438,11 @@
             <div class="datos-pedido" style="display: flex;">
             <p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
             <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            {% if pedido.Instalacion == 'si' %}
+              Instalación
+            {% else %}
+              Entrega
+            {% endif %}
             </div>
 
             <div class="estado-pedido">
