@@ -73,18 +73,18 @@
     <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
     <p><b>Color:</b> {{ producto.Color }}</p>
     <p><b>stock:</b>{{ producto.Stock}}</p>
-    <button class="btn btn-warning" id="btn-editar-producto"
+    <button class="btn btn-primary" id="btn-editar-producto"
         data-id="{{ producto.ID_Producto }}"
         data-nombre="{{ producto.NombreProducto }}"
         data-precio="{{ producto.PrecioUnidad }}"
         data-material="{{ producto.Material }}"
         data-color="{{ producto.Color }}"
         data-stock="{{ producto.Stock }}"
-        data-stockminimo="{{ producto.StockMinimo }}">
+        data-stockminimo="{{ producto.StockMinimo }}" style="margin-bottom: 10px;">
         Editar producto
     </button>
 
-    <button class="btn btn-danger" id="btn-eliminar-producto"
+    <button class="btn btn-primary" id="btn-eliminar-producto"
         data-id="{{ producto.ID_Producto }}">
         Eliminar producto
     </button>
@@ -126,22 +126,10 @@
 
     <div class="caja">
       <h2>{{ producto.NombreProducto }}</h2>
-      <p><b>Material:</b> {{ producto.Material }}</p>
-      <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-      <p><b>Color:</b> {{ producto.Color }}</p>
-      <p><b>Stock:</b> {{ producto.Stock }}</p>
       <p><b>Garantía:</b> {{ producto.Garantia }}</p>
 
       <div class="botones mt-3">
-        <button class="btn btn-primary"
-          data-id="{{ producto.ID_Producto }}"
-          data-name="{{ producto.NombreProducto }}"
-          data-price="{{ producto.PrecioUnidad }}"
-          data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-          data-material="{{ producto.Material }}"
-          onclick="addToCartFromButton(this)">
-          Añadir al carrito
-        </button>
+       
       </div>
 
       <div class="mt-3">

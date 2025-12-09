@@ -691,14 +691,13 @@ def get_productos():
     return productos
 
 
-
 def get_producto_by_id(id_producto):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     query = """
-        SELECT p.ID_Producto,p.Stock, p.NombreProducto, p.Material,
-        p.PrecioUnidad, p.Color,
+        SELECT p.ID_Producto, p.Stock, p.NombreProducto, p.Material,
+               p.PrecioUnidad, p.Color, p.Garantia,
                c.NombreCategoria, pr.NombreEmpresa,
                i.ruta AS Imagen
         FROM producto p
@@ -724,12 +723,12 @@ def get_producto_by_id(id_producto):
         "Material": rows[0]["Material"],
         "PrecioUnidad": rows[0]["PrecioUnidad"],
         "Color": rows[0]["Color"],
+        "Garantia": rows[0]["Garantia"],  # <-- agregada la garantía
         "NombreCategoria": rows[0]["NombreCategoria"],
         "NombreEmpresa": rows[0]["NombreEmpresa"],
         # Limpiar rutas para que sean relativas a /static/
         "Imagenes": [
-            row["Imagen"].replace(
-                "static/", "") for row in rows if row["Imagen"]
+            row["Imagen"].replace("static/", "") for row in rows if row["Imagen"]
         ]
     }
 
