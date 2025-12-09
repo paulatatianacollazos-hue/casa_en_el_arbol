@@ -503,11 +503,11 @@ def guardar_producto_route():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Guardar datos del producto
+        # Guardar datos del producto, incluyendo la garantía
         cursor.execute("""
             INSERT INTO producto (NombreProducto, Stock, StockMinimo, Material, Color,
-                                  PrecioUnidad, ID_Categoria, ID_Proveedor)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                  PrecioUnidad, ID_Categoria, ID_Proveedor, Garantia)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             request.form['NombreProducto'],
             int(request.form['Stock']),
@@ -516,18 +516,11 @@ def guardar_producto_route():
             request.form['Color'],
             float(request.form['PrecioUnidad']),
             int(request.form['ID_Categoria']),
-            int(request.form['ID_Proveedor'])
+            int(request.form['ID_Proveedor']),
+            request.form.get('Garantia', '')[:255]  # Garantía limitada a 255 caracteres
         ))
 
         producto_id = cursor.lastrowid
-
-        # Guardar garantía (si existe)
-        if 'Garantia' in request.form and request.form['Garantia'].strip() != "":
-            garantia_texto = request.form['Garantia'][:255]  # Limitar a 255 caracteres
-            cursor.execute("""
-                INSERT INTO garantia (ID_Producto, descripcion)
-                VALUES (%s, %s)
-            """, (producto_id, garantia_texto))
 
         # Guardar imágenes (si hay)
         if 'imagenes[]' in request.files:
