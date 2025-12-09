@@ -422,8 +422,8 @@ document.getElementById("btn-eliminar-producto").addEventListener("click", async
 
         if (data.success) {
             alert(data.message);
-            // Redirige a la lista de productos o dashboard
-            window.location.href = "/admin/lista_productos";
+            // Volver a la página anterior
+            window.history.back();
         } else {
             alert("Error al eliminar: " + data.message);
         }
@@ -433,6 +433,7 @@ document.getElementById("btn-eliminar-producto").addEventListener("click", async
     }
 });
 </script>
+
 
 
 {% endblock %}
