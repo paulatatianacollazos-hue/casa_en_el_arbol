@@ -986,17 +986,24 @@ def editar_producto(producto_id):
     try:
         precio = float(data.get("precio", 0))
         stock = int(data.get("stock", 0))
+        stock_minimo = int(data.get("stock_minimo", 0))
     except ValueError:
-        return jsonify({"success": False, "error": "Precio o stock inválido"}), 400
+        return jsonify({"success": False, "error": "Valores inválidos"}), 400
 
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute("""
             UPDATE producto
-            SET NombreProducto=%s, PrecioUnidad=%s, Material=%s, Color=%s, Stock=%s
+            SET NombreProducto=%s,
+                PrecioUnidad=%s,
+                Material=%s,
+                Color=%s,
+                Stock=%s,
+                StockMinimo=%s
             WHERE ID_Producto=%s
-        """, (nombre, precio, material, color, stock, producto_id))
+        """, (nombre, precio, material, color, stock, stock_minimo, producto_id))
+
         conn.commit()
         return jsonify({"success": True})
     except Exception as e:

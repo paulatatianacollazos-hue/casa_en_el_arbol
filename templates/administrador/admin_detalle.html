@@ -186,32 +186,45 @@
         <h5 class="modal-title" id="modalEditarProductoLabel">Editar Producto</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body">
         <form id="formEditarProducto">
           <input type="hidden" id="productoId">
+
           <div class="mb-3">
             <label for="nombreProducto" class="form-label">Nombre</label>
             <input type="text" class="form-control" id="nombreProducto" required>
           </div>
+
           <div class="mb-3">
             <label for="precioProducto" class="form-label">Precio</label>
             <input type="number" class="form-control" id="precioProducto" required>
           </div>
+
           <div class="mb-3">
             <label for="materialProducto" class="form-label">Material</label>
             <input type="text" class="form-control" id="materialProducto">
           </div>
+
           <div class="mb-3">
             <label for="colorProducto" class="form-label">Color</label>
             <input type="text" class="form-control" id="colorProducto">
           </div>
+
           <div class="mb-3">
-            <label for="stockProducto" class="form-label">Stock</label>
+            <label for="stockProducto" class="form-label">Stock actual</label>
             <input type="number" class="form-control" id="stockProducto" required>
           </div>
+
+          <div class="mb-3">
+            <label for="stockMinimoProducto" class="form-label">Stock mínimo</label>
+            <input type="number" class="form-control" id="stockMinimoProducto" required>
+          </div>
+
           <button type="submit" class="btn btn-primary">Guardar cambios</button>
         </form>
       </div>
+
     </div>
   </div>
 </div>
@@ -333,20 +346,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = new bootstrap.Modal(document.getElementById("modalEditarProducto"));
   const form = document.getElementById("formEditarProducto");
 
-  // Abrir modal y llenar inputs
   btnEditar.addEventListener("click", (e) => {
     const btn = e.currentTarget;
+
     document.getElementById("productoId").value = btn.dataset.id;
     document.getElementById("nombreProducto").value = btn.dataset.nombre;
     document.getElementById("precioProducto").value = btn.dataset.precio;
     document.getElementById("materialProducto").value = btn.dataset.material;
     document.getElementById("colorProducto").value = btn.dataset.color;
     document.getElementById("stockProducto").value = btn.dataset.stock;
+    document.getElementById("stockMinimoProducto").value = btn.dataset.stockminimo;
 
     modal.show();
   });
 
-  // Enviar formulario
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -356,29 +369,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const material = document.getElementById("materialProducto").value;
     const color = document.getElementById("colorProducto").value;
     const stock = document.getElementById("stockProducto").value;
+    const stock_minimo = document.getElementById("stockMinimoProducto").value;
 
     const resp = await fetch(`/admin/administrador/editar_producto/${productoId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, precio, material, color, stock })
+      body: JSON.stringify({ nombre, precio, material, color, stock, stock_minimo })
     });
 
-    const text = await resp.text(); // leer como texto primero
+    const text = await resp.text();
     try {
-        const result = JSON.parse(text); // intentar parsear JSON
-        if (resp.ok && result.success) {
-            alert("✅ Producto actualizado correctamente");
-            location.reload();
-        } else {
-            alert("❌ Error al actualizar producto: " + (result.error || "Desconocido"));
-        }
-    } catch {
-        console.error("Respuesta no es JSON:", text);
-        alert("❌ Error al actualizar producto: respuesta inesperada");
-    }
+      const result = JSON.parse(text);
 
+      if (resp.ok && result.success) {
+        alert("✅ Producto actualizado correctamente");
+        location.reload();
+      } else {
+        alert("❌ Error al actualizar producto: " + (result.error || "Desconocido"));
+      }
+
+    } catch (err) {
+      console.error("Respuesta inesperada:", text);
+      alert("❌ Error al actualizar producto: respuesta inesperada");
+    }
   });
 });
+
 
 </script>
 
