@@ -60,15 +60,7 @@
         <span class="carousel-control-next-icon"></span>
       </button>
       <div class="mt-3">
-  <button class="btn btn-warning" id="btn-editar-producto"
-    data-id="{{ producto.ID_Producto }}"
-    data-nombre="{{ producto.NombreProducto }}"
-    data-precio="{{ producto.PrecioUnidad }}"
-    data-material="{{ producto.Material }}"
-    data-color="{{ producto.Color }}"
-    data-stock="{{ producto.Stock }}">
-    Editar producto
-  </button>
+  
 </div>
     </div>
   </div>
@@ -81,9 +73,17 @@
     <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
     <p><b>Color:</b> {{ producto.Color }}</p>
     <p><b>stock:</b>{{ producto.Stock}}</p>
-      
+    <button class="btn btn-warning" id="btn-editar-producto"
+    data-id="{{ producto.ID_Producto }}"
+    data-nombre="{{ producto.NombreProducto }}"
+    data-precio="{{ producto.PrecioUnidad }}"
+    data-material="{{ producto.Material }}"
+    data-color="{{ producto.Color }}"
+    data-stock="{{ producto.Stock }}">
+    Editar producto
+  </button> 
     </div>
-
+    
     </div>
   </div>
 </div>
@@ -357,25 +357,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const color = document.getElementById("colorProducto").value;
     const stock = document.getElementById("stockProducto").value;
 
+    const resp = await fetch(`/admin/administrador/editar_producto/${productoId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, precio, material, color, stock })
+    });
+
+    const text = await resp.text(); // leer como texto primero
     try {
-      const resp = await fetch(`/administrador/editar_producto/${productoId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, precio, material, color, stock })
-      });
-
-      const result = await resp.json();
-
-      if (resp.ok && result.success) {
-        alert("✅ Producto actualizado correctamente");
-        location.reload(); // recarga para reflejar cambios
-      } else {
-        alert("❌ Error al actualizar producto: " + (result.error || "Desconocido"));
-      }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Error al actualizar producto: " + err.message);
+        const result = JSON.parse(text); // intentar parsear JSON
+        if (resp.ok && result.success) {
+            alert("✅ Producto actualizado correctamente");
+            location.reload();
+        } else {
+            alert("❌ Error al actualizar producto: " + (result.error || "Desconocido"));
+        }
+    } catch {
+        console.error("Respuesta no es JSON:", text);
+        alert("❌ Error al actualizar producto: respuesta inesperada");
     }
+
   });
 });
 
