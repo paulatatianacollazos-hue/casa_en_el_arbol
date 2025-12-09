@@ -79,7 +79,7 @@
     <p id="mensaje-stock" class="mt-2"></p>
   
     <div class="botones mt-3">
-      <button class="btn btn-primary">Garantía</button>
+      <button class="btn btn-primary" id="btn-garantia">Garantía</button>
       <button class="btn btn-primary"
         data-id="{{ producto.ID_Producto }}"
         data-name="{{ producto.NombreProducto }}"
@@ -96,6 +96,7 @@
       <button id="btn-personalizar" class="btn btn-primary">
         Personalizar
       </button>
+
       <button type="button" class="btn btn-primary "
                     onclick="volverAtras()">Volver
             </button>
@@ -160,6 +161,69 @@
   </div>
   </div>
 </div>
+<div id="seccion-garantia" class="d-none">
+  <div class="content1">
+    <div class="container text-center my-4">
+      <div id="carouselGarantia" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+        <div class="carousel-inner">
+          {% for img in producto.Imagenes %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename=img) }}"
+                 class="d-block w-100"
+                 style="max-height: 400px; object-fit: cover;"
+                 alt="Imagen de {{ producto.NombreProducto }}">
+          </div>
+          {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselGarantia" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselGarantia" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="caja">
+      <h2>{{ producto.NombreProducto }}</h2>
+      <p><b>Garantía:</b> <span id="texto-garantia">{{ producto.Garantia }}</span></p>
+
+      <div class="botones mt-3">
+        <button id="btn-editar-garantia" class="btn btn-primary"
+                data-garantia="{{ producto.Garantia }}"
+                data-id="{{ producto.ID_Producto }}">
+          Editar Garantía
+        </button>
+      </div>
+
+      <div class="mt-3">
+        <button id="btn-volver-garantia" class="btn btn-primary">Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar garantía -->
+<div class="modal fade" id="modalEditarGarantia" tabindex="-1" aria-labelledby="modalEditarGarantiaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formEditarGarantia">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarGarantiaLabel">Editar Garantía</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <textarea id="inputGarantia" class="form-control" rows="5"></textarea>
+          <input type="hidden" id="idProductoGarantia">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 <h3 class="mt-4">Reseñas</h3>
 
@@ -354,4 +418,34 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 </script>
 
+// ---- MOSTRAR GARANTIA ----
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnGarantia = document.getElementById("btn-garantia");
+  const btnVolverGarantia = document.getElementById("btn-volver-garantia");
+  const vistaPrincipal = document.getElementById("vista-principal");
+  const seccionGarantia = document.getElementById("seccion-garantia");
+
+  // Mostrar sección garantía
+  btnGarantia.addEventListener("click", () => {
+    vistaPrincipal.classList.add("d-none");
+    seccionGarantia.classList.remove("d-none");
+
+    // Reiniciar carrusel de garantía
+    const garantiaCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselGarantia");
+    garantiaCarousel.to(0);
+  });
+
+  // Volver a vista principal
+  btnVolverGarantia.addEventListener("click", () => {
+    seccionGarantia.classList.add("d-none");
+    vistaPrincipal.classList.remove("d-none");
+
+    // Reiniciar carrusel principal
+    const principalCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPrincipal");
+    principalCarousel.to(0);
+  });
+});
+
+</script>
 {% endblock %}

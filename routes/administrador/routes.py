@@ -1071,3 +1071,21 @@ def eliminar_producto_route(producto_id):
     except Exception as e:
         conn.rollback()
         return jsonify({"success": False, "message": str(e)})
+
+
+@admin.route('/editar_garantia/<int:id_producto>', methods=['POST'])
+def editar_garantia(id_producto):
+    data = request.get_json()
+    nueva_garantia = data.get('garantia', '')
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "UPDATE producto SET Garantia = %s WHERE ID_Producto = %s"
+        cursor.execute(query, (nueva_garantia, id_producto))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True, "message": "Garantía actualizada correctamente"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
