@@ -179,9 +179,9 @@ window.abrirMiModalConFecha = async function(fecha, usuarioId) {
                 </table>
                 <div class="d-flex justify-content-between">
                   <button type="submit" class="btn btn-sm btn-primary">Guardar selección</button>
-                  <button type="button" class="btn btn-outline-success btn-sm" onclick="abrirModalEntrega(${info.ID_Pedido})">
+                  <a href="/empleado/registro_entrega/${info.ID_Pedido}" class="btn btn-outline-success btn-sm">
                     <i class="bi bi-journal-text"></i> Registro de Entrega
-                  </button>
+                  </a>
                 </div>
               </form>
             </div>
