@@ -498,11 +498,47 @@ def catalogo():
 @role_required("admin")
 def guardar_producto_route():
     try:
-        producto_id = guardar_producto(
-            request.form, request.files.getlist('imagenes[]'))
-        return jsonify({"success": True, "message":
-                        "Producto guardado con éxito", "id": producto_id})
+        cursor = get_connection.cursor()
+        # Guardar datos del producto
+        cursor.execute("""
+            INSERT INTO producto (NombreProducto, Stock, StockMinimo, Material, Color,
+                                  PrecioUnidad, ID_Categoria, ID_Proveedor)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            request.form['NombreProducto'],
+            int(request.form['Stock']),
+            int(request.form.get('StockMinimo', 0)),  # valor por defecto 0
+            request.form['Material'],
+            request.form['Color'],
+            float(request.form['PrecioUnidad']),
+            int(request.form['ID_Categoria']),
+            int(request.form['ID_Proveedor'])
+        ))
+
+        producto_id = cursor.lastrowid
+
+        # Guardar imágenes
+        if 'imagenes[]' in request.files:
+            files = request.files.getlist('imagenes[]')
+            for file in files:
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    filepath = os.path.join(
+                        current_app.config['UPLOAD_FOLDER'], filename)
+                    file.save(filepath)
+                    image_url = f"static/img/{filename}"
+                    cursor.execute("""
+                        INSERT INTO imagenproducto (ID_Producto, Imagen)
+                        VALUES (%s, %s)
+                    """, (producto_id, image_url))
+
+        get_connection.commit()
+        return jsonify({"success": True,
+                        "message": "Producto guardado con éxito",
+                        "id": producto_id})
+
     except Exception as e:
+        get_connection.rollback()
         return jsonify({"success": False, "message": str(e)})
 
 
