@@ -500,8 +500,8 @@ def catalogo():
 @role_required("admin")
 def guardar_producto_route():
     try:
-        cursor = get_connection.cursor()
-        # Guardar datos del producto
+        conn = get_connection()  # <-- Llamar a la función
+        cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO producto (NombreProducto, Stock, StockMinimo, Material, Color,
                                   PrecioUnidad, ID_Categoria, ID_Proveedor)
