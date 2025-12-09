@@ -616,51 +616,46 @@ def guardar_producto(data, files):
     return producto_id
 
 
-def guardar_producto_route():
+def guardar_producto(form, imagenes):
+    nombre = form.get("NombreProducto")
+    material = form.get("Material")
+    color = form.get("Color")
+    precio = float(form.get("PrecioUnidad", 0))
+    stock = int(form.get("Stock", 0))
+    stock_minimo = int(form.get("StockMinimo", 0))  # <-- aquí capturas StockMinimo
+    id_categoria = int(form.get("ID_Categoria", 0))
+    id_proveedor = int(form.get("ID_Proveedor", 0))
+
+    conn = get_connection()
+    cursor = conn.cursor()
     try:
-        # ✅ Guardar datos del producto primero
-        cursor = db.connection.cursor()
+        # Insertar en la tabla producto
         cursor.execute("""
-            INSERT INTO producto (NombreProducto, Stock, Material, Color,
-            PrecioUnidad, ID_Categoria, ID_Proveedor)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (
-            request.form['NombreProducto'],
-            request.form['Stock'],
-            request.form['Material'],
-            request.form['Color'],
-            request.form['PrecioUnidad'],
-            request.form['ID_Categoria'],
-            request.form['ID_Proveedor']
-        ))
+            INSERT INTO producto
+            (NombreProducto, PrecioUnidad, Material, Color, Stock, StockMinimo, ID_Categoria, ID_Proveedor)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (nombre, precio, material, color, stock, stock_minimo, id_categoria, id_proveedor))
+        
         producto_id = cursor.lastrowid
 
-        # ✅ Guardar imágenes
-        if 'imagenes' in request.files:
-            files = request.files.getlist('imagenes')
-            for file in files:
-                if file and file.filename != '':
-                    filename = secure_filename(file.filename)
-                    filepath = os.path.join(
-                        current_app.config['UPLOAD_FOLDER'], filename)
+        # Guardar imágenes (si las hay)
+        for imagen in imagenes:
+            if imagen.filename != "":
+                filename = secure_filename(imagen.filename)
+                imagen.save(os.path.join("static/img/productos", filename))
+                cursor.execute("""
+                    INSERT INTO producto_imagen (ID_Producto, RutaImagen)
+                    VALUES (%s, %s)
+                """, (producto_id, f"img/productos/{filename}"))
 
-                    # Guardar físicamente en static/img
-                    file.save(filepath)
-
-                    image_url = f"static/img/{filename}"
-
-                    cursor.execute("""
-                        INSERT INTO imagenproducto (ID_Producto, Imagen)
-                        VALUES (%s, %s)
-                    """, (producto_id, image_url))
-
-        db.connection.commit()
-        return jsonify({"success": True,
-                        "message": "Producto guardado con éxito"})
-
+        conn.commit()
+        return producto_id
     except Exception as e:
-        db.connection.rollback()
-        return jsonify({"success": False, "message": str(e)})
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_productos():
