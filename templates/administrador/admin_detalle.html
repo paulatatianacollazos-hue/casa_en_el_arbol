@@ -88,6 +88,7 @@
         data-id="{{ producto.ID_Producto }}">
         Eliminar producto
     </button>
+    <button class="btn btn-primary" id="btn-garantia">Garantía</button>
 
     </div>
     
@@ -99,57 +100,57 @@
 
 
 <!-- SECCIÓN PERSONALIZAR -->
-<div id="seccion-personalizar" class="d-none">
+<!-- SECCIÓN GARANTÍA -->
+<div id="seccion-garantia" class="d-none">
   <div class="content1">
-  <div class="container text-center my-4">
-    <div id="carouselPersonalizar" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
-      <div class="carousel-inner">
-        {% for img in producto.Imagenes %}
-        <div class="carousel-item {% if loop.first %}active{% endif %}">
-          <img src="{{ url_for('static', filename=img) }}"
-               class="d-block w-100"
-               style="max-height: 400px; object-fit: cover;"
-               alt="Imagen personalizada de {{ producto.NombreProducto }}">
+    <div class="container text-center my-4">
+      <div id="carouselGarantia" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+        <div class="carousel-inner">
+          {% for img in producto.Imagenes %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename=img) }}"
+                 class="d-block w-100"
+                 style="max-height: 400px; object-fit: cover;"
+                 alt="Imagen de {{ producto.NombreProducto }}">
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselGarantia" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselGarantia" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-      </button>
     </div>
-  </div>
 
-  
-  <div class="caja">
-    <h2>{{ producto.NombreProducto }}</h2>
-    <p><b>Material:</b> {{ producto.Material }}</p>
-    <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
-    <p><b>Color:</b> {{ producto.Color }}</p>
-    <p><b>stock:</b>{{ producto.Stock}}</p>
+    <div class="caja">
+      <h2>{{ producto.NombreProducto }}</h2>
+      <p><b>Material:</b> {{ producto.Material }}</p>
+      <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+      <p><b>Color:</b> {{ producto.Color }}</p>
+      <p><b>Stock:</b> {{ producto.Stock }}</p>
+      <p><b>Garantía:</b> {{ producto.Garantia }}</p>
 
-    <div class="botones mt-3">
-      <button class="btn btn-primary">Garantía</button>
-      <button class="btn btn-primary"
-        data-id="{{ producto.ID_Producto }}"
-        data-name="{{ producto.NombreProducto }}"
-        data-price="{{ producto.PrecioUnidad }}"
-        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-        data-material="{{ producto.Material }}"
-        onclick="addToCartFromButton(this)">
-        Añadir al carrito
-      </button>
+      <div class="botones mt-3">
+        <button class="btn btn-primary"
+          data-id="{{ producto.ID_Producto }}"
+          data-name="{{ producto.NombreProducto }}"
+          data-price="{{ producto.PrecioUnidad }}"
+          data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+          data-material="{{ producto.Material }}"
+          onclick="addToCartFromButton(this)">
+          Añadir al carrito
+        </button>
+      </div>
+
+      <div class="mt-3">
+        <button id="btn-volver-garantia" class="btn btn-primary">Volver</button>
+      </div>
     </div>
-  
-    <div class="mt-3">
-    <button id="btn-volver" class="btn btn-primary">Volver</button>
-  </div>
-    </div>
-  </div>
   </div>
 </div>
+
 
 <h3 class="mt-4">🗣️ Reseñas</h3>
 
