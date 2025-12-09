@@ -435,13 +435,13 @@ def pagos():
     )
 
 
-
 @cliente.route('/confirmar_pago', methods=['POST'])
 def confirmar_pago():
     data = request.get_json()
     productos_carrito = data.get('productos', [])
     metodo_pago = data.get('metodo_pago')
-    direccion_id = data.get('direccion')  # ID de la dirección seleccionada
+    instalaciones = data.get('instalaciones')   # 🔹 <- AGREGADO
+    direccion_id = data.get('direccion')
     total = data.get('total', 0)
 
     try:
@@ -462,10 +462,11 @@ def confirmar_pago():
             producto.Stock -= item['quantity']
             db.session.add(producto)
 
-        # Obtener la dirección completa
+        # Obtener dirección completa
         direccion = Direccion.query.get(direccion_id)
         if not direccion:
             return jsonify({"success": False, "error": "Dirección no encontrada."})
+
         destino_texto = f"{direccion.Direccion}, {direccion.Barrio or ''}, {direccion.Ciudad or ''}, {direccion.Departamento or ''}, {direccion.Pais or ''}"
 
         # Crear pedido
@@ -473,12 +474,13 @@ def confirmar_pago():
             ID_Usuario=current_user.ID_Usuario,
             Destino=destino_texto,
             Estado='pendiente',
-            FechaPedido=datetime.utcnow()
+            FechaPedido=datetime.utcnow(),
+            Instalaciones=instalaciones   # 🔹 <- SE GUARDA EN BD
         )
         db.session.add(nuevo_pedido)
-        db.session.commit()  # guardar pedido y actualizar stock
+        db.session.commit()
 
-        # Guardar detalle de pedido
+        # Guardar detalle del pedido
         for item in productos_carrito:
             detalle = Detalle_Pedido(
                 ID_Pedido=nuevo_pedido.ID_Pedido,
@@ -495,7 +497,6 @@ def confirmar_pago():
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)})
-
 
 
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])

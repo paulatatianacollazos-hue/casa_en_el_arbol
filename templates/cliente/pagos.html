@@ -58,6 +58,14 @@
         </option>
       {% endfor %}
     </select>
+    <!-- 🔹 Selector de instalaciones -->
+    <div class="mb-4 mt-3">
+      <label class="form-label fw-bold">Instalaciones:</label>
+      <select id="instalaciones" class="form-select w-auto">
+        <option value="no" selected>No</option>
+        <option value="si">Sí</option>
+      </select>
+    </div>
 
   </div>
 
@@ -232,10 +240,13 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(async () => {
       try {
         // Preparar datos para backend
+        const instalaciones = document.getElementById("instalaciones").value;
+
         const payload = {
           metodo_pago: metodoPago,
+          instalaciones: instalaciones,
           productos: productos.map(p => ({
-            id: p.id,        // 🔹 Asegúrate de que cada producto tenga ID
+            id: p.id,
             name: p.name,
             price: p.price,
             quantity: p.quantity
@@ -243,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
           total: total,
           direccion: direccion
         };
+
 
         const response = await fetch("{{ url_for('cliente.confirmar_pago') }}", {
           method: "POST",
