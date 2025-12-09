@@ -3,7 +3,8 @@ from flask import jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import (
-    Usuario, Calendario, Notificaciones, RegistroEntrega, db
+    Usuario, Calendario, Notificaciones, RegistroEntrega, db,
+    Pedido, Detalle_Pedido, Producto
     )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -343,3 +344,27 @@ def registro_entrega(pedido_id):
 @empleado.route("/nosotros")
 def nosotros():
     return render_template("empleado/Nosotros.html")
+
+
+@empleado.route("/pedido/<int:id_pedido>/productos", methods=["GET", "POST"])
+@login_required
+def pedido_productos(id_pedido):
+    pedido = Pedido.query.get_or_404(id_pedido)
+    productos = (
+        db.session.query(Detalle_Pedido, Producto)
+        .join(Producto, Detalle_Pedido.ID_Producto == Producto.ID_Producto)
+        .filter(Detalle_Pedido.ID_Pedido == id_pedido)
+        .all()
+    )
+
+    if request.method == "POST":
+        # Guardar el estado de los checkboxes
+        for detalle, producto in productos:
+            marcado = str(producto.ID_Producto) in request.form
+            detalle.marcado = marcado  # Suponiendo que agregas un campo "marcado" en Detalle_Pedido
+            db.session.add(detalle)
+        db.session.commit()
+        flash("Estado de productos actualizado", "success")
+        return redirect(url_for("cliente.detalle_pedido", id_pedido=id_pedido))
+
+    return render_template("cliente/pedido_productos.html", pedido=pedido, productos=productos)
