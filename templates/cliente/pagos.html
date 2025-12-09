@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const payload = {
           metodo_pago: metodoPago,
-          instalaciones: instalaciones,
+          instalacion: instalaciones,  // 🔹 debe coincidir con el modelo y tabla
           productos: productos.map(p => ({
             id: p.id,
             name: p.name,
