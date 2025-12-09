@@ -619,20 +619,20 @@ def guardar_producto(data, files):
 def guardar_producto_route():
     try:
         # ✅ Guardar datos del producto primero
-        cursor = db.connection.cursor()
+        cursor = get_connection.cursor()
         cursor.execute("""
             INSERT INTO producto (NombreProducto, Stock, StockMinimo, Material, Color,
                                 PrecioUnidad, ID_Categoria, ID_Proveedor)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             request.form['NombreProducto'],
-            request.form['Stock'],
-            request.form['StockMinimo'],  # <-- agregado StockMinimo
+            int(request.form['Stock']),
+            int(request.form.get('StockMinimo', 0)),  # <- asegura un valor por defecto
             request.form['Material'],
             request.form['Color'],
-            request.form['PrecioUnidad'],
-            request.form['ID_Categoria'],
-            request.form['ID_Proveedor']
+            float(request.form['PrecioUnidad']),
+            int(request.form['ID_Categoria']),
+            int(request.form['ID_Proveedor'])
         ))
 
         producto_id = cursor.lastrowid
