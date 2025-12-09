@@ -190,43 +190,55 @@
 </div>
 
 <script>
-  const modal = document.getElementById("myModal");
-  const openBtn = document.getElementById("openModalBtn");
-  const closeBtn = document.getElementById("closeModalBtn");
-  const form = document.getElementById("productoForm");
+  // --- Variables del modal ---
+const modal = document.getElementById("myModal");
+const openBtn = document.getElementById("openModalBtn");
+const closeBtn = document.getElementById("closeModalBtn");
+const form = document.getElementById("productoForm");
+const imagenesContainer = document.getElementById("imagenesContainer");
+const addImageBtn = document.getElementById("addImageBtn");
 
-  openBtn.onclick = () => modal.style.display = "flex";
-  closeBtn.onclick = () => modal.style.display = "none";
-  window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
+// --- Abrir y cerrar modal ---
+openBtn.onclick = () => modal.style.display = "flex";
+closeBtn.onclick = () => modal.style.display = "none";
+window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
-  // Enviar formulario con fetch
-  form.onsubmit = async (event) => {
-    event.preventDefault();
+// --- Agregar más inputs de imagen ---
+addImageBtn.onclick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.name = "imagenes[]"; // importante para enviarlas como array
+    input.accept = "image/*";
+    input.classList.add("mt-2");
+    imagenesContainer.appendChild(input);
+};
+
+// --- Enviar formulario con fetch ---
+form.onsubmit = async (event) => {
+    event.preventDefault(); // Evita que se recargue la página
     const formData = new FormData(form);
 
-    const resp = await fetch("{{ url_for('admin.guardar_producto_route') }}", {
-      method: "POST",
-      body: formData
-    });
+    try {
+        const resp = await fetch("{{ url_for('admin.guardar_producto_route') }}", {
+            method: "POST",
+            body: formData
+        });
 
-    const data = await resp.json();
-    alert(data.message);
-    if (data.success) {
-      modal.style.display = "none";
-      form.reset();
+        const data = await resp.json();
+
+        if (data.success) {
+            alert(data.message);
+            modal.style.display = "none";
+            form.reset();
+            // Opcional: recargar la página o actualizar la lista de productos dinámicamente
+            // location.reload();
+        } else {
+            alert("Error: " + data.message);
+        }
+    } catch (error) {
+        console.error("Error al enviar el formulario:", error);
+        alert("Ocurrió un error al guardar el producto.");
     }
-  };
-  // Botón para agregar más inputs de imagen
-const addImageBtn = document.getElementById("addImageBtn");
-const imagenesContainer = document.getElementById("imagenesContainer");
-
-addImageBtn.onclick = () => {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.name = "imagenes[]"; // importante para enviarlas como array
-  input.accept = "image/*";
-  input.classList.add("mt-2");
-  imagenesContainer.appendChild(input);
 };
 
 </script>
