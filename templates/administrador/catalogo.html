@@ -184,7 +184,7 @@
         <h3>{{ p.NombreProducto }}</h3>
         <p>Material: {{ p.Material }}</p>
         <p>Precio: ${{ p.PrecioUnidad }}</p>
-        {% if p.Stock <= p.StockMinimo %}
+        {% if p['Stock'] <= p['StockMinimo'] %}
         <div style="
             background:#ff4d4d;
             color:white;
