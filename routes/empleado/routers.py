@@ -383,57 +383,41 @@ def detalles_pedido(id_pedido):
     return render_template("cliente/detalle_pedido.html", pedido=pedido, productos=productos)
 
 
-@empleado.route("/guardar_recogido/<int:pedido_id>", methods=["POST"])
+@empleado.route("/actualizar_productos/<int:pedido_id>", methods=["POST"])
 @login_required
-def guardar_recogido(pedido_id):
-    data = request.get_json()
+def actualizar_productos(pedido_id):
+    data = request.json
 
-    if not data or "productos" not in data:
-        return jsonify({"success": False, "message": "Datos inválidos"}), 400
-
-    productos = data["productos"]  # Lista: [{id_producto, recogido}, ...]
+    seleccionados = data.get("seleccionados", [])
+    no_seleccionados = data.get("noSeleccionados", [])
 
     conn = get_connection()
     cursor = conn.cursor()
 
     try:
-        for item in productos:
-            id_producto = item.get("id_producto")
-            recogido = item.get("recogido")
-
-            if id_producto is None:
-                continue
-
-            # Verificar si ya existe registro
+        # Guardar productos marcados como recogidos
+        for producto_id in seleccionados:
             cursor.execute("""
-                SELECT * FROM productos_recogidos
-                WHERE ID_Pedido = %s AND ID_Producto = %s
-            """, (pedido_id, id_producto))
+                INSERT INTO productos_recogidos (ID_Pedido, ID_Producto, Recogido)
+                VALUES (%s, %s, 1)
+                ON DUPLICATE KEY UPDATE Recogido = 1
+            """, (pedido_id, producto_id))
 
-            existe = cursor.fetchone()
-
-            if existe:
-                # Actualizar
-                cursor.execute("""
-                    UPDATE productos_recogidos
-                    SET Recogido = %s
-                    WHERE ID_Pedido = %s AND ID_Producto = %s
-                """, (recogido, pedido_id, id_producto))
-            else:
-                # Insertar nuevo registro
-                cursor.execute("""
-                    INSERT INTO productos_recogidos (ID_Pedido, ID_Producto, Recogido)
-                    VALUES (%s, %s, %s)
-                """, (pedido_id, id_producto, recogido))
+        # Guardar productos NO recogidos
+        for producto_id in no_seleccionados:
+            cursor.execute("""
+                INSERT INTO productos_recogidos (ID_Pedido, ID_Producto, Recogido)
+                VALUES (%s, %s, 0)
+                ON DUPLICATE KEY UPDATE Recogido = 0
+            """, (pedido_id, producto_id))
 
         conn.commit()
-
-        return jsonify({"success": True, "message": "Productos actualizados correctamente"})
+        return jsonify({"success": True})
 
     except Exception as e:
         conn.rollback()
-        print("❌ ERROR:", e)
-        return jsonify({"success": False, "message": "Error al guardar la selección"}), 500
+        print("❌ Error en actualizar_productos:", str(e))
+        return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
         cursor.close()
