@@ -143,22 +143,24 @@ window.abrirMiModalConFecha = async function (fecha, usuarioId) {
       const res = await fetch(`/empleado/detalle_pedido/${evento.ID_Pedido}`);
       const data = await res.json();
 
+      if (data.error) return `<div class='alert alert-danger'>Error cargando pedido #${evento.ID_Pedido}</div>`;
+
       const info = data[0];
 
       const productosHTML = data.map(p => `
         <tr>
           <td>${p.NombreProducto}</td>
           <td>
-            <input type="checkbox" class="chk-producto" data-id="${p.ID_Producto}">
+            <input type="checkbox" class="chk-producto" data-id="${p.ID_Producto}" ${p.marcado ? 'checked' : ''}>
           </td>
-          <td class="estado-producto">No recogido</td>
+          <td class="estado-producto">${p.marcado ? 'Recogido' : 'No recogido'}</td>
         </tr>
       `).join("");
 
       return `
         <div class='card mb-3 shadow-sm border-0'>
-          <div class='card-header bg-success text-white'>
-            <strong>Pedido #${info.ID_Pedido}</strong>
+          <div class='card-header ${info.TipoPedido === 'Instalación' ? 'bg-primary' : 'bg-success'} text-white'>
+            <strong>${info.TipoPedido === 'Instalación' ? '🧰 Instalación' : '🚚 Entrega'} #${info.ID_Pedido}</strong>
           </div>
           <div class='card-body'>
 
@@ -192,7 +194,7 @@ window.abrirMiModalConFecha = async function (fecha, usuarioId) {
   contenido.innerHTML = resultados.join("");
   modal.show();
 
-  // Actualizar estado del producto al marcar
+  // 🔹 Listeners para checkboxes (actualizar texto de estado)
   document.querySelectorAll(".chk-producto").forEach(chk => {
     chk.addEventListener("change", (e) => {
       const fila = e.target.closest("tr");
@@ -201,14 +203,19 @@ window.abrirMiModalConFecha = async function (fecha, usuarioId) {
     });
   });
 
-  // Guardar selección
+  // 🔹 Guardar selección de productos
   pedidosDelDia.forEach(evento => {
     const form = document.getElementById(`formProductosPedido-${evento.ID_Pedido}`);
+    if (!form) return;
 
-    form.addEventListener("submit", async e => {
+    // Eliminar listener previo para evitar duplicados
+    form.replaceWith(form.cloneNode(true));
+    const nuevoForm = document.getElementById(`formProductosPedido-${evento.ID_Pedido}`);
+
+    nuevoForm.addEventListener("submit", async e => {
       e.preventDefault();
 
-      const checkboxes = form.querySelectorAll(".chk-producto");
+      const checkboxes = nuevoForm.querySelectorAll(".chk-producto");
 
       const seleccionados = [];
       const noSeleccionados = [];
@@ -218,25 +225,60 @@ window.abrirMiModalConFecha = async function (fecha, usuarioId) {
         else noSeleccionados.push(chk.dataset.id);
       });
 
-      const resp = await fetch(`/empleado/actualizar_productos/${evento.ID_Pedido}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          seleccionados: seleccionados,
-          noSeleccionados: noSeleccionados
-        })
-      });
+      try {
+        const resp = await fetch(`/empleado/actualizar_productos/${evento.ID_Pedido}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ seleccionados, noSeleccionados })
+        });
 
-      const result = await resp.json();
+        const result = await resp.json();
 
-      if (resp.ok && result.success) {
-        alert("✅ Selección guardada correctamente");
-      } else {
+        if (resp.ok && result.success) {
+          alert("✅ Selección guardada correctamente");
+        } else {
+          alert("❌ Error al guardar selección");
+        }
+      } catch (err) {
+        console.error("❌ Error al enviar productos:", err);
         alert("❌ Error al guardar selección");
       }
     });
   });
 };
+
+// =============================================================
+// 🔹 Controles del calendario
+// =============================================================
+btnHoy.addEventListener("click", () => { fechaActual = new Date(); renderCalendario(fechaActual); });
+
+btnMes.addEventListener("click", () => {
+  const selectorMes = document.createElement("input");
+  selectorMes.type = "month";
+  selectorMes.style.position = "absolute";
+  selectorMes.style.opacity = "0";
+  document.body.appendChild(selectorMes);
+  const año = fechaActual.getFullYear();
+  const mes = String(fechaActual.getMonth() + 1).padStart(2, "0");
+  selectorMes.value = `${año}-${mes}`;
+  selectorMes.addEventListener("change", e => {
+    const [nuevoAño, nuevoMes] = e.target.value.split("-");
+    fechaActual = new Date(parseInt(nuevoAño), parseInt(nuevoMes) - 1, 1);
+    renderCalendario(fechaActual);
+    document.body.removeChild(selectorMes);
+  });
+  selectorMes.showPicker?.();
+  selectorMes.click();
+});
+
+btnAño.addEventListener("click", () => {
+  const añoActual = fechaActual.getFullYear();
+  const nuevoAño = prompt("Ingrese un año:", añoActual);
+  if (nuevoAño && !isNaN(nuevoAño)) fechaActual = new Date(parseInt(nuevoAño), fechaActual.getMonth(), 1);
+  renderCalendario(fechaActual);
+});
+
+selectorUsuario.addEventListener("change", (e) => { usuarioSeleccionado = e.target.value; renderCalendario(fechaActual); });
 
 // =============================================================
 // 🔹 Inicialización

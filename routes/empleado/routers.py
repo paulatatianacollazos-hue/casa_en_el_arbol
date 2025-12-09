@@ -239,19 +239,20 @@ def detalle_pedido(pedido_id):
         SELECT
             p.ID_Pedido,
             p.FechaPedido,
-            p.Destino,
             p.Estado,
             u.Nombre AS ClienteNombre,
             u.Apellido AS ClienteApellido,
-            u.Correo AS ClienteCorreo,
-            dp.ID_Producto,                 -- ✅ AGREGADO AQUÍ
+            dp.ID_Producto,
             dp.Cantidad,
             dp.PrecioUnidad,
-            pr.NombreProducto
+            pr.NombreProducto,
+            COALESCE(prr.Recogido, 0) AS marcado  -- ✅ marcar si ya fue recogido
         FROM pedido p
         INNER JOIN usuario u ON u.ID_Usuario = p.ID_Usuario
         INNER JOIN detalle_pedido dp ON dp.ID_Pedido = p.ID_Pedido
         INNER JOIN producto pr ON pr.ID_Producto = dp.ID_Producto
+        LEFT JOIN productos_recogidos prr
+               ON prr.ID_Pedido = p.ID_Pedido AND prr.ID_Producto = dp.ID_Producto
         WHERE p.ID_Pedido = %s
     """, (pedido_id,))
 
