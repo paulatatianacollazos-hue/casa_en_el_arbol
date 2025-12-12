@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, flash, redirect, url_for, jsonify, request
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
@@ -42,6 +45,7 @@ app.config.update(
 if not os.path.exists(app.config["UPLOAD_FOLDER"]):
     os.makedirs(app.config["UPLOAD_FOLDER"])
 
+
 # ------------------ CONFIGURACIÓN MAIL ------------------ #
 app.config.update(
     MAIL_SERVER="smtp.gmail.com",
@@ -57,8 +61,10 @@ app.config.update(
 )
 mail.init_app(app)
 
+
 # ------------------ DB ------------------ #
 db.init_app(app)
+
 
 # ------------------ FLASK LOGIN ------------------ #
 login_manager = LoginManager()
@@ -80,7 +86,6 @@ def load_user(user_id):
 
 
 # ------------------ REGISTRO DE BLUEPRINTS ------------------ #
-# No redefinimos url_prefix aquí, ya está en cada blueprint
 app.register_blueprint(auth)
 app.register_blueprint(cliente)
 app.register_blueprint(admin)
