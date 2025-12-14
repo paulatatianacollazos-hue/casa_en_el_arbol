@@ -14,7 +14,7 @@ def role_required(*roles):
     Decorador para restringir acceso según roles.
 
     Uso:
-        @role_required('empleado', 'admin')
+        @role_required('instalador', 'admin')
     """
     # Convertimos todos los roles permitidos a minúsculas
     valid_roles = [r.strip().lower() for r in roles]
