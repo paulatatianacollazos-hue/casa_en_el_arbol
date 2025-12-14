@@ -355,7 +355,9 @@
         <h4>🌿 HOLA!</h4>
         <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
         <a id="menu-direcciones"><i class="bi bi-calendar me-2"></i>Calendario</a>
+        {% if current_user.Rol == 'taller' %}
         <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>estado</a>
+        {%endif%}
         <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
     </div>
