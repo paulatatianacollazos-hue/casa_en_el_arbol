@@ -30,7 +30,7 @@ app.config.update(
     SECRET_KEY=os.getenv("SECRET_KEY", "mi_clave_super_secreta_y_unica"),
     SQLALCHEMY_DATABASE_URI=os.getenv(
         "DATABASE_URI",
-        "mysql+pymysql://root:@127.0.0.1:3306/Tienda_db"
+        "mysql+pymysql://root:paula123@127.0.0.1:3306/Tienda_db"
     ),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True},
