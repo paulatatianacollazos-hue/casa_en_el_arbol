@@ -356,7 +356,7 @@
         <a id="menu-perfil" class="active"><i class="bi bi-person-circle me-2"></i>Perfil</a>
         <a id="menu-direcciones"><i class="bi bi-calendar me-2"></i>Calendario</a>
         {% if current_user.Rol == 'taller' %}
-        <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>estado</a>
+        <a id="menu-pedidos"><i class="bi bi-box-seam me-2"></i>pedidos</a>
         {%endif%}
         <a href="{{ url_for('cliente.dashboard') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a>
       </div>
@@ -445,26 +445,10 @@
       <!-- ✅ MIS PEDIDOS -->
       <div id="seccion-pedidos" class="card shadow-sm p-4 mt-4" style="display:none; ">
         <div class="profile-header mb-4">
-          <h5 class="mb-0">Actualizar estado de pedidos</h5>
+          <h5 class="mb-0">pedidos</h5>
         </div>
-        <div class="estado">
-        <form method="POST" action="{{ url_for('empleado.actualizar_pedido_route') }}">
-          <div class="content">
-              <input type="number" name="pedido_id" required placeholder="ID del pedido:" style="color:black;">
-
-              <label for="estado" style="color:#628D46;">Nuevo estado:</label>
-              <select name="estado" required>
-                  <option value="pendiente">pendiente</option>
-                  <option value="en proseso">en proceso</option>
-                  <option value="en reparto">en reparto</option>
-                  <option value="entregado">entregado</option>
-              </select><br><br>
-
-              <textarea name="comentario" rows="3" placeholder="Comentario:"></textarea><br><br>
-
-              <button type="submit">Actualizar Pedido</button>
-          </div>
-      </form>
+        
+        
       </div>
       </div>
 
