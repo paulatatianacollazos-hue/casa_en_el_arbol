@@ -112,6 +112,9 @@ def login():
                     'admin': 'admin.dashboard',
                     'cliente': 'cliente.dashboard',
                     'empleado': 'empleado.dashboard',
+                    'instalador': 'empleado.dashboard',
+                    'transportista': 'empleado.dashboard',
+                    'taller': 'empleado.dashboard',
                 }
 
                 ruta = rutas_por_rol.get(usuario.Rol)
