@@ -1,0 +1,67 @@
+.social-float-container {
+  position: fixed;
+  bottom: 160px; /* Va ENCIMA del chat */
+  right: 25px;
+  z-index: 999;
+}
+
+.social-main-btn {
+  width: 60px;
+  height: 60px;
+  background: #111;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.social-btn {
+  position: absolute;
+  right: 0;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* Mostrar al activar */
+.social-float-container.active .facebook {
+  bottom: 70px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.social-float-container.active .instagram {
+  bottom: 135px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.social-float-container.active .whatsapp {
+  bottom: 200px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.social-float-container.active .youtube {
+  bottom: 265px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Colores */
+.facebook { background: #1877f2; }
+.instagram { background: #e1306c; }
+.whatsapp { background: #25d366; }
+.youtube { background: #ff0000; }
