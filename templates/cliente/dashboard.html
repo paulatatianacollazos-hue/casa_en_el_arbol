@@ -422,5 +422,13 @@ searchInput.addEventListener('input', async () => {
 
 {% include 'common/partials/chat_flotante.html' %}
 
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/redes_sociales.css') }}">
+
+{% include 'common/partials/redes_sociales_flotante.html' %}
+
+<script src="{{ url_for('static', filename='js/redes_sociales.js') }}"></script>
+
+
 </body>
 </html>
