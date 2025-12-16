@@ -428,7 +428,7 @@
         <a href="{{ url_for('admin.control_pedidos') }}" class="btn btn-success">control de pedidos</a>
         
         {% for pedido in pedidos if pedido.estado == 'en proceso' %}
-          <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}">
+          <div class="pedido-card" data-id="{{ pedido.id }}" data-empleado="{{ pedido.ID_Empleado | default('') }}" style="border: 2px solid #dddd; border-radius: 20px; padding: 20px; margin: 10px 0 10px 0;">
             <h3>Pedido #{{ pedido.id }}              
             {% if pedido.instalacion == 'si' %}
                 Instalación
@@ -473,9 +473,7 @@
               {% endfor %}
             </div>
           
-            <div class="boton-detalle" style="border: #7db243; color: #7db243;">
-              <button style="background-color: transparent;" onclick="abrirModal('{{ pedido.id }}')">Ver Detalles</button>
-            </div>
+           
 
           </div>
             <div id="modal-{{ pedido.id }}" class="modal">
