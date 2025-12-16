@@ -532,7 +532,7 @@
     {% if pedidos.has_prev %}
       <a class="btn btn-outline-secondary"
          href="{{ url_for('empleado.actualizacion_datos', page=pedidos.prev_num) }}">
-        ⬅️
+        <i class="bi bi-arrow-left-short"></i>
       </a>
     {% else %}
       <span></span>
@@ -541,7 +541,7 @@
     {% if pedidos.has_next %}
       <a class="btn btn-outline-secondary"
          href="{{ url_for('empleado.actualizacion_datos', page=pedidos.next_num) }}">
-        ➡️
+        <i class="bi bi-arrow-right-short"></i>
       </a>
     {% endif %}
 
