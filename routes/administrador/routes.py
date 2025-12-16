@@ -1096,16 +1096,15 @@ def editar_garantia(id_producto):
 def estadistica():
     stats = obtener_estadisticas_pedidos_por_mes()
 
-    # Ordenar por mes
     meses = sorted(stats.keys())
     totales = [stats[m]["total_ventas"] for m in meses]
-    cantidades = [stats[m]["cantidad_pedidos"] for m in meses]
+    productos = [stats[m]["total_productos"] for m in meses]
     promedios = [stats[m]["promedio"] for m in meses]
 
     return render_template(
         "administrador/estadisticas.html",
         meses=meses,
         totales=totales,
-        cantidades=cantidades,
+        productos=productos,
         promedios=promedios
     )

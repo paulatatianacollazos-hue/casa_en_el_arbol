@@ -10,8 +10,15 @@
 <h2>📊 Ventas mensuales</h2>
 <canvas id="ventasChart"></canvas>
 
-<h2>📦 Cantidad de pedidos por mes</h2>
-<canvas id="pedidosChart"></canvas>
+<h2>📦 Cantidad de productos vendidos por mes</h2>
+<canvas id="productosChart"></canvas>
+
+<script>
+const meses = {{ meses | tojson }};
+const totales = {{ totales | tojson }};
+const productos = {{ productos | tojson }};
+const promedios = {{ promedios | tojson }};
+</script>
 
 <h2>📈 Promedio de venta por pedido</h2>
 <canvas id="promedioChart"></canvas>
@@ -28,47 +35,95 @@ const promedios = {{ promedios | tojson }};
 </body>
 </html>
 <script>
-    // 📊 Total de ventas
-new Chart(document.getElementById("ventasChart"), {
-    type: "bar",
-    data: {
-        labels: meses,
-        datasets: [{
-            label: "Total vendido ($)",
-            data: totales,
-            backgroundColor: "#7db243"
-        }]
-    }
-});
+    // Datos desde Flask
+    const meses = {{ meses | tojson }};
+    const totales = {{ totales | tojson }};
+    const productos = {{ productos | tojson }};
+    const promedios = {{ promedios | tojson }};
 
-// 📦 Cantidad de pedidos
-new Chart(document.getElementById("pedidosChart"), {
-    type: "line",
-    data: {
-        labels: meses,
-        datasets: [{
-            label: "Cantidad de pedidos",
-            data: cantidades,
-            borderColor: "#1b8a3d",
-            fill: false,
-            tension: 0.3
-        }]
-    }
-});
+    // 📊 Total de ventas por mes
+    new Chart(document.getElementById("ventasChart"), {
+        type: "bar",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Total vendido ($)",
+                data: totales,
+                backgroundColor: "#7db243",
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 
-// 📈 Promedio por pedido
-new Chart(document.getElementById("promedioChart"), {
-    type: "line",
-    data: {
-        labels: meses,
-        datasets: [{
-            label: "Promedio por pedido ($)",
-            data: promedios,
-            borderColor: "#ff9800",
-            fill: false,
-            tension: 0.3
-        }]
-    }
-});
+    // 📦 Cantidad de productos vendidos por mes
+    new Chart(document.getElementById("productosChart"), {
+        type: "line",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Productos vendidos",
+                data: productos,
+                borderColor: "#1b8a3d",
+                backgroundColor: "rgba(27, 138, 61, 0.15)",
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0   // solo enteros
+                    }
+                }
+            }
+        }
+    });
 
+    // 📈 Promedio de venta por pedido
+    new Chart(document.getElementById("promedioChart"), {
+        type: "line",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Promedio por pedido ($)",
+                data: promedios,
+                borderColor: "#ff9800",
+                backgroundColor: "rgba(255, 152, 0, 0.15)",
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 </script>

@@ -1014,7 +1014,8 @@ def obtener_estadisticas_pedidos_por_mes():
     query = """
         SELECT
             pe.FechaPedido,
-            SUM(dp.Cantidad * p.PrecioUnidad) AS total_pedido
+            SUM(dp.Cantidad * p.PrecioUnidad) AS total_ventas,
+            SUM(dp.Cantidad) AS total_productos
         FROM Pedido pe
         JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
         JOIN Producto p ON dp.ID_Producto = p.ID_Producto
@@ -1030,21 +1031,23 @@ def obtener_estadisticas_pedidos_por_mes():
 
     estadisticas = defaultdict(lambda: {
         "total_ventas": 0,
+        "total_productos": 0,
         "cantidad_pedidos": 0,
         "promedio": 0
     })
 
-    for fecha, total in resultados:
-        clave_mes = fecha.strftime("%Y-%m")  # ej: 2025-01
+    for fecha, total_ventas, total_productos in resultados:
+        clave_mes = fecha.strftime("%Y-%m")
 
-        estadisticas[clave_mes]["total_ventas"] += float(total)
+        estadisticas[clave_mes]["total_ventas"] += float(total_ventas)
+        estadisticas[clave_mes]["total_productos"] += int(total_productos)
         estadisticas[clave_mes]["cantidad_pedidos"] += 1
 
     # Calcular promedios
     for mes in estadisticas:
-        cantidad = estadisticas[mes]["cantidad_pedidos"]
+        pedidos = estadisticas[mes]["cantidad_pedidos"]
         estadisticas[mes]["promedio"] = round(
-            estadisticas[mes]["total_ventas"] / cantidad, 2
+            estadisticas[mes]["total_ventas"] / pedidos, 2
         )
 
         estadisticas[mes]["total_ventas"] = round(
