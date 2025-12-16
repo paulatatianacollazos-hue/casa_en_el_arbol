@@ -1004,3 +1004,50 @@ def generar_estadisticas_reseñas():
     data["negativos"] = lista_neg
 
     return data
+
+
+def obtener_estadisticas_pedidos_por_mes():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT
+            pe.FechaPedido,
+            SUM(dp.Cantidad * p.PrecioUnidad) AS total_pedido
+        FROM Pedido pe
+        JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
+        JOIN Producto p ON dp.ID_Producto = p.ID_Producto
+        WHERE pe.Estado IN ('completado', 'en proceso')
+        GROUP BY pe.ID_Pedido, pe.FechaPedido
+        ORDER BY pe.FechaPedido;
+    """
+
+    cursor.execute(query)
+    resultados = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    estadisticas = defaultdict(lambda: {
+        "total_ventas": 0,
+        "cantidad_pedidos": 0,
+        "promedio": 0
+    })
+
+    for fecha, total in resultados:
+        clave_mes = fecha.strftime("%Y-%m")  # ej: 2025-01
+
+        estadisticas[clave_mes]["total_ventas"] += float(total)
+        estadisticas[clave_mes]["cantidad_pedidos"] += 1
+
+    # Calcular promedios
+    for mes in estadisticas:
+        cantidad = estadisticas[mes]["cantidad_pedidos"]
+        estadisticas[mes]["promedio"] = round(
+            estadisticas[mes]["total_ventas"] / cantidad, 2
+        )
+
+        estadisticas[mes]["total_ventas"] = round(
+            estadisticas[mes]["total_ventas"], 2
+        )
+
+    return dict(estadisticas)

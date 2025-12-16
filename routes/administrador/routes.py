@@ -31,7 +31,7 @@ from basedatos.queries import (
     get_producto_by_id,
     guardar_producto,
     get_productos, detalle, recivo,
-    generar_estadisticas_reseñas
+    obtener_estadisticas_pedidos_por_mes
 )
 
 reviews = []
@@ -1089,3 +1089,10 @@ def editar_garantia(id_producto):
         return jsonify({"success": True, "message": "Garantía actualizada correctamente"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+
+@admin.route("/estadisticas")
+@login_required
+def estadistica():
+    stats = obtener_estadisticas_pedidos_por_mes()
+    return render_template("admin/estadisticas.html", stats=stats)

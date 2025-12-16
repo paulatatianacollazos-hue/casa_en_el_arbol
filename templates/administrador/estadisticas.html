@@ -1,0 +1,20 @@
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Mes</th>
+      <th>Total vendido</th>
+      <th>Pedidos</th>
+      <th>Promedio</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for mes, data in stats.items() %}
+    <tr>
+      <td>{{ mes }}</td>
+      <td>${{ "{:,.0f}".format(data.total_ventas) }}</td>
+      <td>{{ data.cantidad_pedidos }}</td>
+      <td>${{ "{:,.0f}".format(data.promedio) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
