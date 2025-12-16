@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash
-from flask import jsonify, redirect, url_for
+from flask import jsonify, redirect, url_for, abort
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import (
@@ -37,52 +37,96 @@ def dashboard():
 @login_required
 def actualizacion_datos():
     usuario = current_user
+
+    # 🔔 Notificaciones
     notificaciones = Notificaciones.query.filter_by(
         ID_Usuario=usuario.ID_Usuario
     ).order_by(Notificaciones.Fecha.desc()).all()
 
-    # 📅 Obtener calendario del usuario
-    eventos = Calendario.query.filter_by(ID_Usuario=usuario.ID_Usuario).all()
+    # 📅 Calendario
+    eventos = Calendario.query.filter_by(
+        ID_Usuario=usuario.ID_Usuario
+    ).all()
 
-    # ✅ Si el usuario actualiza sus datos
-    if request.method == "POST":
+    # 📦 Pedidos pendientes (solo rol taller)
+    pedidos = None
+    if usuario.Rol == "taller":
+        page = request.args.get("page", 1, type=int)
+
+        pedidos = Pedido.query.filter_by(
+            Estado="pendiente"
+        ).order_by(
+            Pedido.FechaPedido.is_(None),
+            Pedido.FechaPedido.desc(),
+            Pedido.ID_Pedido.desc()
+        ).paginate(
+            page=page,
+            per_page=40,
+            error_out=False
+        )
+
+    # ✏️ Actualización de perfil
+    if request.method == "POST" and "nombre" in request.form:
         nombre = request.form.get("nombre", "").strip()
         apellido = request.form.get("apellido", "").strip()
         correo = request.form.get("correo", "").strip()
         password = request.form.get("password", "").strip()
 
         if not nombre or not apellido or not correo:
-            flash("⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
-                  "warning")
+            flash(
+                "⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
+                "warning"
+            )
         else:
             usuario_existente = Usuario.query.filter(
                 Usuario.Correo == correo,
                 Usuario.ID_Usuario != usuario.ID_Usuario
             ).first()
+
             if usuario_existente:
-                flash("El correo ya está registrado por otro usuario.",
-                      "danger")
+                flash(
+                    "El correo ya está registrado por otro usuario.",
+                    "danger"
+                )
             else:
                 usuario.Nombre = nombre
                 usuario.Apellido = apellido
                 usuario.Correo = correo
+
                 if password:
                     usuario.Contraseña = generate_password_hash(password)
+
                 db.session.commit()
+
                 crear_notificacion(
                     user_id=usuario.ID_Usuario,
                     titulo="Perfil actualizado ✏️",
-                    mensaje="""Tus datos personales se han actualizado
-                    correctamente."""
+                    mensaje="Tus datos personales se han actualizado correctamente."
                 )
+
                 flash("✅ Perfil actualizado correctamente", "success")
 
     return render_template(
         "empleado/actualizacion_datos.html",
         usuario=usuario,
         notificaciones=notificaciones,
-        eventos=eventos
+        eventos=eventos,
+        pedidos=pedidos
     )
+
+
+@empleado.route("/pedido/<int:pedido_id>/completar", methods=["POST"])
+@login_required
+def completar_pedido(pedido_id):
+    if current_user.Rol != "taller":
+        abort(403)
+
+    pedido = Pedido.query.get_or_404(pedido_id)
+    pedido.Estado = "en proceso"
+    db.session.commit()
+
+    flash("Pedido cambiado a 'en proceso'", "success")
+    return redirect(url_for("empleado.actualizacion_datos"))
 
 
 @empleado.route("/calendario/pedidos/<fecha>")
