@@ -1,20 +1,74 @@
-<table class="table table-bordered">
-  <thead>
-    <tr>
-      <th>Mes</th>
-      <th>Total vendido</th>
-      <th>Pedidos</th>
-      <th>Promedio</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for mes, data in stats.items() %}
-    <tr>
-      <td>{{ mes }}</td>
-      <td>${{ "{:,.0f}".format(data.total_ventas) }}</td>
-      <td>{{ data.cantidad_pedidos }}</td>
-      <td>${{ "{:,.0f}".format(data.promedio) }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas de Pedidos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>📊 Ventas mensuales</h2>
+<canvas id="ventasChart"></canvas>
+
+<h2>📦 Cantidad de pedidos por mes</h2>
+<canvas id="pedidosChart"></canvas>
+
+<h2>📈 Promedio de venta por pedido</h2>
+<canvas id="promedioChart"></canvas>
+
+<script>
+const meses = {{ meses | tojson }};
+const totales = {{ totales | tojson }};
+const cantidades = {{ cantidades | tojson }};
+const promedios = {{ promedios | tojson }};
+</script>
+
+<script src="{{ url_for('static', filename='js/estadisticas.js') }}"></script>
+
+</body>
+</html>
+<script>
+    // 📊 Total de ventas
+new Chart(document.getElementById("ventasChart"), {
+    type: "bar",
+    data: {
+        labels: meses,
+        datasets: [{
+            label: "Total vendido ($)",
+            data: totales,
+            backgroundColor: "#7db243"
+        }]
+    }
+});
+
+// 📦 Cantidad de pedidos
+new Chart(document.getElementById("pedidosChart"), {
+    type: "line",
+    data: {
+        labels: meses,
+        datasets: [{
+            label: "Cantidad de pedidos",
+            data: cantidades,
+            borderColor: "#1b8a3d",
+            fill: false,
+            tension: 0.3
+        }]
+    }
+});
+
+// 📈 Promedio por pedido
+new Chart(document.getElementById("promedioChart"), {
+    type: "line",
+    data: {
+        labels: meses,
+        datasets: [{
+            label: "Promedio por pedido ($)",
+            data: promedios,
+            borderColor: "#ff9800",
+            fill: false,
+            tension: 0.3
+        }]
+    }
+});
+
+</script>

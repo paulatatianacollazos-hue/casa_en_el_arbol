@@ -9,6 +9,7 @@ from basedatos.models import Producto, Calendario
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
+from collections import defaultdict
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")

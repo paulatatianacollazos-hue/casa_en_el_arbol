@@ -1091,8 +1091,21 @@ def editar_garantia(id_producto):
         return jsonify({"success": False, "error": str(e)})
 
 
-@admin.route("/estadisticas")
+@admin.route("/control_financiero")
 @login_required
 def estadistica():
     stats = obtener_estadisticas_pedidos_por_mes()
-    return render_template("admin/estadisticas.html", stats=stats)
+
+    # Ordenar por mes
+    meses = sorted(stats.keys())
+    totales = [stats[m]["total_ventas"] for m in meses]
+    cantidades = [stats[m]["cantidad_pedidos"] for m in meses]
+    promedios = [stats[m]["promedio"] for m in meses]
+
+    return render_template(
+        "administrador/estadisticas.html",
+        meses=meses,
+        totales=totales,
+        cantidades=cantidades,
+        promedios=promedios
+    )
