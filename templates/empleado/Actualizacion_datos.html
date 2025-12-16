@@ -482,7 +482,7 @@
 
           <div class="text-end">
             <form method="POST"
-                  action="{{ url_for('empleado.marcar_pedido_completado', pedido_id=pedido.ID_Pedido) }}">
+                  action="{{ url_for('empleado.completar_pedido', pedido_id=pedido.ID_Pedido) }}">
               <button class="btn btn-success btn-sm">
                 Marcar como completado
               </button>
