@@ -447,76 +447,79 @@
     <h5 class="mb-0">Pedidos</h5>
   </div>
 
-  {% if pedidos.items %}
-  <div id="carouselPedidos" class="carousel slide" data-bs-ride="false">
+  {% if pedidos and pedidos.items %}
+    {% for pedido in pedidos.items %}
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Pedido #{{ pedido.ID_Pedido }}</strong><br>
+            Cliente: {{ pedido.usuario.Nombre }} {{ pedido.usuario.Apellido or '' }}
+          </div>
+          <div>
+            {{ pedido.FechaPedido.strftime('%d/%m/%Y') if pedido.FechaPedido else 'Sin fecha' }}
+          </div>
+        </div>
 
-    <!-- 🔘 INDICADORES -->
-    <div class="carousel-indicators">
-      {% for pedido in pedidos.items %}
-        <button
-          type="button"
-          data-bs-target="#carouselPedidos"
-          data-bs-slide-to="{{ loop.index0 }}"
-          class="{% if loop.first %}active{% endif %}"
-          aria-current="{% if loop.first %}true{% endif %}">
-        </button>
-      {% endfor %}
-    </div>
+        <div class="card-body">
+          <table class="table table-bordered table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unitario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for detalle in pedido.detalles_pedido %}
+              <tr>
+                <td>{{ detalle.producto.NombreProducto }}</td>
+                <td>{{ detalle.Cantidad }}</td>
+                <td>${{ "{:,.0f}".format(detalle.PrecioUnidad) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
 
-    <!-- 📦 SLIDES -->
-    <div class="carousel-inner">
-
-      {% for pedido in pedidos.items %}
-      <div class="carousel-item {% if loop.first %}active{% endif %}">
-        <div class="card">
-          <div class="card-body d-flex justify-content-between align-items-center">
-
-            <div>
-              <strong>Pedido #{{ pedido.ID_Pedido }}</strong><br>
-              Cliente: {{ pedido.usuario.Nombre }} {{ pedido.usuario.Apellido or '' }}<br>
-              Fecha:
-              {% if pedido.FechaPedido %}
-                {{ pedido.FechaPedido.strftime('%d/%m/%Y') }}
-              {% else %}
-                Sin fecha
-              {% endif %}
-            </div>
-
+          <div class="text-end">
             <form method="POST"
-                  action="{{ url_for('empleado.actualizacion_datos', pedido_id=pedido.ID_Pedido) }}">
-              <button class="btn btn-success">
-                Pedido completado
+                  action="{{ url_for('empleado.marcar_pedido_completado', pedido_id=pedido.ID_Pedido) }}">
+              <button class="btn btn-success btn-sm">
+                Marcar como completado
               </button>
             </form>
-
           </div>
         </div>
       </div>
-      {% endfor %}
+    {% endfor %}
 
-    </div>
+    <!-- 🔢 PAGINACIÓN -->
+    <nav class="d-flex justify-content-center">
+      <ul class="pagination">
+        {% if pedidos.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ pedidos.prev_num }}">Anterior</a>
+          </li>
+        {% endif %}
 
-    <!-- ⬅️➡️ FLECHAS (opcional) -->
-    <button class="carousel-control-prev" type="button"
-            data-bs-target="#carouselPedidos" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
+        <li class="page-item active">
+          <span class="page-link">
+            Página {{ pedidos.page }} de {{ pedidos.pages }}
+          </span>
+        </li>
 
-    <button class="carousel-control-next" type="button"
-            data-bs-target="#carouselPedidos" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
+        {% if pedidos.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ pedidos.next_num }}">Siguiente</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
 
-  </div>
   {% else %}
     <p class="text-muted">No hay pedidos pendientes.</p>
   {% endif %}
-</div>
-
-        
-        
       </div>
-      </div>
+    </div>
 
 
 

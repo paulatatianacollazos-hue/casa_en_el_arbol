@@ -48,63 +48,20 @@ def actualizacion_datos():
         ID_Usuario=usuario.ID_Usuario
     ).all()
 
-    # 📦 Pedidos pendientes (solo rol taller)
+    # 📦 Pedidos pendientes (solo taller)
     pedidos = None
     if usuario.Rol == "taller":
         page = request.args.get("page", 1, type=int)
 
-        pedidos = Pedido.query.filter_by(
-            Estado="pendiente"
+        pedidos = Pedido.query.filter(
+            Pedido.Estado == "pendiente"
         ).order_by(
-            Pedido.FechaPedido.is_(None),
-            Pedido.FechaPedido.desc(),
-            Pedido.ID_Pedido.desc()
+            Pedido.FechaPedido.desc()
         ).paginate(
             page=page,
-            per_page=40,
+            per_page=20,   # ✅ 20 pedidos visibles
             error_out=False
         )
-
-    # ✏️ Actualización de perfil
-    if request.method == "POST" and "nombre" in request.form:
-        nombre = request.form.get("nombre", "").strip()
-        apellido = request.form.get("apellido", "").strip()
-        correo = request.form.get("correo", "").strip()
-        password = request.form.get("password", "").strip()
-
-        if not nombre or not apellido or not correo:
-            flash(
-                "⚠️ Los campos Nombre, Apellido y Correo son obligatorios.",
-                "warning"
-            )
-        else:
-            usuario_existente = Usuario.query.filter(
-                Usuario.Correo == correo,
-                Usuario.ID_Usuario != usuario.ID_Usuario
-            ).first()
-
-            if usuario_existente:
-                flash(
-                    "El correo ya está registrado por otro usuario.",
-                    "danger"
-                )
-            else:
-                usuario.Nombre = nombre
-                usuario.Apellido = apellido
-                usuario.Correo = correo
-
-                if password:
-                    usuario.Contraseña = generate_password_hash(password)
-
-                db.session.commit()
-
-                crear_notificacion(
-                    user_id=usuario.ID_Usuario,
-                    titulo="Perfil actualizado ✏️",
-                    mensaje="Tus datos personales se han actualizado correctamente."
-                )
-
-                flash("✅ Perfil actualizado correctamente", "success")
 
     return render_template(
         "empleado/actualizacion_datos.html",
