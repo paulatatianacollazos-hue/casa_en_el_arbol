@@ -441,68 +441,78 @@
 
 
 
+        <!-- ✅ MIS PEDIDOS -->
+<div id="seccion-pedidos" class="card shadow-sm p-4 mt-4" style="display:none;">
+  <div class="profile-header mb-4">
+    <h5 class="mb-0">Pedidos</h5>
+  </div>
 
-      <!-- ✅ MIS PEDIDOS -->
-      <div id="seccion-pedidos" class="card shadow-sm p-4 mt-4" style="display:none; ">
-        <div class="profile-header mb-4">
-          <h5 class="mb-0">pedidos</h5>
-        </div>
-        {% if pedidos.items %}
-          {% for pedido in pedidos.items %}
-            <div class="card mb-3">
-              <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>Pedido #{{ pedido.ID_Pedido }}</strong><br>
-                  Cliente: {{ pedido.Cliente }}<br>
-                  Fecha: 
-                  {% if pedido.FechaPedido %}
-                    {{ pedido.FechaPedido.strftime('%d/%m/%Y') }}
-                  {% else %}
-                    Sin fecha
-                  {% endif %}
+  {% if pedidos.items %}
+  <div id="carouselPedidos" class="carousel slide" data-bs-ride="false">
 
-                </div>
+    <!-- 🔘 INDICADORES -->
+    <div class="carousel-indicators">
+      {% for pedido in pedidos.items %}
+        <button
+          type="button"
+          data-bs-target="#carouselPedidos"
+          data-bs-slide-to="{{ loop.index0 }}"
+          class="{% if loop.first %}active{% endif %}"
+          aria-current="{% if loop.first %}true{% endif %}">
+        </button>
+      {% endfor %}
+    </div>
 
-                <form method="POST" action="{{ url_for('empleado.actualizacion_datos', pedido_id=pedido.ID_Pedido) }}">
-                  <button class="btn btn-success">
-                    Pedido completado
-                  </button>
-                </form>
-              </div>
+    <!-- 📦 SLIDES -->
+    <div class="carousel-inner">
+
+      {% for pedido in pedidos.items %}
+      <div class="carousel-item {% if loop.first %}active{% endif %}">
+        <div class="card">
+          <div class="card-body d-flex justify-content-between align-items-center">
+
+            <div>
+              <strong>Pedido #{{ pedido.ID_Pedido }}</strong><br>
+              Cliente: {{ pedido.usuario.Nombre }} {{ pedido.usuario.Apellido or '' }}<br>
+              Fecha:
+              {% if pedido.FechaPedido %}
+                {{ pedido.FechaPedido.strftime('%d/%m/%Y') }}
+              {% else %}
+                Sin fecha
+              {% endif %}
             </div>
-          {% endfor %}
-          <nav class="mt-4">
-            <ul class="pagination justify-content-center">
 
-              <!-- Flecha izquierda -->
-              <li class="page-item {% if not pedidos.has_prev %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=pedidos.prev_num) }}">◀</a>
-              </li>
+            <form method="POST"
+                  action="{{ url_for('empleado.actualizacion_datos', pedido_id=pedido.ID_Pedido) }}">
+              <button class="btn btn-success">
+                Pedido completado
+              </button>
+            </form>
 
-              <!-- Números -->
-              {% for page_num in pedidos.iter_pages() %}
-                {% if page_num %}
-                  <li class="page-item {% if page_num == pedidos.page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=page_num) }}">
-                      {{ page_num }}
-                    </a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled"><span class="page-link">…</span></li>
-                {% endif %}
-              {% endfor %}
-
-              <!-- Flecha derecha -->
-              <li class="page-item {% if not pedidos.has_next %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=pedidos.next_num) }}">▶</a>
-              </li>
-
-            </ul>
-          </nav>
-        {% else %}
-          <p class="text-muted">No hay pedidos pendientes.</p>
-        {% endif %}
           </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- ⬅️➡️ FLECHAS (opcional) -->
+    <button class="carousel-control-prev" type="button"
+            data-bs-target="#carouselPedidos" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <button class="carousel-control-next" type="button"
+            data-bs-target="#carouselPedidos" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+
+  </div>
+  {% else %}
+    <p class="text-muted">No hay pedidos pendientes.</p>
+  {% endif %}
+</div>
+
         
         
       </div>
