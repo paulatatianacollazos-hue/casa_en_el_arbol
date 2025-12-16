@@ -183,6 +183,26 @@
             border: 1px solid #7db243;
         }
 
+        .page-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #cfcfcf;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.page-dot:hover {
+  background-color: #7db243;
+  transform: scale(1.2);
+}
+
+.page-dot.active {
+  background-color: #7db243;
+  width: 14px;
+  height: 14px;
+}
+
   </style>
 </head>
 <body>
@@ -447,8 +467,12 @@
     <h5 class="mb-0">Pedidos</h5>
   </div>
 
-{% if pedidos and pedidos.items %}
+ {% if pedidos and pedidos.items %}
 
+  <!-- 🔁 CONTENEDOR DEL "SLIDE" -->
+  <div id="pedido-carousel">
+
+    <!-- 📦 PEDIDOS (20 por página) -->
     {% for pedido in pedidos.items %}
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -493,34 +517,40 @@
       </div>
     {% endfor %}
 
-    <!-- 🔢 PAGINACIÓN -->
-    <nav class="d-flex justify-content-center">
-      <ul class="pagination">
+  </div>
 
-        {% if pedidos.has_prev %}
-          <li class="page-item">
-            <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=pedidos.prev_num) }}">
-              Anterior
-            </a>
-          </li>
-        {% endif %}
+  <!-- ⬅️➡️ FLECHAS -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
 
-        <li class="page-item active">
-          <span class="page-link">
-            Página {{ pedidos.page }} de {{ pedidos.pages }}
-          </span>
-        </li>
+    {% if pedidos.has_prev %}
+      <a class="btn btn-outline-secondary"
+         href="{{ url_for('empleado.actualizacion_datos', page=pedidos.prev_num) }}">
+        ⬅️
+      </a>
+    {% else %}
+      <span></span>
+    {% endif %}
 
-        {% if pedidos.has_next %}
-          <li class="page-item">
-            <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=pedidos.next_num) }}">
-              Siguiente
-            </a>
-          </li>
-        {% endif %}
+    {% if pedidos.has_next %}
+      <a class="btn btn-outline-secondary"
+         href="{{ url_for('empleado.actualizacion_datos', page=pedidos.next_num) }}">
+        ➡️
+      </a>
+    {% endif %}
 
-      </ul>
-    </nav>
+  </div>
+
+  <!-- 🔵 INDICADORES (CÍRCULOS) -->
+  <div class="d-flex justify-content-center gap-2 mt-3">
+
+    {% for p in range(1, pedidos.pages + 1) %}
+      <a href="{{ url_for('empleado.actualizacion_datos', page=p) }}"
+         class="page-dot {% if p == pedidos.page %}active{% endif %}"
+         title="Página {{ p }}">
+      </a>
+    {% endfor %}
+
+  </div>
 
   {% else %}
     <p class="text-muted">No hay pedidos pendientes.</p>
