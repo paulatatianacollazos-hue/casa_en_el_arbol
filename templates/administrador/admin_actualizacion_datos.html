@@ -473,31 +473,8 @@
               {% endfor %}
             </div>
           
-           
-
           </div>
-            <div id="modal-{{ pedido.id }}" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="cerrarModal('{{ pedido.id }}')">&times;</span>
-
-                {% set info = detalles[pedido.id] if pedido.id in detalles else None %}
-                {% if info %}
-                  <p><strong>Nombre:</strong> {{ info.Nombre_Cliente }}</p>
-                  <p><strong>Teléfono:</strong> {{ info.Telefono }}</p>
-                  <p><strong>Dirección:</strong> {{ info.Direccion }}</p>
-
-                  <hr>
-                  <h6>Productos:</h6>
-                  <ul>
-                    {% for p in info.Productos %}
-                      <li>{{ p.Producto }} - Cantidad: {{ p.Cantidad }}</li>
-                    {% endfor %}
-                  </ul>
-                {% else %}
-                  <p>No hay detalles para este pedido.</p>
-                {% endif %}
-              </div>
-            </div>
+           
         {% endfor %} 
       </div> 
       
@@ -695,17 +672,17 @@
   <div class="modal-content">
     <span class="close">&times;</span>
     <form id="formAsignarEmpleado">
-      <label for="empleado_id">Empleado:</label>
-      <select name="empleado_id" id="empleado_id" required>
-        <option value="">-- Selecciona empleado --</option>
+      <label for="empleado_id">Empleado:</label><br>
+      <select name="empleado_id" id="empleado_id" required style="width: 80%; height: 30px; border-radius: 20px;">
+        <option value="" >-- Selecciona empleado --</option>
         {% for emp in empleados %}
         <option value="{{ emp.ID_Empleado }}">{{ emp.Nombre }}</option>
         {% endfor %}
       </select><br>
-      <label for="fecha">Fecha:</label>
-      <input type="date" id="fecha" required><br>
-      <label for="hora">Hora:</label>
-      <input type="time" id="hora" required><br>
+      <label for="fecha">Fecha:</label><br>
+      <input type="date" id="fecha" required style="width: 80%; height: 30px; border-radius: 20px;"><br><br>
+      <label for="hora">Hora:</label><br>
+      <input type="time" id="hora" required style="width: 80%; height: 30px; border-radius: 20px;"><br><br>
       <input type="hidden" id="pedidosSeleccionados">
       <button type="submit">Asignar</button>
     </form>
