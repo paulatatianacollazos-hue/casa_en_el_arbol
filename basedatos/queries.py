@@ -22,25 +22,25 @@ def obtener_todos_los_pedidos():
 
     query = """
         SELECT
-            pe.ID_Pedido,
-            u.Nombre AS nombre_usuario,
-            u.Telefono,
-            u.Direccion,
-            p.ID_Producto,
-            p.NombreProducto,
-            dp.Cantidad,
-            pe.FechaPedido,
-            ip.ruta AS ImagenURL,
-            p.PrecioUnidad,
-            pe.ID_Empleado,
-            pe.Instalacion  -- 🔹 se agrega Instalacion
+            pe.ID_Pedido,            -- 0
+            u.Nombre AS nombre_usuario, -- 1
+            u.Telefono,              -- 2
+            u.Direccion,             -- 3
+            p.ID_Producto,           -- 4
+            p.NombreProducto,        -- 5
+            dp.Cantidad,             -- 6
+            pe.FechaPedido,          -- 7
+            ip.ruta AS ImagenURL,    -- 8
+            p.PrecioUnidad,          -- 9
+            pe.ID_Empleado,          -- 10
+            pe.Instalacion,          -- 11
+            pe.Estado                -- 🔹 12 (NUEVO)
         FROM Pedido pe
         JOIN Usuario u ON pe.ID_Usuario = u.ID_Usuario
         JOIN Detalle_Pedido dp ON pe.ID_Pedido = dp.ID_Pedido
         JOIN Producto p ON dp.ID_Producto = p.ID_Producto
         LEFT JOIN ImagenProducto ip ON p.ID_Producto = ip.ID_Producto
         ORDER BY pe.FechaPedido DESC;
-
     """
 
     cursor.execute(query)
@@ -54,10 +54,10 @@ def obtener_todos_los_pedidos():
         id_pedido = row[0]
         id_producto = row[4]
 
-        # 🔹 Limpiar ruta completa de imagen
+        # 🔹 Limpiar ruta de imagen
         imagen_ruta = row[8] or ''
         if imagen_ruta:
-            imagen_ruta = os.path.basename(imagen_ruta)  # se queda solo con 'silla.jpg'
+            imagen_ruta = os.path.basename(imagen_ruta)
 
         producto = {
             'id': id_producto,
@@ -78,7 +78,8 @@ def obtener_todos_los_pedidos():
                 'fecha': fecha,
                 'productos': {},
                 'id_empleado': row[10],
-                'instalacion': row[11]  # 🔹 aquí se guarda Instalacion
+                'instalacion': row[11],
+                'estado': row[12]  # 🔹 AQUÍ SE GUARDA ESTADO
             }
 
         productos = pedidos_dict[id_pedido]['productos']
@@ -91,9 +92,13 @@ def obtener_todos_los_pedidos():
     # 🔹 Calcular totales
     for pedido in pedidos_dict.values():
         pedido['productos'] = list(pedido['productos'].values())
-        pedido['total'] = round(sum(prod['cantidad'] * prod['precio'] for prod in pedido['productos']), 2)
+        pedido['total'] = round(
+            sum(prod['cantidad'] * prod['precio'] for prod in pedido['productos']),
+            2
+        )
 
     return list(pedidos_dict.values())
+
 # --------- TODOS_LOS_PEDIDOS ---------
 
 
