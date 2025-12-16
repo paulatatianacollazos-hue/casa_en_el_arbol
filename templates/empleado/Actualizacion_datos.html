@@ -448,6 +448,7 @@
   </div>
 
 {% if pedidos and pedidos.items %}
+
     {% for pedido in pedidos.items %}
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -495,9 +496,12 @@
     <!-- 🔢 PAGINACIÓN -->
     <nav class="d-flex justify-content-center">
       <ul class="pagination">
+
         {% if pedidos.has_prev %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ pedidos.prev_num }}">Anterior</a>
+            <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=pedidos.prev_num) }}">
+              Anterior
+            </a>
           </li>
         {% endif %}
 
@@ -509,9 +513,12 @@
 
         {% if pedidos.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ pedidos.next_num }}">Siguiente</a>
+            <a class="page-link" href="{{ url_for('empleado.actualizacion_datos', page=pedidos.next_num) }}">
+              Siguiente
+            </a>
           </li>
         {% endif %}
+
       </ul>
     </nav>
 
