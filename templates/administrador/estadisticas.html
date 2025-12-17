@@ -1,25 +1,42 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Estadísticas de Pedidos</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
 
-<div class="formulario">
 
-</div>
 
+{% extends "administrador/admin_dashboard.html" %}
+{% block title %} control financiero | Casa en el Árbol{% endblock %}
+
+{% block extra_css %}
+<style>
+    .estadistica{
+        height: 500px;
+        width: 900px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+<div class="estadistica">
 <h2>📊 Ventas mensuales</h2>
 <canvas id="ventasChart"></canvas>
+</div>
+<div class="formulario">
+    <label for=""></label>
+    <input type="text" name="" id="">
+    <label for=""></label>
+    <input type="text" name="" id="">
+    <label for=""></label>
+    <input type="text">
+</div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const meses = {{ meses | tojson }};
+const totales = {{ totales | tojson }};
+const cantidades = {{ cantidades | tojson }};
+const promedios = {{ promedios | tojson }};
+</script>
 
-
-<script src="{{ url_for('static', filename='js/estadisticas.js') }}"></script>
-
-</body>
-</html>
 <script>
     // 📊 Total de ventas
 new Chart(document.getElementById("ventasChart"), {
@@ -65,3 +82,4 @@ new Chart(document.getElementById("promedioChart"), {
 });
 
 </script>
+{% endblock %}
