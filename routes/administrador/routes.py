@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from flask import flash, jsonify, abort, current_app
+from flask import flash, jsonify, abort, current_app                                                                                                                    
 from basedatos.models import RegistroSesion
 
 from flask_login import login_required, current_user
