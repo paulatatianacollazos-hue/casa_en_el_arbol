@@ -1109,3 +1109,19 @@ def estadistica():
         cantidades=cantidades,
         promedios=promedios
     )
+
+
+@admin.route('/admin/asistencia/<int:id_usuario>')
+@login_required
+def ver_asistencia(id_usuario):
+
+    usuario = Usuario.query.get_or_404(id_usuario)
+    registros = RegistroSesion.query.filter_by(
+        ID_Usuario=id_usuario
+    ).order_by(RegistroSesion.Fecha.desc()).all()
+
+    return render_template(
+        'admin/asistencia.html',
+        usuario=usuario,
+        registros=registros
+    )

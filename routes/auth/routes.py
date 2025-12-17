@@ -88,48 +88,46 @@ def login():
 
         usuario = Usuario.query.filter_by(Correo=correo).first()
 
-        if usuario:
-            print("Correo ingresado:", correo)
-            print("Contraseña ingresada:", password)
-            print("Hash almacenado en DB:", usuario.Contraseña)
+        if usuario and check_password_hash(usuario.Contraseña, password):
+            login_user(usuario)
+            flash("Inicio de sesión exitoso", "success")
 
-            check = check_password_hash(usuario.Contraseña, password)
-            print("Resultado check_password_hash:", check)
+            # ------------------ REGISTRO HORA ENTRADA ------------------
+            if usuario.Rol in ['empleado', 'instalador', 'transportista', 'taller']:
+                hoy = date.today()
+                ahora = datetime.now()
 
-            if check:
-                login_user(usuario)
-                flash("Inicio de sesión exitoso", "success")
+                registro = RegistroSesion.query.filter_by(
+                    ID_Usuario=usuario.ID_Usuario,
+                    Fecha=hoy
+                ).first()
 
-                # Guardar nombre completo y bandera en sesión para modal
-                session['username'] = f"{usuario.Nombre} {
-                    usuario.Apellido or ''}".strip()
-                session['show_welcome_modal'] = True
+                if not registro:
+                    nuevo_registro = RegistroSesion(
+                        ID_Usuario=usuario.ID_Usuario,
+                        Fecha=hoy,
+                        HoraEntrada=ahora
+                    )
+                    db.session.add(nuevo_registro)
+                    db.session.commit()
 
-                print("ROL ACTUAL:", getattr(current_user, 'rol', getattr(
-                    current_user, 'Rol', None)))
+            # Guardar datos en sesión
+            session['username'] = f"{usuario.Nombre} {usuario.Apellido or ''}".strip()
+            session['show_welcome_modal'] = True
 
-                rutas_por_rol = {
-                    'admin': 'admin.dashboard',
-                    'cliente': 'cliente.dashboard',
-                    'empleado': 'empleado.dashboard',
-                    'instalador': 'empleado.dashboard',
-                    'transportista': 'empleado.dashboard',
-                    'taller': 'empleado.dashboard',
-                }
+            rutas_por_rol = {
+                'admin': 'admin.dashboard',
+                'cliente': 'cliente.dashboard',
+                'empleado': 'empleado.dashboard',
+                'instalador': 'empleado.dashboard',
+                'transportista': 'empleado.dashboard',
+                'taller': 'empleado.dashboard',
+            }
 
-                ruta = rutas_por_rol.get(usuario.Rol)
+            ruta = rutas_por_rol.get(usuario.Rol)
+            return redirect(url_for(ruta)) if ruta else redirect(url_for('auth.login'))
 
-                if ruta:
-                    return redirect(url_for(ruta))
-                else:
-                    flash("Tu cuenta no tiene un rol válido", "danger")
-                    return redirect(url_for('auth.login'))
-            else:
-                flash("Correo o contraseña incorrectos", "danger")
-        else:
-            flash("Correo o contraseña incorrectos", "danger")
-
-        # Mantener correo en el formulario si falla login
+        flash("Correo o contraseña incorrectos", "danger")
         return render_template('login.html', correo=correo)
 
     return render_template('login.html')
@@ -139,6 +137,22 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+
+    # ------------------ REGISTRO HORA SALIDA ------------------
+    if current_user.Rol in ['empleado', 'instalador', 'transportista', 'taller']:
+        hoy = date.today()
+        ahora = datetime.now()
+
+        registro = RegistroSesion.query.filter_by(
+            ID_Usuario=current_user.ID_Usuario,
+            Fecha=hoy,
+            HoraSalida=None
+        ).first()
+
+        if registro:
+            registro.HoraSalida = ahora
+            db.session.commit()
+
     logout_user()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('auth.login'))
