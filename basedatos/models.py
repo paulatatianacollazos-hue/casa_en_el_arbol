@@ -303,3 +303,18 @@ class Reseñas(db.Model):
         self.Comentario = Comentario
         self.Estrellas = Estrellas
         self.Fecha = datetime.utcnow()
+
+
+# ------------------ Registro de Sesiones ------------------
+class RegistroSesion(db.Model):
+    __tablename__ = 'RegistroSesion'
+
+    ID_Registro = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+                           nullable=False)
+
+    Fecha = db.Column(db.Date, nullable=False)
+    HoraEntrada = db.Column(db.DateTime, nullable=True)
+    HoraSalida = db.Column(db.DateTime, nullable=True)
+
+    usuario = db.relationship('Usuario', backref='registros_sesion')
