@@ -4,14 +4,14 @@ from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import (
     Usuario, Calendario, Notificaciones, RegistroEntrega, db,
-    Pedido, Detalle_Pedido, Producto
+    Pedido, Detalle_Pedido, Producto, Reseñas
     )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.db import get_connection
 from basedatos.queries import (
     actualizar_pedido as actualizar_pedido_query,
-    get_productos
+    get_productos, get_producto_by_id
 )
 import os
 from werkzeug.utils import secure_filename
@@ -419,5 +419,38 @@ def actualizar_productos(pedido_id):
 @login_required
 def catalogo():
     productos = get_productos()
-    return render_template("cliente/cliente_catalogo.html",
+    return render_template("empleado/catalogo.html",
                            productos=productos)
+
+
+@empleado.route("/producto/<int:id_producto>")
+@login_required
+def detalle_producto(id_producto):
+    producto = get_producto_by_id(id_producto)
+    if not producto:
+        flash("Producto no encontrado", "error")
+        return redirect(url_for("empleado.catalogo"))
+
+    # Verificar si el usuario compró este producto
+    ha_comprado = (
+        db.session.query(Detalle_Pedido)
+        .join(Pedido, Detalle_Pedido.ID_Pedido == Pedido.ID_Pedido)
+        .filter(
+            Pedido.ID_Usuario == current_user.ID_Usuario,
+            Detalle_Pedido.ID_Producto == id_producto
+        )
+        .first() is not None
+    )
+
+    # 🟢 Traer reseñas tipo "producto"
+    reseñas = Reseñas.query.filter_by(
+        ID_Referencia=id_producto,
+        tipo="producto"
+    ).order_by(Reseñas.Fecha.desc()).all()
+
+    return render_template(
+        "cliente/cliente_detalle.html",
+        producto=producto,
+        ha_comprado=ha_comprado,
+        reseñas=reseñas
+    )

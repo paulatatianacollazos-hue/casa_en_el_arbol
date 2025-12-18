@@ -1,0 +1,406 @@
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formularios.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nosotros.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+  
+{% extends "cliente/dashboard.html" %}
+
+{% block title %}Catálogo | Casa en el Árbol{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo.css') }}">
+  <style>
+    /* Fondo oscuro */
+    .modal {
+      display: none; /* Oculto por defecto */
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    input{
+      height: 35px;
+      width: 100%;
+      border-radius: 20px;
+      margin: 0 0 20px 50px;
+    }
+
+    .input1{
+      width: 89%;
+    }
+
+    /* Caja del modal */
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 1000px;
+      max-width: 90%;
+      margin-top: 80px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .close {
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      background: none;
+    }
+
+  .btn-success {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+/* Cuando pasas el mouse */
+.btn-success:hover {
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px); /* opcional: efecto flotante */
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  width: 94%;
+  margin-left: 3%;
+}
+.producto-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  width: 240px;
+  height: auto;
+}
+.producto-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+.imagen img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.info {
+  padding: 10px;
+}
+
+.imagen {
+  width: 100%;
+  height: 200px;             /* fija altura */
+  overflow: hidden;          /* corta lo que se sale */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.imagen img {
+  width: 80%;
+  height: 100%;              /* ocupa el contenedor */
+  object-fit: cover;         /* recorta y ajusta */
+  display: block;
+}
+
+
+</style>
+
+  </style>
+
+{% endblock %}
+
+{% block content %}
+<br>
+
+
+<!-- Modal -->
+
+<a href="{{ url_for('cliente.comparar_productos') }}" class="btn btn-outline-primary">
+  Comparar productos
+</a>
+
+
+<h2>Productos</h2><br>
+<div class="grid">
+  {% for p in productos %}
+    <div class="producto-card" onclick="window.location.href='/cliente/producto/{{ p.ID_Producto }}'">
+      <div class="imagen">
+        <img src="{{ p.Imagen if p.Imagen else url_for('static', filename='img/default.jpg') }}"
+          alt="{{ p.NombreProducto }}">
+      </div>
+      <div class="info">
+        <h3>{{ p.NombreProducto }}</h3>
+        <p>Material: {{ p.Material }}</p>
+        <p>Precio: ${{ p.PrecioUnidad }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  const modal = document.getElementById("myModal");
+  const openBtn = document.getElementById("openModalBtn");
+  const closeBtn = document.getElementById("closeModalBtn");
+  const form = document.getElementById("productoForm");
+
+  openBtn.onclick = () => modal.style.display = "flex";
+  closeBtn.onclick = () => modal.style.display = "none";
+  window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
+
+  // Enviar formulario con fetch
+  form.onsubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+
+    const resp = await fetch("{{ url_for('admin.guardar_producto_route') }}", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await resp.json();
+    alert(data.message);
+    if (data.success) {
+      modal.style.display = "none";
+      form.reset();
+    }
+  };
+  // Botón para agregar más inputs de imagen
+const addImageBtn = document.getElementById("addImageBtn");
+const imagenesContainer = document.getElementById("imagenesContainer");
+
+addImageBtn.onclick = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.name = "imagenes[]"; // importante para enviarlas como array
+  input.accept = "image/*";
+  input.classList.add("mt-2");
+  imagenesContainer.appendChild(input);
+};
+
+</script>
+
+{% endblock %}
+
+{% block extra_foour %}
+{% if current_user.is_authenticated %}
+<script>
+  window.FLASK_USER_ID = "{{ current_user.id }}";
+</script>
+{% else %}
+<script>
+  window.FLASK_USER_ID = null;
+</script>
+{% endif %}
+
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/catalogo.js') }}"></script>
+{% endblock %}
+
+
+
+
+
+
+
+<style>
+/* --- Sección --- */
+.catalog-section {
+  padding: 80px 0;
+  background-color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: #222;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* --- Filtros y Buscador --- */
+.catalog-filters {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.catalog-search {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 250px;
+}
+
+.catalog-select {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.btn-filter {
+  background: #7cb342;
+  color: #fff;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-filter:hover {
+  background: #7cb342;
+}
+
+/* --- Tarjetas --- */
+.product-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: 0.3s;
+  overflow: hidden;
+  background: #fff;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+
+/* Descuento */
+.discount-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #7cb342;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+/* Imagen */
+.product-image-wrapper {
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8f9fa;
+  overflow: hidden;
+}
+.product-image {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+.product-card:hover .product-image {
+  transform: scale(1.08);
+}
+
+/* Información */
+.product-info {
+  padding: 20px;
+}
+
+.product-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  min-height: 48px;
+  margin-bottom: 10px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Precios */
+.price {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+.price-final {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #27ae60;
+  margin-right: 8px;
+}
+.price-old {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+/* Botón carrito */
+.btn-add-to-cart {
+  display: block;
+  width: 100%;
+  background: #7cb342;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px 0;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+  text-decoration: none;
+}
+.btn-add-to-cart:hover {
+  background: #7cb342;
+}
+
+/* Botón Ver Todo */
+.btn-see-all {
+  background: #222;
+  color: #fff;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+.btn-see-all:hover {
+  background: #444;
+}
+
+/* --- Responsivo --- */
+@media (max-width: 992px) {
+  .section-title { font-size: 2rem; }
+  .product-image-wrapper { height: 200px; }
+}
+@media (max-width: 768px) {
+  .catalog-filters { flex-direction: column; align-items: center; }
+  .catalog-search, .catalog-select, .btn-filter { width: 100%; max-width: 300px; }
+  .product-image-wrapper { height: 180px; }
+}
+
+</style>
+
+

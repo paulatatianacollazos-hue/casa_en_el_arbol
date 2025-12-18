@@ -1,0 +1,451 @@
+{% extends "cliente/dashboard.html" %}
+{% block title %}{{ producto.NombreProducto }} | Casa en el Árbol{% endblock %}
+
+{% block extra_css %}
+<style>
+  .content1 {
+    display: flex;
+    
+  }
+
+  .caja {
+    background-color: #fff;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 40px;
+    width: 50%;
+    margin-right: 10%;
+    margin-top: 20px;
+  }
+
+  .btn-primary {
+    padding: 10px 20px;
+  }
+</style>
+<style>
+ .corazon {
+    cursor: pointer;
+    color: gray;
+    font-size: 24px;
+    transition: color 0.3s;
+}
+
+.corazon.activo {
+    color: red;
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+<div class="content1" id="vista-principal">
+  <!-- Carrusel principal -->
+  <div class="container text-center my-4">
+    <div id="carouselPrincipal" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+      <div class="carousel-inner">
+        {% for img in producto.Imagenes %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <img src="{{ url_for('static', filename=img) }}"
+               class="d-block w-100"
+               style="max-height: 400px; object-fit: cover;"
+               alt="Imagen de {{ producto.NombreProducto }}">
+        </div>
+        {% endfor %}
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselPrincipal" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselPrincipal" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Caja de información -->
+  <div class="caja">
+     <h2>{{ producto.NombreProducto }}
+      {% set key = 'favoritos_' ~ current_user.ID_Usuario %}
+      <span class="corazon {% if producto.ID_Producto in session.get(key, []) %}activo{% endif %}"
+            data-id="{{ producto.ID_Producto }}">
+        ❤
+      </span>
+
+    </h2>
+    <p><b>Material:</b> {{ producto.Material }}</p>
+    <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+    <p><b>Color:</b> {{ producto.Color }}</p>
+    <p><b>stock:</b>{{ producto.Stock}}</p>
+    <p id="mensaje-stock" class="mt-2"></p>
+  
+    <div class="botones mt-3">
+      <button class="btn btn-primary" id="btn-garantia">Garantía</button>
+      <button class="btn btn-primary"
+        data-id="{{ producto.ID_Producto }}"
+        data-name="{{ producto.NombreProducto }}"
+        data-price="{{ producto.PrecioUnidad }}"
+        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+        data-material="{{ producto.Material }}"
+        onclick="addToCartFromButton(this)">
+        Añadir al carrito
+      </button>
+      
+    </div>
+    
+    <div class="botones mt-3">
+      <button id="btn-personalizar" class="btn btn-primary">
+        Personalizar
+      </button>
+
+      <button type="button" class="btn btn-primary "
+                    onclick="volverAtras()">Volver
+            </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- SECCIÓN PERSONALIZAR -->
+<div id="seccion-personalizar" class="d-none">
+  <div class="content1">
+  <div class="container text-center my-4">
+    <div id="carouselPersonalizar" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+      <div class="carousel-inner">
+        {% for img in producto.Imagenes %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <img src="{{ url_for('static', filename=img) }}"
+               class="d-block w-100"
+               style="max-height: 400px; object-fit: cover;"
+               alt="Imagen personalizada de {{ producto.NombreProducto }}">
+        </div>
+        {% endfor %}
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselPersonalizar" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+  <p id="mensaje-stock" class="mt-2"></p>
+  
+  <div class="caja">
+    <h2>{{ producto.NombreProducto }}</h2>
+    <p><b>Material:</b> {{ producto.Material }}</p>
+    <p><b>Precio:</b> ${{ producto.PrecioUnidad }}</p>
+    <p><b>Color:</b> {{ producto.Color }}</p>
+    <p><b>stock:</b>{{ producto.Stock}}</p>
+
+    <div class="botones mt-3">
+      <button class="btn btn-primary">Garantía</button>
+      <button class="btn btn-primary"
+        data-id="{{ producto.ID_Producto }}"
+        data-name="{{ producto.NombreProducto }}"
+        data-price="{{ producto.PrecioUnidad }}"
+        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
+        data-material="{{ producto.Material }}"
+        onclick="addToCartFromButton(this)">
+        Añadir al carrito
+      </button>
+    </div>
+  
+
+    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2 volver"
+                    onclick="volverAtras()">
+                <i class="bi bi-arrow-left"></i> <p>Volver</p>
+            </button>
+    </div>
+  </div>
+  </div>
+</div>
+<div id="seccion-garantia" class="d-none">
+  <div class="content1">
+    <div class="container text-center my-4">
+      <div id="carouselGarantia" class="carousel slide mx-auto" data-bs-ride="carousel" style="max-width: 600px;">
+        <div class="carousel-inner">
+          {% for img in producto.Imagenes %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename=img) }}"
+                 class="d-block w-100"
+                 style="max-height: 400px; object-fit: cover;"
+                 alt="Imagen de {{ producto.NombreProducto }}">
+          </div>
+          {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselGarantia" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselGarantia" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="caja">
+      <h2>{{ producto.NombreProducto }}</h2>
+      <p><b>Garantía:</b> <span id="texto-garantia">{{ producto.Garantia }}</span></p>
+
+      <div class="botones mt-3">
+        <button id="btn-editar-garantia" class="btn btn-primary"
+                data-garantia="{{ producto.Garantia }}"
+                data-id="{{ producto.ID_Producto }}">
+          Editar Garantía
+        </button>
+      </div>
+
+      <div class="mt-3">
+        <button id="btn-volver-garantia" class="btn btn-primary">Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar garantía -->
+<div class="modal fade" id="modalEditarGarantia" tabindex="-1" aria-labelledby="modalEditarGarantiaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formEditarGarantia">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarGarantiaLabel">Editar Garantía</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <textarea id="inputGarantia" class="form-control" rows="5"></textarea>
+          <input type="hidden" id="idProductoGarantia">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<h3 class="mt-4">Reseñas</h3>
+
+{% if ha_comprado %}
+<div id="form-reseña" class="border p-3 rounded mb-4">
+  <h5>Deja tu reseña</h5>
+  <form method="POST" action="{{ url_for('cliente.guardar_reseña_producto', id_producto=producto.ID_Producto) }}">
+    <textarea name="comentario" class="form-control mb-2" placeholder="Escribe tu comentario..." required></textarea>
+    <select name="estrellas" class="form-select mb-2" required>
+      <option value="">Selecciona estrellas</option>
+      <option value="5">⭐ 5 estrellas</option>
+      <option value="4">⭐ 4 estrellas</option>
+      <option value="3">⭐ 3 estrellas</option>
+      <option value="2">⭐ 2 estrellas</option>
+      <option value="1">⭐ 1 estrella</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Enviar reseña</button>
+  </form>
+</div>
+{% else %}
+<p class="text-muted">🛒 Solo puedes dejar reseña si compraste este producto.</p>
+{% endif %}
+
+<!-- Mostrar reseñas existentes -->
+<div id="lista-reseñas" class="mb-3">
+  {% if reseñas %}
+    {% for r in reseñas %}
+      <div class="border rounded p-3 mb-2">
+        <strong>{{ r.usuario.Nombre }}</strong>
+        <small class="text-muted">{{ r.Fecha.strftime("%d/%m/%Y %H:%M") }}</small><br>
+        {{ "⭐" * r.Estrellas }}<br>
+        {{ r.Comentario }}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No hay reseñas aún para este producto.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_footer %}
+<!-- Bootstrap JS (requerido para el carrusel) -->
+ {% if current_user.is_authenticated %}
+<script>
+  window.FLASK_USER_ID = "{{ current_user.id }}";
+</script>
+{% else %}
+<script>
+  window.FLASK_USER_ID = null;
+</script>
+{% endif %}
+
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnPersonalizar = document.getElementById("btn-personalizar");
+  const btnVolver = document.getElementById("btn-volver");
+  const vistaPrincipal = document.getElementById("vista-principal");
+  const seccionPersonalizar = document.getElementById("seccion-personalizar");
+
+  // Mostrar personalización
+  btnPersonalizar.addEventListener("click", () => {
+    vistaPrincipal.classList.add("d-none");
+    seccionPersonalizar.classList.remove("d-none");
+
+    // Reiniciar carrusel personalizado
+    const personalizarCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPersonalizar");
+    personalizarCarousel.to(0);
+  });
+
+  // Volver a vista principal
+  btnVolver.addEventListener("click", () => {
+    seccionPersonalizar.classList.add("d-none");
+    vistaPrincipal.classList.remove("d-none");
+
+    // Reiniciar carrusel principal
+    const principalCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPrincipal");
+    principalCarousel.to(0);
+  });
+});
+</script>
+<script>
+document.querySelectorAll(".corazon").forEach(corazon => {
+  corazon.addEventListener("click", () => {
+    const productoId = corazon.dataset.id;
+    const url = `/cliente/favorito/toggle/${productoId}`;
+
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.accion === "agregado") corazon.classList.add("activo");
+      else corazon.classList.remove("activo");
+    })
+    .catch(err => console.error("Error:", err));
+  });
+});
+
+
+</script>
+
+<script>
+// ---- MOSTRAR RESEÑAS ----
+function mostrarReseñas(idProducto) {
+    fetch(`/cliente/producto/${idProducto}/reseñas`)
+        .then(res => res.json())
+        .then(lista => {
+            const cont = document.getElementById("lista-reseñas");
+
+            if (!lista || lista.length === 0) {
+                cont.innerHTML = "<p>No hay reseñas aún para este producto.</p>";
+                return;
+            }
+
+            cont.innerHTML = lista.map(r => `
+                <div class="border rounded p-3 mb-2">
+                    <strong>${r.usuario}</strong>
+                    <small class="text-muted">${r.fecha}</small><br>
+                    ${"⭐".repeat(r.estrellas)}<br>
+                    ${r.comentario}
+                </div>
+            `).join("");
+        })
+        .catch(err => console.error("Error cargando reseñas:", err));
+}
+
+// ---- GUARDAR RESEÑA ----
+function guardarReseña(idProducto) {
+    const comentario = document.querySelector("textarea[name='comentario']").value.trim();
+    const estrellas = document.querySelector("select[name='estrellas']").value;
+
+    if (!comentario || !estrellas) {
+        alert("Debes completar todos los campos.");
+        return;
+    }
+
+    fetch(`/cliente/producto/${idProducto}/reseña`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comentario, estrellas })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            mostrarReseñas(idProducto);
+            document.querySelector("textarea[name='comentario']").value = "";
+        } else {
+            alert(data.message || "Error al guardar la reseña.");
+        }
+    })
+    .catch(err => console.error("Error guardando reseña:", err));
+}
+
+// ---- CARGAR RESEÑAS AL CARGAR LA PÁGINA ----
+document.addEventListener("DOMContentLoaded", () => {
+    mostrarReseñas({{ producto.ID_Producto }});
+});
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const stock = {{ producto.Stock }};
+    const mensajeStock = document.getElementById("mensaje-stock");
+    const btnAgregarCarrito = document.querySelector(".botones button[onclick^='addToCartFromButton']");
+
+    if (stock <= 9 && stock > 0) {
+        // Mostrar advertencia de pocas unidades
+        mensajeStock.textContent = `⚠️ Quedan pocas unidades: ${stock} disponibles`;
+        mensajeStock.style.color = "orange"; // opcional: cambiar color
+    }
+
+    if (stock === 0) {
+        // Mostrar agotado y deshabilitar botón
+        mensajeStock.textContent = "❌ Producto agotado";
+        mensajeStock.style.color = "red";
+        if (btnAgregarCarrito) btnAgregarCarrito.style.display = "none"; // ocultar botón
+    }
+});
+</script>
+
+<script>
+  function volverAtras() {
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = "/";
+}
+</script>
+
+// ---- MOSTRAR GARANTIA ----
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnGarantia = document.getElementById("btn-garantia");
+  const btnVolverGarantia = document.getElementById("btn-volver-garantia");
+  const vistaPrincipal = document.getElementById("vista-principal");
+  const seccionGarantia = document.getElementById("seccion-garantia");
+
+  // Mostrar sección garantía
+  btnGarantia.addEventListener("click", () => {
+    vistaPrincipal.classList.add("d-none");
+    seccionGarantia.classList.remove("d-none");
+
+    // Reiniciar carrusel de garantía
+    const garantiaCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselGarantia");
+    garantiaCarousel.to(0);
+  });
+
+  // Volver a vista principal
+  btnVolverGarantia.addEventListener("click", () => {
+    seccionGarantia.classList.add("d-none");
+    vistaPrincipal.classList.remove("d-none");
+
+    // Reiniciar carrusel principal
+    const principalCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPrincipal");
+    principalCarousel.to(0);
+  });
+});
+
+</script>
+{% endblock %}
