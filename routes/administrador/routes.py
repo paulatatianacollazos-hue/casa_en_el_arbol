@@ -1150,3 +1150,31 @@ def asistencia_empleado(id_usuario):
         pedidos=pedidos
     )
 
+
+@admin.route('/pedido/<int:pedido_id>/reporte')
+@login_required
+@role_required("admin")
+def ver_reporte_entrega(pedido_id):
+
+    pedido = Pedido.query.get_or_404(pedido_id)
+
+    registros = db.session.execute(text("""
+        SELECT
+            ID_Registro,
+            Comentario,
+            FechaRegistro,
+            Foto1,
+            Foto2,
+            Foto3
+        FROM registros_entrega
+        WHERE ID_Pedido = :pedido_id
+    """), {"pedido_id": pedido_id}).mappings().all()
+
+    return render_template(
+        'administrador/reporte_entrega.html',
+        pedido=pedido,
+        registros=registros
+    )
+
+
+

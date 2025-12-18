@@ -1,0 +1,33 @@
+{% extends "administrador/admin_dashboard.html" %}
+
+{% block content %}
+
+<h2>Reporte de entrega – Pedido #{{ pedido.ID_Pedido }}</h2>
+
+<a href="javascript:history.back()"
+   class="btn btn-secondary mb-3">← Volver</a>
+
+{% for r in registros %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Fecha:</strong> {{ r.FechaRegistro }}</p>
+        <p><strong>Comentario:</strong> {{ r.Comentario or 'Sin comentario' }}</p>
+
+        <div class="d-flex gap-2">
+            {% for foto in [r.Foto1, r.Foto2, r.Foto3] %}
+                {% if foto %}
+                    <img src="/static/img/entregas/{{ foto }}"
+                         class="img-thumbnail"
+                         width="150">
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% if not registros %}
+<p>No hay registros de entrega para este pedido.</p>
+{% endif %}
+
+{% endblock %}
