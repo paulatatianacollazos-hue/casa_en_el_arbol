@@ -1126,18 +1126,27 @@ def listar_empleados():
     )
 
 
-@admin.route('/admin/empleado/<int:id_usuario>/asistencia')
+@admin.route('/empleado/<int:id_usuario>/asistencia')
 @login_required
+@role_required("admin")
 def asistencia_empleado(id_usuario):
 
     empleado = Usuario.query.get_or_404(id_usuario)
 
+    # ⏰ Registros de sesión
     registros = RegistroSesion.query.filter_by(
         ID_Usuario=id_usuario
     ).order_by(RegistroSesion.Fecha.desc()).all()
 
+    # 📦 Pedidos asignados al empleado
+    pedidos = Pedido.query.filter_by(
+        ID_Empleado=id_usuario
+    ).order_by(Pedido.FechaPedido.desc()).all()
+
     return render_template(
         'administrador/asistencia_empleado.html',
         empleado=empleado,
-        registros=registros
+        registros=registros,
+        pedidos=pedidos
     )
+
