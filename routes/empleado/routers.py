@@ -6,6 +6,7 @@ from basedatos.models import (
     Usuario, Calendario, Notificaciones, RegistroEntrega, db,
     Pedido, Detalle_Pedido, Producto
     )
+from basedatos.db import get_connection
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.db import get_connection
@@ -412,3 +413,11 @@ def actualizar_productos(pedido_id):
     finally:
         cursor.close()
         conn.close()
+
+
+@empleado.route("/catalogo")
+@login_required
+def catalogo():
+    productos = get_productos()
+    return render_template("cliente/cliente_catalogo.html",
+                           productos=productos)
