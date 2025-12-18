@@ -145,14 +145,16 @@
                         <i class="bi bi-info-circle me-1"></i>NOSOTROS
                     </a>
                 </li>
+                {% if current_user.Rol == 'taller' %}
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-dark" href="{{ url_for('cliente.catalogo') }}">
+                    <i class="bi bi-collection me-1"></i>CATÁLOGO
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link fw-semibold text-dark" href="#" onclick="filterProducts('ofertas')">
                         <i class="bi bi-tag me-1"></i>OFERTAS
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold text-dark" href="#">
-                        <i class="bi bi-shield-check me-1"></i>GARANTÍAS
                     </a>
                 </li>
                 <li class="nav-item">
