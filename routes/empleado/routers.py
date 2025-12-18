@@ -454,3 +454,4 @@ def detalle_producto(id_producto):
         ha_comprado=ha_comprado,
         reseñas=reseñas
     )
+
