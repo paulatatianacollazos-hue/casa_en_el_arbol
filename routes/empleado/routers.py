@@ -6,12 +6,12 @@ from basedatos.models import (
     Usuario, Calendario, Notificaciones, RegistroEntrega, db,
     Pedido, Detalle_Pedido, Producto
     )
-from basedatos.db import get_connection
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
 from basedatos.db import get_connection
 from basedatos.queries import (
     actualizar_pedido as actualizar_pedido_query,
+    get_productos
 )
 import os
 from werkzeug.utils import secure_filename
