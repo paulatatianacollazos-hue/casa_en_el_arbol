@@ -1113,17 +1113,31 @@ def estadistica():
     )
 
 
-@admin.route('/admin/asistencia/<int:id_usuario>')
+@admin.route('/empleados')
 @login_required
-def ver_asistencia(id_usuario):
+def listar_empleados():
+    empleados = Usuario.query.filter(
+        Usuario.Rol.in_(['empleado', 'instalador', 'transportista', 'taller'])
+    ).all()
 
-    usuario = Usuario.query.get_or_404(id_usuario)
+    return render_template(
+        'administrador/empleados.html',
+        empleados=empleados
+    )
+
+
+@admin.route('/admin/empleado/<int:id_usuario>/asistencia')
+@login_required
+def asistencia_empleado(id_usuario):
+
+    empleado = Usuario.query.get_or_404(id_usuario)
+
     registros = RegistroSesion.query.filter_by(
         ID_Usuario=id_usuario
     ).order_by(RegistroSesion.Fecha.desc()).all()
 
     return render_template(
-        'admin/asistencia.html',
-        usuario=usuario,
+        'administrador/asistencia_empleado.html',
+        empleado=empleado,
         registros=registros
     )

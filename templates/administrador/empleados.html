@@ -1,0 +1,36 @@
+{% extends "administrador/admin_dashboard.html" %}
+{% block content %}
+
+<h2>Listado de Empleados</h2>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in empleados %}
+        <tr>
+            <td>{{ e.Nombre }} {{ e.Apellido }}</td>
+            <td>{{ e.Correo }}</td>
+            <td>{{ e.Rol }}</td>
+            <td>
+                <a href="{{ url_for('admin.asistencia_empleado', id_usuario=e.ID_Usuario) }}"
+                   class="btn btn-sm btn-primary">
+                    Ver asistencia
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not empleados %}
+<p>No hay empleados registrados.</p>
+{% endif %}
+
+{% endblock %}

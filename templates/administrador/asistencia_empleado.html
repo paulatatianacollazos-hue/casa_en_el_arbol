@@ -1,0 +1,38 @@
+{% extends "administrador/admin_dashboard.html" %}
+{% block content %}
+
+<h2>Asistencia de {{ empleado.Nombre }} {{ empleado.Apellido }}</h2>
+
+<a href="{{ url_for('admin.listar_empleados') }}"
+   class="btn btn-secondary mb-3">
+    ← Volver a empleados
+</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Hora de entrada</th>
+            <th>Hora de salida</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in registros %}
+        <tr>
+            <td>{{ r.Fecha.strftime('%Y-%m-%d') }}</td>
+            <td>
+                {{ r.HoraEntrada.strftime('%H:%M:%S') if r.HoraEntrada else '—' }}
+            </td>
+            <td>
+                {{ r.HoraSalida.strftime('%H:%M:%S') if r.HoraSalida else '—' }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not registros %}
+<p>No hay registros de asistencia para este empleado.</p>
+{% endif %}
+
+{% endblock %}
