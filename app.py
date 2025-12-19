@@ -6,6 +6,9 @@ from flask import Flask, render_template, flash, redirect, url_for, jsonify, req
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
 from basedatos.queries import Producto
+from extensions import mysql
+app = Flask(__name__)
+app.secret_key = "clave_secreta"
 
 
 
@@ -24,15 +27,23 @@ from routes.empleado.routers import empleado
 
 
 # ------------------ APP ------------------ #
-app = Flask(__name__)
-app.register_blueprint(empleado)
+# 🔹 CONFIGURACIÓN MYSQL (OBLIGATORIA TODA)
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = ""
-app.config["MYSQL_DB"] = "nombre_de_tu_base_de_datos"
+app.config["MYSQL_PASSWORD"] = ""        # cambia si tu MySQL tiene contraseña
+app.config["MYSQL_DB"] = "tienda_db"
 app.config["MYSQL_PORT"] = 3306
+
+# 🔹 ESTAS SON LAS QUE TE ESTÁN DANDO ERROR
 app.config["MYSQL_UNIX_SOCKET"] = None
+app.config["MYSQL_CONNECT_TIMEOUT"] = 10
 app.config["MYSQL_CURSORCLASS"] = "DictCursor"
+app.config["MYSQL_AUTOCOMMIT"] = True
+
+# 🔹 INICIALIZAR MYSQL
+mysql.init_app(app)
+
+login_manager = LoginManager(app)
 
 
 
