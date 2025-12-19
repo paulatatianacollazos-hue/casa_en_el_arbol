@@ -1303,7 +1303,7 @@ def registrar_proveedor():
 @role_required('Admin')
 def control_financiero():
 
-    conexion = get_db_connection()
+    conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
     from datetime import datetime
