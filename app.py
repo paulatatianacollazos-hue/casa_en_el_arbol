@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
+from routes.empleado.routers import empleado
 from flask import Flask, render_template, flash, redirect, url_for, jsonify, request
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
@@ -112,6 +112,7 @@ def load_user(user_id):
 app.register_blueprint(auth)
 app.register_blueprint(cliente)
 app.register_blueprint(admin)
+app.register_blueprint(empleado)
 
 
 # ------------------ RUTAS PÚBLICAS ------------------ #
