@@ -43,26 +43,41 @@
     Registrar compra
 </button>
 
-<table class="table mt-3">
-    <thead>
-        <tr>
-            <th>ID Compra</th>
-            <th>Fecha</th>
-            <th>Producto</th>
-            <th>Cantidad</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for c in compras %}
-        <tr>
-            <td>{{ c.id_compra }}</td>
-            <td>{{ c.fecha }}</td>
-            <td>{{ c.NombreProducto }}</td>
-            <td>{{ c.cantidad }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="mt-4">
+    {% set compra_actual = None %}
+
+    {% for c in compras %}
+        {% if compra_actual != c.id_compra %}
+            {% if compra_actual is not none %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <strong>Compra #{{ c.id_compra }}</strong> |
+                    Fecha: {{ c.fecha }}
+                </div>
+
+                <ul class="list-group list-group-flush">
+            {% set compra_actual = c.id_compra %}
+        {% endif %}
+
+        <li class="list-group-item d-flex justify-content-between">
+            <span>{{ c.producto }}</span>
+            <span>
+                Cant: {{ c.cantidad }}
+            </span>
+        </li>
+
+    {% endfor %}
+
+    {% if compra_actual is not none %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
 
 <div class="modal fade" id="modalCompra" tabindex="-1">
   <div class="modal-dialog modal-lg">
