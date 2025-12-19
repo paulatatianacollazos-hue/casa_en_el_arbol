@@ -1384,6 +1384,7 @@ def compras_empresa():
 def registrar_compras():
     productos = request.form.getlist("producto[]")
     cantidades = request.form.getlist("cantidad[]")
+    precios = request.form.getlist("precio[]")
 
     cursor = mysql.connection.cursor()
 
@@ -1391,12 +1392,13 @@ def registrar_compras():
     cursor.execute("INSERT INTO compra () VALUES ()")
     id_compra = cursor.lastrowid
 
-    # 2️⃣ Guardar detalles
-    for producto, cantidad in zip(productos, cantidades):
+    # 2️⃣ Guardar detalle
+    for producto, cantidad, precio in zip(productos, cantidades, precios):
         cursor.execute("""
-            INSERT INTO detalle_compra (id_compra, producto, cantidad)
-            VALUES (%s, %s, %s)
-        """, (id_compra, producto, cantidad))
+            INSERT INTO detalle_compra
+            (id_compra, producto, cantidad, precio)
+            VALUES (%s, %s, %s, %s)
+        """, (id_compra, producto, cantidad, precio))
 
     mysql.connection.commit()
     cursor.close()
