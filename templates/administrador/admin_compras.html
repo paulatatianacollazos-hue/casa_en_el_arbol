@@ -6,8 +6,29 @@
         .caja1{
             background-color: #fff;
             border: 1px solid #ddd;
-            height: 300px;
-            width: 40%;
+            height: 700px;
+            width: 45%;
+            border-radius: 20px;
+            margin-left: 4%;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input{
+            height: 40px;
+            width: 80%;
+            border-radius: 50px;
+            margin-top: 20px;
+        }
+
+        h3{
+            margin: 20px 0;
+        }
+
+        button{
+            color: white;
+            margin-top: 20px;
+            padding: 20px;
         }
 
         .contenedor{
@@ -29,14 +50,14 @@
             <select name="producto" required>
                 <option value="">Seleccione</option>
                 {% for p in productos %}
-                    <option value="{{ p[0] }}">{{ p[1] }}</option>
+                    <option value="{{ p[0] }}" style="color: black;">{{ p[1] }}</option>
                 {% endfor %}
             </select>
 
             <label>Cantidad</label>
-            <input type="number" name="cantidad" min="1" required>
+            <input type="number" name="cantidad" min="1" required><br>
 
-            <button type="submit">Añadir compra</button>
+            <button type="submit" class="btn-primary">Añadir compra</button>
         </form>
     </div>
 
@@ -48,8 +69,8 @@
             <input type="text"
                    name="producto"
                    placeholder="Filtrar producto"
-                   value="{{ filtro_producto }}">
-            <button type="submit">Filtrar</button>
+                   value="{{ filtro_producto }}"><br>
+            <button type="submit" class="btn-primary">Filtrar</button>
         </form>
 
         <table>
@@ -79,8 +100,8 @@
             <input type="text"
                    name="proveedor"
                    placeholder="Filtrar proveedor"
-                   value="{{ filtro_proveedor }}">
-            <button type="submit">Filtrar</button>
+                   value="{{ filtro_proveedor }}"><br>
+            <button type="submit" class="btn-primary">Filtrar</button>
         </form>
 
         <ul>
@@ -99,13 +120,13 @@
 <h3>Registrar proveedor</h3>
 
 <form method="POST" action="{{ url_for('admin.registrar_proveedor') }}">
-    <input type="text" name="nombre_empresa" placeholder="Empresa" required>
-    <input type="text" name="nombre_contacto" placeholder="Contacto" required>
-    <input type="text" name="telefono" placeholder="Teléfono" required>
-    <input type="text" name="pais" placeholder="País" required>
-    <input type="text" name="cargo" placeholder="Cargo" required>
+    <input type="text" name="nombre_empresa" placeholder="Empresa" required><br>
+    <input type="text" name="nombre_contacto" placeholder="Contacto" required><br>
+    <input type="text" name="telefono" placeholder="Teléfono" required><br>
+    <input type="text" name="pais" placeholder="País" required><br>
+    <input type="text" name="cargo" placeholder="Cargo" required><br>
 
-    <button type="submit">Registrar proveedor</button>
+    <button type="submit" class="btn-primary">Registrar proveedor</button>
 </form>
     </div>
 </div>
