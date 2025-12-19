@@ -1216,7 +1216,7 @@ def compras_proveedores():
     proveedores = cursor.fetchall()
 
     return render_template(
-        "compras/admin_compras.html",
+        "administrador/admin_compras.html",
         productos=productos,
         proveedores=proveedores,
         filtro_producto=filtro_producto,
