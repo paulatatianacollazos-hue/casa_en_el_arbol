@@ -26,14 +26,13 @@ from routes.empleado.routers import empleado
 # ------------------ APP ------------------ #
 app = Flask(__name__)
 app.register_blueprint(empleado)
-app = Flask(__name__)
-app.secret_key = "clave_secreta"
-
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = ""
 app.config["MYSQL_DB"] = "nombre_de_tu_base_de_datos"
+app.config["MYSQL_PORT"] = 3306
 app.config["MYSQL_CURSORCLASS"] = "DictCursor"
+
 
 
 
