@@ -1240,3 +1240,27 @@ def registrar_compra():
 
     flash("Compra registrada correctamente", "success")
     return redirect(url_for("admin.compras_proveedores"))
+
+
+@admin.route("/proveedores/registrar", methods=["POST"])
+@login_required
+@role_required("admin")
+def registrar_proveedor():
+    nombre_empresa = request.form["nombre_empresa"]
+    nombre_contacto = request.form["nombre_contacto"]
+    telefono = request.form["telefono"]
+    pais = request.form["pais"]
+    cargo = request.form["cargo"]
+
+    cursor = mysql.connection.cursor()
+    cursor.execute("""
+        INSERT INTO proveedor 
+        (NombreEmpresa, NombreContacto, Telefono, Pais, CargoContacto)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (nombre_empresa, nombre_contacto, telefono, pais, cargo))
+
+    mysql.connection.commit()
+    cursor.close()
+
+    flash("Proveedor registrado correctamente", "success")
+    return redirect(url_for("admin.compras_proveedores"))

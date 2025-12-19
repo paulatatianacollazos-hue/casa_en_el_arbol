@@ -91,5 +91,18 @@
 
 </div>
 
+<h3>Registrar proveedor</h3>
+
+<form method="POST" action="{{ url_for('admin.registrar_proveedor') }}">
+    <input type="text" name="nombre_empresa" placeholder="Empresa" required>
+    <input type="text" name="nombre_contacto" placeholder="Contacto" required>
+    <input type="text" name="telefono" placeholder="Teléfono" required>
+    <input type="text" name="pais" placeholder="País" required>
+    <input type="text" name="cargo" placeholder="Cargo" required>
+
+    <button type="submit">Registrar proveedor</button>
+</form>
+
+
 </body>
 </html>
