@@ -1182,7 +1182,7 @@ def ver_reporte_entrega(pedido_id):
 
 # ---------- Administrar compras y Proveedores ----------
 
-@admin.route("/compras", methods=["GET"])
+@admin.route("/compras", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
 def compras_proveedores():
@@ -1191,7 +1191,28 @@ def compras_proveedores():
 
     cursor = mysql.connection.cursor()
 
-    # Productos
+    # =========================
+    # REGISTRAR PROVEEDOR (POST)
+    # =========================
+    if request.method == "POST":
+        nombre_empresa = request.form.get("nombre_empresa")
+        nombre_contacto = request.form.get("nombre_contacto")
+        telefono = request.form.get("telefono")
+        pais = request.form.get("pais")
+        cargo = request.form.get("cargo")
+
+        if nombre_empresa:
+            cursor.execute("""
+                INSERT INTO proveedor 
+                (NombreEmpresa, NombreContacto, Telefono, Pais, CargoContacto)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (nombre_empresa, nombre_contacto, telefono, pais, cargo))
+
+            mysql.connection.commit()
+
+    # ==========
+    # PRODUCTOS
+    # ==========
     if filtro_producto:
         cursor.execute("""
             SELECT ID_Producto, NombreProducto, Stock
@@ -1199,21 +1220,31 @@ def compras_proveedores():
             WHERE NombreProducto LIKE %s
         """, (f"%{filtro_producto}%",))
     else:
-        cursor.execute("SELECT ID_Producto, NombreProducto, Stock FROM producto")
+        cursor.execute("""
+            SELECT ID_Producto, NombreProducto, Stock 
+            FROM producto
+        """)
 
     productos = cursor.fetchall()
 
-    # Proveedores
+    # ============
+    # PROVEEDORES
+    # ============
     if filtro_proveedor:
         cursor.execute("""
-            SELECT ID_Proveedor, NombreEmpresa
+            SELECT ID_Proveedor, NombreEmpresa, Pais
             FROM proveedor
             WHERE NombreEmpresa LIKE %s
         """, (f"%{filtro_proveedor}%",))
     else:
-        cursor.execute("SELECT ID_Proveedor, NombreEmpresa FROM proveedor")
+        cursor.execute("""
+            SELECT ID_Proveedor, NombreEmpresa, Pais 
+            FROM proveedor
+        """)
 
     proveedores = cursor.fetchall()
+
+    cursor.close()
 
     return render_template(
         "administrador/admin_compras.html",
@@ -1222,6 +1253,7 @@ def compras_proveedores():
         filtro_producto=filtro_producto,
         filtro_proveedor=filtro_proveedor
     )
+
 
 
 @admin.route("/compras/registrar", methods=["POST"])
