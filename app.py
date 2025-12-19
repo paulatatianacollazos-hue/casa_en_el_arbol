@@ -30,7 +30,7 @@ from routes.empleado.routers import empleado
 # 🔹 CONFIGURACIÓN MYSQL (OBLIGATORIA TODA)
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = ""        # cambia si tu MySQL tiene contraseña
+app.config["MYSQL_PASSWORD"] = "paula123"        # cambia si tu MySQL tiene contraseña
 app.config["MYSQL_DB"] = "tienda_db"
 app.config["MYSQL_PORT"] = 3306
 
