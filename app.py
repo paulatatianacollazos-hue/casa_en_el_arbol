@@ -6,6 +6,9 @@ from flask import Flask, render_template, flash, redirect, url_for, jsonify, req
 from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
 from basedatos.queries import Producto
+from flask_mysqldb import MySQL
+
+
 
 # ------------------ MODELOS ------------------ #
 from basedatos.models import db, Usuario
@@ -23,6 +26,7 @@ from routes.empleado.routers import empleado
 # ------------------ APP ------------------ #
 app = Flask(__name__)
 app.register_blueprint(empleado)
+mysql = MySQL(app)
 
 
 # ------------------ CONFIGURACIÓN PRINCIPAL ------------------ #
