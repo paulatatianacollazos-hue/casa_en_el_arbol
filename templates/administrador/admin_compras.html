@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración de Compras</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compras.css') }}">
+</head>
+<body>
+
+<h2>Administración de Compras y Proveedores</h2>
+
+<div class="contenedor">
+
+    <!-- FORMULARIO COMPRA -->
+    <div class="panel">
+        <h3>Registrar compra</h3>
+        <form method="POST" action="{{ url_for('compras.registrar_compra') }}">
+            <label>Producto</label>
+            <select name="producto" required>
+                <option value="">Seleccione</option>
+                {% for p in productos %}
+                <option value="{{ p[0] }}">{{ p[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Cantidad</label>
+            <input type="number" name="cantidad" min="1" required>
+
+            <button type="submit">Añadir compra</button>
+        </form>
+    </div>
+
+    <!-- TABLA PRODUCTOS -->
+    <div class="panel grande">
+        <h3>Stock actual</h3>
+
+        <form method="GET">
+            <input type="text"
+                   name="producto"
+                   placeholder="Filtrar producto"
+                   value="{{ filtro_producto }}"
+                   required>
+            <button type="submit">Filtrar</button>
+        </form>
+
+        <table>
+            <tr>
+                <th>Producto</th>
+                <th>Stock</th>
+            </tr>
+            {% for p in productos %}
+            <tr>
+                <td>{{ p[1] }}</td>
+                <td>{{ p[2] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- PROVEEDORES -->
+    <div class="panel">
+        <h3>Proveedores</h3>
+
+        <form method="GET">
+            <input type="text"
+                   name="proveedor"
+                   placeholder="Filtrar proveedor"
+                   value="{{ filtro_proveedor }}"
+                   required>
+            <button type="submit">Filtrar</button>
+        </form>
+
+        <ul>
+            {% for pr in proveedores %}
+            <li>{{ pr[1] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>

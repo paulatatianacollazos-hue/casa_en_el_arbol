@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify, abort, current_app                                                                                                                    
 from basedatos.models import RegistroSesion
+from app import mysql
 
 from flask_login import login_required, current_user
 from routes.cliente.routes import mensajes
@@ -1178,3 +1179,63 @@ def ver_reporte_entrega(pedido_id):
 
 
 
+# ---------- Administrar compras y Proveedores ----------
+
+@admin.route("/compras", methods=["GET"])
+@login_required
+@role_required("admin")
+def compras_proveedores():
+    filtro_producto = request.args.get("producto", "")
+    filtro_proveedor = request.args.get("proveedor", "")
+
+    cursor = mysql.connection.cursor()
+
+    # Productos
+    if filtro_producto:
+        cursor.execute("""
+            SELECT ID_Producto, NombreProducto, Stock
+            FROM producto
+            WHERE NombreProducto LIKE %s
+        """, (f"%{filtro_producto}%",))
+    else:
+        cursor.execute("SELECT ID_Producto, NombreProducto, Stock FROM producto")
+
+    productos = cursor.fetchall()
+
+    # Proveedores
+    if filtro_proveedor:
+        cursor.execute("""
+            SELECT ID_Proveedor, NombreEmpresa
+            FROM proveedor
+            WHERE NombreEmpresa LIKE %s
+        """, (f"%{filtro_proveedor}%",))
+    else:
+        cursor.execute("SELECT ID_Proveedor, NombreEmpresa FROM proveedor")
+
+    proveedores = cursor.fetchall()
+
+    return render_template(
+        "compras/admin_compras.html",
+        productos=productos,
+        proveedores=proveedores,
+        filtro_producto=filtro_producto,
+        filtro_proveedor=filtro_proveedor
+    )
+
+
+@admin.route("/compras/registrar", methods=["POST"])
+@login_required
+@role_required("admin")
+def registrar_compra():
+    id_producto = request.form["producto"]
+    cantidad = int(request.form["cantidad"])
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        "UPDATE producto SET Stock = Stock + %s WHERE ID_Producto = %s",
+        (cantidad, id_producto)
+    )
+    mysql.connection.commit()
+
+    flash("Compra registrada correctamente", "success")
+    return redirect(url_for("admin.compras_proveedores"))
