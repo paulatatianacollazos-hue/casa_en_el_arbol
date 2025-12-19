@@ -1296,3 +1296,65 @@ def registrar_proveedor():
 
     flash("Proveedor registrado correctamente", "success")
     return redirect(url_for("admin.compras_proveedores"))
+
+# ------------------ CONTROL FINANCIERO ------------------ #
+
+@admin.route('/control-financiero')
+@role_required('Administrador', 'Finanzas')
+def control_financiero():
+
+    conexion = get_db_connection()
+    cursor = conexion.cursor(dictionary=True)
+
+    from datetime import datetime
+    mes = datetime.now().month
+    anio = datetime.now().year
+
+    # Total ventas
+    cursor.execute("""
+        SELECT SUM(Monto) AS total_ventas
+        FROM pagos
+        WHERE MONTH(FechaPago) = %s AND YEAR(FechaPago) = %s
+    """, (mes, anio))
+    total_ventas = cursor.fetchone()['total_ventas'] or 0
+
+    # Costo productos vendidos
+    cursor.execute("""
+        SELECT SUM(dp.Cantidad * dp.PrecioUnidad) AS costo_productos
+        FROM detalle_pedido dp
+        JOIN pedido p ON dp.ID_Pedido = p.ID_Pedido
+        WHERE MONTH(p.FechaPedido) = %s AND YEAR(p.FechaPedido) = %s
+    """, (mes, anio))
+    costo_productos = cursor.fetchone()['costo_productos'] or 0
+
+    # Costos adicionales
+    pagos_empleados = 1200000
+    gastos_adicionales = 500000
+
+    # Costos totales reales
+    costos_totales = costo_productos + pagos_empleados + gastos_adicionales
+
+    # Ganancia real
+    ganancia_real = total_ventas - costos_totales
+
+    # Transacciones
+    cursor.execute("""
+        SELECT pagos.FechaPago, pagos.MetodoPago, pagos.Monto, pedido.ID_Pedido
+        FROM pagos
+        JOIN pedido ON pagos.ID_Pedido = pedido.ID_Pedido
+        WHERE MONTH(pagos.FechaPago) = %s AND YEAR(pagos.FechaPago) = %s
+    """, (mes, anio))
+    transacciones = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template(
+        'administrador/control_financiero.html',
+        total_ventas=total_ventas,
+        costo_productos=costo_productos,
+        pagos_empleados=pagos_empleados,
+        gastos_adicionales=gastos_adicionales,
+        costos_totales=costos_totales,
+        ganancia_real=ganancia_real,
+        transacciones=transacciones
+    )

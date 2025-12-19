@@ -1,0 +1,38 @@
+<h2>📊 Control Financiero Mensual</h2>
+
+<h3>💰 Ingresos</h3>
+<p><strong>Total Ventas:</strong> ${{ total_ventas }}</p>
+
+<h3>📉 Costos Reales</h3>
+<ul>
+    <li>Costo de Productos: ${{ costo_productos }}</li>
+    <li>Pagos a Empleados: ${{ pagos_empleados }}</li>
+    <li>Gastos Adicionales: ${{ gastos_adicionales }}</li>
+</ul>
+
+<p><strong>Total Costos Reales:</strong> ${{ costos_totales }}</p>
+
+<hr>
+
+<h3>📈 Ganancia Real del Mes</h3>
+<p style="font-size: 18px; font-weight: bold;">
+    ${{ ganancia_real }}
+</p>
+
+<h3>🧾 Transacciones</h3>
+<table border="1">
+    <tr>
+        <th>Pedido</th>
+        <th>Fecha</th>
+        <th>Método</th>
+        <th>Monto</th>
+    </tr>
+    {% for t in transacciones %}
+    <tr>
+        <td>{{ t.ID_Pedido }}</td>
+        <td>{{ t.FechaPago }}</td>
+        <td>{{ t.MetodoPago }}</td>
+        <td>${{ t.Monto }}</td>
+    </tr>
+    {% endfor %}
+</table>
