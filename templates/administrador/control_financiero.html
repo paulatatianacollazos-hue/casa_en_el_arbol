@@ -2,9 +2,35 @@
 {% block title %} compras_proveedores | Casa en el Árbol{% endblock %}
 
 {% block extra_css %}
+<style>
+.caja{
+    background-color: #fff;
+    min-height: 600px;
+    width: 80%;
+    border-radius: 20px;
+    margin-top: 20px;
+    display: flex;
+
+    align-items: center;
+}
+
+.body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subcaja{
+    margin-left: 50px;
+}
+
+</style>
 {%endblock%}
 
 {% block content %}
+<div class="body">
+<div class="caja">
+<div class="subcaja">
 <h2>📊 Control Financiero Mensual</h2>
 
 <h3>💰 Ingresos</h3>
@@ -43,4 +69,7 @@
     </tr>
     {% endfor %}
 </table>
+</div>
+</div>
+</div>
 {%endblock%}
