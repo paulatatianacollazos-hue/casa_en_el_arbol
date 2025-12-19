@@ -43,40 +43,34 @@
     Registrar compra
 </button>
 
-<div class="mt-4">
-    {% set compra_actual = None %}
-
-    {% for c in compras %}
-        {% if compra_actual != c.id_compra %}
-            {% if compra_actual is not none %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <div class="card mb-3 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <strong>Compra #{{ c.id_compra }}</strong> |
-                    Fecha: {{ c.fecha }}
-                </div>
-
-                <ul class="list-group list-group-flush">
-            {% set compra_actual = c.id_compra %}
-        {% endif %}
-
-        <li class="list-group-item d-flex justify-content-between">
-            <span>{{ c.producto }}</span>
-            <span>
-                Cant: {{ c.cantidad }}
-            </span>
-        </li>
-
-    {% endfor %}
-
-    {% if compra_actual is not none %}
-        </ul>
+{% for compra in compras %}
+<div class="card mb-4 shadow">
+    <div class="card-header bg-primary text-white">
+        <strong>Compra #{{ compra.id_compra }}</strong>
+        <span class="float-end">{{ compra.fecha }}</span>
     </div>
-    {% endif %}
+
+    <ul class="list-group list-group-flush">
+        {% for d in compra.detalles %}
+        <li class="list-group-item">
+            <strong>{{ d.producto }}</strong><br>
+            Cantidad: {{ d.cantidad }}<br>
+            Precio: ${{ d.precio }}<br>
+            <small class="text-muted">
+                Subtotal: ${{ "%.2f"|format(d.subtotal) }}
+            </small>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="card-footer text-end">
+        <strong>Total compra:</strong>
+        <span class="fs-5 text-success">
+            ${{ "%.2f"|format(compra.total) }}
+        </span>
+    </div>
 </div>
+{% endfor %}
 
 
 <div class="modal fade" id="modalCompra" tabindex="-1">

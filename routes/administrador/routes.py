@@ -1248,17 +1248,48 @@ def compras_empresa():
     cursor = mysql.connection.cursor()
 
     cursor.execute("""
-        SELECT c.id_compra, c.fecha,
-               d.producto, d.cantidad
+        SELECT 
+            c.id_compra,
+            c.fecha,
+            d.producto,
+            d.cantidad,
+            d.precio
         FROM compra c
         JOIN detalle_compra d ON c.id_compra = d.id_compra
-        ORDER BY c.fecha DESC
+        ORDER BY c.id_compra DESC
     """)
 
-    compras = cursor.fetchall()
+    filas = cursor.fetchall()
     cursor.close()
 
-    return render_template("administrador/admin_compras.html", compras=compras)
+    compras = {}
+
+    for fila in filas:
+        id_compra = fila["id_compra"]
+
+        if id_compra not in compras:
+            compras[id_compra] = {
+                "id_compra": id_compra,
+                "fecha": fila["fecha"],
+                "detalles": [],
+                "total": 0
+            }
+
+        subtotal = float(fila["cantidad"]) * float(fila["precio"])
+
+        compras[id_compra]["detalles"].append({
+            "producto": fila["producto"],
+            "cantidad": fila["cantidad"],
+            "precio": fila["precio"],
+            "subtotal": subtotal
+        })
+
+        compras[id_compra]["total"] += subtotal
+
+    return render_template(
+        "administrador/admin_compras.html",
+        compras=compras.values()
+    )
 
 
 @admin.route("/compras/registrar", methods=["POST"])
