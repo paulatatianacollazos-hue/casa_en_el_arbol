@@ -1287,4 +1287,4 @@ def registrar_compra():
     cursor.close()
 
     flash("Compra registrada correctamente", "success")
-    return redirect(url_for("admin.admin_compras"))
+    return redirect(url_for("admin.compras_empresa"))
