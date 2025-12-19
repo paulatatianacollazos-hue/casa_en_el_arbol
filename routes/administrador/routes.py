@@ -1300,7 +1300,7 @@ def registrar_proveedor():
 # ------------------ CONTROL FINANCIERO ------------------ #
 
 @admin.route('/control-financiero')
-@role_required('Administrador', 'Finanzas')
+@role_required('Admin')
 def control_financiero():
 
     conexion = get_db_connection()
