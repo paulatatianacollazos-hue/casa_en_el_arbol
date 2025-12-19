@@ -1179,9 +1179,7 @@ def ver_reporte_entrega(pedido_id):
     )
 
 
-
 # ---------- Administrar compras y Proveedores ----------
-
 @admin.route("/compras", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
