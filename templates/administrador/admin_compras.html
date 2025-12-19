@@ -118,13 +118,13 @@ function agregarProducto() {
   container.insertAdjacentHTML("beforeend", `
     <div class="row mb-2">
       <div class="col">
-        <input type="text" name="producto[]" class="form-control" required>
+        <input type="text" name="producto[]" class="form-control" required placeholder="Producto">
       </div>
       <div class="col">
-        <input type="number" name="cantidad[]" class="form-control" required>
+        <input type="number" name="cantidad[]" class="form-control" required placeholder="Cantidad">
       </div>
       <div class="col">
-        <input type="number" step="0.01" name="precio[]" class="form-control" required>
+        <input type="number" step="0.01" name="precio[]" class="form-control" required placeholder="Precio">
       </div>
     </div>
   `);
