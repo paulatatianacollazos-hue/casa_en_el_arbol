@@ -833,3 +833,35 @@ def catalogo_filtros():
         materiales=materiales,
         colores=colores
     )
+    
+    
+    #---------Historial---------
+    
+@cliente.route('/historial')
+@login_required
+def historial_cliente():
+
+    if 'usuario_id' not in session:
+        return render_template('cliente/historial.html', historial=[])
+
+    historial = session.get('historial', [])
+
+    tipo = request.args.get('tipo')
+    fecha = request.args.get('fecha')
+    q = request.args.get('q')
+
+    if tipo:
+        historial = [h for h in historial if h['tipo'] == tipo]
+
+    if fecha:
+        historial = [h for h in historial if h['fecha'].startswith(fecha)]
+
+    if q:
+        historial = [h for h in historial if q.lower() in h['descripcion'].lower()]
+
+    historial = sorted(historial, key=lambda x: x['fecha'], reverse=True)
+
+    return render_template(
+        'cliente/historial.html',
+        historial=historial
+    )
