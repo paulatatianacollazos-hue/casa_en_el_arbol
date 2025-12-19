@@ -1179,124 +1179,7 @@ def ver_reporte_entrega(pedido_id):
     )
 
 
-# ---------- Administrar compras y Proveedores ----------
-@admin.route("/compras", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def compras_proveedores():
-    filtro_producto = request.args.get("producto", "")
-    filtro_proveedor = request.args.get("proveedor", "")
-
-    cursor = mysql.connection.cursor()
-
-    # =========================
-    # REGISTRAR PROVEEDOR (POST)
-    # =========================
-    if request.method == "POST":
-        nombre_empresa = request.form.get("nombre_empresa")
-        nombre_contacto = request.form.get("nombre_contacto")
-        telefono = request.form.get("telefono")
-        pais = request.form.get("pais")
-        cargo = request.form.get("cargo")
-
-        if nombre_empresa:
-            cursor.execute("""
-                INSERT INTO proveedor 
-                (NombreEmpresa, NombreContacto, Telefono, Pais, CargoContacto)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (nombre_empresa, nombre_contacto, telefono, pais, cargo))
-
-            mysql.connection.commit()
-
-    # ==========
-    # PRODUCTOS
-    # ==========
-    if filtro_producto:
-        cursor.execute("""
-            SELECT ID_Producto, NombreProducto, Stock
-            FROM producto
-            WHERE NombreProducto LIKE %s
-        """, (f"%{filtro_producto}%",))
-    else:
-        cursor.execute("""
-            SELECT ID_Producto, NombreProducto, Stock 
-            FROM producto
-        """)
-
-    productos = cursor.fetchall()
-
-    # ============
-    # PROVEEDORES
-    # ============
-    if filtro_proveedor:
-        cursor.execute("""
-            SELECT ID_Proveedor, NombreEmpresa, Pais
-            FROM proveedor
-            WHERE NombreEmpresa LIKE %s
-        """, (f"%{filtro_proveedor}%",))
-    else:
-        cursor.execute("""
-            SELECT ID_Proveedor, NombreEmpresa, Pais 
-            FROM proveedor
-        """)
-
-    proveedores = cursor.fetchall()
-
-    cursor.close()
-
-    return render_template(
-        "administrador/admin_compras.html",
-        productos=productos,
-        proveedores=proveedores,
-        filtro_producto=filtro_producto,
-        filtro_proveedor=filtro_proveedor
-    )
-
-
-
-@admin.route("/compras/registrar", methods=["POST"])
-@login_required
-@role_required("admin")
-def registrar_compra():
-    id_producto = request.form["producto"]
-    cantidad = int(request.form["cantidad"])
-
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        "UPDATE producto SET Stock = Stock + %s WHERE ID_Producto = %s",
-        (cantidad, id_producto)
-    )
-    mysql.connection.commit()
-
-    flash("Compra registrada correctamente", "success")
-    return redirect(url_for("admin.compras_proveedores"))
-
-
-@admin.route("/proveedores/registrar", methods=["POST"])
-@login_required
-@role_required("admin")
-def registrar_proveedor():
-    nombre_empresa = request.form["nombre_empresa"]
-    nombre_contacto = request.form["nombre_contacto"]
-    telefono = request.form["telefono"]
-    pais = request.form["pais"]
-    cargo = request.form["cargo"]
-
-    cursor = mysql.connection.cursor()
-    cursor.execute("""
-        INSERT INTO proveedor 
-        (NombreEmpresa, NombreContacto, Telefono, Pais, CargoContacto)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (nombre_empresa, nombre_contacto, telefono, pais, cargo))
-
-    mysql.connection.commit()
-    cursor.close()
-
-    flash("Proveedor registrado correctamente", "success")
-    return redirect(url_for("admin.compras_proveedores"))
-
-# ------------------ CONTROL FINANCIERO ------------------ #
-
+# ---------- Administrar compras y Proveedores --------
 @admin.route('/control-financiero')
 @role_required('Admin')
 def control_financiero():
@@ -1375,13 +1258,13 @@ def compras_empresa():
     compras = cursor.fetchall()
     cursor.close()
 
-    return render_template("administrador/compras.html", compras=compras)
+    return render_template("administrador/admin_compras.html", compras=compras)
 
 
 @admin.route("/compras/registrar", methods=["POST"])
 @login_required
 @role_required("admin")
-def registrar_compras():
+def registrar_compra():
     productos = request.form.getlist("producto[]")
     cantidades = request.form.getlist("cantidad[]")
     precios = request.form.getlist("precio[]")
@@ -1404,4 +1287,4 @@ def registrar_compras():
     cursor.close()
 
     flash("Compra registrada correctamente", "success")
-    return redirect(url_for("admin.compras_empresa"))
+    return redirect(url_for("admin.admin_compras"))
