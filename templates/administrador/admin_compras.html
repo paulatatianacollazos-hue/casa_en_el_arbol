@@ -38,10 +38,14 @@
 {%endblock%}
 {% block content %}
 <h2>Compras de la empresa</h2>
-
-<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCompra">
+<div style="display: flex;">
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCompra" >
     Registrar compra
 </button>
+<a href="{{ url_for('admin.proveedores_empresa') }}" class="btn btn-outline-primary ms-2" style="margin-left: 20px;">
+    Ver proveedores
+</a>
+</div>
 
 {% for compra in compras %}
 <div class="card mb-4 shadow">

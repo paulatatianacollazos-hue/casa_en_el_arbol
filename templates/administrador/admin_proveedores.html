@@ -1,0 +1,62 @@
+{% extends "administrador/admin_dashboard.html" %}
+
+{% block content %}
+<h2>Proveedores</h2>
+
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalProveedor">
+    Registrar proveedor
+</button>
+
+<a href="{{ url_for('admin.compras_empresa') }}" class="btn btn-outline-secondary mb-3 ms-2">
+    Volver a compras
+</a>
+
+<hr>
+
+<div class="row">
+{% for p in proveedores %}
+  <div class="col-md-4">
+    <div class="card mb-4 shadow">
+      <div class="card-header bg-dark text-white">
+        {{ p.NombreEmpresa }}
+      </div>
+
+      <div class="card-body">
+        <p><strong>Contacto:</strong> {{ p.NombreContacto }}</p>
+        <p><strong>Cargo:</strong> {{ p.CargoContacto }}</p>
+        <p><strong>Teléfono:</strong> {{ p.Telefono }}</p>
+        <p><strong>País:</strong> {{ p.Pais }}</p>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+
+<!-- MODAL REGISTRAR PROVEEDOR -->
+<div class="modal fade" id="modalProveedor" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('admin.registrar_proveedor') }}">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar proveedor</h5>
+        </div>
+
+        <div class="modal-body">
+          <input class="form-control mb-2" name="nombre_empresa" placeholder="Empresa" required>
+          <input class="form-control mb-2" name="nombre_contacto" placeholder="Contacto" required>
+          <input class="form-control mb-2" name="cargo" placeholder="Cargo del contacto" required>
+          <input class="form-control mb-2" name="telefono" placeholder="Teléfono" required>
+          <input class="form-control mb-2" name="pais" placeholder="País" required>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-success" type="submit">
+            Guardar proveedor
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
