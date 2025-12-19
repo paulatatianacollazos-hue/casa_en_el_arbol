@@ -76,19 +76,19 @@
 
         <div class="modal-body">
           <div id="productos-container">
-            <div class="row mb-2 producto-row">
-              <div class="col">
-                <input type="text" name="producto[]" class="form-control" placeholder="producto">
-              </div>
-              <div class="col">
+            <div class="row mb-2">
+                <div class="col">
+                <input type="text" name="producto[]" class="form-control" placeholder="Producto" required>
+                </div>
+                <div class="col">
                 <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" required>
-              </div>
+                </div>
             </div>
-          </div>
+        </div>
 
-          <button type="button" class="btn btn-secondary" onclick="agregarProducto()">
+            <button type="button" class="btn btn-secondary" onclick="agregarProducto()">
             Agregar otro producto
-          </button>
+            </button>
         </div>
 
         <div class="modal-footer">
@@ -100,21 +100,17 @@
 </div>
 <script>
 function agregarProducto() {
-    const container = document.getElementById("productos-container");
-
-    const fila = document.createElement("div");
-    fila.classList.add("row", "mb-2", "producto-row");
-
-    fila.innerHTML = `
-        <div class="col">
-            <input type="text" name="producto[]" class="form-control" required placeholder="producto">
-        </div>
-        <div class="col">
-            <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" required>
-        </div>
-    `;
-
-    container.appendChild(fila);
+  const container = document.getElementById("productos-container");
+  container.insertAdjacentHTML("beforeend", `
+    <div class="row mb-2">
+      <div class="col">
+        <input type="text" name="producto[]" class="form-control" required>
+      </div>
+      <div class="col">
+        <input type="number" name="cantidad[]" class="form-control" required>
+      </div>
+    </div>
+  `);
 }
 </script>
 

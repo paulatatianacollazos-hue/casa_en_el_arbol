@@ -1366,25 +1366,16 @@ def compras_empresa():
 
     cursor.execute("""
         SELECT c.id_compra, c.fecha,
-               p.NombreProducto, d.cantidad
+               d.producto, d.cantidad
         FROM compra c
         JOIN detalle_compra d ON c.id_compra = d.id_compra
-        JOIN producto p ON d.id_producto = p.ID_Producto
         ORDER BY c.fecha DESC
     """)
 
     compras = cursor.fetchall()
-
-    cursor.execute("SELECT ID_Producto, NombreProducto FROM producto")
-    productos = cursor.fetchall()
-
     cursor.close()
 
-    return render_template(
-        "administrador/compras.html",
-        compras=compras,
-        productos=productos
-    )
+    return render_template("administrador/compras.html", compras=compras)
 
 
 @admin.route("/compras/registrar", methods=["POST"])
