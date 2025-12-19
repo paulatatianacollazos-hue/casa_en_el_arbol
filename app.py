@@ -31,6 +31,7 @@ app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = ""
 app.config["MYSQL_DB"] = "nombre_de_tu_base_de_datos"
 app.config["MYSQL_PORT"] = 3306
+app.config["MYSQL_UNIX_SOCKET"] = None
 app.config["MYSQL_CURSORCLASS"] = "DictCursor"
 
 
