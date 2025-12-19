@@ -1356,3 +1356,59 @@ def control_financiero():
         ganancia_real=ganancia_real,
         transacciones=transacciones
     )
+
+
+@admin.route("/compras", methods=["GET"])
+@login_required
+@role_required("admin")
+def compras_empresa():
+    cursor = mysql.connection.cursor()
+
+    cursor.execute("""
+        SELECT c.id_compra, c.fecha,
+               p.NombreProducto, d.cantidad
+        FROM compra c
+        JOIN detalle_compra d ON c.id_compra = d.id_compra
+        JOIN producto p ON d.id_producto = p.ID_Producto
+        ORDER BY c.fecha DESC
+    """)
+
+    compras = cursor.fetchall()
+
+    cursor.execute("SELECT ID_Producto, NombreProducto FROM producto")
+    productos = cursor.fetchall()
+
+    cursor.close()
+
+    return render_template(
+        "administrador/compras.html",
+        compras=compras,
+        productos=productos
+    )
+
+
+@admin.route("/compras/registrar", methods=["POST"])
+@login_required
+@role_required("admin")
+def registrar_compras():
+    productos = request.form.getlist("producto[]")
+    cantidades = request.form.getlist("cantidad[]")
+
+    cursor = mysql.connection.cursor()
+
+    # 1️⃣ Crear compra
+    cursor.execute("INSERT INTO compra () VALUES ()")
+    id_compra = cursor.lastrowid
+
+    # 2️⃣ Guardar detalles
+    for producto, cantidad in zip(productos, cantidades):
+        cursor.execute("""
+            INSERT INTO detalle_compra (id_compra, producto, cantidad)
+            VALUES (%s, %s, %s)
+        """, (id_compra, producto, cantidad))
+
+    mysql.connection.commit()
+    cursor.close()
+
+    flash("Compra registrada correctamente", "success")
+    return redirect(url_for("admin.compras_empresa"))

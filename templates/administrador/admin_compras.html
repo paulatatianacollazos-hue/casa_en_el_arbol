@@ -37,97 +37,85 @@
     </style>
 {%endblock%}
 {% block content %}
-<h2>Administración de Compras y Proveedores</h2>
+<h2>Compras de la empresa</h2>
 
-<div class="contenedor">
-    <div class="caja1">
-    <!-- REGISTRAR COMPRA -->
-    <div class="panel">
-        <h3>Registrar compra</h3>
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCompra">
+    Registrar compra
+</button>
 
-        <form method="POST" action="{{ url_for('admin.registrar_compra') }}">
-            <label>Producto</label>
-            <select name="producto" required>
-                <option value="">Seleccione</option>
-                {% for p in productos %}
-                    <option value="{{ p[0] }}" style="color: black;">{{ p[1] }}</option>
-                {% endfor %}
-            </select>
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>ID Compra</th>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in compras %}
+        <tr>
+            <td>{{ c.id_compra }}</td>
+            <td>{{ c.fecha }}</td>
+            <td>{{ c.NombreProducto }}</td>
+            <td>{{ c.cantidad }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-            <label>Cantidad</label>
-            <input type="number" name="cantidad" min="1" required><br>
+<div class="modal fade" id="modalCompra" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <form method="POST" action="{{ url_for('admin.registrar_compra') }}">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar compra</h5>
+        </div>
 
-            <button type="submit" class="btn-primary">Añadir compra</button>
-        </form>
-    </div>
+        
 
-    <!-- STOCK -->
-    <div class="panel grande">
-        <h3>Stock actual</h3>
+        <div class="modal-body">
+          <div id="productos-container">
+            <div class="row mb-2 producto-row">
+              <div class="col">
+                <input type="text" name="producto[]" class="form-control" placeholder="producto">
+              </div>
+              <div class="col">
+                <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" required>
+              </div>
+            </div>
+          </div>
 
-        <form method="GET" action="{{ url_for('admin.compras_proveedores') }}">
-            <input type="text"
-                   name="producto"
-                   placeholder="Filtrar producto"
-                   value="{{ filtro_producto }}"><br>
-            <button type="submit" class="btn-primary">Filtrar</button>
-        </form>
+          <button type="button" class="btn btn-secondary" onclick="agregarProducto()">
+            Agregar otro producto
+          </button>
+        </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in productos %}
-                <tr>
-                    <td>{{ p[1] }}</td>
-                    <td>{{ p[2] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    </div>
-    <div class="caja1">
-    <!-- PROVEEDORES -->
-    <div class="panel">
-        <h3>Proveedores</h3>
-
-        <form method="GET" action="{{ url_for('admin.compras_proveedores') }}">
-            <input type="text"
-                   name="proveedor"
-                   placeholder="Filtrar proveedor"
-                   value="{{ filtro_proveedor }}"><br>
-            <button type="submit" class="btn-primary">Filtrar</button>
-        </form>
-
-        <ul>
-            {% for pr in proveedores %}
-                <li>{{ pr[1] }}</li>
-            {% else %}
-                <li>No hay proveedores</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-
-<hr>
-
-<!-- REGISTRAR PROVEEDOR -->
-<h3>Registrar proveedor</h3>
-
-<form method="POST" action="{{ url_for('admin.registrar_proveedor') }}">
-    <input type="text" name="nombre_empresa" placeholder="Empresa" required><br>
-    <input type="text" name="nombre_contacto" placeholder="Contacto" required><br>
-    <input type="text" name="telefono" placeholder="Teléfono" required><br>
-    <input type="text" name="pais" placeholder="País" required><br>
-    <input type="text" name="cargo" placeholder="Cargo" required><br>
-
-    <button type="submit" class="btn-primary">Registrar proveedor</button>
-</form>
-    </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Registrar compra</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
+<script>
+function agregarProducto() {
+    const container = document.getElementById("productos-container");
+
+    const fila = document.createElement("div");
+    fila.classList.add("row", "mb-2", "producto-row");
+
+    fila.innerHTML = `
+        <div class="col">
+            <input type="text" name="producto[]" class="form-control" required placeholder="producto">
+        </div>
+        <div class="col">
+            <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" required>
+        </div>
+    `;
+
+    container.appendChild(fila);
+}
+</script>
+
 {%endblock%}
