@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask import flash, jsonify, abort, current_app                                                                                                                    
 from basedatos.models import RegistroSesion
 from extensions import mysql
-
+from MySQLdb.cursors import DictCursor
 
 from flask_login import login_required, current_user
 from routes.cliente.routes import mensajes
@@ -1184,30 +1184,26 @@ def ver_reporte_entrega(pedido_id):
 @login_required
 @role_required("admin")
 def control_financiero():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor = mysql.connection.cursor(DictCursor)
 
-    # 🔹 TOTAL VENTAS
     cursor.execute("""
         SELECT IFNULL(SUM(Monto), 0) AS total_ventas
         FROM pagos
     """)
     total_ventas = cursor.fetchone()["total_ventas"]
 
-    # 🔹 COSTO PRODUCTOS (compras)
     cursor.execute("""
         SELECT IFNULL(SUM(cantidad * precio), 0) AS costo_productos
         FROM detalle_compra
     """)
     costo_productos = cursor.fetchone()["costo_productos"]
 
-    # 🔹 PAGOS EMPLEADOS (si aún no tienes tabla, déjalo en 0)
     pagos_empleados = 0
     gastos_adicionales = 0
 
     costos_totales = costo_productos + pagos_empleados + gastos_adicionales
     ganancia_real = total_ventas - costos_totales
 
-    # 🔹 TRANSACCIONES
     cursor.execute("""
         SELECT ID_Pedido, FechaPago, MetodoPago, Monto
         FROM pagos
