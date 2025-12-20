@@ -318,3 +318,22 @@ class RegistroSesion(db.Model):
     HoraSalida = db.Column(db.DateTime, nullable=True)
 
     usuario = db.relationship('Usuario', backref='registros_sesion')
+
+
+class PagoEmpleado(db.Model):
+    __tablename__ = "Pago_Empleado"
+
+    ID_Pago = db.Column(db.Integer, primary_key=True)
+    ID_Empleado = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"))
+    Fecha = db.Column(db.Date)
+    Monto = db.Column(db.Float)
+    Concepto = db.Column(db.String(100))
+
+
+class ContratoEmpleado(db.Model):
+    __tablename__ = "Contrato_Empleado"
+
+    ID_Contrato = db.Column(db.Integer, primary_key=True)
+    ID_Empleado = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"))
+    Archivo = db.Column(db.String(255))
+    FechaSubida = db.Column(db.DateTime, default=datetime.utcnow)

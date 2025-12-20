@@ -3,6 +3,8 @@ from flask import flash, jsonify, abort, current_app
 from basedatos.models import RegistroSesion
 from extensions import mysql
 from MySQLdb.cursors import DictCursor
+from werkzeug.utils import secure_filename
+
 
 from flask_login import login_required, current_user
 from routes.cliente.routes import mensajes
@@ -10,7 +12,7 @@ from sqlalchemy import func
 from werkzeug.utils import secure_filename
 import os
 from basedatos.models import (
-    db, Usuario, Notificaciones,
+    db, Usuario, Notificaciones, PagoEmpleado,
     Direccion, Calendario, Pedido, Reseñas, Producto
     )
 from sqlalchemy import text
@@ -19,7 +21,7 @@ import traceback
 from werkzeug.security import generate_password_hash
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
-from datetime import datetime  # Ajusta según tu modelo
+from datetime import datetime, date  # Ajusta según tu modelo
 from flask import make_response
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -1336,6 +1338,7 @@ def proveedores_empresa():
         proveedores=proveedores
     )
 
+
 @admin.route("/proveedores/registrar", methods=["POST"])
 @login_required
 @role_required("admin")
@@ -1359,3 +1362,23 @@ def registrar_proveedor():
 
     flash("Proveedor registrado correctamente", "success")
     return redirect(url_for("admin.proveedores_empresa"))
+
+
+@admin.route("/empleado/<int:id>/pago", methods=["POST"])
+@login_required
+@role_required("admin")
+def registrar_pago_empleado(id):
+    monto = request.form["monto"]
+    concepto = request.form["concepto"]
+
+    pago = PagoEmpleado(
+        ID_Empleado=id,
+        Fecha=date.today(),
+        Monto=monto,
+        Concepto=concepto
+    )
+    db.session.add(pago)
+    db.session.commit()
+
+    flash("Pago registrado correctamente", "success")
+    return redirect(request.referrer)
