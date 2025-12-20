@@ -1180,57 +1180,58 @@ def ver_reporte_entrega(pedido_id):
 
 
 # ---------- Administrar compras y Proveedores --------
-@admin.route('/control-financiero')
-@role_required('Admin')
+@admin.route("/control-financiero")
+@login_required
+@role_required("admin")
 def control_financiero():
+    cursor = mysql.connection.cursor()
 
-    conexion = get_connection()
-    cursor = conexion.cursor(dictionary=True)
-
-    from datetime import datetime
-    mes = datetime.now().month
-    anio = datetime.now().year
-
-    # Total ventas
+    # =========================
+    # 🔹 TOTAL COMPRAS (COSTOS)
+    # =========================
     cursor.execute("""
-        SELECT SUM(Monto) AS total_ventas
-        FROM pagos
-        WHERE MONTH(FechaPago) = %s AND YEAR(FechaPago) = %s
-    """, (mes, anio))
-    total_ventas = cursor.fetchone()['total_ventas'] or 0
+        SELECT 
+            IFNULL(SUM(cantidad * precio), 0) AS total_compras
+        FROM detalle_compra
+    """)
+    costo_productos = cursor.fetchone()["total_compras"]
 
-    # Costo productos vendidos
+    # =========================
+    # 🔹 TOTAL VENTAS
+    # =========================
     cursor.execute("""
-        SELECT SUM(dp.Cantidad * dp.PrecioUnidad) AS costo_productos
-        FROM detalle_pedido dp
-        JOIN pedido p ON dp.ID_Pedido = p.ID_Pedido
-        WHERE MONTH(p.FechaPedido) = %s AND YEAR(p.FechaPedido) = %s
-    """, (mes, anio))
-    costo_productos = cursor.fetchone()['costo_productos'] or 0
+        SELECT IFNULL(SUM(Total), 0) AS total_ventas
+        FROM pedido
+    """)
+    total_ventas = cursor.fetchone()["total_ventas"]
 
-    # Costos adicionales
-    pagos_empleados = 1200000
-    gastos_adicionales = 500000
-
-    # Costos totales reales
-    costos_totales = costo_productos + pagos_empleados + gastos_adicionales
-
-    # Ganancia real
-    ganancia_real = total_ventas - costos_totales
-
-    # Transacciones
+    # =========================
+    # 🔹 TRANSACCIONES
+    # =========================
     cursor.execute("""
-        SELECT pagos.FechaPago, pagos.MetodoPago, pagos.Monto, pedido.ID_Pedido
-        FROM pagos
-        JOIN pedido ON pagos.ID_Pedido = pedido.ID_Pedido
-        WHERE MONTH(pagos.FechaPago) = %s AND YEAR(pagos.FechaPago) = %s
-    """, (mes, anio))
+        SELECT 
+            ID_Pedido,
+            FechaPedido AS FechaPago,
+            'Online' AS MetodoPago,
+            Total AS Monto
+        FROM pedido
+        ORDER BY FechaPedido DESC
+    """)
     transacciones = cursor.fetchall()
 
-    conexion.close()
+    # =========================
+    # 🔹 OTROS COSTOS (fijos)
+    # =========================
+    pagos_empleados = 0
+    gastos_adicionales = 0
+
+    costos_totales = costo_productos + pagos_empleados + gastos_adicionales
+    ganancia_real = total_ventas - costos_totales
+
+    cursor.close()
 
     return render_template(
-        'administrador/control_financiero.html',
+        "administrador/control_financiero.html",
         total_ventas=total_ventas,
         costo_productos=costo_productos,
         pagos_empleados=pagos_empleados,
@@ -1239,6 +1240,7 @@ def control_financiero():
         ganancia_real=ganancia_real,
         transacciones=transacciones
     )
+
 
 
 @admin.route("/compras", methods=["GET"])
