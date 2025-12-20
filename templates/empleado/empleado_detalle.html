@@ -80,15 +80,7 @@
   
     <div class="botones mt-3">
       <button class="btn btn-primary" id="btn-garantia">Garantía</button>
-      <button class="btn btn-primary"
-        data-id="{{ producto.ID_Producto }}"
-        data-name="{{ producto.NombreProducto }}"
-        data-price="{{ producto.PrecioUnidad }}"
-        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-        data-material="{{ producto.Material }}"
-        onclick="addToCartFromButton(this)">
-        Añadir al carrito
-      </button>
+      
       
     </div>
     
@@ -141,15 +133,6 @@
 
     <div class="botones mt-3">
       <button class="btn btn-primary">Garantía</button>
-      <button class="btn btn-primary"
-        data-id="{{ producto.ID_Producto }}"
-        data-name="{{ producto.NombreProducto }}"
-        data-price="{{ producto.PrecioUnidad }}"
-        data-image="{{ url_for('static', filename=producto.Imagenes[0]) }}"
-        data-material="{{ producto.Material }}"
-        onclick="addToCartFromButton(this)">
-        Añadir al carrito
-      </button>
     </div>
   
 
