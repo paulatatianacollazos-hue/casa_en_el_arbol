@@ -1369,4 +1369,4 @@ def registrar_proveedor():
     cursor.close()
 
     flash("Proveedor registrado correctamente", "success")
-    return redirect(url_for("admin.pedidos_empresa"))
+    return redirect(url_for("admin.proveedores_empresa"))
