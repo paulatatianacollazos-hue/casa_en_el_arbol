@@ -1186,24 +1186,29 @@ def ver_reporte_entrega(pedido_id):
 def control_financiero():
     cursor = mysql.connection.cursor(DictCursor)
 
+    # 🔹 TOTAL VENTAS
     cursor.execute("""
         SELECT IFNULL(SUM(Monto), 0) AS total_ventas
         FROM pagos
     """)
-    total_ventas = cursor.fetchone()["total_ventas"]
+    total_ventas = float(cursor.fetchone()["total_ventas"] or 0)
 
+    # 🔹 COSTO PRODUCTOS
     cursor.execute("""
         SELECT IFNULL(SUM(cantidad * precio), 0) AS costo_productos
         FROM detalle_compra
     """)
-    costo_productos = cursor.fetchone()["costo_productos"]
+    costo_productos = float(cursor.fetchone()["costo_productos"] or 0)
 
-    pagos_empleados = 0
-    gastos_adicionales = 0
+    # 🔹 OTROS COSTOS
+    pagos_empleados = 0.0
+    gastos_adicionales = 0.0
 
-    costos_totales = costo_productos + pagos_empleados + gastos_adicionales
-    ganancia_real = total_ventas - costos_totales
+    # 🔹 CÁLCULOS
+    costos_totales = float(costo_productos + pagos_empleados + gastos_adicionales)
+    ganancia_real = float(total_ventas - costos_totales)
 
+    # 🔹 TRANSACCIONES
     cursor.execute("""
         SELECT ID_Pedido, FechaPago, MetodoPago, Monto
         FROM pagos
@@ -1215,12 +1220,12 @@ def control_financiero():
 
     return render_template(
         "administrador/control_financiero.html",
-        total_ventas=total_ventas,
-        costo_productos=costo_productos,
-        pagos_empleados=pagos_empleados,
-        gastos_adicionales=gastos_adicionales,
-        costos_totales=costos_totales,
-        ganancia_real=ganancia_real,
+        total_ventas=round(total_ventas, 2),
+        costo_productos=round(costo_productos, 2),
+        pagos_empleados=round(pagos_empleados, 2),
+        gastos_adicionales=round(gastos_adicionales, 2),
+        costos_totales=round(costos_totales, 2),
+        ganancia_real=round(ganancia_real, 2),
         transacciones=transacciones
     )
 
