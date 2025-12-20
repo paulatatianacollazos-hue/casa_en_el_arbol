@@ -76,4 +76,42 @@
 </div>
 </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('graficaFinanciera').getContext('2d');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Ventas', 'Costos', 'Ganancia'],
+        datasets: [{
+            label: 'Control Financiero',
+            data: [
+                {{ total_ventas }},
+                {{ costos_totales }},
+                {{ ganancia_real }}
+            ],
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.7)',   // Ventas
+                'rgba(255, 99, 132, 0.7)',   // Costos
+                'rgba(75, 192, 192, 0.7)'    // Ganancia
+            ],
+            borderRadius: 10
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+
 {%endblock%}

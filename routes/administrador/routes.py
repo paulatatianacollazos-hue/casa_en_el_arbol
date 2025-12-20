@@ -1184,49 +1184,36 @@ def ver_reporte_entrega(pedido_id):
 @login_required
 @role_required("admin")
 def control_financiero():
-    cursor = mysql.connection.cursor()
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-    # =========================
-    # 🔹 TOTAL COMPRAS (COSTOS)
-    # =========================
-    cursor.execute("""
-        SELECT 
-            IFNULL(SUM(cantidad * precio), 0) AS total_compras
-        FROM detalle_compra
-    """)
-    costo_productos = cursor.fetchone()["total_compras"]
-
-    # =========================
     # 🔹 TOTAL VENTAS
-    # =========================
     cursor.execute("""
-        SELECT IFNULL(SUM(Total), 0) AS total_ventas
-        FROM pedido
+        SELECT IFNULL(SUM(Monto), 0) AS total_ventas
+        FROM pagos
     """)
     total_ventas = cursor.fetchone()["total_ventas"]
 
-    # =========================
-    # 🔹 TRANSACCIONES
-    # =========================
+    # 🔹 COSTO PRODUCTOS (compras)
     cursor.execute("""
-        SELECT 
-            ID_Pedido,
-            FechaPedido AS FechaPago,
-            'Online' AS MetodoPago,
-            Total AS Monto
-        FROM pedido
-        ORDER BY FechaPedido DESC
+        SELECT IFNULL(SUM(cantidad * precio), 0) AS costo_productos
+        FROM detalle_compra
     """)
-    transacciones = cursor.fetchall()
+    costo_productos = cursor.fetchone()["costo_productos"]
 
-    # =========================
-    # 🔹 OTROS COSTOS (fijos)
-    # =========================
+    # 🔹 PAGOS EMPLEADOS (si aún no tienes tabla, déjalo en 0)
     pagos_empleados = 0
     gastos_adicionales = 0
 
     costos_totales = costo_productos + pagos_empleados + gastos_adicionales
     ganancia_real = total_ventas - costos_totales
+
+    # 🔹 TRANSACCIONES
+    cursor.execute("""
+        SELECT ID_Pedido, FechaPago, MetodoPago, Monto
+        FROM pagos
+        ORDER BY FechaPago DESC
+    """)
+    transacciones = cursor.fetchall()
 
     cursor.close()
 
@@ -1242,7 +1229,6 @@ def control_financiero():
     )
 
 
-
 @admin.route("/compras", methods=["GET"])
 @login_required
 @role_required("admin")
@@ -1250,7 +1236,7 @@ def compras_empresa():
     cursor = mysql.connection.cursor()
 
     cursor.execute("""
-        SELECT 
+        SELECT
             c.id_compra,
             c.fecha,
             d.producto,
