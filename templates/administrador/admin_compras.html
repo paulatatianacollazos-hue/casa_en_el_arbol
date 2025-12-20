@@ -12,6 +12,7 @@
             margin-left: 4%;
             text-align: center;
             margin-top: 20px;
+            
         }
 
         input{
@@ -38,7 +39,7 @@
 {%endblock%}
 {% block content %}
 <h2>Compras de la empresa</h2>
-<div style="display: flex;">
+<div style="display: flex; margin-bottom: 20px;">
 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCompra" >
     Registrar compra
 </button>
@@ -49,7 +50,7 @@
 
 {% for compra in compras %}
 <div class="card mb-4 shadow">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header text-white" style="background-color: #7cb342;">
         <strong>Compra #{{ compra.id_compra }}</strong>
         <span class="float-end">{{ compra.fecha }}</span>
     </div>
