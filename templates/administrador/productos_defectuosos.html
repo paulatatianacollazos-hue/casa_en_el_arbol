@@ -1,0 +1,52 @@
+{% extends "administrador/admin_dashboard.html" %}
+{% block content %}
+
+<h3>⚠️ Productos defectuosos</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody id="tablaDefectos"></tbody>
+</table>
+
+<script>
+function cargarDefectos() {
+    let defectos = JSON.parse(localStorage.getItem("defectuosos")) || [];
+    const tabla = document.getElementById("tablaDefectos");
+
+    tabla.innerHTML = "";
+
+    defectos.forEach((d, index) => {
+        tabla.innerHTML += `
+            <tr>
+                <td>${d.nombre}</td>
+                <td>${d.descripcion}</td>
+                <td>${d.fecha}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="eliminarDefecto(${index})">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function eliminarDefecto(index) {
+    let defectos = JSON.parse(localStorage.getItem("defectuosos"));
+    defectos.splice(index, 1);
+    localStorage.setItem("defectuosos", JSON.stringify(defectos));
+    cargarDefectos();
+}
+
+cargarDefectos();
+</script>
+
+{% endblock %}

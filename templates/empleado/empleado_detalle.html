@@ -80,7 +80,15 @@
   
     <div class="botones mt-3">
       <button class="btn btn-primary" id="btn-garantia">Garantía</button>
-      
+      <button class="btn btn-warning"
+        onclick="abrirModalDefecto(
+            {{ p.ID_Producto }},
+            '{{ p.NombreProducto }}',
+            {{ p.Stock }}
+        )">
+        Marcar defectuoso
+      </button>
+
       
     </div>
     
@@ -171,13 +179,7 @@
       <h2>{{ producto.NombreProducto }}</h2>
       <p><b>Garantía:</b> <span id="texto-garantia">{{ producto.Garantia }}</span></p>
 
-      <div class="botones mt-3">
-        <button id="btn-editar-garantia" class="btn btn-primary"
-                data-garantia="{{ producto.Garantia }}"
-                data-id="{{ producto.ID_Producto }}">
-          Editar Garantía
-        </button>
-      </div>
+      
 
       <div class="mt-3">
         <button id="btn-volver-garantia" class="btn btn-primary">Volver</button>
@@ -245,6 +247,36 @@
     <p>No hay reseñas aún para este producto.</p>
   {% endif %}
 </div>
+
+
+<div class="modal fade" id="modalDefecto">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5>Producto defectuoso</h5>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="defecto_id">
+        <input type="hidden" id="defecto_nombre">
+
+        <textarea id="defecto_descripcion"
+                  class="form-control"
+                  placeholder="Describe el defecto..."
+                  required></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="guardarDefecto()">
+            Guardar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_footer %}
@@ -431,4 +463,45 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+<script>
+function abrirModalDefecto(id, nombre, stock) {
+    if (stock <= 0) {
+        alert("No hay stock disponible");
+        return;
+    }
+
+    document.getElementById("defecto_id").value = id;
+    document.getElementById("defecto_nombre").value = nombre;
+
+    new bootstrap.Modal(document.getElementById("modalDefecto")).show();
+}
+
+function guardarDefecto() {
+    const id = document.getElementById("defecto_id").value;
+    const nombre = document.getElementById("defecto_nombre").value;
+    const descripcion = document.getElementById("defecto_descripcion").value;
+
+    fetch(`/producto/${id}/defectuoso`, { method: "POST" })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            alert("Error al descontar stock");
+            return;
+        }
+
+        let defectos = JSON.parse(localStorage.getItem("defectuosos")) || [];
+
+        defectos.push({
+            id,
+            nombre,
+            descripcion,
+            fecha: new Date().toLocaleString()
+        });
+
+        localStorage.setItem("defectuosos", JSON.stringify(defectos));
+        location.reload();
+    });
+}
+</script>
+
 {% endblock %}
