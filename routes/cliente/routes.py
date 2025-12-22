@@ -350,6 +350,7 @@ def catalogo():
         recomendados=recomendados
     )
 
+
 @cliente.route("/producto/<int:id_producto>")
 @login_required
 def detalle_producto(id_producto):
