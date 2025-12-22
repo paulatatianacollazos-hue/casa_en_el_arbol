@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alerta de Seguridad</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #c0392b;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 25px;
+            color: #333333;
+        }
+        .content p {
+            line-height: 1.6;
+        }
+        .info {
+            background: #f8f9fa;
+            border-left: 4px solid #c0392b;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .btn-yes {
+            background-color: #27ae60;
+        }
+        .btn-no {
+            background-color: #e74c3c;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+            padding: 15px;
+            background: #f4f6f8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>⚠️ Alerta de Seguridad</h2>
+    </div>
+
+    <div class="content">
+        <p>Hola,</p>
+
+        <p>
+            Detectamos <strong>{{ intentos }}</strong> intentos fallidos de inicio
+            de sesión en tu cuenta.
+        </p>
+
+        <div class="info">
+            <strong>📍 Dirección IP:</strong> {{ ip }}
+            <strong>🕒 Fecha:</strong> {{ fecha }}
+        </div>
+
+        <p>
+            Si reconoces esta actividad, puedes confirmarlo.
+            Si no, te recomendamos bloquear el acceso inmediatamente.
+        </p>
+
+        <div class="buttons">
+            <a href="{{ url_for('auth.confirmar_dispositivo', intento_id=intento_id, accion='si', _external=True) }}"
+               class="btn btn-yes">
+                ✅ Sí fui yo
+            </a>
+
+            <a href="{{ url_for('auth.confirmar_dispositivo', intento_id=intento_id, accion='no', _external=True) }}"
+               class="btn btn-no">
+                ❌ No fui yo
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>
+            Si no solicitaste este acceso, te recomendamos cambiar tu contraseña
+            inmediatamente.
+        </p>
+        <p>
+            © {{ current_year if current_year else "Casa en el Árbol" }}
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
