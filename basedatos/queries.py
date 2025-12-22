@@ -1058,41 +1058,51 @@ def obtener_estadisticas_pedidos_por_mes():
     return dict(estadisticas)
 
 
-def obtener_productos_similares(producto_actual=None, user_id=None, limit=6):
+def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
+    Imagen = aliased(ImagenProducto)
+
     query = (
-        db.session.query(Producto, ImagenProducto)
-        .outerjoin(
-            ImagenProducto,
-            Producto.ID_Producto == ImagenProducto.ID_Producto
+        db.session.query(
+            Producto,
+            Imagen
         )
+        .outerjoin(Imagen, Imagen.ID_Producto == Producto.ID_Producto)
     )
 
-    # 🟢 CASO 1: desde detalle de producto (producto_actual es dict)
+    # 🔹 Si está viendo un producto → ordenar por similitud
     if producto_actual:
         material = producto_actual.get("Material")
         id_producto = producto_actual.get("ID_Producto")
 
-        query = query.filter(
-            Producto.Material == material,
-            Producto.ID_Producto != id_producto
+        orden_similares = case(
+            (Producto.Material == material, 0),
+            else_=1
         )
 
-    # 🟢 CASO 2: desde catálogo (usuario logueado)
+        query = (
+            query
+            .filter(Producto.ID_Producto != id_producto)
+            .order_by(orden_similares)
+        )
+
+    # 🔹 Si NO hay producto actual pero sí usuario → compras primero
     elif user_id:
         subquery = (
             db.session.query(Detalle_Pedido.ID_Producto)
-            .join(Pedido, Pedido.ID_Pedido == Detalle_Pedido.ID_Pedido)
+            .join(Pedido)
             .filter(Pedido.ID_Usuario == user_id)
             .subquery()
         )
 
-        query = query.filter(
-            Producto.ID_Producto.in_(subquery)
+        orden_comprados = case(
+            (Producto.ID_Producto.in_(subquery), 0),
+            else_=1
         )
 
-    return (
-        query
-        .group_by(Producto.ID_Producto)
-        .limit(limit)
-        .all()
-    )
+        query = query.order_by(orden_comprados)
+
+    # 🔹 Opcional: límite
+    if limit:
+        query = query.limit(limit)
+
+    return query.all()

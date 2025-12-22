@@ -11,7 +11,7 @@ from sqlalchemy import or_
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from basedatos.db import get_connection
-from basedatos.queries import obtener_productos_similares
+from basedatos.queries import obtener_productos_ordenados
 from basedatos.models import (
     db, Usuario, Producto, Calendario, Notificaciones,
     Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias,
@@ -343,14 +343,14 @@ def borrar_direccion(id_direccion):
 def catalogo():
     productos = get_productos()
 
-    productos_similares = obtener_productos_similares(
-        user_id=current_user.ID_Usuario
+    productos_ordenados = obtener_productos_ordenados(
+        producto_actual=None,
+        user_id=current_user.id
     )
 
     return render_template(
         "cliente/cliente_catalogo.html",
-        productos=productos,
-        productos_similares=productos_similares
+        productos=productos_ordenados
     )
 
 
