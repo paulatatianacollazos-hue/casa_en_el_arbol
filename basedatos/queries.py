@@ -10,7 +10,8 @@ import os
 from werkzeug.utils import secure_filename
 from flask import current_app
 from collections import defaultdict
-from flask_login import current_user
+from sqlalchemy.orm import aliased
+from sqlalchemy import case
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")

@@ -350,7 +350,8 @@ def catalogo():
 
     return render_template(
         "cliente/cliente_catalogo.html",
-        productos=productos_ordenados
+        producto=productos_ordenados,
+        productos=productos
     )
 
 
@@ -377,7 +378,7 @@ def detalle_producto(id_producto):
         tipo="producto"
     ).order_by(Reseñas.Fecha.desc()).all()
 
-    productos_similares = obtener_productos_similares(
+    productos_similares = obtener_productos_ordenados(
         producto_actual=producto
     )
 
