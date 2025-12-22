@@ -463,18 +463,21 @@ def marcar_defectuoso(id):
     data = request.get_json()
     descripcion = data.get("descripcion", "")
 
-    if producto.Stock > 0:
-        producto.Stock -= 1
-        db.session.commit()
+    if producto.Stock <= 0:
+        return {"success": False, "error": "Stock insuficiente"}, 400
 
+    try:
+        producto.Stock -= 1
         defecto = Defecto(
             producto_id=id,
             descripcion=descripcion,
-            usuario_id=current_user.id
+            usuario_id=current_user.ID_Usuario
         )
         db.session.add(defecto)
         db.session.commit()
-
         return {"success": True}
 
-    return {"success": False, "error": "Stock insuficiente"}, 400
+    except Exception as e:
+        db.session.rollback()
+        print("Error al guardar defecto:", e)
+        return {"success": False, "error": str(e)}, 500
