@@ -343,7 +343,7 @@ class ContratoEmpleado(db.Model):
 class Defecto(db.Model):
     __tablename__ = "defectos"
     id = db.Column(db.Integer, primary_key=True)
-    producto_id = db.Column(db.Integer, db.ForeignKey("producto.ID_Producto"), nullable=False)
+    producto_id = db.Column(db.Integer, db.ForeignKey("Producto.ID_Producto"), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"), nullable=True)
