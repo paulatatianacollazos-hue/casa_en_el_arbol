@@ -145,21 +145,20 @@
 <h3 class="mt-5">Productos similares</h3>
 
 <div class="grid">
-  {% for p in productos_similares %}
+  {% for producto, imagen in productos_similares %}
     <div class="producto-card"
-         onclick="window.location.href='/cliente/producto/{{ p.ID_Producto }}'">
+         onclick="window.location.href='/cliente/producto/{{ producto.ID_Producto }}'">
 
       <div class="imagen">
-        <img src="{{ p.Imagen if p.Imagen else url_for('static', filename='img/default.jpg') }}"
-             alt="{{ p.NombreProducto }}">
+        <img src="{{ imagen.ruta if imagen else '/static/img/default.jpg' }}"
+             alt="{{ producto.NombreProducto }}">
       </div>
 
       <div class="info">
-        <h4>{{ p.NombreProducto }}</h4>
-        <p>Material: {{ p.Material }}</p>
-        <p>Precio: ${{ p.PrecioUnidad }}</p>
+        <h4>{{ producto.NombreProducto }}</h4>
+        <p>Material: {{ producto.Material }}</p>
+        <p>Precio: ${{ producto.PrecioUnidad }}</p>
       </div>
-
     </div>
   {% endfor %}
 </div>

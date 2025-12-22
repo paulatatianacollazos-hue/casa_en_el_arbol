@@ -5,7 +5,7 @@ from basedatos.db import get_connection
 from sqlalchemy import and_
 from basedatos.models import (
     db, Pedido, Usuario, Detalle_Pedido, Comentarios, Reseñas)
-from basedatos.models import Producto, Calendario
+from basedatos.models import Producto, Calendario, ImagenProducto
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
@@ -1059,9 +1059,15 @@ def obtener_estadisticas_pedidos_por_mes():
 
 
 def obtener_productos_similares(producto_actual=None, user_id=None, limit=6):
-    query = Producto.query
+    query = (
+        db.session.query(Producto, ImagenProducto)
+        .outerjoin(
+            ImagenProducto,
+            Producto.ID_Producto == ImagenProducto.ID_Producto
+        )
+    )
 
-    # 🟢 SI producto_actual ES UN DICT
+    # 🟢 CASO 1: desde detalle de producto (producto_actual es dict)
     if producto_actual:
         material = producto_actual.get("Material")
         id_producto = producto_actual.get("ID_Producto")
@@ -1071,14 +1077,22 @@ def obtener_productos_similares(producto_actual=None, user_id=None, limit=6):
             Producto.ID_Producto != id_producto
         )
 
+    # 🟢 CASO 2: desde catálogo (usuario logueado)
     elif user_id:
         subquery = (
             db.session.query(Detalle_Pedido.ID_Producto)
-            .join(Pedido)
+            .join(Pedido, Pedido.ID_Pedido == Detalle_Pedido.ID_Pedido)
             .filter(Pedido.ID_Usuario == user_id)
             .subquery()
         )
 
-        query = query.filter(Producto.ID_Producto.in_(subquery))
+        query = query.filter(
+            Producto.ID_Producto.in_(subquery)
+        )
 
-    return query.limit(limit).all()
+    return (
+        query
+        .group_by(Producto.ID_Producto)
+        .limit(limit)
+        .all()
+    )
