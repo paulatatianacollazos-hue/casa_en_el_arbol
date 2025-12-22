@@ -79,7 +79,7 @@
     <p id="mensaje-stock" class="mt-2"></p>
   
     <div class="botones mt-3">
-      <button class="btn btn-primary" id="btn-garantia">Garantía</button>
+      
       <button class="btn btn-warning"
           onclick="abrirModalDefecto(
               {{ producto.ID_Producto }},
@@ -269,9 +269,10 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-danger" onclick="guardarDefecto()">
+        <button type="button" class="btn btn-danger" onclick="guardarDefecto()">
             Guardar
         </button>
+
       </div>
 
     </div>
@@ -434,36 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 </script>
 
-// ---- MOSTRAR GARANTIA ----
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const btnGarantia = document.getElementById("btn-garantia");
-  const btnVolverGarantia = document.getElementById("btn-volver-garantia");
-  const vistaPrincipal = document.getElementById("vista-principal");
-  const seccionGarantia = document.getElementById("seccion-garantia");
 
-  // Mostrar sección garantía
-  btnGarantia.addEventListener("click", () => {
-    vistaPrincipal.classList.add("d-none");
-    seccionGarantia.classList.remove("d-none");
-
-    // Reiniciar carrusel de garantía
-    const garantiaCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselGarantia");
-    garantiaCarousel.to(0);
-  });
-
-  // Volver a vista principal
-  btnVolverGarantia.addEventListener("click", () => {
-    seccionGarantia.classList.add("d-none");
-    vistaPrincipal.classList.remove("d-none");
-
-    // Reiniciar carrusel principal
-    const principalCarousel = bootstrap.Carousel.getOrCreateInstance("#carouselPrincipal");
-    principalCarousel.to(0);
-  });
-});
-
-</script>
 <script>
 function abrirModalDefecto(id, nombre, stock) {
     if (stock <= 0) {
