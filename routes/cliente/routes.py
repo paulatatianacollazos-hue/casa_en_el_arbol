@@ -11,6 +11,7 @@ from sqlalchemy import or_
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from basedatos.db import get_connection
+from basedatos.queries import obtener_productos_similares
 from basedatos.models import (
     db, Usuario, Producto, Calendario, Notificaciones,
     Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias,
