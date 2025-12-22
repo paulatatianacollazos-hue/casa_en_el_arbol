@@ -461,10 +461,13 @@ def detalle_producto(id_producto):
 @role_required("admin")
 def marcar_defectuoso(id):
     producto = Producto.query.get_or_404(id)
+    data = request.get_json()  # <-- recibir JSON
+    descripcion = data.get("descripcion", "")
 
     if producto.Stock > 0:
         producto.Stock -= 1
         db.session.commit()
+        # aquí podrías guardar la descripción en otra tabla si quieres
         return {"success": True}
-
+    
     return {"success": False, "error": "Stock insuficiente"}, 400

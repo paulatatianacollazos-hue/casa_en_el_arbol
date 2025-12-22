@@ -454,27 +454,34 @@ function guardarDefecto() {
     const nombre = document.getElementById("defecto_nombre").value;
     const descripcion = document.getElementById("defecto_descripcion").value;
 
-    fetch(`/empleado/producto/${id}/defectuoso`, { method: "POST" })
-    .then(r => r.json())
+    if (!descripcion.trim()) {
+        alert("Debes escribir la descripción del defecto");
+        return;
+    }
+
+    fetch(`/empleado/producto/${id}/defectuoso`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ descripcion }) // enviar descripción
+    })
+    .then(res => res.json())
     .then(data => {
         if (!data.success) {
-            alert("Error al descontar stock");
+            alert(data.error || "Error al descontar stock");
             return;
         }
 
         let defectos = JSON.parse(localStorage.getItem("defectuosos")) || [];
-
-        defectos.push({
-            id,
-            nombre,
-            descripcion,
-            fecha: new Date().toLocaleString()
-        });
-
+        defectos.push({ id, nombre, descripcion, fecha: new Date().toLocaleString() });
         localStorage.setItem("defectuosos", JSON.stringify(defectos));
         location.reload();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Ocurrió un error al guardar el defecto");
     });
 }
+
 </script>
 
 {% endblock %}
