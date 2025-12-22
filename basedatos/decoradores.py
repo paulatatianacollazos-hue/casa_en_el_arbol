@@ -108,18 +108,24 @@ def enviar_correo_seguridad(email, intento):
 
 
 def enviar_factura_email(usuario, pedido, productos, total):
-    with current_app.app_context():
-        msg = Message(
-            subject=f"🧾 Factura Pedido #{pedido.ID_Pedido} - Casa en el Árbol",
-            recipients=[usuario.Correo]
-        )
+    try:
+        with current_app.app_context():
+            msg = Message(
+                subject="🧾 Factura de tu pedido | Casa en el Árbol",
+                recipients=[usuario.Correo]
+            )
 
-        msg.html = render_template(
-            "email_factura.html",
-            usuario=usuario,
-            pedido=pedido,
-            productos=productos,
-            total=total
-        )
+            msg.html = render_template(
+                "email_factura.html",
+                usuario=usuario,
+                pedido=pedido,
+                productos=productos,
+                total=total,
+                fecha=datetime.utcnow()
+            )
 
-        mail.send(msg)
+            mail.send(msg)
+            print("✅ FACTURA ENVIADA A:", usuario.Correo)
+
+    except Exception as e:
+        print("❌ ERROR enviando correo:", e)
