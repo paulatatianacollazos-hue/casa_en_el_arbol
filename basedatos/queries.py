@@ -1075,49 +1075,21 @@ def obtener_dispositivo():
         return "Dispositivo desconocido"
 
 
-def enviar_correo_seguridad(correo, intento):
-    dispositivo = obtener_dispositivo()
-
-    link_si = url_for(
-        'auth.confirmar_dispositivo',
-        intento_id=intento.id,
-        accion='si',
-        _external=True
-    )
-
-    link_no = url_for(
-        'auth.confirmar_dispositivo',
-        intento_id=intento.id,
-        accion='no',
-        _external=True
-    )
-
-    msg = Message(
-        subject="⚠️ Alerta de seguridad - Intentos de acceso",
-        recipients=[correo]
-    )
-
-    msg.html = f"""
-    <h3>⚠️ Intento de acceso detectado</h3>
-    <p>Están intentando acceder a tu cuenta desde:</p>
-    <ul>
-        <li><b>Dispositivo:</b> {dispositivo}</li>
-        <li><b>IP:</b> {intento.ip}</li>
-        <li><b>Fecha:</b> {datetime.now()}</li>
-    </ul>
-
-    <p><b>¿Eres tú?</b></p>
-
-    <a href="{link_si}"
-       style="padding:10px;background:green;color:white;text-decoration:none;">
-       ✔ Sí
-    </a>
-
-    <a href="{link_no}"
-       style="padding:10px;background:red;color:white;text-decoration:none;">
-       ❌ No
-    </a>
+def enviar_correo_seguridad(email, intento):
+    """
+    Envía un correo de alerta por intento de login sospechoso
     """
 
-    mail.send(msg)
+    msg = Message(
+        subject="⚠️ Alerta de seguridad - Casa en el Árbol",
+        recipients=[email]
+    )
 
+    msg.html = render_template(
+        "email_seguridad.html",
+        intentos=intento.intentos,
+        ip=intento.ip,
+        fecha=intento.fecha
+    )
+
+    mail.send(msg)
