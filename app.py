@@ -42,7 +42,7 @@ app.config["MYSQL_CURSORCLASS"] = "DictCursor"
 app.config["MYSQL_AUTOCOMMIT"] = True
 
 # 🔹 INICIALIZAR MYSQL
-mysql.init_app(app)
+mail.init_app(app)
 
 login_manager = LoginManager(app)
 
