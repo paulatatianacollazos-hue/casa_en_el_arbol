@@ -1059,17 +1059,14 @@ def obtener_estadisticas_pedidos_por_mes():
 
 
 def obtener_productos_similares(limit=6):
-    """
-    Devuelve productos similares según el historial del cliente
-    """
 
+    # Si no está autenticado, mostrar productos aleatorios
     if not current_user.is_authenticated:
-        # Si no está logueado → mostrar productos populares
         return Producto.query.order_by(func.random()).limit(limit).all()
 
-    # 🔹 1. Obtener categorías de productos comprados
+    # Obtener categorías de productos comprados por el usuario
     categorias = (
-        db.session.query(Producto.Categoria)
+        db.session.query(Producto.categoria)  # 🔥 CORREGIDO
         .join(Detalle_Pedido, Producto.ID_Producto == Detalle_Pedido.ID_Producto)
         .join(Pedido, Pedido.ID_Pedido == Detalle_Pedido.ID_Pedido)
         .filter(Pedido.ID_Usuario == current_user.ID_Usuario)
@@ -1077,20 +1074,18 @@ def obtener_productos_similares(limit=6):
         .all()
     )
 
-    categorias = [c[0] for c in categorias]
+    categorias = [c[0] for c in categorias if c[0]]
 
+    # Si no hay historial, devolver productos aleatorios
     if not categorias:
-        # Si no tiene historial → aleatorios
         return Producto.query.order_by(func.random()).limit(limit).all()
 
-    # 🔹 2. Buscar productos de esas categorías
+    # Buscar productos de esas categorías
     productos_similares = (
         Producto.query
-        .filter(Producto.Categoria.in_(categorias))
+        .filter(Producto.categoria.in_(categorias))
         .limit(limit)
         .all()
     )
 
     return productos_similares
-
-
