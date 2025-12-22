@@ -12,7 +12,7 @@ from flask import current_app
 from collections import defaultdict
 from flask import url_for
 from flask_mail import Message
-from decoradores import mail
+from basedatos.decoradores import mail
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")
