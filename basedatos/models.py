@@ -349,3 +349,4 @@ class Defecto(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"), nullable=True)
 
     producto = db.relationship("Producto", back_populates="defectos")
+    usuario = db.relationship("Usuario", backref="defectos")
