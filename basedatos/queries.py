@@ -1060,35 +1060,6 @@ def obtener_estadisticas_pedidos_por_mes():
     return dict(estadisticas)
 
 
-def obtener_dispositivo():
-    ua = request.headers.get("User-Agent", "").lower()
-
-    if "mobile" in ua:
-        return "📱 Teléfono móvil"
-    elif "windows" in ua:
-        return "💻 Windows"
-    elif "mac" in ua:
-        return "💻 Mac"
-    elif "linux" in ua:
-        return "💻 Linux"
-    else:
-        return "Dispositivo desconocido"
 
 
-def enviar_correo_seguridad(email, intento):
 
-    with current_app.app_context():
-        msg = Message(
-            subject="⚠️ Alerta de seguridad - Casa en el Árbol",
-            recipients=[email]
-        )
-
-        msg.html = render_template(
-            "email_seguridad.html",
-            intentos=intento.intentos,
-            ip=intento.ip,
-            fecha=intento.fecha,
-            intento_id=intento.id
-        )
-
-        mail.send(msg)
