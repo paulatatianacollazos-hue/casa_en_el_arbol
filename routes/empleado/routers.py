@@ -458,7 +458,6 @@ def detalle_producto(id_producto):
 
 @empleado.route("/producto/<int:id>/defectuoso", methods=["POST"])
 @login_required
-@role_required("admin")
 def marcar_defectuoso(id):
     producto = Producto.query.get_or_404(id)
     data = request.get_json()  # <-- recibir JSON
