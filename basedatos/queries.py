@@ -12,6 +12,8 @@ from flask import current_app
 from collections import defaultdict
 from sqlalchemy.orm import aliased
 from sqlalchemy import case
+from sqlalchemy.orm import aliased
+from sqlalchemy import func
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")
@@ -1082,16 +1084,14 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
     )
 
     if producto_actual:
-        categoria = producto_actual.get("Categoria")   # Nueva prioridad
+        categoria = producto_actual.get("Categoria")   # diccionario
         material = producto_actual.get("Material")
         id_producto = producto_actual.get("ID_Producto")
 
         # Orden por categoría primero, luego por material
         orden_prioridad = case(
-            [
-                (Producto.categoria == categoria, 0),
-                (Producto.Material == material, 1)
-            ],
+            (Producto.ID_Categoria == categoria, 0),
+            (Producto.Material == material, 1),
             else_=2
         )
 
