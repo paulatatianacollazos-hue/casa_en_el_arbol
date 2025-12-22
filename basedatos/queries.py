@@ -1061,14 +1061,16 @@ def obtener_estadisticas_pedidos_por_mes():
 def obtener_productos_similares(producto_actual=None, user_id=None, limit=6):
     query = Producto.query
 
-    # 🟢 Si viene un producto (detalle)
+    # 🟢 SI producto_actual ES UN DICT
     if producto_actual:
+        material = producto_actual.get("Material")
+        id_producto = producto_actual.get("ID_Producto")
+
         query = query.filter(
-            Producto.Material == producto_actual.Material,
-            Producto.ID_Producto != producto_actual.ID_Producto
+            Producto.Material == material,
+            Producto.ID_Producto != id_producto
         )
 
-    # 🟢 Si el usuario está logueado (historial de compras)
     elif user_id:
         subquery = (
             db.session.query(Detalle_Pedido.ID_Producto)
