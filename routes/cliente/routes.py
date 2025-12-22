@@ -342,12 +342,15 @@ def borrar_direccion(id_direccion):
 @login_required
 def catalogo():
     productos = get_productos()
-    recomendados = obtener_productos_similares()
+
+    productos_similares = obtener_productos_similares(
+        user_id=current_user.ID_Usuario
+    )
 
     return render_template(
         "cliente/cliente_catalogo.html",
         productos=productos,
-        recomendados=recomendados
+        productos_similares=productos_similares
     )
 
 
@@ -359,10 +362,9 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
 
-    # Verificar si el usuario compró este producto
     ha_comprado = (
         db.session.query(Detalle_Pedido)
-        .join(Pedido, Detalle_Pedido.ID_Pedido == Pedido.ID_Pedido)
+        .join(Pedido)
         .filter(
             Pedido.ID_Usuario == current_user.ID_Usuario,
             Detalle_Pedido.ID_Producto == id_producto
@@ -370,17 +372,21 @@ def detalle_producto(id_producto):
         .first() is not None
     )
 
-    # 🟢 Traer reseñas tipo "producto"
     reseñas = Reseñas.query.filter_by(
         ID_Referencia=id_producto,
         tipo="producto"
     ).order_by(Reseñas.Fecha.desc()).all()
 
+    productos_similares = obtener_productos_similares(
+        producto_actual=producto
+    )
+
     return render_template(
         "cliente/cliente_detalle.html",
         producto=producto,
         ha_comprado=ha_comprado,
-        reseñas=reseñas
+        reseñas=reseñas,
+        productos_similares=productos_similares
     )
 
 

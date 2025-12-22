@@ -135,6 +135,12 @@
 {% block content %}
 <br>
 
+
+<!-- Modal -->
+
+<a href="{{ url_for('cliente.comparar_productos') }}" class="btn btn-outline-primary">
+  Comparar productos
+</a>
 {% if productos_similares %}
 <h3 class="mt-5">Productos similares</h3>
 
@@ -158,14 +164,6 @@
   {% endfor %}
 </div>
 {% endif %}
-
-
-<!-- Modal -->
-
-<a href="{{ url_for('cliente.comparar_productos') }}" class="btn btn-outline-primary">
-  Comparar productos
-</a>
-
 
 
 <h2>Productos</h2><br>
