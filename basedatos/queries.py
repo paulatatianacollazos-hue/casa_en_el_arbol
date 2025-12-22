@@ -10,6 +10,9 @@ import os
 from werkzeug.utils import secure_filename
 from flask import current_app
 from collections import defaultdict
+from flask import url_for
+from flask_mail import Message
+from app import mail
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")
@@ -1057,6 +1060,21 @@ def obtener_estadisticas_pedidos_por_mes():
     return dict(estadisticas)
 
 
+def obtener_dispositivo():
+    ua = request.headers.get("User-Agent", "").lower()
+
+    if "mobile" in ua:
+        return "📱 Teléfono móvil"
+    elif "windows" in ua:
+        return "💻 Windows"
+    elif "mac" in ua:
+        return "💻 Mac"
+    elif "linux" in ua:
+        return "💻 Linux"
+    else:
+        return "Dispositivo desconocido"
+
+
 def enviar_correo_seguridad(correo, intento):
     dispositivo = obtener_dispositivo()
 
@@ -1102,3 +1120,4 @@ def enviar_correo_seguridad(correo, intento):
     """
 
     mail.send(msg)
+

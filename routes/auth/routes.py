@@ -230,6 +230,22 @@ def forgot_password():
     return render_template("forgot_password.html")
 
 
+@auth.route('/confirmar-dispositivo/<int:intento_id>/<accion>')
+def confirmar_dispositivo(intento_id, accion):
+    intento = LoginIntento.query.get_or_404(intento_id)
+
+    if accion == 'no':
+        intento.bloqueado = True
+        db.session.commit()
+        return "❌ Dispositivo bloqueado correctamente."
+
+    if accion == 'si':
+        return "✅ Dispositivo confirmado. Puedes ignorar este mensaje."
+
+    return "Acción no válida"
+
+
+
 # ------------------ RESET_PASSWORD ------------------ #
 @auth.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
