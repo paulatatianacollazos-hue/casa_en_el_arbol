@@ -4,7 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from flask_login import login_required, login_user, logout_user
 from datetime import datetime, date
-from basedatos.models import RegistroSesion
+from basedatos.models import RegistroSesion, LoginIntento
+
 
 
 from basedatos.models import db, Usuario
@@ -89,13 +90,41 @@ def login():
         correo = request.form.get('correo', '').strip()
         password = request.form.get('password', '').strip()
 
+        ip = request.remote_addr
+        user_agent = request.headers.get("User-Agent")
+
+        # ⛔ VERIFICAR BLOQUEO
+        bloqueo = LoginIntento.query.filter_by(
+            email=correo,
+            ip=ip,
+            user_agent=user_agent,
+            bloqueado=True
+        ).first()
+
+        if bloqueo:
+            flash("Este dispositivo está bloqueado. Revisa tu correo.", "danger")
+            return render_template('login.html', correo=correo)
+
         usuario = Usuario.query.filter_by(Correo=correo).first()
 
+        # ✅ LOGIN CORRECTO
         if usuario and check_password_hash(usuario.Contraseña, password):
+
+            # 🔄 RESETEAR INTENTOS
+            intento = LoginIntento.query.filter_by(
+                email=correo,
+                ip=ip,
+                user_agent=user_agent
+            ).first()
+
+            if intento:
+                intento.intentos = 0
+                db.session.commit()
+
             login_user(usuario)
             flash("Inicio de sesión exitoso", "success")
 
-            # ------------------ REGISTRO HORA ENTRADA ------------------
+            # -------- REGISTRO SESIÓN --------
             if usuario.Rol in ['empleado', 'instalador', 'transportista', 'taller']:
                 hoy = date.today()
                 ahora = datetime.now()
@@ -106,15 +135,13 @@ def login():
                 ).first()
 
                 if not registro:
-                    nuevo_registro = RegistroSesion(
+                    db.session.add(RegistroSesion(
                         ID_Usuario=usuario.ID_Usuario,
                         Fecha=hoy,
                         HoraEntrada=ahora
-                    )
-                    db.session.add(nuevo_registro)
+                    ))
                     db.session.commit()
 
-            # Guardar datos en sesión
             session['username'] = f"{usuario.Nombre} {usuario.Apellido or ''}".strip()
             session['show_welcome_modal'] = True
 
@@ -127,8 +154,31 @@ def login():
                 'taller': 'empleado.dashboard',
             }
 
-            ruta = rutas_por_rol.get(usuario.Rol)
-            return redirect(url_for(ruta)) if ruta else redirect(url_for('auth.login'))
+            return redirect(url_for(rutas_por_rol.get(usuario.Rol)))
+
+        # ❌ LOGIN FALLIDO → CONTAR INTENTOS
+        intento = LoginIntento.query.filter_by(
+            email=correo,
+            ip=ip,
+            user_agent=user_agent
+        ).first()
+
+        if not intento:
+            intento = LoginIntento(
+                email=correo,
+                ip=ip,
+                user_agent=user_agent,
+                intentos=1
+            )
+            db.session.add(intento)
+        else:
+            intento.intentos += 1
+
+        db.session.commit()
+
+        # 📧 ENVIAR CORREO AL 3ER INTENTO
+        if intento.intentos == 3:
+            enviar_correo_seguridad(correo, intento)
 
         flash("Correo o contraseña incorrectos", "danger")
         return render_template('login.html', correo=correo)

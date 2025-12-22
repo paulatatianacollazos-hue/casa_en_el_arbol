@@ -350,3 +350,27 @@ class Defecto(db.Model):
 
     producto = db.relationship("Producto", back_populates="defectos")
     usuario = db.relationship("Usuario", backref="defectos")
+
+
+class LoginIntento(db.Model):
+    __tablename__ = "LoginIntento"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100))
+    ip = db.Column(db.String(45))
+    user_agent = db.Column(db.String(255))
+    intentos = db.Column(db.Integer, default=0)
+    bloqueado = db.Column(db.Boolean, default=False)
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class TokenSeguridad(db.Model):
+    __tablename__ = "TokenSeguridad"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100))
+    ip = db.Column(db.String(45))
+    token = db.Column(db.String(255), unique=True)
+    accion = db.Column(db.Enum("si", "no", "desbloquear"))
+    usado = db.Column(db.Boolean, default=False)
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
