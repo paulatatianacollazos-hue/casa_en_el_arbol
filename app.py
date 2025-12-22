@@ -7,6 +7,8 @@ from flask_login import LoginManager
 from basedatos.queries import get_productos, get_producto_by_id
 from basedatos.queries import Producto
 from extensions import mysql
+from extensions import mail
+
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
 
