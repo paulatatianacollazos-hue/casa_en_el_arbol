@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from basedatos.db import get_connection

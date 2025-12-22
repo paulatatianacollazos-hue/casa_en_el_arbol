@@ -3,10 +3,8 @@ from flask import redirect, url_for, flash, render_template
 from flask_login import current_user
 import re
 from flask_mail import Message
-# basedatos/extensions.py
-from flask_mail import Mail
-
-mail = Mail()
+from extensions import mail
+from flask import current_app
 
 
 def role_required(*roles):
