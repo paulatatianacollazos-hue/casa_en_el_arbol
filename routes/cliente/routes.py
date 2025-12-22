@@ -341,9 +341,13 @@ def borrar_direccion(id_direccion):
 @login_required
 def catalogo():
     productos = get_productos()
-    return render_template("cliente/cliente_catalogo.html",
-                           productos=productos)
+    recomendados = obtener_productos_similares()
 
+    return render_template(
+        "cliente/cliente_catalogo.html",
+        productos=productos,
+        recomendados=recomendados
+    )
 
 @cliente.route("/producto/<int:id_producto>")
 @login_required
