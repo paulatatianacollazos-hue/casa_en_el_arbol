@@ -1384,15 +1384,4 @@ def registrar_pago_empleado(id):
     return redirect(request.referrer)
 
 
-@admin.route("/producto/<int:id>/defectuoso", methods=["POST"])
-@login_required
-@role_required("admin")
-def marcar_defectuoso(id):
-    producto = Producto.query.get_or_404(id)
 
-    if producto.Stock > 0:
-        producto.Stock -= 1
-        db.session.commit()
-        return {"success": True}
-    
-    return {"success": False, "error": "Stock insuficiente"}, 400
