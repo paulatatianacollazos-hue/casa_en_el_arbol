@@ -455,3 +455,7 @@ def detalle_producto(id_producto):
         reseñas=reseñas
     )
 
+
+@empleado.route('/enviar-mensaje', methods=['POST'])
+def enviar_mensaje_empleado():
+    pass
