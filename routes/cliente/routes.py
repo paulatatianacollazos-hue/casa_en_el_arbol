@@ -343,15 +343,16 @@ def borrar_direccion(id_direccion):
 def catalogo():
     productos = get_productos()
 
+    ultimo_producto = session.get('ultimo_producto')  # Diccionario con ID y categoría
+
     productos_ordenados = obtener_productos_ordenados(
-        producto_actual=None,
+        producto_actual=ultimo_producto,
         user_id=current_user.id
     )
 
     return render_template(
         "cliente/cliente_catalogo.html",
         productos=productos_ordenados
-
     )
 
 
@@ -362,6 +363,12 @@ def detalle_producto(id_producto):
     if not producto:
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
+
+    # Guardar el producto actual en la sesión
+    session['ultimo_producto'] = {
+        "ID_Producto": producto.ID_Producto,
+        "Categoria": producto.ID_Categoria
+    }
 
     ha_comprado = (
         db.session.query(Detalle_Pedido)
