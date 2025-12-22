@@ -5,7 +5,7 @@ from basedatos.db import get_connection
 from sqlalchemy import and_
 from basedatos.models import (
     db, Pedido, Usuario, Detalle_Pedido, Comentarios, Reseñas)
-from basedatos.models import Producto, Calendario, ImagenProducto
+from basedatos.models import Producto, Calendario, ImagenProducto, Categorias
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
@@ -1089,7 +1089,7 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
         # Orden por categoría primero, luego por material
         orden_prioridad = case(
             [
-                (Producto.Categoria == categoria, 0),
+                (Producto.categoria == categoria, 0),
                 (Producto.Material == material, 1)
             ],
             else_=2
