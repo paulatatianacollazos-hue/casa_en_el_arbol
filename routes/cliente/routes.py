@@ -3,6 +3,7 @@ from flask import (render_template, request, redirect, url_for, flash, session,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
+from basedatos.decoradores import enviar_factura_email
 from io import BytesIO
 import base64
 import os

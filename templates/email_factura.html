@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial; color:#333; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #ddd; padding:8px; }
+    th { background:#f4f4f4; }
+  </style>
+</head>
+<body>
+
+<h2>🧾 Factura - Casa en el Árbol</h2>
+
+<p>Hola <strong>{{ usuario.Nombre }}</strong>,</p>
+<p>Gracias por tu compra. Aquí está el resumen de tu pedido:</p>
+
+<p><strong>N° Pedido:</strong> {{ pedido.id }}</p>
+<p><strong>Fecha:</strong> {{ fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Precio</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in productos %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>{{ p.quantity }}</td>
+      <td>${{ "%.2f"|format(p.price) }}</td>
+      <td>${{ "%.2f"|format(p.price * p.quantity) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Total: ${{ "%.2f"|format(pedido.total) }}</h3>
+
+<p>📦 Dirección de envío confirmada.</p>
+
+<p>Gracias por confiar en <strong>Casa en el Árbol</strong> 🌳</p>
+
+</body>
+</html>

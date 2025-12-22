@@ -5,6 +5,7 @@ import re
 from flask_mail import Message
 from extensions import mail
 from flask import current_app
+from datetime import datetime
 
 
 def role_required(*roles):
@@ -101,6 +102,27 @@ def enviar_correo_seguridad(email, intento):
             ip=intento.ip,
             fecha=intento.fecha,
             intento_id=intento.id
+        )
+
+        mail.send(msg)
+
+
+def enviar_factura_email(usuario, pedido, productos):
+    """
+    Envía la factura del pedido por correo
+    """
+    with current_app.app_context():
+        msg = Message(
+            subject=f"🧾 Factura de tu pedido #{pedido.id}",
+            recipients=[usuario.Correo]
+        )
+
+        msg.html = render_template(
+            "email_factura.html",
+            usuario=usuario,
+            pedido=pedido,
+            productos=productos,
+            fecha=datetime.now()
         )
 
         mail.send(msg)
