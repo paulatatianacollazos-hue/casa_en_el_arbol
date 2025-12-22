@@ -445,7 +445,7 @@ def confirmar_pago():
     metodo_pago = data.get('metodo_pago')
     instalacion = data.get('instalacion')
     direccion_id = data.get('direccion')
-    total = data.get('total', 0)
+    total = float(data.get('total', 0))
 
     try:
         # ------------------ VALIDAR STOCK ------------------
@@ -494,9 +494,11 @@ def confirmar_pago():
             Instalacion=instalacion
         )
         db.session.add(nuevo_pedido)
-        db.session.commit()  # 🔴 necesario para obtener ID_Pedido
+        db.session.commit()  # necesario para ID_Pedido
 
         # ------------------ DETALLE DEL PEDIDO ------------------
+        productos_factura = []
+
         for item in productos_carrito:
             detalle = Detalle_Pedido(
                 ID_Pedido=nuevo_pedido.ID_Pedido,
@@ -506,13 +508,22 @@ def confirmar_pago():
             )
             db.session.add(detalle)
 
+            subtotal = float(item['price']) * int(item['quantity'])
+
+            productos_factura.append({
+                "name": item['name'],
+                "price": float(item['price']),
+                "quantity": int(item['quantity']),
+                "subtotal": subtotal
+            })
+
         db.session.commit()
 
         # ------------------ ENVIAR FACTURA POR CORREO ------------------
         enviar_factura_email(
             usuario=current_user,
             pedido=nuevo_pedido,
-            productos=productos_carrito,
+            productos=productos_factura,
             total=total
         )
 
@@ -525,6 +536,7 @@ def confirmar_pago():
             "success": False,
             "error": "Ocurrió un error al procesar el pedido."
         })
+
 
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
 @login_required
