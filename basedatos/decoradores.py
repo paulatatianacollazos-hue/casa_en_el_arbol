@@ -107,13 +107,10 @@ def enviar_correo_seguridad(email, intento):
         mail.send(msg)
 
 
-def enviar_factura_email(usuario, pedido, productos):
-    """
-    Envía la factura del pedido por correo
-    """
+def enviar_factura_email(usuario, pedido, productos, total):
     with current_app.app_context():
         msg = Message(
-            subject=f"🧾 Factura de tu pedido #{pedido.id}",
+            subject=f"🧾 Factura Pedido #{pedido.ID_Pedido} - Casa en el Árbol",
             recipients=[usuario.Correo]
         )
 
@@ -122,7 +119,7 @@ def enviar_factura_email(usuario, pedido, productos):
             usuario=usuario,
             pedido=pedido,
             productos=productos,
-            fecha=datetime.now()
+            total=total
         )
 
         mail.send(msg)
