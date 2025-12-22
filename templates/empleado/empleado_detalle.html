@@ -454,7 +454,7 @@ function guardarDefecto() {
     const nombre = document.getElementById("defecto_nombre").value;
     const descripcion = document.getElementById("defecto_descripcion").value;
 
-    fetch(`/producto/${id}/defectuoso`, { method: "POST" })
+    fetch(`/empleado/producto/${id}/defectuoso`, { method: "POST" })
     .then(r => r.json())
     .then(data => {
         if (!data.success) {
