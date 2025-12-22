@@ -364,26 +364,26 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
 
-    # Guardar el producto actual en la sesión
-    session['ultimo_producto'] = {
-        "ID_Producto": producto.ID_Producto,
-        "Categoria": producto.ID_Categoria
-    }
-
     ha_comprado = (
         db.session.query(Detalle_Pedido)
         .join(Pedido)
         .filter(
             Pedido.ID_Usuario == current_user.ID_Usuario,
-            Detalle_Pedido.ID_Producto == id_producto
+            Detalle_Pedido.ID_Producto == producto["ID_Producto"]
         )
         .first() is not None
     )
 
     reseñas = Reseñas.query.filter_by(
-        ID_Referencia=id_producto,
+        ID_Referencia=producto["ID_Producto"],
         tipo="producto"
     ).order_by(Reseñas.Fecha.desc()).all()
+
+    # Guardar en sesión el último producto visto
+    session['ultimo_producto'] = {
+        "ID_Producto": producto["ID_Producto"],
+        "Categoria": producto["ID_Categoria"]
+    }
 
     productos_similares = obtener_productos_ordenados(
         producto_actual=producto
@@ -396,6 +396,7 @@ def detalle_producto(id_producto):
         reseñas=reseñas,
         productos_similares=productos_similares
     )
+
 
 
 @cliente.route("/firmar/<int:id_pedido>", methods=["GET", "POST"])

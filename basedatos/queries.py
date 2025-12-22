@@ -1084,20 +1084,20 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
     )
 
     if producto_actual:
-        # Determinar si es dict o objeto SQLAlchemy
+        # Detectar si es dict o objeto SQLAlchemy
         if isinstance(producto_actual, dict):
             id_producto = producto_actual.get("ID_Producto")
             categoria = producto_actual.get("Categoria")
         else:
             id_producto = producto_actual.ID_Producto
-            categoria = producto_actual.categoria.ID_Categoria if producto_actual.categoria else None
+            categoria = producto_actual.ID_Categoria if producto_actual.categoria else None
 
-        # Orden por: 0 = producto actual, 1 = misma categoría, 2 = otros productos
+        # Orden por prioridad: producto actual -> misma categoría -> otros
         orden_prioridad = case(
-            (
+            [
                 (Producto.ID_Producto == id_producto, 0),
                 (Producto.ID_Categoria == categoria, 1)
-            ),
+            ],
             else_=2
         )
 
@@ -1113,7 +1113,9 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
         )
 
         orden_comprados = case(
-            (Producto.ID_Producto.in_(subquery), 0),
+            [
+                (Producto.ID_Producto.in_(subquery), 0)
+            ],
             else_=1
         )
 
