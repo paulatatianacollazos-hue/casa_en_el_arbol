@@ -449,13 +449,10 @@ def detalle_producto(id_producto):
     ).order_by(Reseñas.Fecha.desc()).all()
 
     return render_template(
-        "cliente/cliente_detalle.html",
+        "empleado/empleado_detalle.html",
         producto=producto,
         ha_comprado=ha_comprado,
         reseñas=reseñas
     )
 
 
-@empleado.route('/enviar-mensaje', methods=['POST'])
-def enviar_mensaje_empleado():
-    pass
