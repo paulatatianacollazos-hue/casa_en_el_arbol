@@ -346,6 +346,6 @@ class Defecto(db.Model):
     producto_id = db.Column(db.Integer, db.ForeignKey("Producto.ID_Producto"), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
-    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"), nullable=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"), nullable=True)
 
     producto = db.relationship("Producto", back_populates="defectos")

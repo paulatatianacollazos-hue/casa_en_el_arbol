@@ -1384,7 +1384,7 @@ def registrar_pago_empleado(id):
     return redirect(request.referrer)
 
 
-@admin.route("/admin/defectuosos")
+@admin.route("/defectuosos")
 @login_required
 @role_required("admin")
 def ver_defectuosos():
