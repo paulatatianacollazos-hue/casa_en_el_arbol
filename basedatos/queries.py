@@ -1055,3 +1055,50 @@ def obtener_estadisticas_pedidos_por_mes():
         )
 
     return dict(estadisticas)
+
+
+def enviar_correo_seguridad(correo, intento):
+    dispositivo = obtener_dispositivo()
+
+    link_si = url_for(
+        'auth.confirmar_dispositivo',
+        intento_id=intento.id,
+        accion='si',
+        _external=True
+    )
+
+    link_no = url_for(
+        'auth.confirmar_dispositivo',
+        intento_id=intento.id,
+        accion='no',
+        _external=True
+    )
+
+    msg = Message(
+        subject="⚠️ Alerta de seguridad - Intentos de acceso",
+        recipients=[correo]
+    )
+
+    msg.html = f"""
+    <h3>⚠️ Intento de acceso detectado</h3>
+    <p>Están intentando acceder a tu cuenta desde:</p>
+    <ul>
+        <li><b>Dispositivo:</b> {dispositivo}</li>
+        <li><b>IP:</b> {intento.ip}</li>
+        <li><b>Fecha:</b> {datetime.now()}</li>
+    </ul>
+
+    <p><b>¿Eres tú?</b></p>
+
+    <a href="{link_si}"
+       style="padding:10px;background:green;color:white;text-decoration:none;">
+       ✔ Sí
+    </a>
+
+    <a href="{link_no}"
+       style="padding:10px;background:red;color:white;text-decoration:none;">
+       ❌ No
+    </a>
+    """
+
+    mail.send(msg)
