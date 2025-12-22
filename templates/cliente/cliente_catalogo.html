@@ -142,6 +142,27 @@
   Comparar productos
 </a>
 
+{% if recomendados %}
+<hr>
+<h4 class="mt-4">⭐ Productos recomendados para ti</h4>
+
+<div class="row">
+    {% for producto in recomendados %}
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ producto.NombreProducto }}</h5>
+                <p>$ {{ producto.Precio }}</p>
+                <a href="/producto/{{ producto.ID_Producto }}" class="btn btn-sm btn-primary">
+                    Ver producto
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 
 <h2>Productos</h2><br>
 <div class="grid">
