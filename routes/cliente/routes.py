@@ -350,8 +350,8 @@ def catalogo():
 
     return render_template(
         "cliente/cliente_catalogo.html",
-        producto=productos_ordenados,
-        productos=productos
+        productos=productos_ordenados
+
     )
 
 
