@@ -111,6 +111,7 @@ class Producto(db.Model):
     novedades = db.relationship('Novedades', backref='producto', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='producto',
                                       lazy=True)
+    defectos = db.relationship("Defecto", back_populates="producto")
 
 
 # ------------------ ImagenProducto ------------------
@@ -344,8 +345,7 @@ class Defecto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     producto_id = db.Column(db.Integer, db.ForeignKey("producto.ID_Producto"), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=datetime.utcnow)
-    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"))
+    fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"), nullable=True)
 
-    producto = db.relationship("Producto", backref="defectos")
-    usuario = db.relationship("Usuario")
+    producto = db.relationship("Producto", back_populates="defectos")
