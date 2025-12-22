@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 import os
 from basedatos.models import (
     db, Usuario, Notificaciones, PagoEmpleado,
-    Direccion, Calendario, Pedido, Reseñas, Producto
+    Direccion, Calendario, Pedido, Reseñas, Producto, Defecto
     )
 from sqlalchemy import text
 from basedatos.db import get_connection
@@ -1384,4 +1384,9 @@ def registrar_pago_empleado(id):
     return redirect(request.referrer)
 
 
-
+@admin.route("/admin/defectuosos")
+@login_required
+@role_required("admin")
+def ver_defectuosos():
+    defectos = Defecto.query.order_by(Defecto.fecha.desc()).all()
+    return render_template("administrador/defectuosos.html", defectos=defectos)

@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from basedatos.models import (
     Usuario, Calendario, Notificaciones, RegistroEntrega, db,
-    Pedido, Detalle_Pedido, Producto, Reseñas
+    Pedido, Detalle_Pedido, Producto, Reseñas, Defecto
     )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -460,13 +460,21 @@ def detalle_producto(id_producto):
 @login_required
 def marcar_defectuoso(id):
     producto = Producto.query.get_or_404(id)
-    data = request.get_json()  # <-- recibir JSON
+    data = request.get_json()
     descripcion = data.get("descripcion", "")
 
     if producto.Stock > 0:
         producto.Stock -= 1
         db.session.commit()
-        # aquí podrías guardar la descripción en otra tabla si quieres
+
+        defecto = Defecto(
+            producto_id=id,
+            descripcion=descripcion,
+            usuario_id=current_user.id
+        )
+        db.session.add(defecto)
+        db.session.commit()
+
         return {"success": True}
-    
+
     return {"success": False, "error": "Stock insuficiente"}, 400
