@@ -1073,7 +1073,6 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
         .subquery()
     )
 
-    # Consulta base: productos + su primera imagen
     query = (
         db.session.query(
             Producto,
@@ -1084,40 +1083,41 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
     )
 
     if producto_actual:
-        # Detectar si es dict o SQLAlchemy object
+        # Detectar si es dict o objeto SQLAlchemy
         if isinstance(producto_actual, dict):
             id_producto = producto_actual.get("ID_Producto")
-            categoria = producto_actual.get("Categoria")  # asegúrate que la clave es correcta
+            categoria = producto_actual.get("ID_Categoria")
         else:
             id_producto = producto_actual.ID_Producto
-            categoria = producto_actual.ID_Categoria if producto_actual.categoria else None
+            categoria = producto_actual.categoria.ID_Categoria if hasattr(producto_actual, "categoria") and producto_actual.categoria else None
 
-        # Orden: 0 = producto actual, 1 = misma categoría, 2 = otros
+        # Prioridad: producto actual -> misma categoría -> otros
         orden_prioridad = case(
             (Producto.ID_Producto == id_producto, 0),
             (Producto.ID_Categoria == categoria, 1),
             else_=2
         )
 
-        # Excluir el producto actual de los resultados
-        query = query.filter(Producto.ID_Producto != id_producto).order_by(orden_prioridad)
+        query = query.order_by(orden_prioridad)
 
     elif user_id:
-        # Productos comprados por el usuario
-        subquery = (
-            db.session.query(Detalle_Pedido.ID_Producto)
-            .join(Pedido)
+        # Obtener las categorías de los productos que el usuario compró
+        categorias_compradas = (
+            db.session.query(Producto.ID_Categoria)
+            .join(Detalle_Pedido, Detalle_Pedido.ID_Producto == Producto.ID_Producto)
+            .join(Pedido, Pedido.ID_Pedido == Detalle_Pedido.ID_Pedido)
             .filter(Pedido.ID_Usuario == user_id)
+            .distinct()
             .subquery()
         )
 
-        # Orden: 0 = comprados, 1 = no comprados
-        orden_comprados = case(
-            (Producto.ID_Producto.in_(subquery), 0),
+        # Prioridad: productos en categorías compradas -> otros productos
+        orden_prioridad = case(
+            (Producto.ID_Categoria.in_(categorias_compradas), 0),
             else_=1
         )
 
-        query = query.order_by(orden_comprados)
+        query = query.order_by(orden_prioridad)
 
     if limit:
         query = query.limit(limit)
