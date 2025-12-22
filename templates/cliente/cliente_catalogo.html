@@ -144,7 +144,7 @@
 <h2>Productos recomendados</h2>
 
 <div class="grid">
-  {% for producto, imagen in productos_ordenados %}
+  {% for producto, imagen in productos %}
     <div class="producto-card"
          onclick="window.location.href='/cliente/producto/{{ producto.ID_Producto }}'">
 

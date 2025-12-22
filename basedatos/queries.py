@@ -1062,12 +1062,23 @@ def obtener_estadisticas_pedidos_por_mes():
 def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
     Imagen = aliased(ImagenProducto)
 
+    # Tomamos la primera imagen de cada producto
+    subimagen = (
+        db.session.query(
+            Imagen.ID_Producto,
+            func.min(Imagen.ID_Imagen).label("min_id")  # primera imagen por ID
+        )
+        .group_by(Imagen.ID_Producto)
+        .subquery()
+    )
+
     query = (
         db.session.query(
             Producto,
             Imagen
         )
-        .outerjoin(Imagen, Imagen.ID_Producto == Producto.ID_Producto)
+        .outerjoin(subimagen, subimagen.c.ID_Producto == Producto.ID_Producto)
+        .outerjoin(Imagen, Imagen.ID_Imagen == subimagen.c.min_id)
     )
 
     # 🔹 Si está viendo un producto → ordenar por similitud
@@ -1080,11 +1091,7 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
             else_=1
         )
 
-        query = (
-            query
-            .filter(Producto.ID_Producto != id_producto)
-            .order_by(orden_similares)
-        )
+        query = query.filter(Producto.ID_Producto != id_producto).order_by(orden_similares)
 
     # 🔹 Si NO hay producto actual pero sí usuario → compras primero
     elif user_id:
