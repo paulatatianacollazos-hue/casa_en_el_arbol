@@ -17,7 +17,7 @@
 <p>Gracias por tu compra. Aquí está el resumen de tu pedido:</p>
 
 <p><strong>N° Pedido:</strong> {{ pedido.id }}</p>
-<p><strong>Fecha:</strong> {{ fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+<p><strong>Fecha:</strong> {{ {{ pedido.FechaPedido.strftime('%d/%m/%Y %H:%M') }}}}</p>
 
 <table>
   <thead>
