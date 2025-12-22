@@ -1076,20 +1076,19 @@ def obtener_dispositivo():
 
 
 def enviar_correo_seguridad(email, intento):
-    """
-    Envía un correo de alerta por intento de login sospechoso
-    """
 
-    msg = Message(
-        subject="⚠️ Alerta de seguridad - Casa en el Árbol",
-        recipients=[email]
-    )
+    with current_app.app_context():
+        msg = Message(
+            subject="⚠️ Alerta de seguridad - Casa en el Árbol",
+            recipients=[email]
+        )
 
-    msg.html = render_template(
-        "email_seguridad.html",
-        intentos=intento.intentos,
-        ip=intento.ip,
-        fecha=intento.fecha
-    )
+        msg.html = render_template(
+            "email_seguridad.html",
+            intentos=intento.intentos,
+            ip=intento.ip,
+            fecha=intento.fecha,
+            intento_id=intento.id
+        )
 
-    mail.send(msg)
+        mail.send(msg)
