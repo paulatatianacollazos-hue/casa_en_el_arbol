@@ -187,6 +187,7 @@ def login():
 
 
 # ------------------ LOGOUT ------------------ #
+
 @auth.route('/logout')
 @login_required
 def logout():
@@ -228,6 +229,7 @@ def forgot_password():
         else:
             flash('Correo no registrado.', 'warning')
     return render_template("forgot_password.html")
+
 
 
 @auth.route('/confirmar-dispositivo/<int:intento_id>/<accion>')
