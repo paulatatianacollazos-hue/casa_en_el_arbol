@@ -19,7 +19,6 @@ app.secret_key = "clave_secreta"
 from basedatos.models import db, Usuario
 
 # ------------------ EXTENSIONES ------------------ #
-from basedatos.decoradores import mail
 
 # ------------------ BLUEPRINTS ------------------ #
 from routes.auth import auth
