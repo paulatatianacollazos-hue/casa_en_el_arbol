@@ -437,54 +437,66 @@ def pagos():
 
 
 @cliente.route('/confirmar_pago', methods=['POST'])
+@login_required
 def confirmar_pago():
     data = request.get_json()
+
     productos_carrito = data.get('productos', [])
     metodo_pago = data.get('metodo_pago')
-    instalacion = data.get('instalacion')  # Debe coincidir con el nombre del campo del modelo
+    instalacion = data.get('instalacion')
     direccion_id = data.get('direccion')
     total = data.get('total', 0)
 
     try:
-        # Validar stock
+        # ------------------ VALIDAR STOCK ------------------
         for item in productos_carrito:
             producto = Producto.query.get(item['id'])
             if not producto:
-                return jsonify({"success": False, "error": f"Producto {item['id']} no encontrado."})
+                return jsonify({
+                    "success": False,
+                    "error": f"Producto {item['id']} no encontrado."
+                })
+
             if producto.Stock < item['quantity']:
                 return jsonify({
                     "success": False,
                     "error": f"No hay suficiente stock para {producto.NombreProducto}."
                 })
 
-        # Descontar stock
+        # ------------------ DESCONTAR STOCK ------------------
         for item in productos_carrito:
             producto = Producto.query.get(item['id'])
             producto.Stock -= item['quantity']
             db.session.add(producto)
 
-        # Obtener dirección completa
+        # ------------------ OBTENER DIRECCIÓN ------------------
         direccion = Direccion.query.get(direccion_id)
         if not direccion:
-            return jsonify({"success": False, "error": "Dirección no encontrada."})
+            return jsonify({
+                "success": False,
+                "error": "Dirección no encontrada."
+            })
 
-        destino_texto = f"{direccion.Direccion}, {direccion.Barrio or ''}, {direccion.Ciudad or ''}, {direccion.Departamento or ''}, {direccion.Pais or ''}"
+        destino_texto = (
+            f"{direccion.Direccion}, "
+            f"{direccion.Barrio or ''}, "
+            f"{direccion.Ciudad or ''}, "
+            f"{direccion.Departamento or ''}, "
+            f"{direccion.Pais or ''}"
+        )
 
-        # Debug: imprimir valor de instalacion
-        print("Valor de instalacion recibido:", instalacion)
-
-        # Crear pedido con Instalacion
+        # ------------------ CREAR PEDIDO ------------------
         nuevo_pedido = Pedido(
             ID_Usuario=current_user.ID_Usuario,
             Destino=destino_texto,
             Estado='pendiente',
             FechaPedido=datetime.utcnow(),
-            Instalacion=instalacion  # Debe coincidir con la columna de la BD
+            Instalacion=instalacion
         )
         db.session.add(nuevo_pedido)
-        db.session.commit()
+        db.session.commit()  # 🔴 necesario para obtener ID_Pedido
 
-        # Guardar detalle del pedido
+        # ------------------ DETALLE DEL PEDIDO ------------------
         for item in productos_carrito:
             detalle = Detalle_Pedido(
                 ID_Pedido=nuevo_pedido.ID_Pedido,
@@ -496,12 +508,23 @@ def confirmar_pago():
 
         db.session.commit()
 
+        # ------------------ ENVIAR FACTURA POR CORREO ------------------
+        enviar_factura_email(
+            usuario=current_user,
+            pedido=nuevo_pedido,
+            productos=productos_carrito,
+            total=total
+        )
+
         return jsonify({"success": True})
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"success": False, "error": str(e)})
-
+        print("❌ ERROR confirmar_pago:", e)
+        return jsonify({
+            "success": False,
+            "error": "Ocurrió un error al procesar el pedido."
+        })
 
 @cliente.route('/factura/pdf/<int:pedido_id>', methods=['GET'])
 @login_required
