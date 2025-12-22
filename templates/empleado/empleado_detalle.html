@@ -460,10 +460,12 @@ function guardarDefecto() {
     }
 
     fetch(`/empleado/producto/${id}/defectuoso`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ descripcion }) // enviar descripción
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ descripcion }),  // opcional
+      credentials: "same-origin"  // << importante para que Flask vea la sesión del empleado
     })
+
     .then(res => res.json())
     .then(data => {
         if (!data.success) {
