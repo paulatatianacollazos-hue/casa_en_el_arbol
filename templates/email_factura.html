@@ -34,13 +34,14 @@
         <tbody>
             {% for p in productos %}
             <tr>
-                <td>{{ p.nombre }}</td>
-                <td align="center">{{ p.cantidad }}</td>
-                <td align="right">${{ '%.2f'|format(p.precio) }}</td>
+                <td>{{ p.name }}</td>
+                <td align="center">{{ p.quantity }}</td>
+                <td align="right">${{ '%.2f'|format(p.price) }}</td>
                 <td align="right">${{ '%.2f'|format(p.subtotal) }}</td>
             </tr>
             {% endfor %}
         </tbody>
+
     </table>
 
     <h3 style="text-align:right;">Total: ${{ '%.2f'|format(total) }}</h3>
