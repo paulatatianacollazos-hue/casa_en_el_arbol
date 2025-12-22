@@ -81,13 +81,14 @@
     <div class="botones mt-3">
       <button class="btn btn-primary" id="btn-garantia">Garantía</button>
       <button class="btn btn-warning"
-        onclick="abrirModalDefecto(
-            {{ p.ID_Producto }},
-            '{{ p.NombreProducto }}',
-            {{ p.Stock }}
-        )">
-        Marcar defectuoso
+          onclick="abrirModalDefecto(
+              {{ producto.ID_Producto }},
+              '{{ producto.NombreProducto }}',
+              {{ producto.Stock }}
+          )">
+          Marcar defectuoso
       </button>
+
 
       
     </div>
