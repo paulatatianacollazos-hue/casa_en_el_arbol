@@ -12,7 +12,6 @@ from flask import current_app
 from collections import defaultdict
 from sqlalchemy.orm import aliased
 from sqlalchemy import case
-from sqlalchemy.orm import aliased
 from sqlalchemy import func
 
 
@@ -1074,6 +1073,7 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
         .subquery()
     )
 
+    # Consulta base: productos + su primera imagen
     query = (
         db.session.query(
             Producto,
@@ -1084,27 +1084,26 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
     )
 
     if producto_actual:
-        # Detectar si es dict o objeto SQLAlchemy
+        # Detectar si es dict o SQLAlchemy object
         if isinstance(producto_actual, dict):
             id_producto = producto_actual.get("ID_Producto")
-            categoria = producto_actual.get("Categoria")
+            categoria = producto_actual.get("Categoria")  # asegúrate que la clave es correcta
         else:
             id_producto = producto_actual.ID_Producto
             categoria = producto_actual.ID_Categoria if producto_actual.categoria else None
 
-        # Orden por prioridad: producto actual -> misma categoría -> otros
+        # Orden: 0 = producto actual, 1 = misma categoría, 2 = otros
         orden_prioridad = case(
-            [
-                (Producto.ID_Producto == id_producto, 0),
-                (Producto.ID_Categoria == categoria, 1)
-            ],
+            (Producto.ID_Producto == id_producto, 0),
+            (Producto.ID_Categoria == categoria, 1),
             else_=2
         )
 
-        query = query.order_by(orden_prioridad)
+        # Excluir el producto actual de los resultados
+        query = query.filter(Producto.ID_Producto != id_producto).order_by(orden_prioridad)
 
     elif user_id:
-        # Productos ya comprados por el usuario
+        # Productos comprados por el usuario
         subquery = (
             db.session.query(Detalle_Pedido.ID_Producto)
             .join(Pedido)
@@ -1112,10 +1111,9 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
             .subquery()
         )
 
+        # Orden: 0 = comprados, 1 = no comprados
         orden_comprados = case(
-            [
-                (Producto.ID_Producto.in_(subquery), 0)
-            ],
+            (Producto.ID_Producto.in_(subquery), 0),
             else_=1
         )
 

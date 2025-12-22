@@ -364,26 +364,29 @@ def detalle_producto(id_producto):
         flash("Producto no encontrado", "error")
         return redirect(url_for("cliente.catalogo"))
 
+    # Detectar si es dict o SQLAlchemy
+    if isinstance(producto, dict):
+        id_producto_val = producto.get("ID_Producto")
+        categoria_val = producto.get("ID_Categoria")  # Asegúrate de que la key exista en el dict
+    else:
+        id_producto_val = producto.ID_Producto
+        # si Producto tiene relación categoria
+        categoria_val = producto.categoria.ID_Categoria if hasattr(producto, "categoria") and producto.categoria else None
+
     ha_comprado = (
         db.session.query(Detalle_Pedido)
         .join(Pedido)
         .filter(
             Pedido.ID_Usuario == current_user.ID_Usuario,
-            Detalle_Pedido.ID_Producto == producto["ID_Producto"]
+            Detalle_Pedido.ID_Producto == id_producto_val
         )
         .first() is not None
     )
 
     reseñas = Reseñas.query.filter_by(
-        ID_Referencia=producto["ID_Producto"],
+        ID_Referencia=id_producto_val,
         tipo="producto"
     ).order_by(Reseñas.Fecha.desc()).all()
-
-    # Guardar en sesión el último producto visto
-    session['ultimo_producto'] = {
-        "ID_Producto": producto["ID_Producto"],
-        "Categoria": producto["ID_Categoria"]
-    }
 
     productos_similares = obtener_productos_ordenados(
         producto_actual=producto
