@@ -10,9 +10,7 @@ import os
 from werkzeug.utils import secure_filename
 from flask import current_app
 from collections import defaultdict
-from flask import url_for
-from flask_mail import Message
-from basedatos.decoradores import mail
+from flask_login import current_user
 
 
 UPLOAD_FOLDER = os.path.join("static", "img")
@@ -1060,6 +1058,39 @@ def obtener_estadisticas_pedidos_por_mes():
     return dict(estadisticas)
 
 
+def obtener_productos_similares(limit=6):
+    """
+    Devuelve productos similares según el historial del cliente
+    """
 
+    if not current_user.is_authenticated:
+        # Si no está logueado → mostrar productos populares
+        return Producto.query.order_by(func.random()).limit(limit).all()
+
+    # 🔹 1. Obtener categorías de productos comprados
+    categorias = (
+        db.session.query(Producto.Categoria)
+        .join(Detalle_Pedido, Producto.ID_Producto == Detalle_Pedido.ID_Producto)
+        .join(Pedido, Pedido.ID_Pedido == Detalle_Pedido.ID_Pedido)
+        .filter(Pedido.ID_Usuario == current_user.ID_Usuario)
+        .distinct()
+        .all()
+    )
+
+    categorias = [c[0] for c in categorias]
+
+    if not categorias:
+        # Si no tiene historial → aleatorios
+        return Producto.query.order_by(func.random()).limit(limit).all()
+
+    # 🔹 2. Buscar productos de esas categorías
+    productos_similares = (
+        Producto.query
+        .filter(Producto.Categoria.in_(categorias))
+        .limit(limit)
+        .all()
+    )
+
+    return productos_similares
 
 
