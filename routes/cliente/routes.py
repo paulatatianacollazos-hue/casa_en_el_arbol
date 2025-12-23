@@ -15,7 +15,7 @@ from basedatos.queries import obtener_productos_ordenados
 from basedatos.models import (
     db, Usuario, Producto, Calendario, Notificaciones,
     Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias,
-    Reseñas
+    Reseñas, HistorialActividad
 )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -937,28 +937,21 @@ def catalogo_filtros():
     )
 
 
-def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
+def agregar_historial(tipo, descripcion, ubicacion=None, navegador=None):
 
     if not current_user.is_authenticated:
         return
 
-    key = f"historial_{current_user.ID_Usuario}"
+    evento = HistorialActividad(
+        ID_Usuario=current_user.ID_Usuario,
+        Tipo=tipo,
+        Descripcion=descripcion,
+        Ubicacion=ubicacion,
+        Navegador=navegador
+    )
 
-    historial = session.get(key, [])
-
-    evento = {
-        "tipo": tipo,
-        "descripcion": descripcion,
-        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "ubicacion": ubicacion,
-        "navegador": navegador
-    }
-
-    historial.append(evento)
-
-    # 🔴 CLAVE: reasignar
-    session[key] = historial
-    session.modified = True
+    db.session.add(evento)
+    db.session.commit()
 
 
 # ---------Historial---------
@@ -966,30 +959,9 @@ def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Des
 @login_required
 def historial_cliente():
 
-    key = f"historial_{current_user.ID_Usuario}"
-    historial = session.get(key, [])
-
-    tipo = request.args.get('tipo')
-    fecha = request.args.get('fecha')
-    q = request.args.get('q')
-
-    if tipo:
-        historial = [h for h in historial if h.get('tipo') == tipo]
-
-    if fecha:
-        historial = [h for h in historial if h.get('fecha', '').startswith(fecha)]
-
-    if q:
-        historial = [
-            h for h in historial
-            if q.lower() in h.get('descripcion', '').lower()
-        ]
-
-    historial = sorted(
-        historial,
-        key=lambda x: x.get('fecha', ''),
-        reverse=True
-    )
+    historial = HistorialActividad.query.filter_by(
+        ID_Usuario=current_user.ID_Usuario
+    ).order_by(HistorialActividad.Fecha.desc()).all()
 
     return render_template(
         'cliente/historial.html',

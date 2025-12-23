@@ -374,3 +374,15 @@ class TokenSeguridad(db.Model):
     accion = db.Column(db.Enum("si", "no", "desbloquear"))
     usado = db.Column(db.Boolean, default=False)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class HistorialActividad(db.Model):
+    __tablename__ = 'historial_actividad'
+
+    ID_Historial = db.Column(db.Integer, primary_key=True)
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'), nullable=False)
+    Tipo = db.Column(db.String(50))
+    Descripcion = db.Column(db.String(255))
+    Fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    Ubicacion = db.Column(db.String(100))
+    Navegador = db.Column(db.String(100))
