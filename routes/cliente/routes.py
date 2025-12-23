@@ -937,7 +937,6 @@ def catalogo_filtros():
 
 
 def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
-    # Crear el historial si no existe
     if "historial" not in session:
         session["historial"] = []
 
@@ -957,13 +956,13 @@ def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Des
 @cliente.route('/historial')
 @login_required
 def historial_cliente():
-    # Obtener historial desde la sesión
+    # Obtener historial desde la sesión (ya es solo del usuario actual)
     historial = session.get('historial', [])
 
     # Filtros
-    tipo = request.args.get('tipo')
-    fecha = request.args.get('fecha')
-    q = request.args.get('q')
+    tipo = request.args.get('tipo', None)
+    fecha = request.args.get('fecha', None)
+    q = request.args.get('q', None)
 
     # Filtrado seguro usando get para evitar KeyError
     if tipo:
