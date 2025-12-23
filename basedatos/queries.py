@@ -178,17 +178,35 @@ def detalle():
 # --------- OBTENER_EMPLEADOS ---------
 
 
-def obtener_empleados():
+def obtener_empleados(pedido):
+    """
+    Devuelve los empleados disponibles según si el pedido requiere instalación.
+    pedido: diccionario con los datos del pedido (debe incluir 'Instalacion')
+    """
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT ID_Usuario, Nombre, Apellido, Rol FROM Usuario")
-    empleados = cursor.fetchall()
+    if pedido.get('Instalacion', '').lower() == 'si':
+        # Solo instaladores
+        cursor.execute("""
+            SELECT ID_Usuario, Nombre, Apellido, Rol 
+            FROM Usuario 
+            WHERE Rol = 'instalador'
+        """)
+    else:
+        # Solo transportistas
+        cursor.execute("""
+            SELECT ID_Usuario, Nombre, Apellido, Rol 
+            FROM Usuario 
+            WHERE Rol = 'transportista'
+        """)
 
+    empleados = cursor.fetchall()
     cursor.close()
     conn.close()
 
     return empleados
+
 
 
 # --------- OBTENER_PRODUCTOS_FILTRADOS ---------
