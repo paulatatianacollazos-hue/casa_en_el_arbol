@@ -895,6 +895,23 @@ def catalogo_filtros():
     )
 
 
+def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
+    # Crear el historial si no existe
+    if "historial" not in session:
+        session["historial"] = []
+
+    evento = {
+        "tipo": tipo,
+        "descripcion": descripcion,
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ubicacion": ubicacion,
+        "navegador": navegador
+    }
+
+    session["historial"].append(evento)
+    session.modified = True  # necesario para que Flask guarde cambios en la sesión
+
+
 # ---------Historial---------
 @cliente.route('/historial')
 @login_required
