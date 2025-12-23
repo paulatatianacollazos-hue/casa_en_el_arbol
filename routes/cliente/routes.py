@@ -938,35 +938,43 @@ def catalogo_filtros():
 
 
 def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
-    # Crear el historial si no existe
-    if "historial" not in session:
-        session["historial"] = []
+    # Asegurar que el usuario esté autenticado
+    if not current_user.is_authenticated:
+        return
+
+    # Clave única por usuario
+    key = f"historial_{current_user.ID_Usuario}"
+
+    if key not in session:
+        session[key] = []
 
     evento = {
         "tipo": tipo,
         "descripcion": descripcion,
-        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "fecha": datetime.now().isoformat(),
         "ubicacion": ubicacion,
         "navegador": navegador
     }
 
-    session["historial"].append(evento)
-    session.modified = True  # necesario para que Flask guarde cambios en la sesión
+    session[key].append(evento)
+    session.modified = True
 
 
 # ---------Historial---------
 @cliente.route('/historial')
 @login_required
 def historial_cliente():
-    # Obtener historial desde la sesión
-    historial = session.get('historial', [])
+    # 🔐 Clave única por usuario
+    key = f"historial_{current_user.ID_Usuario}"
 
-    # Filtros
+    # Obtener solo el historial del usuario actual
+    historial = session.get(key, [])
+
+    # 🔍 Filtros
     tipo = request.args.get('tipo')
     fecha = request.args.get('fecha')
     q = request.args.get('q')
 
-    # Filtrado seguro usando get para evitar KeyError
     if tipo:
         historial = [h for h in historial if h.get('tipo') == tipo]
 
@@ -974,9 +982,19 @@ def historial_cliente():
         historial = [h for h in historial if h.get('fecha', '').startswith(fecha)]
 
     if q:
-        historial = [h for h in historial if q.lower() in h.get('descripcion', '').lower()]
+        historial = [
+            h for h in historial
+            if q.lower() in h.get('descripcion', '').lower()
+        ]
 
-    # Ordenar por fecha descendente
-    historial = sorted(historial, key=lambda x: x.get('fecha', ''), reverse=True)
+    # ⏱ Ordenar por fecha descendente
+    historial = sorted(
+        historial,
+        key=lambda x: x.get('fecha', ''),
+        reverse=True
+    )
 
-    return render_template('cliente/historial.html', historial=historial)
+    return render_template(
+        'cliente/historial.html',
+        historial=historial
+    )

@@ -1123,3 +1123,5 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
         query = query.limit(limit)
 
     return query.all()
+
+
