@@ -893,35 +893,31 @@ def catalogo_filtros():
         materiales=materiales,
         colores=colores
     )
-    
-    
-    #---------Historial---------
-    
+
+
+# ---------Historial---------
 @cliente.route('/historial')
 @login_required
 def historial_cliente():
-
-    if 'usuario_id' not in session:
-        return render_template('cliente/historial.html', historial=[])
-
+    # Obtener historial desde la sesión
     historial = session.get('historial', [])
 
+    # Filtros
     tipo = request.args.get('tipo')
     fecha = request.args.get('fecha')
     q = request.args.get('q')
 
+    # Filtrado seguro usando get para evitar KeyError
     if tipo:
-        historial = [h for h in historial if h['tipo'] == tipo]
+        historial = [h for h in historial if h.get('tipo') == tipo]
 
     if fecha:
-        historial = [h for h in historial if h['fecha'].startswith(fecha)]
+        historial = [h for h in historial if h.get('fecha', '').startswith(fecha)]
 
     if q:
-        historial = [h for h in historial if q.lower() in h['descripcion'].lower()]
+        historial = [h for h in historial if q.lower() in h.get('descripcion', '').lower()]
 
-    historial = sorted(historial, key=lambda x: x['fecha'], reverse=True)
+    # Ordenar por fecha descendente
+    historial = sorted(historial, key=lambda x: x.get('fecha', ''), reverse=True)
 
-    return render_template(
-        'cliente/historial.html',
-        historial=historial
-    )
+    return render_template('cliente/historial.html', historial=historial)

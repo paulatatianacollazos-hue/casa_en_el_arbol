@@ -38,10 +38,11 @@
 {% if historial %}
     {% for h in historial %}
     <li class="list-group-item">
-        <i class="bi {{ h.icono }} me-2"></i>
-        <strong>{{ h.descripcion }}</strong><br>
+        <!-- Icono con valor por defecto -->
+        <i class="bi {{ h.icono or 'bi-info-circle' }} me-2"></i>
+        <strong>{{ h.descripcion or 'Sin descripción' }}</strong><br>
         <small class="text-muted">
-            {{ h.fecha }} | {{ h.ubicacion }} | {{ h.navegador }}
+            {{ h.fecha or '' }} | {{ h.ubicacion or 'Desconocido' }} | {{ h.navegador or 'Desconocido' }}
         </small>
     </li>
     {% endfor %}
