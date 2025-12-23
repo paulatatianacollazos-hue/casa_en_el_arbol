@@ -937,8 +937,14 @@ def catalogo_filtros():
 
 
 def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
-    if "historial" not in session:
-        session["historial"] = []
+    # Asegurarse de que historial sea un diccionario
+    if "historial" not in session or not isinstance(session["historial"], dict):
+        session["historial"] = {}
+
+    user_id = str(current_user.id)  # clave por usuario
+
+    if user_id not in session["historial"]:
+        session["historial"][user_id] = []
 
     evento = {
         "tipo": tipo,
@@ -948,23 +954,28 @@ def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Des
         "navegador": navegador
     }
 
-    session["historial"].append(evento)
-    session.modified = True  # necesario para que Flask guarde cambios en la sesión
+    session["historial"][user_id].append(evento)
+    session.modified = True
 
 
-# ---------Historial---------
 @cliente.route('/historial')
 @login_required
 def historial_cliente():
-    # Obtener historial desde la sesión (ya es solo del usuario actual)
-    historial = session.get('historial', [])
+    user_id = str(current_user.id)
+
+    # Asegurarse de que historial sea un diccionario
+    historial_dict = session.get('historial', {})
+    if not isinstance(historial_dict, dict):
+        historial_dict = {}
+        session['historial'] = {}
+
+    historial = historial_dict.get(user_id, [])
 
     # Filtros
-    tipo = request.args.get('tipo', None)
-    fecha = request.args.get('fecha', None)
-    q = request.args.get('q', None)
+    tipo = request.args.get('tipo')
+    fecha = request.args.get('fecha')
+    q = request.args.get('q')
 
-    # Filtrado seguro usando get para evitar KeyError
     if tipo:
         historial = [h for h in historial if h.get('tipo') == tipo]
 
