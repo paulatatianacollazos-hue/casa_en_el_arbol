@@ -474,7 +474,28 @@
             </div>
           
           </div>
-           
+<div class="modal fade" id="modalAsignarEmpleado{{ pedido.ID_Pedido }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4">
+            <div class="modal-header">
+                <h5 class="modal-title">Asignar empleado a pedido {{ pedido.ID_Pedido }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <select class="form-select">
+                    <option value="">-- Selecciona empleado --</option>
+                    {% for emp in obtener_empleados(pedido) %}
+                        <option value="{{ emp.ID_Usuario }}">
+                            {{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-success mt-3">Guardar asignación</button>
+            </div>
+        </div>
+    </div>
+</div>
+
         {% endfor %} 
       </div> 
       
@@ -640,25 +661,6 @@
     <!-- Modal -->
     <!-- Modal -->
 <!-- Modal -->
-<div class="modal fade" id="modalAsignarEmpleado" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-4">
-      <div class="modal-header">
-        <h5 class="modal-title">Asignar empleado a pedidos</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <select id="selectEmpleado" class="form-select">
-          <option value="">-- Selecciona empleado --</option>
-          {% for emp in empleados %}
-            <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">{{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})</option>
-          {% endfor %}
-        </select>
-        <button id="btnGuardarAsignacion" class="btn btn-success mt-3">Guardar asignación</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 
 
