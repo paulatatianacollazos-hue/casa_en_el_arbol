@@ -178,29 +178,22 @@ def detalle():
 # --------- OBTENER_EMPLEADOS ---------
 
 
-def obtener_empleados(pedido):
-    """
-    Retorna los empleados según el tipo de pedido:
-    - Instalacion = 1 → instaladores
-    - Instalacion = 0 → transportistas
-    """
-    # Si es dict, usar get(), si es objeto, usar atributo
-    instalacion = None
-    if isinstance(pedido, dict):
-        instalacion = pedido.get("Instalacion")
-    else:
-        instalacion = getattr(pedido, "Instalacion", 0)
-
-    if instalacion == 1 or instalacion == "1":
-        empleados = Usuario.query.filter_by(Rol="instalador", Activo=True).all()
-    else:
-        empleados = Usuario.query.filter_by(Rol="transportista", Activo=True).all()
+def obtener_empleados():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT ID_Usuario AS ID_Empleado, Nombre
+    FROM Usuario
+    WHERE Rol = 'Empleado'
+    """)
+    empleados = cursor.fetchall()
+    cursor.close()
+    conn.close()
     return empleados
 
 
-
-
 # --------- OBTENER_PRODUCTOS_FILTRADOS ---------
+
 def obtener_productos_filtrados(correo, categoria):
     conn = get_connection()
     cursor = conn.cursor()
@@ -1130,5 +1123,3 @@ def obtener_productos_ordenados(producto_actual=None, user_id=None, limit=None):
         query = query.limit(limit)
 
     return query.all()
-
-
