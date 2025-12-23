@@ -937,11 +937,15 @@ def catalogo_filtros():
 
 
 def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
+    # Si no hay usuario logueado, no registrar historial
+    if not current_user.is_authenticated:
+        return
+
     # Asegurarse de que historial sea un diccionario
     if "historial" not in session or not isinstance(session["historial"], dict):
         session["historial"] = {}
 
-    user_id = str(current_user.id)  # clave por usuario
+    user_id = str(current_user.id)  # ahora seguro, porque ya verificamos
 
     if user_id not in session["historial"]:
         session["historial"][user_id] = []
