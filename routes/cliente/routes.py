@@ -937,21 +937,26 @@ def catalogo_filtros():
     )
 
 
-def agregar_historial(tipo, descripcion, ubicacion=None, navegador=None):
-
+def agregar_historial(tipo, descripcion):
     if not current_user.is_authenticated:
+        print("Usuario no autenticado")
         return
 
     evento = HistorialActividad(
         ID_Usuario=current_user.ID_Usuario,
         Tipo=tipo,
         Descripcion=descripcion,
-        Ubicacion=ubicacion,
-        Navegador=navegador
+        Ubicacion=request.remote_addr,
+        Navegador=request.user_agent.string,
+        Fecha=datetime.utcnow()
     )
-
-    db.session.add(evento)
-    db.session.commit()
+    try:
+        db.session.add(evento)
+        db.session.commit()
+        print("✅ Historial guardado correctamente")
+    except Exception as e:
+        db.session.rollback()
+        print("❌ Error al guardar historial:", e)
 
 
 # ---------Historial---------
