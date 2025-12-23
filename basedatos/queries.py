@@ -181,19 +181,17 @@ def detalle():
 def obtener_empleados():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-    SELECT ID_Usuario AS ID_Empleado, Nombre
-    FROM Usuario
-    WHERE Rol = 'Empleado'
-    """)
+
+    cursor.execute("SELECT ID_Usuario, Nombre, Apellido, Rol FROM Usuario")
     empleados = cursor.fetchall()
+
     cursor.close()
     conn.close()
+
     return empleados
 
 
 # --------- OBTENER_PRODUCTOS_FILTRADOS ---------
-
 def obtener_productos_filtrados(correo, categoria):
     conn = get_connection()
     cursor = conn.cursor()
@@ -255,17 +253,57 @@ def obtener_productos_filtrados(correo, categoria):
 
 
 # --------- ASIGNAR_EMPLEADO ---------
-def obtener_empleados():
+
+
+def asignar_empleado():
+    pedido_ids = request.form['pedido_id'].split(",")
+    empleado_id = request.form['empleado_id']
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT ID_usuario, Nombre, Apellido, Rol FROM Usuario")
-    empleados = cursor.fetchall()
+    mensajes = []
+    for pid in pedido_ids:
 
+        cursor.execute("""
+            SELECT HoraEntrega
+            FROM Pedido
+            WHERE ID_Pedido = %s
+        """, (pid,))
+        pedido = cursor.fetchone()
+
+        if not pedido or not pedido['HoraEntrega']:
+            mensajes.append(f"❌ Pedido {pid} no tiene hora definida")
+            continue
+
+        hora_pedido = pedido['HoraEntrega']
+
+        cursor.execute("""
+            SELECT ID_Pedido, HoraEntrega
+            FROM Pedido
+            WHERE ID_Empleado = %s
+            AND ABS(TIMESTAMPDIFF(MINUTE, HoraEntrega, %s)) < 30
+        """, (empleado_id, hora_pedido))
+        conflicto = cursor.fetchone()
+
+        if conflicto:
+            mensajes.append(f"""❌ Pedido {pid} no se asignó.
+                            Conflicto con pedido {conflicto['ID_Pedido']}
+                            en el calendario.""")
+            continue
+
+        cursor.execute("""
+            UPDATE Pedido
+            SET ID_Empleado = %s
+            WHERE ID_Pedido = %s
+        """, (empleado_id, pid))
+        mensajes.append(f"✅ Pedido {pid} asignado correctamente")
+
+    conn.commit()
     cursor.close()
     conn.close()
 
-    return empleados
+    return jsonify({"success": True, "message": "<br>".join(mensajes)})
 
 
 def obtener_comentarios_agrupados():

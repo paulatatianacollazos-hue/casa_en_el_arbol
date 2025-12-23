@@ -482,20 +482,21 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <select id="selectEmpleado" class="form-select">
+  <select id="selectEmpleado" class="form-select">
   <option value="">-- Selecciona empleado --</option>
-  {% for emp in usuarios %}
+  {% for emp in empleados %}
     {% if pedido.Instalacion and emp.Rol == "instalador" %}
-      <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">
+      <option value="{{ emp.ID_Usuario }}" data-rol="{{ emp.Rol }}">
         {{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})
       </option>
     {% elif not pedido.Instalacion and emp.Rol == "transportista" %}
-      <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">
+      <option value="{{ emp.ID_Usuario }}" data-rol="{{ emp.Rol }}">
         {{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})
       </option>
     {% endif %}
   {% endfor %}
 </select>
+
 
         <button id="btnGuardarAsignacion" class="btn btn-success mt-3">Guardar asignación</button>
       </div>
