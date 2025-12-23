@@ -184,11 +184,16 @@ def obtener_empleados(pedido):
     - Instalacion = 1 → instaladores
     - Instalacion = 0 → transportistas
     """
-    if pedido.get("Instalacion") == '1':
-        # Solo instaladores activos
+    # Si es dict, usar get(), si es objeto, usar atributo
+    instalacion = None
+    if isinstance(pedido, dict):
+        instalacion = pedido.get("Instalacion")
+    else:
+        instalacion = getattr(pedido, "Instalacion", 0)
+
+    if instalacion == 1 or instalacion == "1":
         empleados = Usuario.query.filter_by(Rol="instalador", Activo=True).all()
     else:
-        # Solo transportistas activos
         empleados = Usuario.query.filter_by(Rol="transportista", Activo=True).all()
     return empleados
 
