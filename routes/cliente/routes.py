@@ -938,25 +938,26 @@ def catalogo_filtros():
 
 
 def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
-    # Asegurar que el usuario esté autenticado
+
     if not current_user.is_authenticated:
         return
 
-    # Clave única por usuario
     key = f"historial_{current_user.ID_Usuario}"
 
-    if key not in session:
-        session[key] = []
+    historial = session.get(key, [])
 
     evento = {
         "tipo": tipo,
         "descripcion": descripcion,
-        "fecha": datetime.now().isoformat(),
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "ubicacion": ubicacion,
         "navegador": navegador
     }
 
-    session[key].append(evento)
+    historial.append(evento)
+
+    # 🔴 CLAVE: reasignar
+    session[key] = historial
     session.modified = True
 
 
@@ -964,13 +965,10 @@ def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Des
 @cliente.route('/historial')
 @login_required
 def historial_cliente():
-    # 🔐 Clave única por usuario
-    key = f"historial_{current_user.ID_Usuario}"
 
-    # Obtener solo el historial del usuario actual
+    key = f"historial_{current_user.ID_Usuario}"
     historial = session.get(key, [])
 
-    # 🔍 Filtros
     tipo = request.args.get('tipo')
     fecha = request.args.get('fecha')
     q = request.args.get('q')
@@ -987,7 +985,6 @@ def historial_cliente():
             if q.lower() in h.get('descripcion', '').lower()
         ]
 
-    # ⏱ Ordenar por fecha descendente
     historial = sorted(
         historial,
         key=lambda x: x.get('fecha', ''),
