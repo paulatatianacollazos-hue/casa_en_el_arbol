@@ -6,7 +6,7 @@ from flask_login import login_required, login_user, logout_user
 from datetime import datetime, date
 from basedatos.models import RegistroSesion, LoginIntento
 from basedatos.decoradores import enviar_correo_seguridad
-
+from routes.cliente.routes import agregar_historial
 
 
 from basedatos.models import db, Usuario
@@ -262,22 +262,6 @@ def forgot_password():
             flash('Correo no registrado.', 'warning')
     return render_template("forgot_password.html")
 
-
-def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
-    # Crear el historial si no existe
-    if "historial" not in session:
-        session["historial"] = []
-
-    evento = {
-        "tipo": tipo,
-        "descripcion": descripcion,
-        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "ubicacion": ubicacion,
-        "navegador": navegador
-    }
-
-    session["historial"].append(evento)
-    session.modified = True  # necesario para que Flask guarde cambios en la sesión
 
 
 @auth.route('/confirmar-dispositivo/<int:intento_id>/<accion>')

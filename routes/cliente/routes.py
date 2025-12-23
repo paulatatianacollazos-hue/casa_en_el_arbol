@@ -15,7 +15,7 @@ from basedatos.queries import obtener_productos_ordenados
 from basedatos.models import (
     db, Usuario, Producto, Calendario, Notificaciones,
     Detalle_Pedido, Comentarios, Direccion, Pedido, ImagenProducto, Categorias,
-    Reseñas, HistorialActividad
+    Reseñas
 )
 from basedatos.decoradores import role_required
 from basedatos.notificaciones import crear_notificacion
@@ -937,46 +937,45 @@ def catalogo_filtros():
 
 
 def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
-    if not current_user.is_authenticated:
-        return  # solo usuarios logueados
+    # Crear el historial si no existe
+    if "historial" not in session:
+        session["historial"] = []
 
-    evento = HistorialActividad(
-        ID_Usuario=current_user.ID_Usuario,
-        Tipo=tipo,
-        Descripcion=descripcion,
-        Ubicacion=ubicacion,
-        Navegador=navegador,
-        Fecha=datetime.utcnow()
-    )
+    evento = {
+        "tipo": tipo,
+        "descripcion": descripcion,
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ubicacion": ubicacion,
+        "navegador": navegador
+    }
 
-    db.session.add(evento)
-    try:
-        db.session.commit()
-        print("✅ Historial registrado en DB")
-    except Exception as e:
-        db.session.rollback()
-        print("❌ Error al guardar historial:", e)
+    session["historial"].append(evento)
+    session.modified = True  # necesario para que Flask guarde cambios en la sesión
 
 
 # ---------Historial---------
 @cliente.route('/historial')
 @login_required
 def historial_cliente():
-    # Solo traer eventos del usuario logueado
-    historial = HistorialActividad.query.filter_by(ID_Usuario=current_user.ID_Usuario).order_by(HistorialActividad.Fecha.desc()).all()
+    # Obtener historial desde la sesión
+    historial = session.get('historial', [])
 
-    # Filtrado opcional
+    # Filtros
     tipo = request.args.get('tipo')
     fecha = request.args.get('fecha')
     q = request.args.get('q')
 
+    # Filtrado seguro usando get para evitar KeyError
     if tipo:
-        historial = [h for h in historial if h.Tipo == tipo]
+        historial = [h for h in historial if h.get('tipo') == tipo]
 
     if fecha:
-        historial = [h for h in historial if h.Fecha.strftime("%Y-%m-%d").startswith(fecha)]
+        historial = [h for h in historial if h.get('fecha', '').startswith(fecha)]
 
     if q:
-        historial = [h for h in historial if q.lower() in h.Descripcion.lower()]
+        historial = [h for h in historial if q.lower() in h.get('descripcion', '').lower()]
+
+    # Ordenar por fecha descendente
+    historial = sorted(historial, key=lambda x: x.get('fecha', ''), reverse=True)
 
     return render_template('cliente/historial.html', historial=historial)

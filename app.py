@@ -150,6 +150,11 @@ with app.app_context():
     print("-----------------------------\n")
 
 
+with app.app_context():
+    db.create_all()
+    print("✅ Tablas creadas correctamente")
+
+
 # ------------------ MAIN ------------------ #
 if __name__ == "__main__":
     app.run(debug=True)
