@@ -120,7 +120,7 @@ def login():
 
             if intento:
                 intento.intentos = 0
-                db.session.commit()
+            db.session.commit()
 
             login_user(usuario)
             flash("Inicio de sesión exitoso", "success")
@@ -155,6 +155,14 @@ def login():
                 'taller': 'empleado.dashboard',
             }
 
+            # 🔹 HISTORIAL LOGIN CORRECTO
+            agregar_historial(
+                tipo="login_exitoso",
+                descripcion=f"Inicio de sesión exitoso para {correo}",
+                ubicacion=ip,
+                navegador=request.user_agent.browser
+            )
+
             return redirect(url_for(rutas_por_rol.get(usuario.Rol)))
 
         # ❌ LOGIN FALLIDO → CONTAR INTENTOS
@@ -177,6 +185,14 @@ def login():
 
         db.session.commit()
 
+        # 🔹 HISTORIAL LOGIN FALLIDO
+        agregar_historial(
+            tipo="login_fallido",
+            descripcion=f"Intento de login fallido para {correo}",
+            ubicacion=ip,
+            navegador=request.user_agent.browser
+        )
+
         # 📧 ENVIAR CORREO AL 3ER INTENTO
         if intento.intentos == 3:
             enviar_correo_seguridad(correo, intento)
@@ -187,11 +203,14 @@ def login():
     return render_template('login.html')
 
 
+
 # ------------------ LOGOUT ------------------ #
 
 @auth.route('/logout')
 @login_required
 def logout():
+    ip = request.remote_addr
+    navegador = request.user_agent.browser
 
     # ------------------ REGISTRO HORA SALIDA ------------------
     if current_user.Rol in ['empleado', 'instalador', 'transportista', 'taller']:
@@ -206,11 +225,24 @@ def logout():
 
         if registro:
             registro.HoraSalida = ahora
-            db.session.commit()
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print("❌ ERROR al registrar hora de salida:", e)
+
+    # ------------------ AGREGAR HISTORIAL ------------------
+    agregar_historial(
+        tipo="logout",
+        descripcion=f"Cierre de sesión para {current_user.Correo}",
+        ubicacion=ip,
+        navegador=navegador
+    )
 
     logout_user()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('auth.login'))
+
 
 
 # ------------------ FORGOT_PASSWORD ------------------ #

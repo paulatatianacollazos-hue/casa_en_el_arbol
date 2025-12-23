@@ -470,17 +470,7 @@ def confirmar_pago():
     instalacion = data.get('instalacion')
     direccion_id = data.get('direccion')
     total = float(data.get('total', 0))
-    
-    agregar_historial(
-        tipo="pedido_creado",
-        descripcion=f"Pedido #{nuevo_pedido.ID_Pedido} creado"
-    )
 
-    agregar_historial(
-        tipo="pago_realizado",
-        descripcion=f"Pago realizado para el pedido #{nuevo_pedido.ID_Pedido}"
-    )
-    
     try:
         # ------------------ VALIDAR STOCK ------------------
         for item in productos_carrito:
@@ -529,6 +519,16 @@ def confirmar_pago():
         )
         db.session.add(nuevo_pedido)
         db.session.commit()  # necesario para ID_Pedido
+
+        # ------------------ AGREGAR HISTORIAL ------------------
+        agregar_historial(
+            tipo="pedido_creado",
+            descripcion=f"Pedido #{nuevo_pedido.ID_Pedido} creado"
+        )
+        agregar_historial(
+            tipo="pago_realizado",
+            descripcion=f"Pago realizado para el pedido #{nuevo_pedido.ID_Pedido}"
+        )
 
         # ------------------ DETALLE DEL PEDIDO ------------------
         productos_factura = []
