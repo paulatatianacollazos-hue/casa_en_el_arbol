@@ -47,7 +47,7 @@
             {% else %}bi-info-circle{% endif %} me-2"></i>
         <strong>{{ h.descripcion or 'Sin descripción' }}</strong><br>
         <small class="text-muted">
-            {{ h.fecha.strftime('%d/%m/%Y %H:%M') if h.fecha else '' }} | 
+            {{ h.fecha[:16].replace('T', ' ') if h.fecha else '' }} | 
             {{ h.ubicacion or 'Desconocido' }} | 
             {{ h.navegador or 'Desconocido' }}
         </small>
