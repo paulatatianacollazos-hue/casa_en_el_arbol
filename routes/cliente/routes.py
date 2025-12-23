@@ -936,7 +936,7 @@ def catalogo_filtros():
     )
 
 
-def agregar_historial_db(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
+def agregar_historial(tipo, descripcion, ubicacion="Desconocido", navegador="Desconocido"):
     if not current_user.is_authenticated:
         return  # solo usuarios logueados
 
