@@ -484,7 +484,7 @@
       <div class="modal-body">
         <select id="selectEmpleado" class="form-select">
   <option value="">-- Selecciona empleado --</option>
-  {% for emp in instalador and transportista %}
+  {% for emp in usuarios %}
     {% if pedido.Instalacion and emp.Rol == "instalador" %}
       <option value="{{ emp.ID_Empleado }}" data-rol="{{ emp.Rol }}">
         {{ emp.Nombre }} {{ emp.Apellido }} ({{ emp.Rol }})
