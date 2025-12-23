@@ -14,19 +14,19 @@
     <div class="col-md-3">
         <select name="tipo" class="form-select">
             <option value="">Tipo de actividad</option>
-            <option value="login">Inicio de sesión</option>
-            <option value="catalogo">Catálogo</option>
-            <option value="ver_producto">Ver producto</option>
-            <option value="pedido">Pedido</option>
+            <option value="login" {% if request.args.get('tipo')=='login' %}selected{% endif %}>Inicio de sesión</option>
+            <option value="catalogo" {% if request.args.get('tipo')=='catalogo' %}selected{% endif %}>Catálogo</option>
+            <option value="ver_producto" {% if request.args.get('tipo')=='ver_producto' %}selected{% endif %}>Ver producto</option>
+            <option value="pedido" {% if request.args.get('tipo')=='pedido' %}selected{% endif %}>Pedido</option>
         </select>
     </div>
 
     <div class="col-md-3">
-        <input type="date" name="fecha" class="form-control">
+        <input type="date" name="fecha" class="form-control" value="{{ request.args.get('fecha', '') }}">
     </div>
 
     <div class="col-md-4">
-        <input type="text" name="q" class="form-control" placeholder="Buscar actividad">
+        <input type="text" name="q" class="form-control" placeholder="Buscar actividad" value="{{ request.args.get('q', '') }}">
     </div>
 
     <div class="col-md-2">
@@ -34,15 +34,22 @@
     </div>
 </form>
 
-<ul class="list-group">
+<ul class="list-group" style="max-height: 500px; overflow-y: auto;">
 {% if historial %}
     {% for h in historial %}
     <li class="list-group-item">
-        <!-- Icono con valor por defecto -->
-        <i class="bi {{ h.icono or 'bi-info-circle' }} me-2"></i>
+        <!-- Icono dinámico según tipo -->
+        <i class="bi 
+            {% if h.tipo=='login' %}bi-box-arrow-in-right
+            {% elif h.tipo=='catalogo' %}bi-journal-text
+            {% elif h.tipo=='ver_producto' %}bi-eye
+            {% elif h.tipo=='pedido' %}bi-basket
+            {% else %}bi-info-circle{% endif %} me-2"></i>
         <strong>{{ h.descripcion or 'Sin descripción' }}</strong><br>
         <small class="text-muted">
-            {{ h.fecha or '' }} | {{ h.ubicacion or 'Desconocido' }} | {{ h.navegador or 'Desconocido' }}
+            {{ h.fecha.strftime('%d/%m/%Y %H:%M') if h.fecha else '' }} | 
+            {{ h.ubicacion or 'Desconocido' }} | 
+            {{ h.navegador or 'Desconocido' }}
         </small>
     </li>
     {% endfor %}

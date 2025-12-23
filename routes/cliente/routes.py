@@ -154,38 +154,59 @@ def ver_notificaciones_cliente():
 @cliente.route("/guardar_reseña_pedido/<int:id_pedido>", methods=["POST"])
 @login_required
 def guardar_reseña_pedido(id_pedido):
-    comentario = request.form.get("comentario")
-    estrellas = request.form.get("estrellas")
+    comentario = request.form.get("comentario", "").strip()
+    estrellas = request.form.get("estrellas", "").strip()
 
     if not comentario or not estrellas:
         flash("Por favor, completa todos los campos.", "error")
         return redirect(url_for("cliente.actualizacion_datos"))
 
-    reseña = Reseñas.query.filter_by(
-        ID_Usuario=current_user.ID_Usuario,
-        ID_Referencia=id_pedido,
-        tipo="pedido"
-    ).first()
+    try:
+        estrellas_int = int(estrellas)
+        if estrellas_int < 1 or estrellas_int > 5:
+            flash("Las estrellas deben ser un número entre 1 y 5.", "error")
+            return redirect(url_for("cliente.actualizacion_datos"))
+    except ValueError:
+        flash("Valor de estrellas inválido.", "error")
+        return redirect(url_for("cliente.actualizacion_datos"))
 
-    if reseña:
-        reseña.Comentario = comentario
-        reseña.Estrellas = int(estrellas)
-        reseña.Fecha = datetime.utcnow()
-        mensaje = "Reseña actualizada correctamente."
-    else:
-        nueva_reseña = Reseñas(
+    try:
+        reseña = Reseñas.query.filter_by(
             ID_Usuario=current_user.ID_Usuario,
             ID_Referencia=id_pedido,
-            tipo="pedido",
-            Comentario=comentario,
-            Estrellas=int(estrellas)
-        )
-        db.session.add(nueva_reseña)
-        mensaje = "Reseña guardada correctamente."
+            tipo="pedido"
+        ).first()
 
-    db.session.commit()
-    flash(mensaje, "success")
+        if reseña:
+            reseña.Comentario = comentario
+            reseña.Estrellas = estrellas_int
+            reseña.Fecha = datetime.utcnow()
+            mensaje = "Reseña actualizada correctamente."
+        else:
+            nueva_reseña = Reseñas(
+                ID_Usuario=current_user.ID_Usuario,
+                ID_Referencia=id_pedido,
+                tipo="pedido",
+                Comentario=comentario,
+                Estrellas=estrellas_int
+            )
+            db.session.add(nueva_reseña)
+            mensaje = "Reseña guardada correctamente."
+        
+        # Historial
+        agregar_historial(
+            tipo="reseña_pedido",
+            descripcion=f"Reseña pedido: {comentario[:30]}..."
+        )
+
+        db.session.commit()
+        flash(mensaje, "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"❌ Error al guardar la reseña: {str(e)}", "danger")
+
     return redirect(url_for("cliente.actualizacion_datos"))
+
 
 
 # ---------- ESCRIBIR RESEÑA ----------
@@ -289,13 +310,19 @@ def actualizacion_datos():
 @cliente.route("/direccion/agregar", methods=["POST"])
 @login_required
 def agregar_direccion():
+    direccion_texto = request.form.get("direccion")
+    
+    if not direccion_texto:
+        flash("❌ La dirección no puede estar vacía.", "danger")
+        return redirect(url_for("cliente.actualizacion_datos"))
+    
     try:
         nueva_direccion = Direccion(
             ID_Usuario=current_user.ID_Usuario,
             Pais="Colombia",
             Departamento="Bogotá, D.C.",
             Ciudad="Bogotá",
-            Direccion=request.form.get("direccion"),
+            Direccion=direccion_texto,
             InfoAdicional=request.form.get("infoAdicional"),
             Barrio=request.form.get("barrio"),
             Destinatario=request.form.get("destinatario")
@@ -306,8 +333,12 @@ def agregar_direccion():
         crear_notificacion(
             user_id=current_user.ID_Usuario,
             titulo="Dirección agregada 🏠",
-            mensaje=f"Se ha agregado una nueva dirección: {
-                nueva_direccion.Direccion}"
+            mensaje=f"Se ha agregado una nueva dirección: {nueva_direccion.Direccion}"
+        )
+        
+        agregar_historial(
+            tipo="direccion_agregada",
+            descripcion=f"Dirección agregada: {nueva_direccion.Direccion}"
         )
         flash("Dirección agregada correctamente 🏠", "success")
     except Exception as e:
@@ -315,6 +346,7 @@ def agregar_direccion():
         flash(f"❌ Error al agregar dirección: {str(e)}", "danger")
 
     return redirect(url_for("cliente.actualizacion_datos"))
+
 
 
 @cliente.route("/direccion/borrar/<int:id_direccion>", methods=["POST"])
