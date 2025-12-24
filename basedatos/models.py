@@ -7,7 +7,7 @@ db = SQLAlchemy()
 
 # ------------------ Usuario ------------------
 class Usuario(UserMixin, db.Model):
-    __tablename__ = 'Usuario'
+    __tablename__ = 'usuario'
 
     ID_Usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(100), nullable=False)
