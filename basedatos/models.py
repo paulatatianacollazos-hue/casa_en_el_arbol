@@ -23,7 +23,7 @@ class Usuario(UserMixin, db.Model):
 
     # Relaciones
     calendarios = db.relationship('Calendario', back_populates='usuario', lazy=True)
-    notificaciones = db.relationship('Notificaciones', back_populates='usuario',
+    notificaciones = db.relationship('Notificaciones', back_populates='usuario', foreign_keys='Novedad.ID_Usuario',
                                      lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
     pedidos = db.relationship('Pedido', backref='usuario', lazy=True,
