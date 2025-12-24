@@ -16,7 +16,7 @@ app.secret_key = "clave_secreta"
 
 
 # ------------------ MODELOS ------------------ #
-from basedatos.models import db, Usuario
+from basedatos.models import db, Usuario, HistorialActividad
 
 # ------------------ EXTENSIONES ------------------ #
 
@@ -153,6 +153,14 @@ with app.app_context():
 with app.app_context():
     db.create_all()
     print("✅ Tablas creadas correctamente")
+
+
+# ------------------ DB ------------------ #
+db.init_app(app)
+
+# 🔴 ESTO FALTABA
+with app.app_context():
+    db.create_all()
 
 
 # ------------------ MAIN ------------------ #
