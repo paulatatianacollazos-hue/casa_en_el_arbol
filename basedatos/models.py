@@ -23,10 +23,10 @@ class Usuario(UserMixin, db.Model):
 
     # Relaciones
     calendarios = db.relationship('Calendario', back_populates='usuario', lazy=True)
-    notificaciones = db.relationship('Notificaciones', back_populates='usuario', foreign_keys='Novedad.ID_Usuario',
+    notificaciones = db.relationship('Notificaciones', back_populates='usuario',
                                      lazy=True)
-    novedades = db.relationship('Novedades', backref='usuario', lazy=True)
-    pedidos = db.relationship('Pedido', backref='usuario', lazy=True,
+    novedades = db.relationship('Novedades', backref='usuario', foreign_keys='Novedades.ID_Usuario', lazy=True)
+    pedidos = db.relationship('Pedidos', backref='usuario', lazy=True,
                               foreign_keys='Pedido.ID_Usuario')
     pedidos_asignados = db.relationship('Pedido', backref='empleado',
                                         lazy=True,
@@ -245,7 +245,7 @@ class Pedido(db.Model):
     Descuento = db.Column(db.Float)
     Instalacion = db.Column(db.Integer)
 
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
                            nullable=False)
     ID_Empleado = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'))
 
