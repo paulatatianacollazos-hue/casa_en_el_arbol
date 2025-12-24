@@ -362,7 +362,7 @@ class RegistroSesion(db.Model):
     __tablename__ = 'RegistroSesion'
 
     ID_Registro = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
                            nullable=False)
 
     Fecha = db.Column(db.Date, nullable=False)
