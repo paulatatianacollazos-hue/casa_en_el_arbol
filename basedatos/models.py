@@ -22,7 +22,7 @@ class Usuario(UserMixin, db.Model):
     Activo = db.Column(db.Boolean, default=True)
 
     # Relaciones
-    calendarios = db.relationship('Calendario', backref='usuario', lazy=True)
+    calendarios = db.relationship('Calendario', back_populates='usuario', lazy=True)
     notificaciones = db.relationship('Notificaciones', backref='usuario',
                                      lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', lazy=True)
