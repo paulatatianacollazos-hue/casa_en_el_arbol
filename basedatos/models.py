@@ -269,7 +269,7 @@ class RegistroEntrega(db.Model):
     ID_Registro = db.Column(db.Integer, primary_key=True)
     ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'),
                           nullable=False)
-    ID_Empleado = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+    ID_Empleado = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
                             nullable=False)
     Comentario = db.Column(db.Text, nullable=True)
     Fotos = db.Column(db.Text, nullable=True)
