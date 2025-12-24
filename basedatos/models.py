@@ -228,7 +228,7 @@ class Novedades(db.Model):
 # 👇 CLAVE FORÁNEA OBLIGATORIA
     usuario_id = db.Column(
         db.Integer,
-        db.ForeignKey('usuario.id'),
+        db.ForeignKey('usuario.ID_Usuario'),
         nullable=False
     )
 
