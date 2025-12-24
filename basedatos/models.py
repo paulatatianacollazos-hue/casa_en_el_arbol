@@ -195,6 +195,19 @@ class Notificaciones(db.Model):
     Leida = db.Column(db.Boolean, default=False)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
                            nullable=False)
+    
+    # ✅ FK OBLIGATORIA
+    ID_Usuario = db.Column(
+        db.Integer,
+        db.ForeignKey('usuario.ID_Usuario'),
+        nullable=False
+    )
+
+    # ✅ RELACIÓN
+    usuario = db.relationship(
+        'Usuario',
+        back_populates='notificaciones'
+    )
 
 
 # ------------------ Novedades ------------------
