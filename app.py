@@ -8,6 +8,7 @@ from basedatos.queries import get_productos, get_producto_by_id
 from basedatos.queries import Producto
 from extensions import mysql
 from extensions import mail
+from extensions import mail, mysql, db
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
