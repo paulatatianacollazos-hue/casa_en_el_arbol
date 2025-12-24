@@ -343,7 +343,7 @@ class Reseñas(db.Model):
     Fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relaciones
-    usuario = db.relationship("Usuario", backref="reseñas", lazy=True)
+    usuario = db.relationship("Usuario", back_populates="reseñas", lazy=True)
 
     def __init__(self, ID_Usuario, ID_Referencia, tipo, Comentario, Estrellas):
         if tipo not in ["producto", "pedido"]:
