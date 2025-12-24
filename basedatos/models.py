@@ -248,6 +248,11 @@ class Pedido(db.Model):
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
                            nullable=False)
     ID_Empleado = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'))
+    
+    ID_Calendario = db.Column(
+        db.Integer,
+        db.ForeignKey('calendario.ID_Calendario')
+    )
 
     pagos = db.relationship('Pagos', backref='pedido', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='pedido',
