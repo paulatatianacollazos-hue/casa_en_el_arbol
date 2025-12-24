@@ -157,7 +157,6 @@ with app.app_context():
 
 
 # ------------------ DB ------------------ #
-db.init_app(app)
 
 # 🔴 ESTO FALTABA
 with app.app_context():
