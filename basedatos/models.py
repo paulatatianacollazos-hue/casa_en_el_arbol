@@ -131,17 +131,35 @@ class Calendario(db.Model):
     __tablename__ = 'Calendario'
 
     ID_Calendario = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Fecha = db.Column(db.Date)
-    Hora = db.Column(db.Time)
+    Fecha = db.Column(db.Date, nullable=False)
+    Hora = db.Column(db.Time, nullable=False)
     Ubicacion = db.Column(db.String(200))
     Tipo = db.Column(db.String(50), default="Instalación")
 
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
-                           nullable=False)
-    ID_Pedido = db.Column(db.Integer, db.ForeignKey('Pedido.ID_Pedido'))
+    ID_Usuario = db.Column(
+        db.Integer,
+        db.ForeignKey('Usuario.ID_Usuario'),
+        nullable=False
+    )
+
+    ID_Pedido = db.Column(
+        db.Integer,
+        db.ForeignKey('Pedido.ID_Pedido'),
+        nullable=True
+    )
+
+    # ✅ RELACIONES (ESTO FALTABA)
+    usuario = db.relationship(
+        'Usuario',
+        back_populates='calendarios'
+    )
+
+    pedido = db.relationship(
+        'Pedido',
+        backref='calendarios'
+    )
 
     def to_dict(self):
-        """Convierte el evento en un formato compatible con FullCalendar."""
         return {
             "id": self.ID_Calendario,
             "title": f"{self.Tipo} - Pedido {self.ID_Pedido}",
@@ -162,6 +180,7 @@ class Calendario(db.Model):
             "Instalación": "#007bff"
         }
         return colores.get(self.Tipo, "#6c757d")
+
 
 
 # ------------------ Notificaciones ------------------
