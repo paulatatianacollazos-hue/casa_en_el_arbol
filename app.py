@@ -16,7 +16,7 @@ app.secret_key = "clave_secreta"
 
 
 # ------------------ MODELOS ------------------ #
-from basedatos.models import db, Usuario, HistorialActividad
+from basedatos.models import db, Usuario, HistorialActividad, RegistroEntrega
 
 # ------------------ EXTENSIONES ------------------ #
 
