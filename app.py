@@ -31,7 +31,7 @@ from routes.empleado.routers import empleado
 # 🔹 CONFIGURACIÓN MYSQL (OBLIGATORIA TODA)
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = "paula123"        # cambia si tu MySQL tiene contraseña
+app.config["MYSQL_PASSWORD"] = ""        # cambia si tu MySQL tiene contraseña
 app.config["MYSQL_DB"] = "tienda_db"
 app.config["MYSQL_PORT"] = 3306
 
@@ -54,7 +54,7 @@ app.config.update(
     SECRET_KEY=os.getenv("SECRET_KEY", "mi_clave_super_secreta_y_unica"),
     SQLALCHEMY_DATABASE_URI=os.getenv(
         "DATABASE_URI",
-        "mysql+pymysql://root:paula123@127.0.0.1:3306/Tienda_db"
+        "mysql+pymysql://root:@127.0.0.1:3306/Tienda_db"
     ),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True},
