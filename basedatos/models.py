@@ -50,7 +50,7 @@ class Direccion(db.Model):
     __tablename__ = 'Direccion'
 
     ID_Direccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario',
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario',
                                                      ondelete="CASCADE"),
                            nullable=False)
     Pais = db.Column(db.String(100), default="Colombia")
@@ -247,7 +247,7 @@ class Pedido(db.Model):
 
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
                            nullable=False)
-    ID_Empleado = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'))
+    ID_Empleado = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'))
 
     pagos = db.relationship('Pagos', backref='pedido', lazy=True)
     detalles_pedido = db.relationship('Detalle_Pedido', backref='pedido',
