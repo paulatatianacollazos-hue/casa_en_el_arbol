@@ -26,7 +26,7 @@ class Usuario(UserMixin, db.Model):
     notificaciones = db.relationship('Notificaciones', back_populates='usuario',
                                      lazy=True)
     novedades = db.relationship('Novedades', backref='usuario', foreign_keys='Novedades.ID_Usuario', lazy=True)
-    pedidos = db.relationship('Pedidos', backref='usuario', lazy=True,
+    pedidos = db.relationship('Pedido', backref='usuario', lazy=True,
                               foreign_keys='Pedido.ID_Usuario')
     pedidos_asignados = db.relationship('Pedido', backref='empleado',
                                         lazy=True,
