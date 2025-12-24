@@ -156,7 +156,7 @@ class Calendario(db.Model):
     # ✅ RELACIONES (ESTO FALTABA)
     usuario = db.relationship(
         'Usuario',
-        back_populates='calendario'
+        back_populates='calendarios'
     )
 
     pedido = db.relationship(
