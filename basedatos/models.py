@@ -156,7 +156,7 @@ class Calendario(db.Model):
 
     pedido = db.relationship(
         'Pedido',
-        backref='calendarios'
+        back_populates='calendarios'
     )
 
     def to_dict(self):
@@ -254,7 +254,7 @@ class Pedido(db.Model):
                                       lazy=True)
     firmas = db.relationship('Firmas', backref='pedido', lazy=True)
     comentarios = db.relationship('Comentarios', backref='pedido', lazy=True)
-    calendario = db.relationship('Calendario', backref='pedido', lazy=True)
+    calendario = db.relationship('Calendario', back_populates='pedido', lazy=True)
 
 
 # ------------------ Pagos ------------------
