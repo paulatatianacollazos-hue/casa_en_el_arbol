@@ -151,12 +151,12 @@ class Calendario(db.Model):
     # ✅ RELACIONES (ESTO FALTABA)
     usuario = db.relationship(
         'Usuario',
-        back_populates='calendarios'
+        back_populates='calendario'
     )
 
     pedido = db.relationship(
         'Pedido',
-        back_populates='calendarios'
+        back_populates='calendario'
     )
 
     def to_dict(self):
