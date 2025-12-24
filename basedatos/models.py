@@ -38,6 +38,9 @@ class Usuario(UserMixin, db.Model):
         back_populates='usuario',
         cascade='all, delete-orphan'
     )
+    
+    defectos = db.relationship('Defecto', back_populates='usuario')
+    registros_sesion = db.relationship('RegistroSesion', back_populates='usuario')
 
     def get_id(self):
         return str(self.ID_Usuario)
@@ -359,7 +362,7 @@ class Reseñas(db.Model):
 
 # ------------------ Registro de Sesiones ------------------
 class RegistroSesion(db.Model):
-    __tablename__ = 'RegistroSesion'
+    __tablename__ = 'registroSesion'
 
     ID_Registro = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
@@ -397,7 +400,7 @@ class Defecto(db.Model):
     producto_id = db.Column(db.Integer, db.ForeignKey("Producto.ID_Producto"), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
-    usuario_id = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"), nullable=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"), nullable=True)
 
     producto = db.relationship("Producto", back_populates="defectos")
     usuario = db.relationship("Usuario", backref="defectos")
