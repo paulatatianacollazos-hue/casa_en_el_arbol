@@ -39,7 +39,7 @@ class Usuario(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     
-    defectos = db.relationship('Defecto', back_populates='usuario')
+    defectos = db.relationship('Defecto', back_populates='usuario', cascade='all, delete-orphan')
     registros_sesion = db.relationship('RegistroSesion', back_populates='usuario')
 
     def get_id(self):
@@ -403,7 +403,7 @@ class Defecto(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID.Usuario"), nullable=True)
 
     producto = db.relationship("Producto", back_populates="defectos")
-    usuario = db.relationship("Usuario", backref="defectos", primaryjoin='Defecto.usuario_id == Usuario.ID_Usuario')
+    usuario = db.relationship("Usuario", back_populates="defectos")
 
 
 class LoginIntento(db.Model):
