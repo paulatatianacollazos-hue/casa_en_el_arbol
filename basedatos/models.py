@@ -362,7 +362,7 @@ class Reseñas(db.Model):
 
 # ------------------ Registro de Sesiones ------------------
 class RegistroSesion(db.Model):
-    __tablename__ = 'registroSesion'
+    __tablename__ = 'registro_sesion'
 
     ID_Registro = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
@@ -400,7 +400,7 @@ class Defecto(db.Model):
     producto_id = db.Column(db.Integer, db.ForeignKey("Producto.ID_Producto"), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
-    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"), nullable=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=True)
 
     producto = db.relationship("Producto", back_populates="defectos")
     usuario = db.relationship("Usuario", backref="defectos")
