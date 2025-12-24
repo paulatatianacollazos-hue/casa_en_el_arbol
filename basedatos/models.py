@@ -138,7 +138,7 @@ class Calendario(db.Model):
 
     ID_Usuario = db.Column(
         db.Integer,
-        db.ForeignKey('Usuario.ID_Usuario'),
+        db.ForeignKey('usuario.ID_Usuario'),
         nullable=False
     )
 
