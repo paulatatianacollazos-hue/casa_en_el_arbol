@@ -219,11 +219,18 @@ class Novedades(db.Model):
     EstadoNovedad = db.Column(db.String(50))
     FechaReporte = db.Column(db.Date)
 
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_Usuario'),
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey('usuario.ID_Usuario'),
                            nullable=False)
     ID_Producto = db.Column(db.Integer, db.ForeignKey('Producto.ID_Producto'),
                             nullable=False)
 
+
+# 👇 CLAVE FORÁNEA OBLIGATORIA
+    usuario_id = db.Column(
+        db.Integer,
+        db.ForeignKey('usuario.id'),
+        nullable=False
+    )
 
 # ------------------ Pedido ------------------
 class Pedido(db.Model):
