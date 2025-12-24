@@ -400,10 +400,10 @@ class Defecto(db.Model):
     producto_id = db.Column(db.Integer, db.ForeignKey("Producto.ID_Producto"), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
-    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.ID.Usuario"), nullable=True)
 
     producto = db.relationship("Producto", back_populates="defectos")
-    usuario = db.relationship("Usuario", backref="defectos")
+    usuario = db.relationship("Usuario", backref="defectos", primaryjoin='Defecto.usuario_id == Usuario.ID_Usuario')
 
 
 class LoginIntento(db.Model):
