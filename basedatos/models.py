@@ -33,6 +33,11 @@ class Usuario(UserMixin, db.Model):
                                         foreign_keys='Pedido.ID_Empleado')
     direcciones = db.relationship('Direccion', backref='usuario',
                                   lazy=True, cascade="all, delete-orphan")
+    reseñas = db.relationship(
+        'Reseñas',
+        back_populates='usuario',
+        cascade='all, delete-orphan'
+    )
 
     def get_id(self):
         return str(self.ID_Usuario)
@@ -326,10 +331,10 @@ class RegistroEntrega(db.Model):
 
 
 class Reseñas(db.Model):
-    __tablename__ = "Reseñas"
+    __tablename__ = "reseñas"
 
     ID_Reseña = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ID_Usuario = db.Column(db.Integer, db.ForeignKey("Usuario.ID_Usuario"),
+    ID_Usuario = db.Column(db.Integer, db.ForeignKey("usuario.ID_Usuario"),
                            nullable=False)
     ID_Referencia = db.Column(db.Integer, nullable=False)
     tipo = db.Column(db.String(50), nullable=False)
